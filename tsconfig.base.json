@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@codeheroes/common": ["libs/common/src/index.ts"]
+      "@codeheroes/common": ["libs/common/src/index.ts"],
+      "@codeheroes/migration": ["libs/migration/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
