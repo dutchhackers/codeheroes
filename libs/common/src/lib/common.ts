@@ -1,3 +1,1 @@
-export function common(): string {
-  return 'common';
-}
+export * from './utils';

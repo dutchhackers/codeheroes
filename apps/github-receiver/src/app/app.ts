@@ -1,7 +1,6 @@
 import express from 'express';
 // import { CheckSuiteEvent, CheckRunEvent } from "../../../../.local/migrate/libs/core/models";
 // import { githubHandler } from "../../../../.local/migrate/libs/helpers/github-handler";
-// import * as logger from "firebase-functions/logger";
 import * as logger from 'firebase-functions/logger';
 
 const app = express();
