@@ -1,13 +1,8 @@
 import * as logger from "firebase-functions/logger";
 import { db } from "../core/config/firebase.config";
+import { IssueEvent, PullRequestAction, PullRequestEvent, PullRequestReviewEvent, PushEvent, ReleaseEvent } from "@codeheroes/migration-github-shared";
 import {
   IActivity,
-  IssueEvent,
-  PushEvent,
-  ReleaseEvent,
-  PullRequestAction,
-  PullRequestEvent,
-  PullRequestReviewEvent,
 } from "../core/models";
 import { Publisher } from "../core/utils/publisher";
 import { PUB_SUB_PROJECT_ID } from "../core/config/app.config";

@@ -27,9 +27,11 @@ export class PushEvent {
     logger.info('PushEvent', this.sender, { structuredData: true });
   }
 
-  /*
-
   async resolveEventArguments(db: any): Promise<any> {
+    throw new Error('Not implemented');
+    /*
+
+
     if (!db) {
       return Promise.resolve(null);
     }
@@ -76,7 +78,7 @@ export class PushEvent {
     args.commits = _commits;
 
     return args;
-  }
 
   */
+  }
 }
