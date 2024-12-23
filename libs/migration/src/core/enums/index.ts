@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 export enum FirestoreCollections {
-  GAMES = "games",
-  USERS = "users",
-  TEAMS = "teams",
-  EMPLOYEES = "employees",
+  GAMES = 'games',
+  USERS = 'users',
+  TEAMS = 'teams',
+  EMPLOYEES = 'employees',
 }
 
 export enum Scores {
@@ -22,5 +22,5 @@ export enum Scores {
   TravisBuildCanceled = 0,
 }
 
-import { lib } from "../../../shared/core";
+import { lib } from '@codeheroes/external-shared';
 export import GameState = lib.codeheroes.enums.GameState;

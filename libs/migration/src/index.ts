@@ -1,1 +1,3 @@
-export * from './lib/migration';
+export * from './core';
+export * from './triggers';
+export * from './helpers';

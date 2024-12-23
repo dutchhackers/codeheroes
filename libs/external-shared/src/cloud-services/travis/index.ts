@@ -1,4 +1,4 @@
-export const lib_name = "m4m-common-types/cloud-services/travis";
+export const lib_name2 = "m4m-common-types/cloud-services/travis";
 
 export * as cloudServicesTravisModels from "./models";
 
