@@ -1,0 +1,52 @@
+{
+  "name": "github-receiver",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/github-receiver/src",
+  "projectType": "application",
+  "tags": [
+    "firebase:function",
+    "firebase:name:github-receiver",
+    "firebase:dep:firebase-app"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/github-receiver",
+        "main": "apps/github-receiver/src/main.ts",
+        "tsConfig": "apps/github-receiver/tsconfig.app.json",
+        "assets": [
+          "apps/github-receiver/src/assets",
+          {
+            "glob": "**/*",
+            "input": "apps/firebase-app/environment",
+            "output": "."
+          }
+        ],
+        "generatePackageJson": true,
+        "platform": "node",
+        "bundle": true,
+        "thirdParty": false,
+        "dependenciesFieldType": "dependencies",
+        "target": "node20",
+        "format": ["esm"],
+        "esbuildOptions": {
+          "logLevel": "info"
+        }
+      }
+    },
+    "test": {
+      "options": {
+        "passWithNoTests": true
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run firebase-app:deploy --only functions:github-receiver"
+      },
+      "dependsOn": ["build"]
+    }
+  }
+}
