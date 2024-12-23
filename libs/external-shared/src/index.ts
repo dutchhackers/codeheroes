@@ -1,1 +1,1 @@
-export * from './lib/external-shared';
+export * from './code-heroes';
