@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@codeheroes/common": ["libs/common/src/index.ts"],
+      "@codeheroes/external-shared": ["libs/external-shared/src/index.ts"],
       "@codeheroes/migration": ["libs/migration/src/index.ts"]
     }
   },
