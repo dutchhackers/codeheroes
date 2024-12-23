@@ -25,6 +25,12 @@
       "source": "dist/apps/api",
       "runtime": "nodejs20",
       "ignore": ["*.local"]
+    },
+    {
+      "codebase": "github-receiver",
+      "source": "dist/apps/github-receiver",
+      "runtime": "nodejs20",
+      "ignore": ["*.local"]
     }
   ],
   "emulators": {
