@@ -1,0 +1,79 @@
+{
+  "name": "firebase-app",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "tags": ["firebase:app", "firebase:name:firebase-app"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo Build succeeded."
+      }
+    },
+    "watch": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run-many --targets=build --projects=tag:firebase:dep:firebase-app --parallel=100 --watch"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run-many --targets=lint --projects=tag:firebase:dep:firebase-app --parallel=100"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run-many --targets=test --projects=tag:firebase:dep:firebase-app --parallel=100"
+      }
+    },
+    "firebase": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "firebase --config=firebase.json --project=${FIREBASE_TEST_PROJECT_ID}"
+      },
+      "configurations": {
+        "production": {
+          "command": "firebase --config=firebase.json --project=${FIREBASE_TEST_PROJECT_ID}"
+        }
+      }
+    },
+    "killports": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299,4000,4400,4500"
+      }
+    },
+    "getconfig": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run firebase-app:firebase functions:config:get > apps/firebase-app/environment/.runtimeconfig.json"
+      }
+    },
+    "emulate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx run firebase-app:killports",
+          "nx run firebase-app:firebase emulators:start --import=apps/firebase-app/.emulators --export-on-exit"
+        ],
+        "parallel": false
+      }
+    },
+    "serve": {
+      "executor": "@simondotm/nx-firebase:serve",
+      "options": {
+        "commands": ["nx run firebase-app:watch", "nx run firebase-app:emulate"]
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "nx run firebase-app:firebase deploy"
+      }
+    }
+  },
+  "implicitDependencies": ["api"]
+}
