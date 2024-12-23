@@ -1,7 +1,7 @@
 import { onRequest } from 'firebase-functions/v2/https';
 import { setGlobalOptions } from 'firebase-functions/v2/options';
 
-const DEFAULT_REGION = 'europe-west1';
+import { DEFAULT_REGION } from '@codeheroes/common';
 
 // import { connectFirestore } from '@codeheroes/common';
 // connectFirestore();
