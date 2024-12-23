@@ -1,6 +1,5 @@
 import express from 'express';
 // import { CheckSuiteEvent, CheckRunEvent } from "../../../../.local/migrate/libs/core/models";
-// import { travisHandler } from "../../../../.local/migrate/libs/helpers/travis-handler";
 // import { githubHandler } from "../../../../.local/migrate/libs/helpers/github-handler";
 // import * as logger from "firebase-functions/logger";
 import * as logger from 'firebase-functions/logger';
@@ -26,9 +25,12 @@ app.use('/', async (req, res, next) => {
 
   switch (host) {
     case 'aedc-86-82-222-18.ngrok-free.app':
+    case 'ae13-86-82-222-18.ngrok-free.app':
     case 'dev.github.webhooks.m4m.io':
     case 'github.webhooks.m4m.io':
       response.source = 'github';
+
+      logger.log('Handle GitHub webhook via new entrypoint', { structuredData: true });
 
       // if (req.headers["x-github-event"] === "check_suite") {
       //   handleCheckSuite(req);
