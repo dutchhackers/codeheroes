@@ -23,7 +23,7 @@ export abstract class CoreService {
     modelschema: ClazzOrModelSchema<T>
   ): Promise<T> {
     const snapshot = await docRef.get();
-    if (snapshot !== null) {
+    if (snapshot !== null && snapshot.exists) {
       return this.serializeDocument<T>(modelschema, snapshot);
     }
     return null;
