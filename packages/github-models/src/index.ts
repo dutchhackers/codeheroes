@@ -1,1 +1,2 @@
-export * from './lib/github-models';
+// Dummy export
+export const GithubModels = {};
