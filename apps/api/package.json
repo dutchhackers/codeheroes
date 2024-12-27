@@ -7,7 +7,6 @@
     "build": "nx build api",
     "deploy": "nx deploy api"
   },
-  "type": "module",
   "engines": {
     "node": "20"
   },

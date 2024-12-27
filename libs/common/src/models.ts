@@ -3,16 +3,19 @@ import { ConnectedAccountProvider } from './types';
 
 // User Document
 export interface User {
-  userId: string;
-  githubUsername: string;
-  heroName: string;
-  heroAvatarUrl: string;
+  uid?: string;
+  userId: string; // obsolete?
+  email: string;
+  githubUsername?: string;
+  displayName: string;
+  photoUrl: string;
   level: number;
   xp: number;
   xpToNextLevel: number;
   repositories?: string[]; // Optional, consider making this a subcollection
   createdAt: Timestamp; // ISO date string
   lastLogin: Timestamp; // ISO date string
+  active: boolean;
 }
 
 // XP Breakdown Item
