@@ -10,6 +10,7 @@ import { GitHubReceiverApp } from './github-receiver-app';
 
 setGlobalOptions({ region: DEFAULT_REGION });
 
-export const gitHubReceiver = onRequest(GitHubReceiverLegacyApp);
+export const gitHubReceiver = onRequest(GitHubReceiverApp);
 
-export const gitHubReceiver2 = onRequest(GitHubReceiverApp);
+// For legacy support
+export const gitHubReceiverLegacy = onRequest(GitHubReceiverLegacyApp);
