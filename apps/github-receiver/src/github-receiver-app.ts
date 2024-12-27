@@ -9,7 +9,6 @@ import {
 import { logger } from '@codeheroes/common';
 
 export const GitHubReceiverApp = async (req, res) => {
-  console.log('handleGitHubWebhook');
   const githubEvent = req.headers['x-github-event'];
   const eventId = req.headers['x-github-delivery'] as string;
   const payload = req.body;
