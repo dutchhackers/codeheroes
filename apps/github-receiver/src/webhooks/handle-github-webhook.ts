@@ -1,5 +1,3 @@
-import * as admin from 'firebase-admin';
-
 import { FieldValue, getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { Activity, activityConverter, ActivityType, userConverter, XpBreakdownItem } from '../models';
 
