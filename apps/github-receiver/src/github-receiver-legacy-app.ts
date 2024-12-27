@@ -50,7 +50,7 @@ app.use('/', async (req, res, next) => {
   res.json(response);
 });
 
-export { app as GitHubReceiverApp };
+export { app as GitHubReceiverLegacyApp };
 
 // function handleCheckSuite(req) {
 //   const entry = new CheckSuiteEvent(req.body);

@@ -40,5 +40,10 @@
       },
       "exclude": ["apps/codeheroes-e2e/**/*"]
     }
-  ]
+  ],
+  "release": {
+    "version": {
+      "preVersionCommand": "npx nx run-many -t build"
+    }
+  }
 }

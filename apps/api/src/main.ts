@@ -1,14 +1,13 @@
 import { onRequest } from 'firebase-functions/v2/https';
 import { setGlobalOptions } from 'firebase-functions/v2/options';
-
 import { DEFAULT_REGION } from '@codeheroes/common';
+
+setGlobalOptions({ region: DEFAULT_REGION });
 
 // import { connectFirestore } from '@codeheroes/common';
 // connectFirestore();
 
 import { defaultApi } from './app';
-
-setGlobalOptions({ region: DEFAULT_REGION });
 
 /**
  * HTTP trigger
