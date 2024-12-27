@@ -30,7 +30,6 @@ export const handleGitHubWebhook = async (req, res) => {
     .then((snapshot) => !snapshot.empty);
 
   if (activityExists) {
-    console.log(process.env.NODE_ENV);
     logger.warn('Duplicate event, skipping.'); // TODO: tweak next line
     // return res.status(200).send('Duplicate event, skipping.');
   }
