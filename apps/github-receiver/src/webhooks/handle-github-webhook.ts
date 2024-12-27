@@ -5,7 +5,7 @@ import {
   ActivityType,
   userConverter,
   XpBreakdownItem,
-} from '../models';
+} from '@codeheroes/common';
 import { logger } from '@codeheroes/common';
 
 export const handleGitHubWebhook = async (req, res) => {
