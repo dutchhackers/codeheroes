@@ -1,5 +1,12 @@
 import { FieldValue, getFirestore, Timestamp } from 'firebase-admin/firestore';
-import { Activity, activityConverter, ActivityType, userConverter, XpBreakdownItem } from '../models';
+import {
+  Activity,
+  activityConverter,
+  ActivityType,
+  userConverter,
+  XpBreakdownItem,
+} from '../models';
+import { logger } from '@codeheroes/common';
 
 export const handleGitHubWebhook = async (req, res) => {
   console.log('handleGitHubWebhook');
@@ -13,18 +20,20 @@ export const handleGitHubWebhook = async (req, res) => {
 
   const db = getFirestore();
 
-  // // --- 1. Deduplication (using eventId) ---
-  // const activityExists = await db.collectionGroup('activities')
-  //   .where('eventId', '==', eventId)
-  //   .limit(1)
-  //   .withConverter(activityConverter)
-  //   .get()
-  //   .then((snapshot) => !snapshot.empty);
+  // --- 1. Deduplication (using eventId) ---
+  const activityExists = await db
+    .collectionGroup('activities')
+    .where('eventId', '==', eventId)
+    .limit(1)
+    .withConverter(activityConverter)
+    .get()
+    .then((snapshot) => !snapshot.empty);
 
-  // if (activityExists) {
-  //   functions.logger.warn('Duplicate event, skipping.');
-  //   return res.status(200).send('Duplicate event, skipping.');
-  // }
+  if (activityExists) {
+    console.log(process.env.NODE_ENV);
+    logger.warn('Duplicate event, skipping.'); // TODO: tweak next line
+    // return res.status(200).send('Duplicate event, skipping.');
+  }
 
   // --- 2. Extract Relevant Data from Payload ---
   const senderUsername = payload.sender.login; // GitHub username (e.g., "captaincode")
@@ -100,7 +109,7 @@ export const handleGitHubWebhook = async (req, res) => {
     repositoryName,
     branch,
     eventId,
-    eventTimestamp: FieldValue.serverTimestamp() as Timestamp, 
+    eventTimestamp: FieldValue.serverTimestamp() as Timestamp,
     xpAwarded: xpToAward,
     commitCount,
     userFacingDescription: `Committed ${commitCount} time(s) to ${repositoryName} (${branch}) (GitHub)`,
