@@ -1,5 +1,7 @@
-import { getFirestore } from 'firebase-admin/firestore';
+import * as admin from 'firebase-admin';
 
+import { FieldValue, getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { Activity, activityConverter, ActivityType, userConverter, XpBreakdownItem } from '../models';
 
 export const handleGitHubWebhook = async (req, res) => {
   console.log('handleGitHubWebhook');
@@ -12,10 +14,6 @@ export const handleGitHubWebhook = async (req, res) => {
   }
 
   const db = getFirestore();
-
-  if (req) {
-    return;
-  }
 
   // // --- 1. Deduplication (using eventId) ---
   // const activityExists = await db.collectionGroup('activities')
@@ -31,7 +29,7 @@ export const handleGitHubWebhook = async (req, res) => {
   // }
 
   // --- 2. Extract Relevant Data from Payload ---
-  const senderUsername = payload.sender.login; // GitHub username (e.g., "michael")
+  const senderUsername = payload.sender.login; // GitHub username (e.g., "captaincode")
   const repositoryId = payload.repository.id;
   const repositoryName = payload.repository.full_name;
   const branch = payload.ref.replace('refs/heads/', '');
@@ -43,7 +41,7 @@ export const handleGitHubWebhook = async (req, res) => {
     const connectedAccountSnapshot = await db
       .collectionGroup('connectedAccounts')
       .where('provider', '==', 'github')
-      .where('externalUserId', '==', senderUsername)
+      .where('externalUserName', '==', senderUsername)
       .limit(1)
       .get();
 
@@ -64,10 +62,101 @@ export const handleGitHubWebhook = async (req, res) => {
   }
 
   // --- 4. Calculate XP and Prepare Activity Data ---
+  let xpToAward = 0;
+  let commitCount = 0;
+  const xpBreakdown: XpBreakdownItem[] = [];
+
+  for (const commit of commits) {
+    if (commit.author.username === senderUsername) {
+      xpToAward += 10; // Base XP per commit
+      commitCount++;
+      xpBreakdown.push({
+        description: 'Base XP for Commit',
+        xp: 10,
+      });
+    }
+  }
+
+  if (commitCount > 1) {
+    xpToAward += 5;
+    xpBreakdown.push({
+      description: 'Bonus for multiple commits',
+      xp: 5,
+    });
+  }
+
+  console.log({
+    xpToAward,
+    commitCount,
+    xpBreakdown,
+  });
 
   // --- 5. Create Activity Document ---
+  const activityId = `commit-${eventId}`;
+  const activity: Activity = {
+    activityId,
+    authorId: userId,
+    type: ActivityType.COMMIT,
+    source: 'github',
+    repositoryId: repositoryId.toString(),
+    repositoryName,
+    branch,
+    eventId,
+    eventTimestamp: FieldValue.serverTimestamp() as Timestamp, 
+    xpAwarded: xpToAward,
+    commitCount,
+    userFacingDescription: `Committed ${commitCount} time(s) to ${repositoryName} (${branch}) (GitHub)`,
+    xpBreakdown,
+  };
+
+  console.log('activity', activity);
 
   // --- 6. Update User and Write Activity (Transaction) ---
+  const userRef = db
+    .collection('users')
+    .doc(userId)
+    .withConverter(userConverter);
+  const activityRef = db
+    .collection(`users/${userId}/activities`)
+    .doc(activityId)
+    .withConverter(activityConverter);
+
+  try {
+    await db.runTransaction(async (transaction) => {
+      // Get the current user data to calculate the new XP and level
+      const userDoc = await transaction.get(userRef);
+      if (!userDoc.exists) {
+        throw new Error('User document not found!');
+      }
+      console.log('User data:', userDoc.data());
+      const user = userDoc.data()!;
+
+      // Update XP and level
+      const updatedXp = user.xp + xpToAward;
+      const levelUpResult = calculateLevel(
+        user.level,
+        user.xpToNextLevel,
+        updatedXp
+      );
+
+      // Update user document
+      transaction.update(userRef, {
+        xp: updatedXp,
+        level: levelUpResult.level,
+        xpToNextLevel: levelUpResult.xpToNextLevel,
+        lastLogin: FieldValue.serverTimestamp() as Timestamp,
+      });
+
+      // Create activity document
+      transaction.set(activityRef, activity);
+    });
+
+    console.log('Push event processed successfully.');
+    res.status(200).send('Push event processed successfully.');
+  } catch (error) {
+    console.error('Transaction failed: ', error);
+    res.status(500).send('Failed to process push event.');
+  }
 };
 
 // --- Helper Functions ---
