@@ -5,11 +5,11 @@ import { DEFAULT_REGION } from '@codeheroes/common';
 import { initializeApp } from 'firebase-admin/app';
 initializeApp();
 
-import { GitHubReceiverApp } from './app';
-import { handleGitHubWebhook } from './webhooks/handle-github-webhook';
+import { GitHubReceiverLegacyApp } from './github-receiver-legacy-app';
+import { GitHubReceiverApp } from './github-receiver-app';
 
 setGlobalOptions({ region: DEFAULT_REGION });
 
-export const gitHubReceiver = onRequest(GitHubReceiverApp);
+export const gitHubReceiver = onRequest(GitHubReceiverLegacyApp);
 
-export const gitHubReceiver2 = onRequest(handleGitHubWebhook);
+export const gitHubReceiver2 = onRequest(GitHubReceiverApp);
