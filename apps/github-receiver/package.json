@@ -7,7 +7,6 @@
     "build": "nx build github-receiver",
     "deploy": "nx deploy github-receiver"
   },
-  "type": "module",
   "engines": {
     "node": "20"
   },
