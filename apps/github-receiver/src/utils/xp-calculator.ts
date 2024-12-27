@@ -1,6 +1,10 @@
 import * as admin from 'firebase-admin';
-
 import { Activity, ActivityType, XpBreakdownItem } from '@codeheroes/common';
+
+interface XpCalculationResult {
+  totalXp: number;
+  breakdown: XpBreakdownItem[];
+}
 
 export class XpCalculator {
   private gameSettings: any; // TODO: GameSettings
@@ -140,6 +144,16 @@ export class XpCalculator {
     this.addBonusXpBreakdown(breakdown);
 
     return breakdown;
+  }
+
+  public calculateXpWithBreakdown(activity: Activity): XpCalculationResult {
+    const breakdown = this.generateXpBreakdown(activity);
+    const totalXp = breakdown.reduce((sum, item) => sum + item.xp, 0);
+
+    return {
+      totalXp,
+      breakdown,
+    };
   }
 
   private addBonusXpBreakdown(breakdown: XpBreakdownItem[]): void {
