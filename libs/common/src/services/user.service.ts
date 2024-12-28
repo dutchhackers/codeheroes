@@ -1,4 +1,5 @@
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { userConverter } from '../converters';
 import { CreateUserInput } from '../interfaces/user.interface';
 import { User } from '../models';
 
@@ -11,13 +12,15 @@ const USER_DEFAULTS = {
 
 export class UserService {
   private db = getFirestore();
+  private collection = this.db.collection('users').withConverter(userConverter);
 
   async createUser(input: CreateUserInput) {
     if (!input) {
       throw new Error('User data is required');
     }
 
-    const now = Timestamp.now();
+    const docRef = this.collection.doc(); // Generates new ID
+    const now = Timestamp.now().toDate().toISOString();
     const userDoc: User = {
       ...USER_DEFAULTS,
       email: input.email,
@@ -27,8 +30,14 @@ export class UserService {
       createdAt: now,
       lastLogin: now,
     };
+    const response = await docRef.set(userDoc);
+    console.log('User created', response);
+    // await this.db.collection('users').withConverter(userConverter).doc().set(userDoc);
+    return this.getUser(docRef.id);
+  }
 
-    await this.db.collection('users').doc(input.uid).set(userDoc);
-    return userDoc;
+  async getUser(userId: string): Promise<User> {
+    const snapshot = await this.collection.doc(userId).get();
+    return snapshot.data();
   }
 }

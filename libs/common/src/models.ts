@@ -12,9 +12,8 @@ export interface User {
   level: number;
   xp: number;
   xpToNextLevel: number;
-  repositories?: string[]; // Optional, consider making this a subcollection
-  createdAt: Timestamp; // ISO date string
-  lastLogin: Timestamp; // ISO date string
+  createdAt: string;
+  lastLogin: string;
   active: boolean;
 }
 

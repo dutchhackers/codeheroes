@@ -1,14 +1,19 @@
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
-import { UserService } from '@codeheroes/common';
+import { DEFAULT_REGION, UserService } from '@codeheroes/common';
 
-export const onNewUserCreation = beforeUserCreated(async (event) => {
-  const user = event.data;
+export const onNewUserCreation = beforeUserCreated(
+  {
+    region: DEFAULT_REGION,
+  },
+  async (event) => {
+    const user = event.data;
 
-  const userService = new UserService();
-  await userService.createUser({
-    uid: user.uid,
-    email: user.email,
-    displayName: user.displayName ?? user.email,
-    photoURL: user.photoURL,
-  });
-});
+    const userService = new UserService();
+    await userService.createUser({
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName ?? user.email,
+      photoURL: user.photoURL,
+    });
+  }
+);
