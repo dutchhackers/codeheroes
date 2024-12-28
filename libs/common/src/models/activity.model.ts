@@ -1,21 +1,4 @@
-import { Timestamp } from 'firebase-admin/firestore';
-import { ConnectedAccountProvider } from './types';
-
-// User Document
-export interface User {
-  userId: string;
-  uid?: string; // via Firebase Auth
-  email: string;
-  githubUsername?: string;
-  displayName: string;
-  photoUrl: string;
-  level: number;
-  xp: number;
-  xpToNextLevel: number;
-  createdAt: string;
-  lastLogin: string;
-  active: boolean;
-}
+import { ConnectedAccountProvider } from "../types";
 
 // Base details interface
 export interface BaseEventDetails {
@@ -45,7 +28,8 @@ export interface Activity {
   eventId: string;
   eventTimestamp: string; // Changed from Timestamp to string (ISO format)
   userFacingDescription: string;
-  details: PushEventDetails | PullRequestEventDetails | (BaseEventDetails & Record<string, unknown>);
+  details:
+    | PushEventDetails
+    | PullRequestEventDetails
+    | (BaseEventDetails & Record<string, unknown>);
 }
-
-
