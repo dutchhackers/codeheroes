@@ -3,8 +3,8 @@ import { ConnectedAccountProvider } from './types';
 
 // User Document
 export interface User {
-  uid?: string;
-  userId: string; // obsolete?
+  userId: string;
+  uid?: string; // via Firebase Auth
   email: string;
   githubUsername?: string;
   displayName: string;

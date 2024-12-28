@@ -1,7 +1,8 @@
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
 import { userConverter } from '../converters';
 import { CreateUserInput } from '../interfaces/user.interface';
 import { User } from '../models';
+import { getCurrentTimeAsISO } from '../utils';
 
 const USER_DEFAULTS = {
   level: 1,
@@ -20,7 +21,7 @@ export class UserService {
     }
 
     const docRef = this.collection.doc(); // Generates new ID
-    const now = Timestamp.now().toDate().toISOString();
+    const now = getCurrentTimeAsISO();
     const userDoc: User = {
       ...USER_DEFAULTS,
       email: input.email,
@@ -30,9 +31,7 @@ export class UserService {
       createdAt: now,
       lastLogin: now,
     };
-    const response = await docRef.set(userDoc);
-    console.log('User created', response);
-    // await this.db.collection('users').withConverter(userConverter).doc().set(userDoc);
+    await docRef.set(userDoc);
     return this.getUser(docRef.id);
   }
 
