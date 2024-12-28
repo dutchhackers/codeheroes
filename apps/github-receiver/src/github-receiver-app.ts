@@ -1,12 +1,12 @@
-import { FieldValue, getFirestore, Timestamp } from 'firebase-admin/firestore';
 import {
   Activity,
   activityConverter,
   ActivityType,
-  userConverter,
-  XpBreakdownItem,
+  logger,
+  PushEventDetails,
+  userConverter
 } from '@codeheroes/common';
-import { logger } from '@codeheroes/common';
+import { FieldValue, getFirestore, Timestamp } from 'firebase-admin/firestore';
 
 export const GitHubReceiverApp = async (req, res) => {
   const githubEvent = req.headers['x-github-event'];
@@ -39,6 +39,7 @@ export const GitHubReceiverApp = async (req, res) => {
   const repositoryName = payload.repository.full_name;
   const branch = payload.ref.replace('refs/heads/', '');
   const commits = payload.commits;
+  const commitCount = commits.length; // To be improved later: only count relevant
 
   // --- 3. Find User ID using Connected Accounts ---
   let userId: string | null = null;
@@ -66,52 +67,25 @@ export const GitHubReceiverApp = async (req, res) => {
     return res.status(500).send('Error finding user.');
   }
 
-  // --- 4. Calculate XP and Prepare Activity Data ---
-  let xpToAward = 0;
-  let commitCount = 0;
-  const xpBreakdown: XpBreakdownItem[] = [];
-
-  for (const commit of commits) {
-    if (commit.author.username === senderUsername) {
-      xpToAward += 10; // Base XP per commit
-      commitCount++;
-      xpBreakdown.push({
-        description: 'Base XP for Commit',
-        xp: 10,
-      });
-    }
-  }
-
-  if (commitCount > 1) {
-    xpToAward += 5;
-    xpBreakdown.push({
-      description: 'Bonus for multiple commits',
-      xp: 5,
-    });
-  }
-
-  console.log({
-    xpToAward,
-    commitCount,
-    xpBreakdown,
-  });
+ 
 
   // --- 5. Create Activity Document ---
   const activityId = `commit-${eventId}`;
   const activity: Activity = {
     activityId,
-    authorId: userId,
     type: ActivityType.COMMIT,
     source: 'github',
     repositoryId: repositoryId.toString(),
     repositoryName,
-    branch,
     eventId,
-    eventTimestamp: FieldValue.serverTimestamp() as Timestamp,
-    xpAwarded: xpToAward,
-    commitCount,
+    eventTimestamp: new Date().toISOString(),
     userFacingDescription: `Committed ${commitCount} time(s) to ${repositoryName} (${branch}) (GitHub)`,
-    xpBreakdown,
+    details: {
+      authorId: userId,
+      authorExternalId: senderUsername,
+      commitCount,
+      branch,
+    } as PushEventDetails
   };
 
   console.log('activity', activity);
@@ -136,19 +110,9 @@ export const GitHubReceiverApp = async (req, res) => {
       console.log('User data:', userDoc.data());
       const user = userDoc.data()!;
 
-      // Update XP and level
-      const updatedXp = user.xp + xpToAward;
-      const levelUpResult = calculateLevel(
-        user.level,
-        user.xpToNextLevel,
-        updatedXp
-      );
 
       // Update user document
       transaction.update(userRef, {
-        xp: updatedXp,
-        level: levelUpResult.level,
-        xpToNextLevel: levelUpResult.xpToNextLevel,
         lastLogin: FieldValue.serverTimestamp() as Timestamp,
       });
 

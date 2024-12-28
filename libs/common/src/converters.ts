@@ -38,56 +38,36 @@ export const userConverter: admin.firestore.FirestoreDataConverter<User> = {
   },
 };
 
-export const activityConverter: admin.firestore.FirestoreDataConverter<Activity> =
-  {
-    toFirestore: (activity: Activity): admin.firestore.DocumentData => {
-      const doc: admin.firestore.DocumentData = {
-        activityId: activity.activityId,
-        type: activity.type,
-        source: activity.source,
-        repositoryId: activity.repositoryId,
-        repositoryName: activity.repositoryName,
-        branch: activity.branch,
-        eventId: activity.eventId,
-        eventTimestamp: activity.eventTimestamp,
-        xpAwarded: activity.xpAwarded,
-        commitCount: activity.commitCount,
-        userFacingDescription: activity.userFacingDescription,
-        xpBreakdown: activity.xpBreakdown,
-        authorId: activity.authorId,
-      };
+export const activityConverter: admin.firestore.FirestoreDataConverter<Activity> = {
+  toFirestore: (activity: Activity): admin.firestore.DocumentData => {
+    return {
+      activityId: activity.activityId,
+      type: activity.type,
+      source: activity.source,
+      repositoryId: activity.repositoryId,
+      repositoryName: activity.repositoryName,
+      eventId: activity.eventId,
+      eventTimestamp: activity.eventTimestamp,
+      userFacingDescription: activity.userFacingDescription,
+      details: activity.details,
+    };
+  },
+  fromFirestore: (snapshot: admin.firestore.QueryDocumentSnapshot): Activity => {
+    const data = snapshot.data();
+    if (!data) {
+      throw new Error('Document data is undefined');
+    }
 
-      if (activity.authorExternalId !== undefined) {
-        doc.authorExternalId = activity.authorExternalId;
-      }
-
-      return doc;
-    },
-    fromFirestore: (
-      snapshot: admin.firestore.QueryDocumentSnapshot
-    ): Activity => {
-      const data = snapshot.data();
-      if (!data) {
-        throw new Error('Document data is undefined');
-      }
-
-      // Perform any necessary data transformation here
-
-      return {
-        activityId: data.activityId,
-        type: data.type,
-        source: data.source,
-        repositoryId: data.repositoryId,
-        repositoryName: data.repositoryName,
-        branch: data.branch,
-        eventId: data.eventId,
-        eventTimestamp: data.eventTimestamp,
-        xpAwarded: data.xpAwarded,
-        commitCount: data.commitCount,
-        userFacingDescription: data.userFacingDescription,
-        xpBreakdown: data.xpBreakdown,
-        authorId: data.authorId,
-        authorExternalId: data.authorExternalId,
-      };
-    },
-  };
+    return {
+      activityId: data.activityId,
+      type: data.type,
+      source: data.source,
+      repositoryId: data.repositoryId,
+      repositoryName: data.repositoryName,
+      eventId: data.eventId,
+      eventTimestamp: data.eventTimestamp,
+      userFacingDescription: data.userFacingDescription,
+      details: data.details,
+    };
+  },
+};

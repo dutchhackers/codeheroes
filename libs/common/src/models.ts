@@ -17,29 +17,35 @@ export interface User {
   active: boolean;
 }
 
-// XP Breakdown Item
-export interface XpBreakdownItem {
-  description: string;
-  xp: number;
+// Base details interface
+export interface BaseEventDetails {
+  authorId: string | null;
+  authorExternalId?: string;
 }
 
+// Activity-specific details interfaces
+export interface PushEventDetails extends BaseEventDetails {
+  commitCount: number;
+  branch: string;
+}
+
+export interface PullRequestEventDetails extends BaseEventDetails {
+  prNumber: number;
+  title: string;
+  state: string;
+}
 
 // Activity Document
 export interface Activity {
   activityId: string;
-  type: string; // Consider using an enum for activity types (see below)
+  type: string;
   source: ConnectedAccountProvider;
   repositoryId: string;
   repositoryName: string;
-  branch: string;
   eventId: string;
-  eventTimestamp: Timestamp;
-  xpAwarded: number;
-  commitCount?: number; // Optional, as it might not apply to all activity types
+  eventTimestamp: string; // Changed from Timestamp to string (ISO format)
   userFacingDescription: string;
-  xpBreakdown: XpBreakdownItem[];
-  authorId: string | null;
-  authorExternalId?: string;
+  details: PushEventDetails | PullRequestEventDetails | (BaseEventDetails & Record<string, unknown>);
 }
 
 
