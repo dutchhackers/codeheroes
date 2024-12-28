@@ -7,12 +7,7 @@ export const userConverter: admin.firestore.FirestoreDataConverter<User> = {
   toFirestore: (user: User): admin.firestore.DocumentData => {
     console.log('toFirestore', user);
     const doc: admin.firestore.DocumentData = {
-      userId: user.userId,
-      displayName: user.displayName,
-      photoUrl: user.photoUrl,
-      level: user.level,
-      xp: user.xp,
-      xpToNextLevel: user.xpToNextLevel,
+      ...user,
       createdAt: Timestamp.now().toDate().toISOString(),
       lastLogin: Timestamp.now().toDate().toISOString(),
     };
@@ -28,6 +23,12 @@ export const userConverter: admin.firestore.FirestoreDataConverter<User> = {
     if (!data) {
       throw new Error('Document data is undefined');
     }
+    console.log({
+      ...data,
+      // createdAt: data.createdAt?.toDate().toISOString,
+      // lastLogin: data.lastLogin?.toDate(),
+      userId: snapshot.id,
+    })
     return {
       ...data,
       // createdAt: data.createdAt?.toDate().toISOString,
