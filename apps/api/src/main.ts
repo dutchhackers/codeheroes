@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { onRequest } from 'firebase-functions/v2/https';
 import { setGlobalOptions } from 'firebase-functions/v2';
 import { DEFAULT_REGION } from '@codeheroes/common';

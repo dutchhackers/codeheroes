@@ -3,8 +3,8 @@ import { ConnectedAccountProvider } from './types';
 
 // User Document
 export interface User {
-  uid?: string;
-  userId: string; // obsolete?
+  userId: string;
+  uid?: string; // via Firebase Auth
   email: string;
   githubUsername?: string;
   displayName: string;
@@ -12,9 +12,8 @@ export interface User {
   level: number;
   xp: number;
   xpToNextLevel: number;
-  repositories?: string[]; // Optional, consider making this a subcollection
-  createdAt: Timestamp; // ISO date string
-  lastLogin: Timestamp; // ISO date string
+  createdAt: string;
+  lastLogin: string;
   active: boolean;
 }
 

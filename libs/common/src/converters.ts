@@ -1,39 +1,40 @@
 import * as admin from 'firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
-import { User, Activity } from './models';
+import { Timestamp } from 'firebase-admin/firestore';
+import { Activity, User } from './models';
 
 // --- Firestore Data Converters ---
 export const userConverter: admin.firestore.FirestoreDataConverter<User> = {
   toFirestore: (user: User): admin.firestore.DocumentData => {
     console.log('toFirestore', user);
-    return {
-      userId: user.userId,
-      githubUsername: user.githubUsername,
-      heroName: user.heroName,
-      heroAvatarUrl: user.heroAvatarUrl,
-      level: user.level,
-      xp: user.xp,
-      xpToNextLevel: user.xpToNextLevel,
-      createdAt: FieldValue.serverTimestamp(),
-      lastLogin: FieldValue.serverTimestamp(),
+    const doc: admin.firestore.DocumentData = {
+      ...user,
+      createdAt: Timestamp.now().toDate().toISOString(),
+      lastLogin: Timestamp.now().toDate().toISOString(),
     };
+
+    if (user.githubUsername) {
+      doc.githubUsername = user.githubUsername;
+    }
+
+    return doc;
   },
   fromFirestore: (snapshot: admin.firestore.QueryDocumentSnapshot): User => {
     const data = snapshot.data();
     if (!data) {
       throw new Error('Document data is undefined');
     }
+    console.log({
+      ...data,
+      // createdAt: data.createdAt?.toDate().toISOString,
+      // lastLogin: data.lastLogin?.toDate(),
+      userId: snapshot.id,
+    })
     return {
-      userId: data.userId,
-      githubUsername: data.githubUsername,
-      heroName: data.heroName,
-      heroAvatarUrl: data.heroAvatarUrl,
-      level: data.level,
-      xp: data.xp,
-      xpToNextLevel: data.xpToNextLevel,
-      createdAt: data.createdAt,
-      lastLogin: data.lastLogin,
-    };
+      ...data,
+      // createdAt: data.createdAt?.toDate().toISOString,
+      // lastLogin: data.lastLogin?.toDate(),
+      userId: snapshot.id,
+    } as User;
   },
 };
 
