@@ -11,13 +11,8 @@ export const userConverter: admin.firestore.FirestoreDataConverter<User> = {
     if (!data) {
       throw new Error('Document data is undefined');
     }
-    // Destructure to omit createdAt and lastLogin
+    // Destructure to omit createdAt and updatedAt
     const { createdAt, updatedAt, ...restData } = data;
-    console.log({
-      createdAt,
-      updatedAt
-    })
-    
     return {
       id: snapshot.id,
       ...restData,
