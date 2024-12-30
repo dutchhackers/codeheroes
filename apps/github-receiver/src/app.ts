@@ -2,7 +2,7 @@ import { EventService, logger } from '@codeheroes/common';
 import { ProcessorFactory } from './core/factory/factory.processor';
 import { PushEvent } from './core/interfaces/github.interface';
 
-export const GitHubReceiverApp = async (req, res) => {
+export const App = async (req, res) => {
   const githubEvent = req.headers['x-github-event'];
   const payload = req.body;
 

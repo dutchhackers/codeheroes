@@ -5,12 +5,8 @@ import { DEFAULT_REGION } from '@codeheroes/common';
 import { initializeApp } from 'firebase-admin/app';
 initializeApp();
 
-import { GitHubReceiverLegacyApp } from './github-receiver-legacy-app';
-import { GitHubReceiverApp } from './github-receiver-app';
+import { App } from './app';
 
 setGlobalOptions({ region: DEFAULT_REGION });
 
-export const gitHubReceiver = onRequest(GitHubReceiverApp);
-
-// For legacy support
-export const gitHubReceiverLegacy = onRequest(GitHubReceiverLegacyApp);
+export const gitHubReceiver = onRequest(App);
