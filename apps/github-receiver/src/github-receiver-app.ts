@@ -1,5 +1,4 @@
 import { EventService, logger } from '@codeheroes/common';
-import { getFirestore } from 'firebase-admin/firestore';
 import { ProcessorFactory } from './core/factory/factory.processor';
 import { PushEvent } from './core/interfaces/github.interface';
 
@@ -15,11 +14,13 @@ export const GitHubReceiverApp = async (req, res) => {
 
   try {
     const processor = ProcessorFactory.createProcessor('push', eventService);
-    const event = await processor.process(payload as PushEvent);
+    const event = await processor.process(payload as PushEvent, req.headers);
 
     if (!event) {
       return res.status(200).send('Duplicate event, skipping.');
     }
+
+    console.log('Creating event:', event);
 
     await eventService.createEvent(event);
     logger.info('Event created successfully');

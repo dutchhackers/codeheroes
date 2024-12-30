@@ -1,5 +1,4 @@
-import { BaseEventProcessor } from './processors/base/base-event.processor';
-import { PushEventProcessor } from './github/push-event.processor';
+import { BaseEventProcessor, PushEventProcessor } from '../processors';
 import { EventService } from '@codeheroes/common';
 
 export class ProcessorFactory {

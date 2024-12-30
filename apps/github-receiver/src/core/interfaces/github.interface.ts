@@ -45,3 +45,10 @@ export interface PushEvent {
   commits: GitHubCommit[];
   head_commit: GitHubCommit | null;
 }
+
+export interface GitHubHeaders {
+  'x-github-event'?: string;
+  'x-github-delivery'?: string;
+  'x-hub-signature'?: string;
+  [key: string]: string | string[] | undefined;
+}

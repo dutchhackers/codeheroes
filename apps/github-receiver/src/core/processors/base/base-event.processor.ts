@@ -1,12 +1,12 @@
 import { CreateEventInput, EventService } from '@codeheroes/common';
 
-export abstract class BaseEventProcessor<T = unknown> {
+export abstract class BaseEventProcessor<T = unknown, H = unknown> {
   constructor(protected eventService: EventService) {}
 
-  protected abstract processEvent(payload: T): Promise<CreateEventInput>;
+  protected abstract processEvent(payload: T, headers?: H): Promise<CreateEventInput>;
 
-  async process(payload: T): Promise<CreateEventInput | null> {
-    const eventId = await this.getEventId(payload);
+  async process(payload: T, headers?: H): Promise<CreateEventInput | null> {
+    const eventId = await this.getEventId(payload, headers);
     
     const existingEvent = await this.eventService.findByEventId(eventId);
     if (existingEvent) {
@@ -14,8 +14,8 @@ export abstract class BaseEventProcessor<T = unknown> {
       return null;
     }
 
-    return this.processEvent(payload);
+    return this.processEvent(payload, headers);
   }
 
-  protected abstract getEventId(payload: T): string;
+  protected abstract getEventId(payload: T, headers?: H): string;
 }
