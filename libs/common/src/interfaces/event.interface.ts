@@ -28,6 +28,7 @@ export interface Event extends BaseDocument {
   source: ConnectedAccountProvider;
   eventId: string;
   eventTimestamp: string; // ISO string
+  description?: string;
   details:
     | PushEventDetails
     | PullRequestEventDetails
