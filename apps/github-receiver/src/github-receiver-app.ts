@@ -6,14 +6,14 @@ export const GitHubReceiverApp = async (req, res) => {
   const githubEvent = req.headers['x-github-event'];
   const payload = req.body;
 
-  if (githubEvent !== 'push') {
-    return res.status(200).send('Not a push event, skipping.');
+  if (!githubEvent) {
+    return res.status(400).send('Missing GitHub event header');
   }
 
   const eventService = new EventService();
 
   try {
-    const processor = ProcessorFactory.createProcessor('push', eventService);
+    const processor = ProcessorFactory.createProcessor(githubEvent, eventService);
     const event = await processor.process(payload as PushEvent, req.headers);
 
     if (!event) {
@@ -26,6 +26,11 @@ export const GitHubReceiverApp = async (req, res) => {
     logger.info('Event created successfully');
     return res.status(200).send('Event processed successfully');
   } catch (error) {
+    if (error instanceof Error && error.message.startsWith('Unknown event type:')) {
+      logger.info(`Skipping unsupported event type: ${githubEvent}`);
+      return res.status(200).send(`Event type '${githubEvent}' not supported`);
+    }
+    
     logger.error('Failed to process event:', error);
     return res.status(500).send('Failed to process event');
   }

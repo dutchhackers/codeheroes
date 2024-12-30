@@ -1,4 +1,4 @@
-import { BaseEventProcessor, PushEventProcessor } from '../processors';
+import { BaseEventProcessor, PushEventProcessor, PullRequestEventProcessor } from '../processors';
 import { EventService } from '@codeheroes/common';
 
 export class ProcessorFactory {
@@ -9,6 +9,8 @@ export class ProcessorFactory {
     switch (type) {
       case 'push':
         return new PushEventProcessor(eventService);
+      case 'pull_request':
+        return new PullRequestEventProcessor(eventService);
       default:
         throw new Error(`Unknown event type: ${type}`);
     }
