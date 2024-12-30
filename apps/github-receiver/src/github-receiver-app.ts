@@ -1,7 +1,9 @@
 import {
-  Activity,
   activityConverter,
   ActivityType,
+  CreateActivityInput,
+  Event,
+  EventService,
   logger,
   PushEventDetails,
   userConverter
@@ -67,17 +69,14 @@ export const GitHubReceiverApp = async (req, res) => {
     return res.status(500).send('Error finding user.');
   }
 
- 
-
-  // --- 5. Create Activity Document ---
-  const activityId = `commit-${eventId}`;
-  const activity: Activity = {
-    activityId,
+  // start: 4. Create Event Document
+  const eventService = new EventService();
+  const event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'> = {
+    activityId: `commit-${eventId}`,
     type: ActivityType.COMMIT,
     source: 'github',
     eventId,
     eventTimestamp: new Date().toISOString(),
-    userFacingDescription: `Committed ${commitCount} time(s) to ${repositoryName} (${branch}) (GitHub)`,
     details: {
       authorId: userId,
       authorExternalId: senderUsername,
@@ -86,6 +85,27 @@ export const GitHubReceiverApp = async (req, res) => {
       commitCount,
       branch,
     } as PushEventDetails
+  };
+
+  try {
+    await eventService.createEvent(event);
+    logger.info('Event created successfully');
+  } catch (error) {
+    logger.error('Failed to create event:', error);
+    return res.status(500).send('Failed to create event');
+  }
+  // end: 4. Create Event Document
+
+  // --- 5. Create Activity Document ---
+  const activityId = `commit-${eventId}`;
+  const activity: CreateActivityInput = {
+    activityId,
+    type: ActivityType.COMMIT,
+    source: 'github',
+    eventId,
+    eventTimestamp: new Date().toISOString(),
+    userFacingDescription: `Committed ${commitCount} time(s) to ${repositoryName} (${branch}) (GitHub)`,
+
   };
 
   console.log('activity', activity);

@@ -24,7 +24,7 @@ export abstract class BaseFirestoreService<T extends DocumentData> {
     return doc.exists ? doc.data() : null;
   }
 
-  async create(data: Omit<T, keyof FirestoreTimestamps>): Promise<T> {
+  async create(data: Omit<T, 'id' | keyof FirestoreTimestamps>): Promise<T> {
     const docRef = this.collection.doc();
     const timestamps = this.createTimestamps();
 
