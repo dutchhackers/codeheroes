@@ -1,67 +1,48 @@
 import * as admin from 'firebase-admin';
-import { Timestamp } from 'firebase-admin/firestore';
+import { Event } from './interfaces';
 import { Activity, User } from './models';
 
 // --- Firestore Data Converters ---
 export const userConverter: admin.firestore.FirestoreDataConverter<User> = {
   toFirestore: (user: User): admin.firestore.DocumentData => {
-    console.log('toFirestore', user);
-    const doc: admin.firestore.DocumentData = {
-      ...user,
-      createdAt: Timestamp.now().toDate().toISOString(),
-      lastLogin: Timestamp.now().toDate().toISOString(),
-    };
-
-    if (user.githubUsername) {
-      doc.githubUsername = user.githubUsername;
-    }
-
-    return doc;
+    return user;
   },
   fromFirestore: (snapshot: admin.firestore.QueryDocumentSnapshot): User => {
     const data = snapshot.data();
     if (!data) {
       throw new Error('Document data is undefined');
     }
-    console.log({
-      ...data,
-      // createdAt: data.createdAt?.toDate().toISOString,
-      // lastLogin: data.lastLogin?.toDate(),
-      userId: snapshot.id,
-    })
+    // Destructure to omit createdAt and lastLogin
+    const { createdAt, updatedAt, ...restData } = data;
     return {
-      ...data,
-      // createdAt: data.createdAt?.toDate().toISOString,
-      // lastLogin: data.lastLogin?.toDate(),
-      userId: snapshot.id,
+      id: snapshot.id,
+      ...restData,
     } as User;
+  },
+};
+
+export const eventConverter: admin.firestore.FirestoreDataConverter<Event> = {
+  toFirestore: (user: Event): admin.firestore.DocumentData => {
+    return user;
+  },
+  fromFirestore: (snapshot: admin.firestore.QueryDocumentSnapshot): Event => {
+    const data = snapshot.data();
+    if (!data) {
+      throw new Error('Document data is undefined');
+    }
+    // Destructure to omit createdAt and lastLogin
+    const { createdAt, updatedAt, ...restData } = data;
+    return {
+      id: snapshot.id,
+      ...restData,
+    } as Event;
   },
 };
 
 export const activityConverter: admin.firestore.FirestoreDataConverter<Activity> =
   {
-    toFirestore: (activity: Activity): admin.firestore.DocumentData => {
-      const doc: admin.firestore.DocumentData = {
-        activityId: activity.activityId,
-        type: activity.type,
-        source: activity.source,
-        repositoryId: activity.repositoryId,
-        repositoryName: activity.repositoryName,
-        branch: activity.branch,
-        eventId: activity.eventId,
-        eventTimestamp: activity.eventTimestamp,
-        xpAwarded: activity.xpAwarded,
-        commitCount: activity.commitCount,
-        userFacingDescription: activity.userFacingDescription,
-        xpBreakdown: activity.xpBreakdown,
-        authorId: activity.authorId,
-      };
-
-      if (activity.authorExternalId !== undefined) {
-        doc.authorExternalId = activity.authorExternalId;
-      }
-
-      return doc;
+    toFirestore: (user: Activity): admin.firestore.DocumentData => {
+      return user;
     },
     fromFirestore: (
       snapshot: admin.firestore.QueryDocumentSnapshot
@@ -70,24 +51,11 @@ export const activityConverter: admin.firestore.FirestoreDataConverter<Activity>
       if (!data) {
         throw new Error('Document data is undefined');
       }
-
-      // Perform any necessary data transformation here
-
+      // Destructure to omit createdAt and lastLogin
+      const { createdAt, updatedAt, ...restData } = data;
       return {
-        activityId: data.activityId,
-        type: data.type,
-        source: data.source,
-        repositoryId: data.repositoryId,
-        repositoryName: data.repositoryName,
-        branch: data.branch,
-        eventId: data.eventId,
-        eventTimestamp: data.eventTimestamp,
-        xpAwarded: data.xpAwarded,
-        commitCount: data.commitCount,
-        userFacingDescription: data.userFacingDescription,
-        xpBreakdown: data.xpBreakdown,
-        authorId: data.authorId,
-        authorExternalId: data.authorExternalId,
-      };
+        id: snapshot.id,
+        ...restData,
+      } as Activity;
     },
   };

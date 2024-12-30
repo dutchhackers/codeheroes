@@ -1,8 +1,9 @@
 export interface CreateUserInput {
-  uid: string;
+  uid?: string;
   email: string | null;
   displayName: string | null;
-  photoURL: string | null;
+  photoUrl: string | null;
+  // githubUsername?: string;
 }
 
 export interface PaginationParams {

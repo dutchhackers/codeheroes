@@ -13,7 +13,7 @@ export const onNewUserCreation = beforeUserCreated(
       uid: user.uid,
       email: user.email,
       displayName: user.displayName ?? user.email,
-      photoURL: user.photoURL,
+      photoUrl: user.photoURL,
     });
   }
 );
