@@ -75,14 +75,14 @@ export const GitHubReceiverApp = async (req, res) => {
     activityId,
     type: ActivityType.COMMIT,
     source: 'github',
-    repositoryId: repositoryId.toString(),
-    repositoryName,
     eventId,
     eventTimestamp: new Date().toISOString(),
     userFacingDescription: `Committed ${commitCount} time(s) to ${repositoryName} (${branch}) (GitHub)`,
     details: {
       authorId: userId,
       authorExternalId: senderUsername,
+      repositoryId: repositoryId.toString(),
+      repositoryName,
       commitCount,
       branch,
     } as PushEventDetails

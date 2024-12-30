@@ -4,6 +4,8 @@ import { ConnectedAccountProvider } from "../types";
 export interface BaseEventDetails {
   authorId: string | null;
   authorExternalId?: string;
+  repositoryId: string;
+  repositoryName: string;
 }
 
 // Activity-specific details interfaces
@@ -23,8 +25,6 @@ export interface Activity {
   activityId: string;
   type: string;
   source: ConnectedAccountProvider;
-  repositoryId: string;
-  repositoryName: string;
   eventId: string;
   eventTimestamp: string; // Changed from Timestamp to string (ISO format)
   userFacingDescription: string;
