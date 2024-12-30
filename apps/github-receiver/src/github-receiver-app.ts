@@ -1,14 +1,12 @@
 import {
   activityConverter,
   ActivityType,
-  CreateActivityInput,
   Event,
   EventService,
   logger,
-  PushEventDetails,
-  userConverter
+  PushEventDetails
 } from '@codeheroes/common';
-import { FieldValue, getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
 
 export const GitHubReceiverApp = async (req, res) => {
   const githubEvent = req.headers['x-github-event'];
@@ -84,7 +82,7 @@ export const GitHubReceiverApp = async (req, res) => {
       repositoryName,
       commitCount,
       branch,
-    } as PushEventDetails
+    } as PushEventDetails,
   };
 
   try {
@@ -95,77 +93,4 @@ export const GitHubReceiverApp = async (req, res) => {
     return res.status(500).send('Failed to create event');
   }
   // end: 4. Create Event Document
-
-  // --- 5. Create Activity Document ---
-  const activityId = `commit-${eventId}`;
-  const activity: CreateActivityInput = {
-    activityId,
-    type: ActivityType.COMMIT,
-    source: 'github',
-    eventId,
-    eventTimestamp: new Date().toISOString(),
-    userFacingDescription: `Committed ${commitCount} time(s) to ${repositoryName} (${branch}) (GitHub)`,
-
-  };
-
-  console.log('activity', activity);
-
-  // --- 6. Update User and Write Activity (Transaction) ---
-  const userRef = db
-    .collection('users')
-    .doc(userId)
-    .withConverter(userConverter);
-  const activityRef = db
-    .collection(`users/${userId}/activities`)
-    .doc(activityId)
-    .withConverter(activityConverter);
-
-  try {
-    await db.runTransaction(async (transaction) => {
-      // Get the current user data to calculate the new XP and level
-      const userDoc = await transaction.get(userRef);
-      if (!userDoc.exists) {
-        throw new Error('User document not found!');
-      }
-      console.log('User data:', userDoc.data());
-      const user = userDoc.data()!;
-
-
-      // Update user document
-      transaction.update(userRef, {
-        lastLogin: FieldValue.serverTimestamp() as Timestamp,
-      });
-
-      // Create activity document
-      transaction.set(activityRef, activity);
-    });
-
-    console.log('Push event processed successfully.');
-    res.status(200).send('Push event processed successfully.');
-  } catch (error) {
-    console.error('Transaction failed: ', error);
-    res.status(500).send('Failed to process push event.');
-  }
 };
-
-// --- Helper Functions ---
-function calculateLevel(
-  currentLevel: number,
-  currentXpToNextLevel: number,
-  updatedXp: number
-): { level: number; xpToNextLevel: number } {
-  let level = currentLevel;
-  let xpToNextLevel = currentXpToNextLevel;
-
-  while (updatedXp >= xpToNextLevel) {
-    level++;
-    updatedXp -= xpToNextLevel;
-    xpToNextLevel = calculateXpToNextLevel(level); // Implement your formula to determine XP needed for each level
-  }
-
-  return { level, xpToNextLevel };
-}
-
-function calculateXpToNextLevel(level: number): number {
-  return 1000 * level; // Example formula, adjust as needed
-}
