@@ -52,3 +52,27 @@ export interface GitHubHeaders {
   'x-hub-signature'?: string;
   [key: string]: string | string[] | undefined;
 }
+
+export interface PullRequestEvent {
+  action: 'opened' | 'closed' | 'reopened' | 'synchronize' | 'edited' | 'ready_for_review' | 'draft';
+  number: number;
+  pull_request: {
+    id: number;
+    title: string;
+    state: 'open' | 'closed';
+    draft: boolean;
+    merged: boolean;
+    updated_at: string;
+    html_url: string;
+    body?: string;
+  };
+  repository: {
+    id: number;
+    name: string;
+    full_name: string;
+  };
+  sender: {
+    id: number;
+    login: string;
+  };
+}
