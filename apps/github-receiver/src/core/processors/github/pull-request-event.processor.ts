@@ -1,4 +1,4 @@
-import { ActivityType, CreateEventInput } from '@codeheroes/common';
+import { EventType, CreateEventInput } from '@codeheroes/common';
 import {
   GitHubHeaders,
   PullRequestEvent,
@@ -45,14 +45,14 @@ export class PullRequestEventProcessor extends BaseEventProcessor<
   private getActivityType(
     action: PullRequestEvent['action'],
     payload: PullRequestEvent
-  ): ActivityType {
+  ): EventType {
     if (action === 'opened') {
-      return ActivityType.PULL_REQUEST_OPENED;
+      return EventType.PULL_REQUEST_OPENED;
     }
     if (action === 'closed' && payload.pull_request.merged) {
-      return ActivityType.PULL_REQUEST_MERGED;
+      return EventType.PULL_REQUEST_MERGED;
     }
     // For actions like 'edited', 'reopened', 'synchronize', etc.
-    return ActivityType.PULL_REQUEST_REVIEWED;
+    return EventType.PULL_REQUEST_REVIEWED;
   }
 }

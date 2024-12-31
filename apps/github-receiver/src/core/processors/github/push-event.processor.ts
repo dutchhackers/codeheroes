@@ -1,4 +1,4 @@
-import { ActivityType, CreateEventInput } from '@codeheroes/common';
+import { EventType, CreateEventInput } from '@codeheroes/common';
 import { GitHubHeaders, PushEvent } from '../../interfaces/github.interface';
 import { BaseEventProcessor } from '../base/base-event.processor';
 
@@ -12,7 +12,7 @@ export class PushEventProcessor extends BaseEventProcessor<PushEvent, GitHubHead
 
     return {
       eventId,
-      type: ActivityType.COMMIT,
+      type: EventType.COMMIT,
       source: 'github',
       activityId: `commit-${eventId}`,
       description: `Push to ${payload.repository.name}`,
