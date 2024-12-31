@@ -1,4 +1,5 @@
 import { CreateEventInput, EventService } from '@codeheroes/common';
+import { logger } from '@codeheroes/common';
 
 export abstract class BaseEventProcessor<T = unknown, H = unknown> {
   constructor(protected eventService: EventService) {}
@@ -10,7 +11,7 @@ export abstract class BaseEventProcessor<T = unknown, H = unknown> {
     
     const existingEvent = await this.eventService.findByEventId(eventId);
     if (existingEvent) {
-      console.log(`Event ${eventId} already processed`);
+      logger.info(`Event ${eventId} already processed`);
       return null;
     }
 
