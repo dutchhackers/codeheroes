@@ -66,13 +66,6 @@ export interface PullRequestEvent {
     html_url: string;
     body?: string;
   };
-  repository: {
-    id: number;
-    name: string;
-    full_name: string;
-  };
-  sender: {
-    id: number;
-    login: string;
-  };
+  repository: GitHubRepository; // Changed from inline type to GitHubRepository
+  sender: GitHubUser; // Changed from inline type to GitHubUser
 }
