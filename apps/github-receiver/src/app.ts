@@ -26,8 +26,6 @@ export const App = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    console.log('Creating event:', event);
-
     await eventService.createEvent(event);
     logger.info('Event created successfully');
     ResponseHandler.success(res, HTTP_MESSAGES.EVENT_PROCESSED);
