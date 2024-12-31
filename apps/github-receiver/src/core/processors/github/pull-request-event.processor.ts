@@ -36,6 +36,7 @@ export class PullRequestEventProcessor extends BaseEventProcessor<
         title: payload.pull_request.title,
         repositoryId: payload.repository.id.toString(),
         repositoryName: payload.repository.name,
+        repositoryOwner: payload.repository.owner.login,
         state: payload.pull_request.state,
         draft: payload.pull_request.draft,
       },

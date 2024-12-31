@@ -7,6 +7,7 @@ export interface BaseEventDetails {
   authorExternalId?: string;
   repositoryId: string;
   repositoryName: string;
+  repositoryOwner: string;
 }
 
 // Activity-specific details interfaces

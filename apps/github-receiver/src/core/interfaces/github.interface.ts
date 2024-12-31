@@ -66,6 +66,6 @@ export interface PullRequestEvent {
     html_url: string;
     body?: string;
   };
-  repository: GitHubRepository; // Changed from inline type to GitHubRepository
-  sender: GitHubUser; // Changed from inline type to GitHubUser
+  repository: GitHubRepository;
+  sender: GitHubUser;
 }
