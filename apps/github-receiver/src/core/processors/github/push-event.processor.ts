@@ -16,6 +16,7 @@ export class PushEventProcessor extends BaseEventProcessor<PushEvent, GitHubHead
       source: 'github',
       activityId: `commit-${eventId}`,
       description: `Push to ${payload.repository.name}`,
+      processed: false,
       details: {
         authorId: payload.sender.id.toString(),
         commitCount: payload.commits.length,

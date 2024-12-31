@@ -31,6 +31,7 @@ export interface Event extends BaseDocument {
   eventId: string;
   eventTimestamp: string; // ISO string
   description?: string;
+  processed: boolean;
   details:
     | PushEventDetails
     | PullRequestEventDetails
