@@ -23,6 +23,7 @@ export class PushEventProcessor extends BaseEventProcessor<PushEvent, GitHubHead
         repositoryId: payload.repository.id.toString(),
         repositoryName: payload.repository.name,
         repositoryOwner: payload.repository.owner.login,
+        lastCommitMessage: payload.head_commit?.message || null,
       },
       eventTimestamp: new Date(
         payload.head_commit?.timestamp || new Date()

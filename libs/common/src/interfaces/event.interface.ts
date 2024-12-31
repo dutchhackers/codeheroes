@@ -8,6 +8,7 @@ export interface BaseEventDetails {
   repositoryId: string;
   repositoryName: string;
   repositoryOwner: string;
+  lastCommitMessage?: string;
 }
 
 // Activity-specific details interfaces
