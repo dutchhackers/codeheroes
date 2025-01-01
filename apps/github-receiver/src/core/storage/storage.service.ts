@@ -1,12 +1,12 @@
-import { getStorage, ref, uploadString } from "firebase/storage";
+import { getStorage } from 'firebase-admin/storage';
 import { logger } from '@codeheroes/common';
 import { Request } from 'express';
 
 export class StorageService {
-  private storage;
+  private bucket;
 
   constructor() {
-    this.storage = getStorage();
+    this.bucket = getStorage().bucket();
   }
 
   async storeRawRequest(
@@ -17,16 +17,23 @@ export class StorageService {
   ): Promise<void> {
     const now = new Date();
     const timestamp = now.toISOString().replace(/[:.]/g, '-');
-    const filePath = `${source}/${eventType}/${eventId}-${timestamp}.json`;
+    const [year, month, day] = now.toISOString().split('T')[0].split('-');
 
-    const fileRef = ref(this.storage, filePath);
-    try {
-      await uploadString(fileRef, JSON.stringify(req.body), 'raw', {
-        contentType: 'application/json',
-      });
-      logger.info(`Stored raw request at ${filePath}`);
-    } catch (error) {
-      logger.error(`Failed to store raw request at ${filePath}: ${error}`);
-    }
+    const filePath = `event-history/${source}/${eventType}/${year}/${month}/${day}/${eventId}-${timestamp}.txt`;
+
+    const requestLine = `${req.method} ${req.originalUrl} HTTP/${req.httpVersion}`;
+    const headers = Object.entries(req.headers)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('\n');
+    const rawRequest = `${requestLine}\n${headers}\n\n${JSON.stringify(
+      req.body
+    )}`;
+
+    const file = this.bucket.file(filePath);
+    await file.save(rawRequest, {
+      contentType: 'text/plain',
+    });
+
+    logger.info(`Stored raw request at ${filePath}`);
   }
 }
