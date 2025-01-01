@@ -1,9 +1,10 @@
-import { getStorage } from 'firebase-admin/storage';
 import { logger } from '@codeheroes/common';
+import { Bucket } from '@google-cloud/storage';
 import { Request } from 'express';
+import { getStorage } from 'firebase-admin/storage';
 
 export class StorageService {
-  private bucket;
+  private bucket: Bucket;
 
   constructor() {
     this.bucket = getStorage().bucket();

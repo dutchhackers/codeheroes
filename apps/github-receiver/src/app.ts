@@ -7,11 +7,8 @@ import { HTTP_MESSAGES } from './core/constants/http.constants';
 import { StorageService } from './core/storage';
 
 export const App = async (req: Request, res: Response): Promise<void> => {
-  const rawGithubEvent = req.headers['x-github-event'];
-  const githubEvent = Array.isArray(rawGithubEvent)
-    ? rawGithubEvent[0]
-    : rawGithubEvent;
   const eventId = req.headers['x-github-delivery'] as string;
+  const githubEvent = req.headers['x-github-event'] as string;
   // const signature = req.headers['x-hub-signature-256'] as string;
 
   const payload = req.body;
@@ -26,8 +23,7 @@ export const App = async (req: Request, res: Response): Promise<void> => {
 
     await storageService.storeRawRequest(req, 'github', githubEvent, eventId);
   } catch (error) {
-    console.error('Failed to store raw request:', error);
-    // Decide how to handle the error (e.g., continue processing or return an error response)
+    logger.error('Failed to store raw request:', error);
   }
 
   const eventService = new EventService();
