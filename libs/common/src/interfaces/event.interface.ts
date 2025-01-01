@@ -7,6 +7,8 @@ export interface BaseEventDetails {
   authorExternalId?: string;
   repositoryId: string;
   repositoryName: string;
+  repositoryOwner: string;
+  lastCommitMessage?: string;
 }
 
 // Activity-specific details interfaces
@@ -29,6 +31,7 @@ export interface Event extends BaseDocument {
   eventId: string;
   eventTimestamp: string; // ISO string
   description?: string;
+  processed: boolean;
   details:
     | PushEventDetails
     | PullRequestEventDetails

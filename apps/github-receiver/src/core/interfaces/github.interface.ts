@@ -66,13 +66,6 @@ export interface PullRequestEvent {
     html_url: string;
     body?: string;
   };
-  repository: {
-    id: number;
-    name: string;
-    full_name: string;
-  };
-  sender: {
-    id: number;
-    login: string;
-  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
 }
