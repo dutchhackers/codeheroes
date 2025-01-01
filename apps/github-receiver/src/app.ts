@@ -4,10 +4,16 @@ import { ProcessorFactory } from './core/factory/factory.processor';
 import { PushEvent } from './core/interfaces/github.interface';
 import { ResponseHandler } from './core/utils/response.handler';
 import { HTTP_MESSAGES } from './core/constants/http.constants';
+import { StorageService } from './core/storage';
 
 export const App = async (req: Request, res: Response): Promise<void> => {
   const rawGithubEvent = req.headers['x-github-event'];
-  const githubEvent = Array.isArray(rawGithubEvent) ? rawGithubEvent[0] : rawGithubEvent;
+  const githubEvent = Array.isArray(rawGithubEvent)
+    ? rawGithubEvent[0]
+    : rawGithubEvent;
+  const eventId = req.headers['x-github-delivery'] as string;
+  // const signature = req.headers['x-hub-signature-256'] as string;
+
   const payload = req.body;
 
   if (!githubEvent) {
@@ -15,10 +21,22 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+  try {
+    const storageService = new StorageService();
+
+    await storageService.storeRawRequest(req, 'github', githubEvent, eventId);
+  } catch (error) {
+    console.error('Failed to store raw request:', error);
+    // Decide how to handle the error (e.g., continue processing or return an error response)
+  }
+
   const eventService = new EventService();
 
   try {
-    const processor = ProcessorFactory.createProcessor(githubEvent, eventService);
+    const processor = ProcessorFactory.createProcessor(
+      githubEvent,
+      eventService
+    );
     const event = await processor.process(payload as PushEvent, req.headers);
 
     if (!event) {
@@ -30,12 +48,18 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     logger.info('Event created successfully');
     ResponseHandler.success(res, HTTP_MESSAGES.EVENT_PROCESSED);
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith('Unknown event type:')) {
+    if (
+      error instanceof Error &&
+      error.message.startsWith('Unknown event type:')
+    ) {
       logger.info(`Skipping unsupported event type: ${githubEvent}`);
-      ResponseHandler.success(res, HTTP_MESSAGES.UNSUPPORTED_EVENT(githubEvent));
+      ResponseHandler.success(
+        res,
+        HTTP_MESSAGES.UNSUPPORTED_EVENT(githubEvent)
+      );
       return;
     }
-    
+
     logger.error('Failed to process event:', error);
     ResponseHandler.error(res, HTTP_MESSAGES.PROCESSING_ERROR);
   }
