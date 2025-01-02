@@ -9,6 +9,15 @@
         "config": ".verdaccio/config.yml",
         "storage": "tmp/local-registry/storage"
       }
+    },
+    "seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx run database-seeds:build",
+          "node dist/libs/database-seeds/main.js"
+        ]
+      }
     }
   }
 }

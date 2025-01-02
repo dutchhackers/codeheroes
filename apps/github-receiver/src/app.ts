@@ -7,6 +7,11 @@ import { HTTP_MESSAGES } from './core/constants/http.constants';
 import { StorageService } from './core/storage';
 
 export const App = async (req: Request, res: Response): Promise<void> => {
+  // TODO: this method should
+  // 1. Filter out unsupported events
+  // 2. Store the raw request
+  // 3. Process the event
+
   const eventId = req.headers['x-github-delivery'] as string;
   const githubEvent = req.headers['x-github-event'] as string;
   // const signature = req.headers['x-hub-signature-256'] as string;

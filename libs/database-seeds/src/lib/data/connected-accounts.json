@@ -1,0 +1,16 @@
+{
+  "connectedAccounts": [
+    {
+      "userId": "1000001",
+      "provider": "github",
+      "externalUserId": "user1",
+      "externalUserName": "user.one"
+    },
+    {
+      "userId": "1000002",
+      "provider": "github2",
+      "externalUserId": "user2",
+      "externalUserName": "user.two"
+    }
+  ]
+}

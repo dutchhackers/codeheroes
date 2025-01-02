@@ -1,0 +1,52 @@
+{
+  "name": "game-engine",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/game-engine/src",
+  "projectType": "application",
+  "tags": [
+    "firebase:function",
+    "firebase:name:game-engine",
+    "firebase:dep:firebase-app"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/game-engine",
+        "main": "apps/game-engine/src/main.ts",
+        "tsConfig": "apps/game-engine/tsconfig.app.json",
+        "assets": [
+          "apps/game-engine/src/assets",
+          {
+            "glob": "**/*",
+            "input": "apps/firebase-app/environment",
+            "output": "."
+          }
+        ],
+        "generatePackageJson": true,
+        "platform": "node",
+        "bundle": true,
+        "thirdParty": false,
+        "dependenciesFieldType": "dependencies",
+        "target": "node20",
+        "format": ["esm"],
+        "esbuildOptions": {
+          "logLevel": "info"
+        }
+      }
+    },
+    "test": {
+      "options": {
+        "passWithNoTests": true
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run firebase-app:deploy --only functions:game-engine"
+      },
+      "dependsOn": ["build"]
+    }
+  }
+}
