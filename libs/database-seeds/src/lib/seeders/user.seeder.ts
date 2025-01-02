@@ -1,5 +1,6 @@
 import { Firestore } from 'firebase-admin/firestore';
 import { Seeder } from '../types/seeder.interface';
+import { update } from 'serializr';
 
 interface User {
     id: string;
@@ -17,7 +18,11 @@ export class UserSeeder implements Seeder<User> {
     
     for (const user of users) {
       const ref = db.collection('users').doc(user.id);
-      batch.set(ref, user);
+      batch.set(ref, {
+        ...user,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
     }
     
     await batch.commit();
