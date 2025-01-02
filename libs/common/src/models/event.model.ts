@@ -1,5 +1,13 @@
-import { BaseDocument } from '../models';
-import { ConnectedAccountProvider } from '../types';
+import { BaseDocument, ConnectedAccountProvider } from '.';
+
+export enum EventType {
+  PUSH = 'PUSH',
+  PULL_REQUEST_OPENED = 'PULL_REQUEST_OPENED',
+  PULL_REQUEST_MERGED = 'PULL_REQUEST_MERGED',
+  PULL_REQUEST_REVIEWED = 'PULL_REQUEST_REVIEWED',
+  WORKFLOW_RUN_COMPLETED = 'WORKFLOW_RUN_COMPLETED',
+}
+
 
 // Base details interface
 export interface BaseEventDetails {

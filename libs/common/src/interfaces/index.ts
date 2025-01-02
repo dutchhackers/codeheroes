@@ -1,2 +1,1 @@
-export * from './event.interface';
-export * from './user.interface';
+export * from './pagination.interface';

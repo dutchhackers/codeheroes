@@ -1,6 +1,5 @@
 import * as admin from 'firebase-admin';
-import { WebhookEvent } from './interfaces';
-import { Activity, User } from './models';
+import { Activity, User, WebhookEvent } from '../models';
 
 // --- Firestore Data Converters ---
 export const userConverter: admin.firestore.FirestoreDataConverter<User> = {
