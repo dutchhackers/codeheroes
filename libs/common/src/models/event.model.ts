@@ -1,6 +1,6 @@
 import { BaseDocument, ConnectedAccountProvider } from '.';
 
-export enum EventType {
+enum EventType {
   PUSH = 'PUSH',
   PULL_REQUEST_OPENED = 'PULL_REQUEST_OPENED',
   PULL_REQUEST_MERGED = 'PULL_REQUEST_MERGED',
@@ -43,7 +43,7 @@ export interface IssueEventDetails extends BaseEventDetails {
 
 // Event Document
 export interface WebhookEvent extends BaseDocument {
-  action: string; // format: `${source}-${event}-{action}`
+  action: string; // e.g. 'github.push', 'github.pull_request.opened', 'github.pull_request.merged'
   source: ConnectedAccountProvider;
   eventId: string;
   eventTimestamp: string; // ISO string
