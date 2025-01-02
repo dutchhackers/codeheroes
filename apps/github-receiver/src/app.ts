@@ -14,6 +14,11 @@ export const App = async (req: Request, res: Response): Promise<void> => {
   // 2. Store the raw request
   // 3. Process the event
 
+  // TODO:
+  // 1. Move retrieval of eventId, githubEvent and action into 'GitHubEventUtils.getActionFromPayload'
+  // 1b. perhaps move to some "validate" method or similar
+  // 2. simplify this code
+
   const eventId = req.headers['x-github-delivery'] as string;
   const githubEvent = req.headers['x-github-event'] as string;
   // const signature = req.headers['x-hub-signature-256'] as string;
@@ -49,7 +54,11 @@ export const App = async (req: Request, res: Response): Promise<void> => {
       githubEvent,
       eventService
     );
-    const event = await processor.process(payload as PushEvent, req.headers, action);
+    const event = await processor.process(
+      payload as PushEvent,
+      req.headers,
+      action
+    );
 
     if (!event) {
       ResponseHandler.success(res, HTTP_MESSAGES.DUPLICATE_EVENT);
