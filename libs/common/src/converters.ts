@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { Event } from './interfaces';
+import { WebhookEvent } from './interfaces';
 import { Activity, User } from './models';
 
 // --- Firestore Data Converters ---
@@ -21,11 +21,11 @@ export const userConverter: admin.firestore.FirestoreDataConverter<User> = {
   },
 };
 
-export const eventConverter: admin.firestore.FirestoreDataConverter<Event> = {
-  toFirestore: (user: Event): admin.firestore.DocumentData => {
+export const eventConverter: admin.firestore.FirestoreDataConverter<WebhookEvent> = {
+  toFirestore: (user: WebhookEvent): admin.firestore.DocumentData => {
     return user;
   },
-  fromFirestore: (snapshot: admin.firestore.QueryDocumentSnapshot): Event => {
+  fromFirestore: (snapshot: admin.firestore.QueryDocumentSnapshot): WebhookEvent => {
     const data = snapshot.data();
     if (!data) {
       throw new Error('Document data is undefined');
@@ -35,7 +35,7 @@ export const eventConverter: admin.firestore.FirestoreDataConverter<Event> = {
     return {
       id: snapshot.id,
       ...restData,
-    } as Event;
+    } as WebhookEvent;
   },
 };
 

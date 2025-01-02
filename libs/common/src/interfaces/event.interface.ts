@@ -24,7 +24,7 @@ export interface PullRequestEventDetails extends BaseEventDetails {
 }
 
 // Event Document
-export interface Event extends BaseDocument {
+export interface WebhookEvent extends BaseDocument {
   source: ConnectedAccountProvider;
   eventId: string;
   eventTimestamp: string; // ISO string
@@ -36,4 +36,4 @@ export interface Event extends BaseDocument {
   processed: boolean;
 }
 
-export type CreateEventInput = Omit<Event, 'id' | 'createdAt' | 'updatedAt'>;
+export type CreateEventInput = Omit<WebhookEvent, 'id' | 'createdAt' | 'updatedAt'>;
