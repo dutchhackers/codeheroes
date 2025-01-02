@@ -9,8 +9,8 @@ export interface ConnectedAccount {
   accessToken?: string;
   refreshToken?: string;
   expiresAt?: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
 }
 
 export class ConnectedAccountSeeder implements Seeder<ConnectedAccount> {
