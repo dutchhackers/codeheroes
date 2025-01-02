@@ -1,5 +1,5 @@
 import { CollectionReference, getFirestore } from 'firebase-admin/firestore';
-import { userConverter } from '../utils/converters';
+import { userConverter } from '../utils/converters.util';
 import {
   PaginatedResponse,
   PaginationParams,
