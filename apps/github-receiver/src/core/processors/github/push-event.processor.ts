@@ -13,7 +13,7 @@ export class PushEventProcessor extends BaseEventProcessor<PushEvent, GitHubHead
     return {
       eventId,
       activityType: EventType.PUSH,
-      eventSource: 'github',
+      source: 'github',
       processed: false,
       details: {
         authorId: payload.sender.id.toString(),

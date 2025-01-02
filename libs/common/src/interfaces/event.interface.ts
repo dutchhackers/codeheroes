@@ -25,7 +25,7 @@ export interface PullRequestEventDetails extends BaseEventDetails {
 
 // Event Document
 export interface Event extends BaseDocument {
-  eventSource: ConnectedAccountProvider;
+  source: ConnectedAccountProvider;
   eventId: string;
   eventTimestamp: string; // ISO string
   activityType: string;
