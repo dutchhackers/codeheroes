@@ -1,6 +1,7 @@
-import { EventType, CreateEventInput } from '@codeheroes/common';
+import { CreateEventInput } from '@codeheroes/common';
 import { GitHubHeaders, PushEvent } from '../../interfaces/github.interface';
 import { BaseEventProcessor } from '../base/base-event.processor';
+import { GitHubEventAction } from '../../interfaces/github-event-actions.type';
 
 export class PushEventProcessor extends BaseEventProcessor<PushEvent, GitHubHeaders> {
   protected getEventId(payload: PushEvent, headers?: GitHubHeaders): string {
@@ -12,8 +13,7 @@ export class PushEventProcessor extends BaseEventProcessor<PushEvent, GitHubHead
 
     return {
       eventId,
-      activityType: EventType.PUSH,
-      action: this.formatAction('push', 'completed'),
+      action: this.getAction(payload),
       source: 'github',
       processed: false,
       details: {
@@ -29,5 +29,9 @@ export class PushEventProcessor extends BaseEventProcessor<PushEvent, GitHubHead
         payload.head_commit?.timestamp || new Date()
       ).toISOString(),
     };
+  }
+
+  protected getAction(payload: PushEvent): GitHubEventAction {
+    return 'github.push';
   }
 }

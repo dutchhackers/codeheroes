@@ -1,4 +1,5 @@
-import { EventType, CreateEventInput } from '@codeheroes/common';
+import { CreateEventInput } from '@codeheroes/common';
+import { GitHubEventAction } from '../../interfaces/github-event-actions.type';
 import { GitHubHeaders, IssueEvent } from '../../interfaces/github.interface';
 import { BaseEventProcessor } from '../base/base-event.processor';
 
@@ -15,12 +16,10 @@ export class IssueEventProcessor extends BaseEventProcessor<
     headers?: GitHubHeaders
   ): Promise<CreateEventInput> {
     const eventId = this.getEventId(payload, headers);
-    const activityType = this.getActivityType(payload.action);
 
     return {
       eventId,
-      activityType,
-      action: this.formatAction('issue', payload.action),
+      action: this.getAction(payload),
       source: 'github',
       processed: false,
       details: {
@@ -37,17 +36,16 @@ export class IssueEventProcessor extends BaseEventProcessor<
     };
   }
 
-  private getActivityType(action: IssueEvent['action']): EventType {
-    switch (action) {
+  protected getAction(payload: IssueEvent): GitHubEventAction {
+    switch (payload.action) {
       case 'opened':
-        return EventType.ISSUE_OPENED;
+        return 'github.issue.opened';
       case 'closed':
-        return EventType.ISSUE_CLOSED;
+        return 'github.issue.closed';
       case 'edited':
       case 'reopened':
-        return EventType.ISSUE_UPDATED;
       default:
-        return EventType.ISSUE_UPDATED;
+        return 'github.issue.updated';
     }
   }
 }

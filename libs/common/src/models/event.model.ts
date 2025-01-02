@@ -47,7 +47,6 @@ export interface WebhookEvent extends BaseDocument {
   source: ConnectedAccountProvider;
   eventId: string;
   eventTimestamp: string; // ISO string
-  activityType: string;
   details:
     | PushEventDetails
     | PullRequestEventDetails

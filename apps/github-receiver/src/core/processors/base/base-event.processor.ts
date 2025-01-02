@@ -1,5 +1,6 @@
 import { CreateEventInput, EventService } from '@codeheroes/common';
 import { logger } from '@codeheroes/common';
+import { GitHubEventAction } from '../../interfaces/github-event-actions.type';
 
 export abstract class BaseEventProcessor<T = unknown, H = unknown> {
   constructor(protected eventService: EventService) {}
@@ -20,7 +21,5 @@ export abstract class BaseEventProcessor<T = unknown, H = unknown> {
 
   protected abstract getEventId(payload: T, headers?: H): string;
 
-  protected formatAction(event: string, action: string): string {
-    return `github_${event}_${action}`;
-  }
+  protected abstract getAction(payload: T): GitHubEventAction;
 }

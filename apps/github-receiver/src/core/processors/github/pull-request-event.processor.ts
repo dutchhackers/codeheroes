@@ -1,4 +1,5 @@
-import { EventType, CreateEventInput } from '@codeheroes/common';
+import { CreateEventInput } from '@codeheroes/common';
+import { GitHubEventAction } from '../../interfaces/github-event-actions.type';
 import {
   GitHubHeaders,
   PullRequestEvent,
@@ -21,13 +22,10 @@ export class PullRequestEventProcessor extends BaseEventProcessor<
     headers?: GitHubHeaders
   ): Promise<CreateEventInput> {
     const eventId = this.getEventId(payload, headers);
-    const activityType = this.getActivityType(payload.action, payload);
-    const action = payload.pull_request.merged ? 'merged' : payload.action;
 
     return {
       eventId,
-      activityType,
-      action: this.formatAction('pull-request', action),
+      action: this.getAction(payload),
       source: 'github',
       processed: false,
       details: {
@@ -44,17 +42,18 @@ export class PullRequestEventProcessor extends BaseEventProcessor<
       eventTimestamp: new Date(payload.pull_request.updated_at).toISOString(),
     };
   }
-  private getActivityType(
-    action: PullRequestEvent['action'],
-    payload: PullRequestEvent
-  ): EventType {
-    if (action === 'opened') {
-      return EventType.PULL_REQUEST_OPENED;
+
+  protected getAction(payload: PullRequestEvent): GitHubEventAction {
+    if (payload.pull_request.merged) {
+      return 'github.pull_request.merged';
     }
-    if (action === 'closed' && payload.pull_request.merged) {
-      return EventType.PULL_REQUEST_MERGED;
+    switch (payload.action) {
+      case 'opened':
+        return 'github.pull_request.opened';
+      case 'closed':
+        return 'github.pull_request.closed';
+      default:
+        return 'github.pull_request.reviewed';
     }
-    // For actions like 'edited', 'reopened', 'synchronize', etc.
-    return EventType.PULL_REQUEST_REVIEWED;
   }
 }
