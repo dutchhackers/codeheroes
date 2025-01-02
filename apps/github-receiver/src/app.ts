@@ -7,9 +7,9 @@ import { StorageService } from './core/storage';
 import { GitHubEventUtils } from './core/utils/github-event.utils';
 
 export const App = async (req: Request, res: Response): Promise<void> => {
-  let webhookEventDetails;
+  let eventDetails;
   try {
-    webhookEventDetails = GitHubEventUtils.parseWebhookRequest(req);
+    eventDetails = GitHubEventUtils.parseWebhookRequest(req);
   } catch (error) {
     logger.error('Failed to process webhook request:', error);
     ResponseHandler.badRequest(res, HTTP_MESSAGES.MISSING_GITHUB_EVENT);
@@ -18,12 +18,7 @@ export const App = async (req: Request, res: Response): Promise<void> => {
 
   try {
     const storageService = new StorageService();
-    await storageService.storeRawRequest(
-      req,
-      'github',
-      webhookEventDetails.eventType,
-      webhookEventDetails.eventId
-    );
+    await storageService.storeRawRequest(eventDetails);
   } catch (error) {
     logger.error('Failed to store raw request:', error);
   }
@@ -32,14 +27,14 @@ export const App = async (req: Request, res: Response): Promise<void> => {
 
   try {
     const processor = ProcessorFactory.createProcessor(
-      webhookEventDetails.eventType,
+      eventDetails.eventType,
       eventService
     );
     
     const event = await processor.process(
-      webhookEventDetails.payload,
-      webhookEventDetails.headers,
-      webhookEventDetails.action
+      eventDetails.payload,
+      eventDetails.headers,
+      eventDetails.action
     );
 
     if (!event) {
@@ -52,8 +47,8 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     ResponseHandler.success(res, HTTP_MESSAGES.EVENT_PROCESSED);
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('Unknown event type:')) {
-      logger.info(`Skipping unsupported event type: ${webhookEventDetails.eventType}`);
-      ResponseHandler.success(res, HTTP_MESSAGES.UNSUPPORTED_EVENT(webhookEventDetails.eventType));
+      logger.info(`Skipping unsupported event type: ${eventDetails.eventType}`);
+      ResponseHandler.success(res, HTTP_MESSAGES.UNSUPPORTED_EVENT(eventDetails.eventType));
       return;
     }
 
