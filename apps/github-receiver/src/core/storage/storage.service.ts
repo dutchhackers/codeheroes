@@ -15,7 +15,8 @@ export class StorageService {
     const timestamp = now.toISOString().replace(/[:.]/g, '-');
     const [year, month, day] = now.toISOString().split('T')[0].split('-');
 
-    const filePath = `event-history/${event.source}/${event.eventType}/${year}/${month}/${day}/${event.eventId}-${timestamp}.txt`;
+    // path format: event-history/{year}/{month}/{day}/{source}/{eventType}/{timestamp}-{eventId}.txt
+    const filePath = `event-history/${year}/${month}/${day}/${event.source}/${event.eventType}/${timestamp}-${event.eventId}.txt`;
 
     // Format headers similar to HTTP request format
     const headers = Object.entries(event.headers)
