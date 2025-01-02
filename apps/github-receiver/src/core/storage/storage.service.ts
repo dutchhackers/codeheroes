@@ -1,7 +1,7 @@
 import { logger } from '@codeheroes/common';
 import { Bucket } from '@google-cloud/storage';
-import { Request } from 'express';
 import { getStorage } from 'firebase-admin/storage';
+import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
 
 export class StorageService {
   private bucket: Bucket;
@@ -10,24 +10,23 @@ export class StorageService {
     this.bucket = getStorage().bucket();
   }
 
-  async storeRawRequest(
-    req: Request,
-    source: string,
-    eventType: string,
-    eventId: string
-  ): Promise<void> {
+  async storeRawRequest(event: GitHubWebhookEvent): Promise<void> {
     const now = new Date();
     const timestamp = now.toISOString().replace(/[:.]/g, '-');
     const [year, month, day] = now.toISOString().split('T')[0].split('-');
 
-    const filePath = `event-history/${source}/${eventType}/${year}/${month}/${day}/${eventId}-${timestamp}.txt`;
+    // path format: event-history/{source}/{eventType}/{year}/{month}/{day}/{eventId}-{timestamp}.txt
+    const filePath = `event-history/${event.source}/${event.eventType}/${year}/${month}/${day}/${event.eventId}-${timestamp}.txt`;
 
-    const requestLine = `${req.method} ${req.originalUrl} HTTP/${req.httpVersion}`;
-    const headers = Object.entries(req.headers)
+    // Format headers similar to HTTP request format
+    const headers = Object.entries(event.headers)
       .map(([key, value]) => `${key}: ${value}`)
       .join('\n');
-    const rawRequest = `${requestLine}\n${headers}\n\n${JSON.stringify(
-      req.body
+
+    const rawRequest = `${headers}\n\n${JSON.stringify(
+      event.payload,
+      null,
+      2
     )}`;
 
     const file = this.bucket.file(filePath);

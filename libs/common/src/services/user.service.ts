@@ -1,11 +1,10 @@
 import { CollectionReference, getFirestore } from 'firebase-admin/firestore';
-import { userConverter } from '../converters';
+import { userConverter } from '../utils/converters.util';
 import {
-  CreateUserInput,
   PaginatedResponse,
   PaginationParams,
-} from '../interfaces/user.interface';
-import { User } from '../models';
+} from '../interfaces/pagination.interface';
+import { CreateUserInput, User } from '../models';
 import { getCurrentTimeAsISO } from '../utils';
 import { BaseFirestoreService } from './base.service';
 

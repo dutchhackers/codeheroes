@@ -69,3 +69,18 @@ export interface PullRequestEvent {
   repository: GitHubRepository;
   sender: GitHubUser;
 }
+
+export interface IssueEvent {
+  action: 'opened' | 'closed' | 'edited' | 'reopened';
+  issue: {
+    id: number;
+    number: number;
+    title: string;
+    state: 'open' | 'closed';
+    updated_at: string;
+    html_url: string;
+    body?: string;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}

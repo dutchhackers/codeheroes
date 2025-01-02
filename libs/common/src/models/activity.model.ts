@@ -1,5 +1,4 @@
-import { ConnectedAccountProvider } from '../types';
-import { BaseDocument } from './common.model';
+import { BaseDocument, ConnectedAccountProvider } from './common.model';
 
 // Activity Document
 export interface Activity extends BaseDocument {
