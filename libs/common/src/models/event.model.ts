@@ -1,17 +1,5 @@
 import { BaseDocument, ConnectedAccountProvider } from '.';
 
-enum EventType {
-  PUSH = 'PUSH',
-  PULL_REQUEST_OPENED = 'PULL_REQUEST_OPENED',
-  PULL_REQUEST_MERGED = 'PULL_REQUEST_MERGED',
-  PULL_REQUEST_REVIEWED = 'PULL_REQUEST_REVIEWED',
-  WORKFLOW_RUN_COMPLETED = 'WORKFLOW_RUN_COMPLETED',
-  ISSUE_OPENED = 'ISSUE_OPENED',
-  ISSUE_CLOSED = 'ISSUE_CLOSED',
-  ISSUE_UPDATED = 'ISSUE_UPDATED',
-}
-
-
 // Base details interface
 export interface BaseEventDetails {
   authorId: string | null;
