@@ -27,6 +27,12 @@
       "ignore": ["*.local"]
     },
     {
+      "codebase": "game-engine",
+      "source": "dist/apps/game-engine",
+      "runtime": "nodejs16",
+      "ignore": ["*.local"]
+    },
+    {
       "codebase": "github-receiver",
       "source": "dist/apps/github-receiver",
       "runtime": "nodejs20",

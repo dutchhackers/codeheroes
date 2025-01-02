@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "tags": ["firebase:app", "firebase:name:firebase-app"],
-  "implicitDependencies": ["api", "github-receiver"],
+  "implicitDependencies": ["api", "game-engine", "github-receiver"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
