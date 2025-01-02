@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { EventService, logger } from '@codeheroes/common';
+import { logger } from '@codeheroes/common';
 import { ProcessorFactory } from './core/factory/factory.processor';
 import { ResponseHandler } from './core/utils/response.handler';
 import { HTTP_MESSAGES } from './core/constants/http.constants';
@@ -23,27 +23,15 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     logger.error('Failed to store raw request:', error);
   }
 
-  const eventService = new EventService();
-
   try {
-    const processor = ProcessorFactory.createProcessor(
-      eventDetails.eventType,
-      eventService
-    );
-    
-    const event = await processor.process(
-      eventDetails.payload,
-      eventDetails.headers,
-      eventDetails.action
-    );
+    const processor = ProcessorFactory.createProcessor(eventDetails);
+    const processed = await processor.process();
 
-    if (!event) {
+    if (!processed) {
       ResponseHandler.success(res, HTTP_MESSAGES.DUPLICATE_EVENT);
       return;
     }
 
-    await eventService.createEvent(event);
-    logger.info('Event created successfully');
     ResponseHandler.success(res, HTTP_MESSAGES.EVENT_PROCESSED);
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('Unknown event type:')) {

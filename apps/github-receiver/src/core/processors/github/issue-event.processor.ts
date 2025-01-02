@@ -1,27 +1,15 @@
-import { CreateEventInput } from '@codeheroes/common';
-import { GitHubEventAction } from '../../interfaces/github-event-actions.type';
-import { GitHubHeaders, IssueEvent } from '../../interfaces/github.interface';
+import { ConnectedAccountProvider, CreateEventInput } from '@codeheroes/common';
+import { IssueEvent } from '../../interfaces/github.interface';
 import { BaseEventProcessor } from '../base/base-event.processor';
 
-export class IssueEventProcessor extends BaseEventProcessor<
-  IssueEvent,
-  GitHubHeaders
-> {
-  protected getEventId(payload: IssueEvent, headers?: GitHubHeaders): string {
-    return headers?.['x-github-delivery'] || `issue-${payload.issue.id}`;
-  }
-
-  protected async processEvent(
-    payload: IssueEvent,
-    headers?: GitHubHeaders,
-    action?: GitHubEventAction
-  ): Promise<CreateEventInput> {
-    const eventId = this.getEventId(payload, headers);
+export class IssueEventProcessor extends BaseEventProcessor {
+  protected async processEvent(): Promise<CreateEventInput> {
+    const payload = this.webhookEvent.payload as IssueEvent;
 
     return {
-      eventId,
-      action,
-      source: 'github',
+      eventId: this.webhookEvent.eventId,
+      action: this.webhookEvent.action,
+      source: this.webhookEvent.source as ConnectedAccountProvider,
       processed: false,
       details: {
         authorId: payload.sender.id.toString(),

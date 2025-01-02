@@ -1,27 +1,28 @@
 import { CreateEventInput, EventService } from '@codeheroes/common';
 import { logger } from '@codeheroes/common';
-import { GitHubEventAction } from '../../interfaces/github-event-actions.type';
+import { GitHubWebhookEvent } from '../../interfaces/github-webhook-event.interface';
 
-export abstract class BaseEventProcessor<T = unknown, H = unknown> {
-  constructor(protected eventService: EventService) {}
+export abstract class BaseEventProcessor {
+  protected readonly eventService: EventService;
+  protected readonly webhookEvent: GitHubWebhookEvent;
 
-  protected abstract processEvent(payload: T, headers?: H): Promise<CreateEventInput>;
-
-  async process(payload: T, headers?: H, action?: GitHubEventAction): Promise<CreateEventInput | null> {
-    const eventId = await this.getEventId(payload, headers);
-    
-    const existingEvent = await this.eventService.findByEventId(eventId);
-    if (existingEvent) {
-      logger.info(`Event ${eventId} already processed`);
-      return null;
-    }
-
-    const event = await this.processEvent(payload, headers);
-    if (action) {
-      event.action = action;
-    }
-    return event;
+  constructor(webhookEvent: GitHubWebhookEvent) {
+    this.eventService = new EventService();
+    this.webhookEvent = webhookEvent;
   }
 
-  protected abstract getEventId(payload: T, headers?: H): string;
+  protected abstract processEvent(): Promise<CreateEventInput>;
+
+  async process(): Promise<boolean> {
+    const existingEvent = await this.eventService.findByEventId(this.webhookEvent.eventId);
+    if (existingEvent) {
+      logger.info(`Event ${this.webhookEvent.eventId} already processed`);
+      return false;
+    }
+
+    const event = await this.processEvent();
+    await this.eventService.createEvent(event);
+    logger.info('Event created successfully');
+    return true;
+  }
 }

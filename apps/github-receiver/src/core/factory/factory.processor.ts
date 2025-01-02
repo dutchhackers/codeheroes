@@ -1,20 +1,17 @@
 import { BaseEventProcessor, PushEventProcessor, PullRequestEventProcessor, IssueEventProcessor } from '../processors';
-import { EventService } from '@codeheroes/common';
+import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
 
 export class ProcessorFactory {
-  static createProcessor(
-    type: string,
-    eventService: EventService
-  ): BaseEventProcessor {
-    switch (type) {
+  static createProcessor(event: GitHubWebhookEvent): BaseEventProcessor {
+    switch (event.eventType) {
       case 'push':
-        return new PushEventProcessor(eventService);
+        return new PushEventProcessor(event);
       case 'pull_request':
-        return new PullRequestEventProcessor(eventService);
+        return new PullRequestEventProcessor(event);
       case 'issues':
-        return new IssueEventProcessor(eventService);
+        return new IssueEventProcessor(event);
       default:
-        throw new Error(`Unknown event type: ${type}`);
+        throw new Error(`Unknown event type: ${event.eventType}`);
     }
   }
 }
