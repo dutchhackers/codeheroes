@@ -19,20 +19,20 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     if (result.error) {
       throw result.error;
     }
-    
-    // If not successful but no error (e.g., duplicate event)
+
     ResponseHandler.success(res, result.message);
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message === 'Missing GitHub event details') {
-        logger.error('Failed to process webhook request:', error);
-        ResponseHandler.badRequest(res, HTTP_MESSAGES.MISSING_GITHUB_EVENT);
-        return;
-      }
-      
       if (error.message.startsWith('Unknown event type:')) {
-        logger.info(`Skipping unsupported event type: ${error.message.split(':')[1].trim()}`);
-        ResponseHandler.success(res, HTTP_MESSAGES.UNSUPPORTED_EVENT(error.message.split(':')[1].trim()));
+        logger.info(
+          `Skipping unsupported event type: ${error.message
+            .split(':')[1]
+            .trim()}`
+        );
+        ResponseHandler.success(
+          res,
+          HTTP_MESSAGES.UNSUPPORTED_EVENT(error.message.split(':')[1].trim())
+        );
         return;
       }
     }
