@@ -19,13 +19,14 @@ export class PullRequestEventProcessor extends BaseEventProcessor<
 
   protected async processEvent(
     payload: PullRequestEvent,
-    headers?: GitHubHeaders
+    headers?: GitHubHeaders,
+    action?: GitHubEventAction
   ): Promise<CreateEventInput> {
     const eventId = this.getEventId(payload, headers);
 
     return {
       eventId,
-      action: this.getAction(payload),
+      action,
       source: 'github',
       processed: false,
       details: {
@@ -41,19 +42,5 @@ export class PullRequestEventProcessor extends BaseEventProcessor<
       },
       eventTimestamp: new Date(payload.pull_request.updated_at).toISOString(),
     };
-  }
-
-  protected getAction(payload: PullRequestEvent): GitHubEventAction {
-    if (payload.pull_request.merged) {
-      return 'github.pull_request.merged';
-    }
-    switch (payload.action) {
-      case 'opened':
-        return 'github.pull_request.opened';
-      case 'closed':
-        return 'github.pull_request.closed';
-      default:
-        return 'github.pull_request.reviewed';
-    }
   }
 }

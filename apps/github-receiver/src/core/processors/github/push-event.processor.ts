@@ -8,12 +8,12 @@ export class PushEventProcessor extends BaseEventProcessor<PushEvent, GitHubHead
     return headers?.['x-github-delivery'] || payload.head_commit?.id || '';
   }
 
-  protected async processEvent(payload: PushEvent, headers?: GitHubHeaders): Promise<CreateEventInput> {
+  protected async processEvent(payload: PushEvent, headers?: GitHubHeaders, action?: GitHubEventAction): Promise<CreateEventInput> {
     const eventId = this.getEventId(payload, headers);
 
     return {
       eventId,
-      action: this.getAction(payload),
+      action,
       source: 'github',
       processed: false,
       details: {
@@ -29,9 +29,5 @@ export class PushEventProcessor extends BaseEventProcessor<PushEvent, GitHubHead
         payload.head_commit?.timestamp || new Date()
       ).toISOString(),
     };
-  }
-
-  protected getAction(payload: PushEvent): GitHubEventAction {
-    return 'github.push';
   }
 }

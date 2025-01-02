@@ -42,7 +42,6 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-
   const eventService = new EventService();
 
   try {
@@ -50,7 +49,7 @@ export const App = async (req: Request, res: Response): Promise<void> => {
       githubEvent,
       eventService
     );
-    const event = await processor.process(payload as PushEvent, req.headers);
+    const event = await processor.process(payload as PushEvent, req.headers, action);
 
     if (!event) {
       ResponseHandler.success(res, HTTP_MESSAGES.DUPLICATE_EVENT);

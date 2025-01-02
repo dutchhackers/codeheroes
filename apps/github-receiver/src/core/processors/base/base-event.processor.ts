@@ -7,7 +7,7 @@ export abstract class BaseEventProcessor<T = unknown, H = unknown> {
 
   protected abstract processEvent(payload: T, headers?: H): Promise<CreateEventInput>;
 
-  async process(payload: T, headers?: H): Promise<CreateEventInput | null> {
+  async process(payload: T, headers?: H, action?: GitHubEventAction): Promise<CreateEventInput | null> {
     const eventId = await this.getEventId(payload, headers);
     
     const existingEvent = await this.eventService.findByEventId(eventId);
@@ -16,10 +16,12 @@ export abstract class BaseEventProcessor<T = unknown, H = unknown> {
       return null;
     }
 
-    return this.processEvent(payload, headers);
+    const event = await this.processEvent(payload, headers);
+    if (action) {
+      event.action = action;
+    }
+    return event;
   }
 
   protected abstract getEventId(payload: T, headers?: H): string;
-
-  protected abstract getAction(payload: T): GitHubEventAction;
 }

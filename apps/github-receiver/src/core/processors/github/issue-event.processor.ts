@@ -13,13 +13,14 @@ export class IssueEventProcessor extends BaseEventProcessor<
 
   protected async processEvent(
     payload: IssueEvent,
-    headers?: GitHubHeaders
+    headers?: GitHubHeaders,
+    action?: GitHubEventAction
   ): Promise<CreateEventInput> {
     const eventId = this.getEventId(payload, headers);
 
     return {
       eventId,
-      action: this.getAction(payload),
+      action,
       source: 'github',
       processed: false,
       details: {
@@ -34,18 +35,5 @@ export class IssueEventProcessor extends BaseEventProcessor<
       },
       eventTimestamp: new Date(payload.issue.updated_at).toISOString(),
     };
-  }
-
-  protected getAction(payload: IssueEvent): GitHubEventAction {
-    switch (payload.action) {
-      case 'opened':
-        return 'github.issue.opened';
-      case 'closed':
-        return 'github.issue.closed';
-      case 'edited':
-      case 'reopened':
-      default:
-        return 'github.issue.updated';
-    }
   }
 }
