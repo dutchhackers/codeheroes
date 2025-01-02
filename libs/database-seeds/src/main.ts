@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { UserSeeder } from './lib/seeders/user.seeder';
-import userData from './lib/data/users.json';
+import { loadJsonData } from './lib/utils/file-loader';
 
 async function main() {
   if (!process.env.FIREBASE_PROJECT_ID) {
@@ -25,6 +25,7 @@ async function main() {
 
   try {
     const userSeeder = new UserSeeder();
+    const userData = await loadJsonData<{ users: any[] }>('users.json');
     await userSeeder.seed(db, userData.users);
     console.log('✅ Seeding completed');
     process.exit(0);

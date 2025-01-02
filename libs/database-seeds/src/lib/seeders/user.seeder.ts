@@ -2,11 +2,13 @@ import { Firestore } from 'firebase-admin/firestore';
 import { Seeder } from '../types/seeder.interface';
 
 interface User {
-  email: string;
-  displayName: string;
-  photoUrl: string;
-  level: number;
-  xp: number;
+    id: string;
+    uid: string | null; // Firebase Auth UID
+    email: string;
+    displayName: string;
+    photoUrl: string;
+    lastLogin: string;
+    active: boolean;
 }
 
 export class UserSeeder implements Seeder<User> {
@@ -14,7 +16,7 @@ export class UserSeeder implements Seeder<User> {
     const batch = db.batch();
     
     for (const user of users) {
-      const ref = db.collection('users').doc();
+      const ref = db.collection('users').doc(user.id);
       batch.set(ref, user);
     }
     
