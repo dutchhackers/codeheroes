@@ -1,7 +1,7 @@
 import { CreateEventInput, EventService, logger } from '@codeheroes/common';
-import { GitHubWebhookEvent } from '../../interfaces/github-webhook-event.interface';
-import { ProcessResult } from '../../interfaces/process-result.interface';
-import { StorageService } from '../../storage/storage.service';
+import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
+import { ProcessResult } from '../interfaces/process-result.interface';
+import { StorageService } from '../storage/storage.service';
 
 export abstract class BaseEventProcessor {
   protected readonly eventService: EventService;
@@ -24,19 +24,24 @@ export abstract class BaseEventProcessor {
     try {
       await this.storageService.storeRawRequest(this.webhookEvent);
     } catch (error) {
-      logger.error(`Failed to store raw event ${this.webhookEvent.eventId}:`, error);
+      logger.error(
+        `Failed to store raw event ${this.webhookEvent.eventId}:`,
+        error
+      );
       // Don't throw - we want to continue processing even if storage fails
     }
   }
 
   async process(): Promise<ProcessResult> {
     try {
-      const existingEvent = await this.eventService.findByEventId(this.webhookEvent.eventId);
+      const existingEvent = await this.eventService.findByEventId(
+        this.webhookEvent.eventId
+      );
       if (existingEvent) {
         logger.info(`Event ${this.webhookEvent.eventId} already processed`);
         return {
           success: false,
-          message: `Event ${this.webhookEvent.eventId} already processed`
+          message: `Event ${this.webhookEvent.eventId} already processed`,
         };
       }
 
@@ -44,16 +49,16 @@ export abstract class BaseEventProcessor {
       const event = await this.processEvent();
       await this.eventService.createEvent(event);
       logger.info('Event created successfully');
-      
+
       return {
         success: true,
-        message: 'Event processed successfully'
+        message: 'Event processed successfully',
       };
     } catch (error) {
       return {
         success: false,
         message: 'Failed to process event',
-        error: error instanceof Error ? error : new Error(String(error))
+        error: error instanceof Error ? error : new Error(String(error)),
       };
     }
   }

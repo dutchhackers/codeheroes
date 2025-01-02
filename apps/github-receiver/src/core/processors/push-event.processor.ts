@@ -1,7 +1,7 @@
 import { ConnectedAccountProvider, CreateEventInput } from '@codeheroes/common';
-import { PushEvent } from '../../interfaces/github.interface';
-import { BaseEventProcessor } from '../base/base-event.processor';
-import { PushEventDetails } from '../../interfaces/event-details.interface';
+import { PushEvent } from '../interfaces/github.interface';
+import { BaseEventProcessor } from './base-event.processor';
+import { PushEventDetails } from '../interfaces/event-details.interface';
 
 export class PushEventProcessor extends BaseEventProcessor {
   protected async processEvent(): Promise<CreateEventInput> {
