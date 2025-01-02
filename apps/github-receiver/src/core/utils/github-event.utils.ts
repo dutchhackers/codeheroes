@@ -20,7 +20,7 @@ export class GitHubEventUtils {
     }
 
     const payload = req.body as GitHubPayload;
-    const action = this.getActionFromPayload(eventType, payload);
+    const action = this.#getActionFromPayload(eventType, payload);
 
     return {
       eventId,
@@ -33,7 +33,7 @@ export class GitHubEventUtils {
     };
   }
 
-  static getActionFromPayload(
+  static #getActionFromPayload(
     eventType: string,
     payload: GitHubPayload
   ): GitHubEventAction {
