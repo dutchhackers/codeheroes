@@ -6,6 +6,9 @@ export enum EventType {
   PULL_REQUEST_MERGED = 'PULL_REQUEST_MERGED',
   PULL_REQUEST_REVIEWED = 'PULL_REQUEST_REVIEWED',
   WORKFLOW_RUN_COMPLETED = 'WORKFLOW_RUN_COMPLETED',
+  ISSUE_OPENED = 'ISSUE_OPENED',
+  ISSUE_CLOSED = 'ISSUE_CLOSED',
+  ISSUE_UPDATED = 'ISSUE_UPDATED',
 }
 
 
@@ -31,6 +34,13 @@ export interface PullRequestEventDetails extends BaseEventDetails {
   state: string;
 }
 
+export interface IssueEventDetails extends BaseEventDetails {
+  issueNumber: number;
+  title: string;
+  state: string;
+  action: string;
+}
+
 // Event Document
 export interface WebhookEvent extends BaseDocument {
   source: ConnectedAccountProvider;
@@ -40,6 +50,7 @@ export interface WebhookEvent extends BaseDocument {
   details:
     | PushEventDetails
     | PullRequestEventDetails
+    | IssueEventDetails
     | (BaseEventDetails & Record<string, unknown>);
   processed: boolean;
 }
