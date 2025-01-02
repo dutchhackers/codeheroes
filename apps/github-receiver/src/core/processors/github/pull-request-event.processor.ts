@@ -22,10 +22,12 @@ export class PullRequestEventProcessor extends BaseEventProcessor<
   ): Promise<CreateEventInput> {
     const eventId = this.getEventId(payload, headers);
     const activityType = this.getActivityType(payload.action, payload);
+    const action = payload.pull_request.merged ? 'merged' : payload.action;
 
     return {
       eventId,
-      activityType: activityType,
+      activityType,
+      action: this.formatAction('pull-request', action),
       source: 'github',
       processed: false,
       details: {

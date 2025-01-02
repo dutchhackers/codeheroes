@@ -20,6 +20,7 @@ export class IssueEventProcessor extends BaseEventProcessor<
     return {
       eventId,
       activityType,
+      action: this.formatAction('issue', payload.action),
       source: 'github',
       processed: false,
       details: {

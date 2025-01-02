@@ -19,4 +19,8 @@ export abstract class BaseEventProcessor<T = unknown, H = unknown> {
   }
 
   protected abstract getEventId(payload: T, headers?: H): string;
+
+  protected formatAction(event: string, action: string): string {
+    return `github_${event}_${action}`;
+  }
 }

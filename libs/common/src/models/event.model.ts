@@ -43,6 +43,7 @@ export interface IssueEventDetails extends BaseEventDetails {
 
 // Event Document
 export interface WebhookEvent extends BaseDocument {
+  action: string; // format: `${source}-${event}-{action}`
   source: ConnectedAccountProvider;
   eventId: string;
   eventTimestamp: string; // ISO string
