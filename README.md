@@ -34,7 +34,32 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
    npm install
    ```
 
-2. Configure Firebase project
+2. Configure Firebase project:
+   - Create a `.env` file in the root directory
+   - Set your Firebase project ID:
+     ```sh
+     FIREBASE_PROJECT_ID=your-firebase-project-id
+     ```
+   - Run the setup script:
+     ```sh
+     npm run setup
+     ```
+
+3. Start development environment:
+   - To start the Firebase emulator suite with the firebase-app:
+     ```sh
+     nx serve firebase-app
+     ```
+   This will:
+   - Start the Firebase emulators (Functions, Firestore, Auth, etc.)
+   - Watch for code changes and rebuild automatically
+   - Import/export emulator data from `.emulators` directory
+
+4. Access development environment:
+   - Firebase Emulator UI: http://localhost:4000
+   - Functions Emulator: http://localhost:5001
+   - Firestore Emulator: http://localhost:8080
+   - Auth Emulator: http://localhost:9099
 
 ## Contributing
 
