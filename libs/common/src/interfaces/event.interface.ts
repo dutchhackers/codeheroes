@@ -25,15 +25,15 @@ export interface PullRequestEventDetails extends BaseEventDetails {
 
 // Event Document
 export interface Event extends BaseDocument {
-  activityType: string;
-  source: ConnectedAccountProvider;
+  eventSource: ConnectedAccountProvider;
   eventId: string;
   eventTimestamp: string; // ISO string
-  processed: boolean;
+  activityType: string;
   details:
     | PushEventDetails
     | PullRequestEventDetails
     | (BaseEventDetails & Record<string, unknown>);
+  processed: boolean;
 }
 
 export type CreateEventInput = Omit<Event, 'id' | 'createdAt' | 'updatedAt'>;
