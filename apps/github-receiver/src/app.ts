@@ -1,43 +1,40 @@
-import { Request, Response } from 'express';
 import { logger } from '@codeheroes/common';
-import { ProcessorFactory } from './core/factory/factory.processor';
-import { ResponseHandler } from './core/utils/response.handler';
+import { Request, Response } from 'express';
 import { HTTP_MESSAGES } from './core/constants/http.constants';
-import { StorageService } from './core/storage';
+import { ProcessorFactory } from './core/factory/factory.processor';
 import { GitHubEventUtils } from './core/utils/github-event.utils';
+import { ResponseHandler } from './core/utils/response.handler';
 
 export const App = async (req: Request, res: Response): Promise<void> => {
-  let eventDetails;
   try {
-    eventDetails = GitHubEventUtils.parseWebhookRequest(req);
-  } catch (error) {
-    logger.error('Failed to process webhook request:', error);
-    ResponseHandler.badRequest(res, HTTP_MESSAGES.MISSING_GITHUB_EVENT);
-    return;
-  }
-
-  try {
-    const storageService = new StorageService();
-    await storageService.storeRawRequest(eventDetails);
-  } catch (error) {
-    logger.error('Failed to store raw request:', error);
-  }
-
-  try {
+    const eventDetails = GitHubEventUtils.parseWebhookRequest(req);
     const processor = ProcessorFactory.createProcessor(eventDetails);
-    const processed = await processor.process();
+    const result = await processor.process();
 
-    if (!processed) {
-      ResponseHandler.success(res, HTTP_MESSAGES.DUPLICATE_EVENT);
+    if (result.success) {
+      ResponseHandler.success(res, HTTP_MESSAGES.EVENT_PROCESSED);
       return;
     }
 
-    ResponseHandler.success(res, HTTP_MESSAGES.EVENT_PROCESSED);
+    if (result.error) {
+      throw result.error;
+    }
+    
+    // If not successful but no error (e.g., duplicate event)
+    ResponseHandler.success(res, result.message);
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith('Unknown event type:')) {
-      logger.info(`Skipping unsupported event type: ${eventDetails.eventType}`);
-      ResponseHandler.success(res, HTTP_MESSAGES.UNSUPPORTED_EVENT(eventDetails.eventType));
-      return;
+    if (error instanceof Error) {
+      if (error.message === 'Missing GitHub event details') {
+        logger.error('Failed to process webhook request:', error);
+        ResponseHandler.badRequest(res, HTTP_MESSAGES.MISSING_GITHUB_EVENT);
+        return;
+      }
+      
+      if (error.message.startsWith('Unknown event type:')) {
+        logger.info(`Skipping unsupported event type: ${error.message.split(':')[1].trim()}`);
+        ResponseHandler.success(res, HTTP_MESSAGES.UNSUPPORTED_EVENT(error.message.split(':')[1].trim()));
+        return;
+      }
     }
 
     logger.error('Failed to process event:', error);
