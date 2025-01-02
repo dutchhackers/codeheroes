@@ -1,63 +1,45 @@
 import { Request, Response } from 'express';
 import { EventService, logger } from '@codeheroes/common';
 import { ProcessorFactory } from './core/factory/factory.processor';
-import { PushEvent } from './core/interfaces/github.interface';
 import { ResponseHandler } from './core/utils/response.handler';
 import { HTTP_MESSAGES } from './core/constants/http.constants';
 import { StorageService } from './core/storage';
-import { GitHubEventAction } from './core/interfaces/github-event-actions.type';
 import { GitHubEventUtils } from './core/utils/github-event.utils';
 
 export const App = async (req: Request, res: Response): Promise<void> => {
-  // TODO: this method should
-  // 1. Filter out unsupported events
-  // 2. Store the raw request
-  // 3. Process the event
-
-  // TODO:
-  // 1. Move retrieval of eventId, githubEvent and action into 'GitHubEventUtils.getActionFromPayload'
-  // 1b. perhaps move to some "validate" method or similar
-  // 2. simplify this code
-
-  const eventId = req.headers['x-github-delivery'] as string;
-  const githubEvent = req.headers['x-github-event'] as string;
-  // const signature = req.headers['x-hub-signature-256'] as string;
-
-  const payload = req.body;
-
-  if (!githubEvent) {
+  let webhookEventDetails;
+  try {
+    webhookEventDetails = GitHubEventUtils.parseWebhookRequest(req);
+  } catch (error) {
+    logger.error('Failed to process webhook request:', error);
     ResponseHandler.badRequest(res, HTTP_MESSAGES.MISSING_GITHUB_EVENT);
     return;
   }
 
   try {
     const storageService = new StorageService();
-
-    await storageService.storeRawRequest(req, 'github', githubEvent, eventId);
+    await storageService.storeRawRequest(
+      req,
+      'github',
+      webhookEventDetails.eventType,
+      webhookEventDetails.eventId
+    );
   } catch (error) {
     logger.error('Failed to store raw request:', error);
-  }
-
-  let action: GitHubEventAction;
-  try {
-    action = GitHubEventUtils.getActionFromPayload(githubEvent, payload);
-  } catch (error) {
-    logger.error('Failed to determine action:', error);
-    ResponseHandler.error(res, HTTP_MESSAGES.PROCESSING_ERROR);
-    return;
   }
 
   const eventService = new EventService();
 
   try {
     const processor = ProcessorFactory.createProcessor(
-      githubEvent,
+      webhookEventDetails.eventType,
       eventService
     );
+    
     const event = await processor.process(
-      payload as PushEvent,
+      webhookEventDetails.payload,
       req.headers,
-      action
+      webhookEventDetails.action
     );
 
     if (!event) {
@@ -69,15 +51,9 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     logger.info('Event created successfully');
     ResponseHandler.success(res, HTTP_MESSAGES.EVENT_PROCESSED);
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message.startsWith('Unknown event type:')
-    ) {
-      logger.info(`Skipping unsupported event type: ${githubEvent}`);
-      ResponseHandler.success(
-        res,
-        HTTP_MESSAGES.UNSUPPORTED_EVENT(githubEvent)
-      );
+    if (error instanceof Error && error.message.startsWith('Unknown event type:')) {
+      logger.info(`Skipping unsupported event type: ${webhookEventDetails.eventType}`);
+      ResponseHandler.success(res, HTTP_MESSAGES.UNSUPPORTED_EVENT(webhookEventDetails.eventType));
       return;
     }
 

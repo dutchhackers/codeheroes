@@ -4,6 +4,8 @@ import {
   PullRequestEvent,
   PushEvent,
 } from '../interfaces/github.interface';
+import { Request } from 'express';
+import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
 
 type GitHubPayload = PushEvent | PullRequestEvent | IssueEvent;
 
@@ -45,5 +47,26 @@ export class GitHubEventUtils {
     }
 
     throw new Error(`Unsupported event type: ${eventType}`);
+  }
+
+  static parseWebhookRequest(req: Request): GitHubWebhookEvent {
+    const eventType = req.header('X-GitHub-Event');
+    const eventId = req.header('X-GitHub-Delivery');
+    const signature = req.header('X-Hub-Signature-256');
+
+    if (!eventType || !eventId) {
+      throw new Error('Missing required GitHub webhook headers');
+    }
+
+    const payload = req.body as GitHubPayload;
+    const action = this.getActionFromPayload(eventType, payload);
+
+    return {
+      eventId,
+      eventType,
+      action,
+      signature,
+      payload,
+    };
   }
 }
