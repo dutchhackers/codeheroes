@@ -1,6 +1,7 @@
 import { ConnectedAccountProvider, CreateEventInput } from '@codeheroes/common';
 import { IssueEvent } from '../../interfaces/github.interface';
 import { BaseEventProcessor } from '../base/base-event.processor';
+import { IssueEventDetails } from '../../interfaces/event-details.interface';
 
 export class IssueEventProcessor extends BaseEventProcessor {
   protected async processEvent(): Promise<CreateEventInput> {
@@ -20,7 +21,7 @@ export class IssueEventProcessor extends BaseEventProcessor {
         repositoryId: payload.repository.id.toString(),
         repositoryName: payload.repository.name,
         repositoryOwner: payload.repository.owner.login,
-      },
+      } as IssueEventDetails,
       eventTimestamp: new Date(payload.issue.updated_at).toISOString(),
     };
   }

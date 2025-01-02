@@ -1,6 +1,7 @@
 import { ConnectedAccountProvider, CreateEventInput } from '@codeheroes/common';
 import { PushEvent } from '../../interfaces/github.interface';
 import { BaseEventProcessor } from '../base/base-event.processor';
+import { PushEventDetails } from '../../interfaces/event-details.interface';
 
 export class PushEventProcessor extends BaseEventProcessor {
   protected async processEvent(): Promise<CreateEventInput> {
@@ -19,7 +20,7 @@ export class PushEventProcessor extends BaseEventProcessor {
         repositoryName: payload.repository.name,
         repositoryOwner: payload.repository.owner.login,
         lastCommitMessage: payload.head_commit?.message || null,
-      },
+      } as PushEventDetails,
       eventTimestamp: new Date(
         payload.head_commit?.timestamp || new Date()
       ).toISOString(),

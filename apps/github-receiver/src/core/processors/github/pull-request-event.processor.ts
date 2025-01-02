@@ -1,6 +1,7 @@
 import { ConnectedAccountProvider, CreateEventInput } from '@codeheroes/common';
 import { PullRequestEvent } from '../../interfaces/github.interface';
 import { BaseEventProcessor } from '../base/base-event.processor';
+import { PullRequestEventDetails } from '../../interfaces/event-details.interface';
 
 export class PullRequestEventProcessor extends BaseEventProcessor {
   protected async processEvent(): Promise<CreateEventInput> {
@@ -13,15 +14,13 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
       processed: false,
       details: {
         authorId: payload.sender.id.toString(),
-        pullRequestNumber: payload.number,
-        action: payload.action,
+        prNumber: payload.number,
         title: payload.pull_request.title,
         repositoryId: payload.repository.id.toString(),
         repositoryName: payload.repository.name,
         repositoryOwner: payload.repository.owner.login,
         state: payload.pull_request.state,
-        draft: payload.pull_request.draft,
-      },
+      } as PullRequestEventDetails,
       eventTimestamp: new Date(payload.pull_request.updated_at).toISOString(),
     };
   }
