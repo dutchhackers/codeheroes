@@ -15,6 +15,21 @@
         "main": "libs/database-seeds/src/index.ts",
         "assets": ["libs/database-seeds/*.md"]
       }
+    },
+    "seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node dist/libs/database-seeds/src/main.js",
+        "env": {
+          "FIRESTORE_EMULATOR_HOST": "localhost:8080",
+          "FIREBASE_AUTH_EMULATOR_HOST": "localhost:9099"
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build"
+        }
+      ]
     }
   }
 }
