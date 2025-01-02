@@ -71,6 +71,7 @@ export class GitHubEventUtils {
       signature,
       payload,
       headers: req.headers,
+      source: 'github',
     };
   }
 }

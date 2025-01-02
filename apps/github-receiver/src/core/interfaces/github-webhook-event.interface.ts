@@ -8,4 +8,5 @@ export interface GitHubWebhookEvent {
   signature?: string;
   payload: PushEvent | PullRequestEvent | IssueEvent;
   headers: Record<string, string | string[] | undefined>;
+  source: string;
 }
