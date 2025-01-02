@@ -27,7 +27,6 @@ export class PullRequestEventProcessor extends BaseEventProcessor<
       eventId,
       type: activityType,
       source: 'github',
-      activityId: `pr-${payload.pull_request.id}`,
       processed: false,
       details: {
         authorId: payload.sender.id.toString(),
