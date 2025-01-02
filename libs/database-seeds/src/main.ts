@@ -1,11 +1,7 @@
-// import * as dotenv from 'dotenv';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { UserSeeder } from './lib/seeders/user.seeder';
 import userData from './lib/data/users.json';
-
-// Load environment variables
-// dotenv.config({ path: '../../.env' });
 
 async function main() {
   if (!process.env.FIREBASE_PROJECT_ID) {
