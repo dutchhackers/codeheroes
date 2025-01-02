@@ -3,7 +3,8 @@ type PullRequestActions =
   | 'github.pull_request.opened'
   | 'github.pull_request.closed'
   | 'github.pull_request.merged'
-  | 'github.pull_request.reviewed';
+  | 'github.pull_request.reviewed'
+  | 'github.pull_request.updated';
 
 // Issue related actions
 type IssueActions =

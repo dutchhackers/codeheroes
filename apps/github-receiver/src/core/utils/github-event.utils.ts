@@ -29,6 +29,9 @@ export class GitHubEventUtils {
               return 'github.pull_request.opened';
             case 'closed':
               return 'github.pull_request.closed';
+            case 'synchronize':
+            case 'edited':
+              return 'github.pull_request.updated';
           }
         }
         break;
@@ -67,6 +70,7 @@ export class GitHubEventUtils {
       action,
       signature,
       payload,
+      headers: req.headers,
     };
   }
 }

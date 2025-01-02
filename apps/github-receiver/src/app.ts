@@ -38,7 +38,7 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     
     const event = await processor.process(
       webhookEventDetails.payload,
-      req.headers,
+      webhookEventDetails.headers,
       webhookEventDetails.action
     );
 
