@@ -1,4 +1,4 @@
-import { GitHubEventAction } from '../interfaces/github-event-actions.type';
+import { SupportedGitHubEventAction } from '../interfaces/github-event-actions.type';
 import {
   IssueEvent,
   PullRequestEvent,

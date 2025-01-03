@@ -24,3 +24,16 @@ export type GitHubEventAction =
   | IssueActions
   | PushActions
   | WorkflowActions;
+
+export const SupportedGitHubEventActions: GitHubEventAction[] = [
+  'github.pull_request.opened',
+  'github.pull_request.closed',
+  'github.pull_request.merged',
+  'github.pull_request.reviewed',
+  'github.pull_request.updated',
+  'github.issue.opened',
+  'github.issue.closed',
+  'github.issue.updated',
+  'github.push',
+  'github.workflow_run.completed',
+];
