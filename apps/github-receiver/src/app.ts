@@ -5,6 +5,7 @@ import { GitHubEventError, UnsupportedEventError } from './core/errors/github-ev
 import { ProcessorFactory } from './core/factory/factory.processor';
 import { GitHubEventUtils } from './core/utils/github-event.utils';
 import { ResponseHandler } from './core/utils/response.handler';
+import { SupportedGitHubEventActions } from './core/constants/github.constants';
 
 export const App = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -13,7 +14,13 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     try {
       eventDetails = GitHubEventUtils.parseWebhookRequest(req);
     } catch (error) {
+      logger.error('Failed to parse GitHub event:', error);
       throw new GitHubEventError(HTTP_MESSAGES.MISSING_GITHUB_EVENT);
+    }
+
+    // Validate action type
+    if (!SupportedGitHubEventActions.includes(eventDetails.action)) {
+      throw new UnsupportedEventError(`action:${eventDetails.action}`);
     }
 
     // Process the event
