@@ -1,14 +1,13 @@
 import { Request } from 'express';
-import { UnsupportedEventError } from '../errors/github-event.error';
 import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
 import {
+  CheckRunEvent,
+  CheckSuiteEvent,
   IssueEvent,
   PullRequestEvent,
   PushEvent,
-  WorkflowRunEvent,
   WorkflowJobEvent,
-  CheckRunEvent,
-  CheckSuiteEvent,
+  WorkflowRunEvent,
 } from '../interfaces/github.interface';
 
 type GitHubPayload = PushEvent | PullRequestEvent | IssueEvent | WorkflowRunEvent | WorkflowJobEvent | CheckRunEvent | CheckSuiteEvent;
@@ -42,45 +41,7 @@ export class GitHubEventUtils {
     payload: GitHubPayload
   ): string {
     const baseAction = `github.${eventType}`;
-
-    switch (eventType) {
-      case 'push':
-        return baseAction;
-
-      case 'pull_request': {
-        const prPayload = payload as PullRequestEvent;
-        if (prPayload.pull_request.merged) {
-          return `${baseAction}.merged`;
-        }
-        return prPayload.action ? `${baseAction}.${prPayload.action}` : baseAction;
-      }
-
-      case 'issues': {
-        const issuePayload = payload as IssueEvent;
-        return issuePayload.action ? `${baseAction}.${issuePayload.action}` : baseAction;
-      }
-
-      case 'workflow_run': {
-        const workflowPayload = payload as WorkflowRunEvent;
-        return workflowPayload.action ? `${baseAction}.${workflowPayload.action}` : baseAction;
-      }
-
-      case 'workflow_job': {
-        const workflowJobPayload = payload as WorkflowJobEvent;
-        return workflowJobPayload.action ? `${baseAction}.${workflowJobPayload.action}` : baseAction;
-      }
-
-      case 'check_run': {
-        const checkRunPayload = payload as CheckRunEvent;
-        return checkRunPayload.action ? `${baseAction}.${checkRunPayload.action}` : baseAction;
-      }
-
-      case 'check_suite': {
-        const checkSuitePayload = payload as CheckSuiteEvent;
-        return checkSuitePayload.action ? `${baseAction}.${checkSuitePayload.action}` : baseAction;
-      }
-    }
-
-    throw new UnsupportedEventError(eventType);
+    const action = (payload as any).action;
+    return action ? `${baseAction}.${action}` : baseAction;
   }
 }
