@@ -46,6 +46,9 @@ export abstract class BaseEventProcessor {
       }
 
       await this.storeRawEvent();
+
+      // TODO: filter out unsupported events
+      
       const event = await this.processEvent();
       await this.eventService.createEvent(event);
       logger.info('Event created successfully');
