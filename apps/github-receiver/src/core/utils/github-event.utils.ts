@@ -5,9 +5,13 @@ import {
   IssueEvent,
   PullRequestEvent,
   PushEvent,
+  WorkflowRunEvent,
+  WorkflowJobEvent,
+  CheckRunEvent,
+  CheckSuiteEvent,
 } from '../interfaces/github.interface';
 
-type GitHubPayload = PushEvent | PullRequestEvent | IssueEvent;
+type GitHubPayload = PushEvent | PullRequestEvent | IssueEvent | WorkflowRunEvent | WorkflowJobEvent | CheckRunEvent | CheckSuiteEvent;
 
 export class GitHubEventUtils {
   static parseWebhookRequest(req: Request): GitHubWebhookEvent {
@@ -55,6 +59,26 @@ export class GitHubEventUtils {
       case 'issues': {
         const issuePayload = payload as IssueEvent;
         return issuePayload.action ? `${baseAction}.${issuePayload.action}` : baseAction;
+      }
+
+      case 'workflow_run': {
+        const workflowPayload = payload as WorkflowRunEvent;
+        return workflowPayload.action ? `${baseAction}.${workflowPayload.action}` : baseAction;
+      }
+
+      case 'workflow_job': {
+        const workflowJobPayload = payload as WorkflowJobEvent;
+        return workflowJobPayload.action ? `${baseAction}.${workflowJobPayload.action}` : baseAction;
+      }
+
+      case 'check_run': {
+        const checkRunPayload = payload as CheckRunEvent;
+        return checkRunPayload.action ? `${baseAction}.${checkRunPayload.action}` : baseAction;
+      }
+
+      case 'check_suite': {
+        const checkSuitePayload = payload as CheckSuiteEvent;
+        return checkSuitePayload.action ? `${baseAction}.${checkSuitePayload.action}` : baseAction;
       }
     }
 
