@@ -14,24 +14,22 @@ type GitHubPayload = PushEvent | PullRequestEvent | IssueEvent | WorkflowRunEven
 
 export class GitHubEventUtils {
   static parseWebhookRequest(req: Request): GitHubWebhookEvent {
-    const eventType = req.header('X-GitHub-Event');
+    const githubEvent = req.header('X-GitHub-Event');
     const eventId = req.header('X-GitHub-Delivery');
-    const signature = req.header('X-Hub-Signature-256');
 
-    if (!eventType || !eventId) {
+    if (!githubEvent || !eventId) {
       throw new Error('Missing required GitHub webhook headers');
     }
 
     const payload = req.body as GitHubPayload;
-    const action = (payload as any).action ? 
-      `github.${eventType}.${(payload as any).action}` : 
-      `github.${eventType}`;
+    const githubEventAction = (payload as any).action ? 
+      `github.${githubEvent}.${(payload as any).action}` : 
+      `github.${githubEvent}`;
 
     return {
       eventId,
-      eventType,
-      action,
-      signature,
+      eventType: githubEvent,
+      action: githubEventAction,
       payload,
       headers: req.headers,
       source: 'github',
