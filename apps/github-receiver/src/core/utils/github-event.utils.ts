@@ -1,12 +1,11 @@
-import { SupportedGitHubEventAction } from '../interfaces/github-event-actions.type';
+import { Request } from 'express';
+import { UnsupportedEventError } from '../errors/github-event.error';
+import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
 import {
   IssueEvent,
   PullRequestEvent,
   PushEvent,
 } from '../interfaces/github.interface';
-import { Request } from 'express';
-import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
-import { UnsupportedEventError } from '../errors/github-event.error';
 
 type GitHubPayload = PushEvent | PullRequestEvent | IssueEvent;
 

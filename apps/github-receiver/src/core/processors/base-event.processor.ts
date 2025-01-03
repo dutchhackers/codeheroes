@@ -51,10 +51,10 @@ export abstract class BaseEventProcessor {
 
       if (!SupportedGitHubEventActions.includes(this.webhookEvent.action as GitHubEventAction)) {
         logger.info(`Unsupported event type: ${this.webhookEvent.action}`);
-        // return {
-        //   success: false,
-        //   message: `Unsupported event type: ${this.webhookEvent.action}`,
-        // };
+        return {
+          success: false,
+          message: `Unsupported event type: ${this.webhookEvent.action}`,
+        };
       }
 
       const event = await this.processEvent();
