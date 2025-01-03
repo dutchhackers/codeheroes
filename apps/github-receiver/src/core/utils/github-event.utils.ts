@@ -23,25 +23,18 @@ export class GitHubEventUtils {
     }
 
     const payload = req.body as GitHubPayload;
-    const action = this.#getActionFromPayload(eventType, payload);
+    const action = (payload as any).action ? 
+      `github.${eventType}.${(payload as any).action}` : 
+      `github.${eventType}`;
 
     return {
       eventId,
       eventType,
-      action: action,
+      action,
       signature,
       payload,
       headers: req.headers,
       source: 'github',
     };
-  }
-
-  static #getActionFromPayload(
-    eventType: string,
-    payload: GitHubPayload
-  ): string {
-    const baseAction = `github.${eventType}`;
-    const action = (payload as any).action;
-    return action ? `${baseAction}.${action}` : baseAction;
   }
 }
