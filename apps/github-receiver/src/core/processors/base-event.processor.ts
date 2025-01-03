@@ -2,7 +2,7 @@ import { CreateEventInput, EventService, logger } from '@codeheroes/common';
 import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
 import { ProcessResult } from '../interfaces/process-result.interface';
 import { StorageService } from '../storage/storage.service';
-import { GitHubEventAction, SupportedGitHubEventActions } from '../interfaces/github-event-actions.type';
+import { SupportedGitHubEventActions } from '../constants/github.constants';
 
 export abstract class BaseEventProcessor {
   protected readonly eventService: EventService;
@@ -48,8 +48,7 @@ export abstract class BaseEventProcessor {
 
       await this.storeRawEvent();
 
-
-      if (!SupportedGitHubEventActions.includes(this.webhookEvent.action as GitHubEventAction)) {
+      if (!SupportedGitHubEventActions.includes(this.webhookEvent.action)) {
         logger.info(`Unsupported event type: ${this.webhookEvent.action}`);
         return {
           success: false,
