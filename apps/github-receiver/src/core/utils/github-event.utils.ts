@@ -6,6 +6,7 @@ import {
 } from '../interfaces/github.interface';
 import { Request } from 'express';
 import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
+import { UnsupportedEventError } from '../errors/github-event.error';
 
 type GitHubPayload = PushEvent | PullRequestEvent | IssueEvent;
 
@@ -21,6 +22,7 @@ export class GitHubEventUtils {
 
     const payload = req.body as GitHubPayload;
     const action = this.#getActionFromPayload(eventType, payload);
+    console.log('action', action);
 
     return {
       eventId,
@@ -72,6 +74,6 @@ export class GitHubEventUtils {
         break;
     }
 
-    throw new Error(`Unsupported event type: ${eventType}`);
+    throw new UnsupportedEventError(eventType);
   }
 }

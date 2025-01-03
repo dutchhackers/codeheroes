@@ -13,6 +13,7 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     try {
       eventDetails = GitHubEventUtils.parseWebhookRequest(req);
     } catch (error) {
+      logger.error('Failed to parse GitHub event:', error);
       throw new GitHubEventError(HTTP_MESSAGES.MISSING_GITHUB_EVENT);
     }
 
