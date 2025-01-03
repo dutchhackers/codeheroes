@@ -25,7 +25,6 @@ export class GitHubEventUtils {
 
     const payload = req.body as GitHubPayload;
     const action = this.#getActionFromPayload(eventType, payload);
-    console.log('action', action);
 
     return {
       eventId,
