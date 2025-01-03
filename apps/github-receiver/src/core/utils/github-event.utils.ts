@@ -27,7 +27,7 @@ export class GitHubEventUtils {
     return {
       eventId,
       eventType,
-      action,
+      action: action,
       signature,
       payload,
       headers: req.headers,
@@ -38,40 +38,25 @@ export class GitHubEventUtils {
   static #getActionFromPayload(
     eventType: string,
     payload: GitHubPayload
-  ): GitHubEventAction {
+  ): string {
+    const baseAction = `github.${eventType}`;
+
     switch (eventType) {
       case 'push':
-        return 'github.push';
+        return baseAction;
 
-      case 'pull_request':
-        {
-          const prPayload = payload as PullRequestEvent;
-          if (prPayload.pull_request.merged) {
-            return 'github.pull_request.merged';
-          }
-          switch (prPayload.action) {
-            case 'opened':
-              return 'github.pull_request.opened';
-            case 'closed':
-              return 'github.pull_request.closed';
-            case 'synchronize':
-            case 'edited':
-              return 'github.pull_request.updated';
-          }
+      case 'pull_request': {
+        const prPayload = payload as PullRequestEvent;
+        if (prPayload.pull_request.merged) {
+          return `${baseAction}.merged`;
         }
-        break;
+        return prPayload.action ? `${baseAction}.${prPayload.action}` : baseAction;
+      }
 
-      case 'issues':
-        {
-          const issuePayload = payload as IssueEvent;
-          switch (issuePayload.action) {
-            case 'opened':
-              return 'github.issue.opened';
-            case 'closed':
-              return 'github.issue.closed';
-          }
-        }
-        break;
+      case 'issues': {
+        const issuePayload = payload as IssueEvent;
+        return issuePayload.action ? `${baseAction}.${issuePayload.action}` : baseAction;
+      }
     }
 
     throw new UnsupportedEventError(eventType);
