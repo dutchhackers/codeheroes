@@ -84,3 +84,78 @@ export interface IssueEvent {
   repository: GitHubRepository;
   sender: GitHubUser;
 }
+
+export interface WorkflowRunEvent {
+  action: 'requested' | 'completed' | 'in_progress';
+  workflow_run: {
+    id: number;
+    name: string;
+    head_branch: string;
+    head_sha: string;
+    status: string;
+    conclusion: string | null;
+    workflow_id: number;
+    html_url: string;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}
+
+export interface WorkflowJobEvent {
+  action: 'queued' | 'in_progress' | 'completed' | 'waiting';
+  workflow_job: {
+    id: number;
+    run_id: number;
+    workflow_name: string;
+    head_branch: string;
+    status: string;
+    conclusion: string | null;
+    started_at: string;
+    completed_at: string | null;
+    name: string;
+    labels: string[];
+    runner_name: string | null;
+    html_url: string;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}
+
+export interface CheckRunEvent {
+  action: 'created' | 'completed' | 'rerequested' | 'requested_action';
+  check_run: {
+    id: number;
+    head_sha: string;
+    status: string;
+    conclusion: string | null;
+    started_at: string;
+    completed_at: string | null;
+    output: {
+      title: string;
+      summary: string;
+      text?: string;
+    };
+    name: string;
+    check_suite: {
+      id: number;
+    };
+    html_url: string;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}
+
+export interface CheckSuiteEvent {
+  action: 'completed' | 'requested' | 'rerequested';
+  check_suite: {
+    id: number;
+    head_branch: string;
+    head_sha: string;
+    status: string;
+    conclusion: string | null;
+    before: string;
+    after: string;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}

@@ -1,12 +1,19 @@
-import { GitHubEventAction } from './github-event-actions.type';
-import { PushEvent, PullRequestEvent, IssueEvent } from './github.interface';
+import {
+  IssueEvent,
+  PullRequestEvent,
+  PushEvent,
+  WorkflowRunEvent,
+  WorkflowJobEvent,
+  CheckRunEvent,
+  CheckSuiteEvent
+} from './github.interface';
 
 export interface GitHubWebhookEvent {
   eventId: string;
   eventType: string;
-  action: GitHubEventAction;
+  action: string;
   signature?: string;
-  payload: PushEvent | PullRequestEvent | IssueEvent;
+  payload: PushEvent | PullRequestEvent | IssueEvent | WorkflowRunEvent | WorkflowJobEvent | CheckRunEvent | CheckSuiteEvent;
   headers: Record<string, string | string[] | undefined>;
   source: string;
 }
