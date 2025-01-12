@@ -6,14 +6,14 @@ export interface UserActivity extends BaseDocument {
   type: string;
   userId: string;
   activityId: string;
-  eventId: string;
-  eventTimestamp: string; // ISO string
   userFacingDescription: string;
   details: UserActivityDetails;
 }
 
 export interface UserActivityDetails {
   source: ConnectedAccountProvider;
+  eventId: string;
+  eventTimestamp: string; // ISO string
 }
 
 export type CreateActivityInput = Omit<
