@@ -8,7 +8,7 @@ import {
   PushEvent,
   WorkflowJobEvent,
   WorkflowRunEvent,
-} from '../../libs/github-models/external-github-interfaces';
+} from '../../_external/external-github-interfaces';
 
 type GitHubPayload = PushEvent | PullRequestEvent | IssueEvent | WorkflowRunEvent | WorkflowJobEvent | CheckRunEvent | CheckSuiteEvent;
 

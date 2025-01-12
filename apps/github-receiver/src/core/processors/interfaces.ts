@@ -6,7 +6,7 @@ import {
   WorkflowJobEvent,
   CheckRunEvent,
   CheckSuiteEvent
-} from '../../libs/github-models/external-github-interfaces';
+} from '../../_external/external-github-interfaces';
 
 export interface Actor {
   id: string;

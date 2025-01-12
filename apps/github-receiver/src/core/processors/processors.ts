@@ -6,7 +6,7 @@ import {
   PullRequestEventDetails,
   PushEventDetails,
 } from './interfaces';
-import { IssueEvent, PullRequestEvent, PushEvent } from '../../libs/github-models/external-github-interfaces';
+import { IssueEvent, PullRequestEvent, PushEvent } from '../../_external/external-github-interfaces';
 import { StorageService } from '../storage/storage.service';
 
 export abstract class BaseEventProcessor {
