@@ -26,7 +26,12 @@ export class DatabaseService {
         .get();
 
       if (!connectedAccountSnapshot.empty) {
-        const userId = connectedAccountSnapshot.docs[0].ref.parent.parent!.id;
+        const parentRef = connectedAccountSnapshot.docs[0].ref.parent.parent;
+        if (!parentRef) {
+          logger.warn('Invalid document reference structure');
+          return undefined;
+        }
+        const userId = parentRef.id;
         logger.info('User ID found', { userId, senderId: sender.id });
         return userId;
       }
