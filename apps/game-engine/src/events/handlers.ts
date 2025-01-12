@@ -29,6 +29,7 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
   }
 
   const activityInput: CreateActivityInput = {
+    action: (eventData.data as any)?.action,
     userId,
     activityId: event.params.eventId,
     type: eventData.eventType,
