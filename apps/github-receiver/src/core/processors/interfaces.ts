@@ -9,10 +9,6 @@ import {
 } from '../../_external/external-github-interfaces';
 
 // Core interfaces
-export interface Actor {
-  id: string;
-  username?: string;
-}
 
 export interface Repository {
   id: string;
@@ -32,7 +28,7 @@ export interface GitHubWebhookEvent {
   eventType: string;
   action: string;
   signature?: string;
-  actor: Actor;
+  actor: string;
   payload: PushEvent | PullRequestEvent | IssueEvent | WorkflowRunEvent | WorkflowJobEvent | CheckRunEvent | CheckSuiteEvent;
   headers: Record<string, string | string[] | undefined>;
   source: string;

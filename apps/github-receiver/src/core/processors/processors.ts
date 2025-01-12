@@ -24,10 +24,7 @@ export abstract class BaseEventProcessor {
     return {
       eventId: this.webhookEvent.eventId,
       source: this.webhookEvent.source as ConnectedAccountProvider,
-      actor: {
-        id: this.webhookEvent.actor.id,
-        username: this.webhookEvent.actor.username || '',
-      },
+      actor: this.webhookEvent.actor,
       data: this.getEventDetails(),
       eventTimestamp: this.getEventTimestamp(),
     };
