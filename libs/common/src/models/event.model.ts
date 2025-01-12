@@ -5,7 +5,6 @@ export interface WebhookEvent extends BaseDocument {
   source: ConnectedAccountProvider;
   eventId: string;
   eventType: string;
-  actor: string;
   eventTimestamp: string; // ISO string
   data: Record<string, unknown>;
 }

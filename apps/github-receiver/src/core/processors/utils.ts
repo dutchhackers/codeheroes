@@ -33,7 +33,6 @@ export class GitHubEventUtils {
       payload,
       headers: req.headers,
       source: 'github',
-      actor: payload.sender.login,
     };
   }
 }

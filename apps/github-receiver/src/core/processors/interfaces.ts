@@ -28,7 +28,6 @@ export interface GitHubWebhookEvent {
   eventType: string;
   action: string;
   signature?: string;
-  actor: string;
   payload: PushEvent | PullRequestEvent | IssueEvent | WorkflowRunEvent | WorkflowJobEvent | CheckRunEvent | CheckSuiteEvent;
   headers: Record<string, string | string[] | undefined>;
   source: string;
