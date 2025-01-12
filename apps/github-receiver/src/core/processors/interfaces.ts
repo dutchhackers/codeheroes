@@ -1,18 +1,32 @@
 import {
+  CheckRunEvent,
+  CheckSuiteEvent,
   IssueEvent,
   PullRequestEvent,
   PushEvent,
-  WorkflowRunEvent,
   WorkflowJobEvent,
-  CheckRunEvent,
-  CheckSuiteEvent
+  WorkflowRunEvent
 } from '../../_external/external-github-interfaces';
 
+// Core interfaces
 export interface Actor {
   id: string;
   username?: string;
 }
 
+export interface Repository {
+  id: string;
+  name: string;
+  owner: string;
+}
+
+export interface ProcessResult {
+  success: boolean;
+  message: string;
+  error?: Error;
+}
+
+// Webhook event interface
 export interface GitHubWebhookEvent {
   eventId: string;
   eventType: string;
@@ -24,25 +38,12 @@ export interface GitHubWebhookEvent {
   source: string;
 }
 
-export interface ProcessResult {
-  success: boolean;
-  message: string;
-  error?: Error;
-}
-
-export interface Repository {
-  id: string;
-  name: string;
-  owner: string;
-}
-
-// Base details interface
+// Event details interfaces
 export interface BaseEventDetails extends Record<string, unknown> {
   repository: Repository;
   lastCommitMessage?: string;
 }
 
-// Activity-specific details interfaces
 export interface PushEventDetails extends BaseEventDetails {
   commitCount: number;
   branch: string;
