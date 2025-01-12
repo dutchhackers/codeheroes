@@ -30,12 +30,13 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
 
   const activityInput: CreateActivityInput = {
     action: (eventData.data as any)?.action,
+    eventId: event.params.eventId,
     userId,
     userFacingDescription: `${eventData.source} ${eventData.eventType}`,
     details: {
       source: eventData.source,
-      eventId: event.params.eventId,
-      eventTimestamp: eventData.eventTimestamp
+      externalEventId: eventData.eventId,
+      externalEventTimestamp: eventData.eventTimestamp
     }
   };
 

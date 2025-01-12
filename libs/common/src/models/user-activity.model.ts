@@ -3,6 +3,7 @@ import { BaseDocument, ConnectedAccountProvider } from './common.model';
 // Activity Document
 export interface UserActivity extends BaseDocument {
   action: string;
+  eventId: string;
   userId: string;
   userFacingDescription: string;
   details: UserActivityDetails;
@@ -10,8 +11,8 @@ export interface UserActivity extends BaseDocument {
 
 export interface UserActivityDetails {
   source: ConnectedAccountProvider;
-  eventId: string;
-  eventTimestamp: string; // ISO string
+  externalEventId: string;
+  externalEventTimestamp: string; // ISO string
 }
 
 export type CreateActivityInput = Omit<
