@@ -24,12 +24,11 @@ export abstract class BaseEventProcessor {
     return {
       eventId: this.webhookEvent.eventId,
       source: this.webhookEvent.source as ConnectedAccountProvider,
-      processed: false,
       actor: {
         id: this.webhookEvent.actor.id,
         username: this.webhookEvent.actor.username || '',
       },
-      eventData: await this.getEventDetails(),
+      data: await this.getEventDetails(),
       eventTimestamp: await this.getEventTimestamp(),
     };
   }
