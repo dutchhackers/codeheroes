@@ -13,12 +13,17 @@ export class PushEventProcessor extends BaseEventProcessor {
       source: this.webhookEvent.source as ConnectedAccountProvider,
       processed: false,
       details: {
-        authorId: payload.sender.id.toString(),
+        actor: {
+          id: payload.sender.id.toString(),
+          username: payload.sender.login,
+        },
+        repository: {
+          id: payload.repository.id.toString(),
+          name: payload.repository.name,
+          owner: payload.repository.owner.login,
+        },
         commitCount: payload.commits.length,
         branch: payload.ref,
-        repositoryId: payload.repository.id.toString(),
-        repositoryName: payload.repository.name,
-        repositoryOwner: payload.repository.owner.login,
         lastCommitMessage: payload.head_commit?.message || null,
       } as PushEventDetails,
       eventTimestamp: new Date(

@@ -13,12 +13,17 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
       source: this.webhookEvent.source as ConnectedAccountProvider,
       processed: false,
       details: {
-        authorId: payload.sender.id.toString(),
+        actor: {
+          id: payload.sender.id.toString(),
+          username: payload.sender.login,
+        },
+        repository: {
+          id: payload.repository.id.toString(),
+          name: payload.repository.name,
+          owner: payload.repository.owner.login,
+        },
         prNumber: payload.number,
         title: payload.pull_request.title,
-        repositoryId: payload.repository.id.toString(),
-        repositoryName: payload.repository.name,
-        repositoryOwner: payload.repository.owner.login,
         state: payload.pull_request.state,
       } as PullRequestEventDetails,
       eventTimestamp: new Date(payload.pull_request.updated_at).toISOString(),

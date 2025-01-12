@@ -1,10 +1,18 @@
+export interface Actor {
+  id: string;
+  username?: string;
+}
+
+export interface Repository {
+  id: string;
+  name: string;
+  owner: string;
+}
+
 // Base details interface
 export interface BaseEventDetails extends Record<string, unknown> {
-  authorId: string | null;
-  authorExternalId?: string;
-  repositoryId: string;
-  repositoryName: string;
-  repositoryOwner: string;
+  actor: Actor;
+  repository: Repository;
   lastCommitMessage?: string;
 }
 

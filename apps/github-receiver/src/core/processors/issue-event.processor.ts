@@ -13,14 +13,19 @@ export class IssueEventProcessor extends BaseEventProcessor {
       source: this.webhookEvent.source as ConnectedAccountProvider,
       processed: false,
       details: {
-        authorId: payload.sender.id.toString(),
+        actor: {
+          id: payload.sender.id.toString(),
+          username: payload.sender.login,
+        },
+        repository: {
+          id: payload.repository.id.toString(),
+          name: payload.repository.name,
+          owner: payload.repository.owner.login,
+        },
         issueNumber: payload.issue.number,
         title: payload.issue.title,
         state: payload.issue.state,
         action: payload.action,
-        repositoryId: payload.repository.id.toString(),
-        repositoryName: payload.repository.name,
-        repositoryOwner: payload.repository.owner.login,
       } as IssueEventDetails,
       eventTimestamp: new Date(payload.issue.updated_at).toISOString(),
     };
