@@ -1,8 +1,3 @@
-export interface Actor {
-  id: string;
-  username?: string;
-}
-
 export interface Repository {
   id: string;
   name: string;

@@ -2,7 +2,6 @@ import { CreateEventInput, EventService, logger } from '@codeheroes/common';
 import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
 import { ProcessResult } from '../interfaces/process-result.interface';
 import { StorageService } from '../storage/storage.service';
-import { SupportedGitHubEventActions } from '../constants/github.constants';
 
 export abstract class BaseEventProcessor {
   protected readonly eventService: EventService;
@@ -49,12 +48,6 @@ export abstract class BaseEventProcessor {
       await this.storeRawEvent();
 
       const event = await this.processEvent();
-      
-      // Set the actor from webhook event
-      this.webhookEvent.actor = {
-        id: this.webhookEvent.payload.sender.id.toString(),
-        username: this.webhookEvent.payload.sender.login,
-      };
       
       await this.eventService.createEvent(event);
       logger.info('Event created successfully');

@@ -33,6 +33,10 @@ export class GitHubEventUtils {
       payload,
       headers: req.headers,
       source: 'github',
+      actor: {
+        id: payload.sender.id.toString(),
+        username: payload.sender.login,
+      },
     };
   }
 }
