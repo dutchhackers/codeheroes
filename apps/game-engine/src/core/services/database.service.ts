@@ -51,10 +51,7 @@ export class DatabaseService {
             .doc(userId)
             .collection('activities')
             .doc(eventId)
-            .create({
-                ...activityInput,
-                processed: false
-            });
+            .create(activityInput);
 
         logger.info('Created new user activity', { userId, eventId });
     } catch (error) {
