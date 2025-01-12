@@ -4,7 +4,6 @@ import { BaseDocument, ConnectedAccountProvider } from './common.model';
 export interface UserActivity extends BaseDocument {
   action: string;
   userId: string;
-  activityId: string;
   userFacingDescription: string;
   details: UserActivityDetails;
 }
