@@ -3,6 +3,37 @@ import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { CreateActivityInput, WebhookEvent } from '@codeheroes/common';
 import { getFirestore } from 'firebase-admin/firestore';
 
+async function lookupUserId(details: Record<string, unknown>): Promise<string> {
+  const db = getFirestore();
+  const authorId = details.authorExternalId;
+
+  if (!authorId) {
+    logger.warn('No authorExternalId found in event details, using fallback ID');
+    return '1000002';
+  }
+
+  try {
+    const connectedAccountSnapshot = await db
+      .collectionGroup('connectedAccounts')
+      .where('provider', '==', 'github')
+      .where('externalUserId', '==', authorId)
+      .limit(1)
+      .get();
+
+    if (!connectedAccountSnapshot.empty) {
+      const userId = connectedAccountSnapshot.docs[0].ref.parent.parent!.id;
+      logger.info('User ID found', { userId, authorId });
+      return userId;
+    }
+
+    logger.warn('No matching user found for author ID, using fallback ID', { authorId });
+    return '1000002';
+  } catch (error) {
+    logger.error('Error looking up user ID', { error, authorId });
+    return '1000002';
+  }
+}
+
 export const handleEventCreation = onDocumentCreated('events/{eventId}', async (event) => {
   logger.info('New event document created', {
     eventId: event.params.eventId,
@@ -16,7 +47,7 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
     return;
   }
 
-  const userId = '1000002'; // Hardcoded user ID as requested
+  const userId = await lookupUserId(eventData.details);
   
   const activityInput: CreateActivityInput = {
     userId,
