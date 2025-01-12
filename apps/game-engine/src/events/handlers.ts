@@ -40,5 +40,5 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
     }
   };
 
-  await dbService.createUserActivity(userId, event.params.eventId, activityInput);
+  await dbService.createUserActivity(activityInput);
 });

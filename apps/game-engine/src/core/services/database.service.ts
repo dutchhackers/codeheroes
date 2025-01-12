@@ -44,10 +44,10 @@ export class DatabaseService {
     }
   }
 
-  async createUserActivity(userId: string, eventId: string, activityInput: CreateActivityInput): Promise<void> {
+  async createUserActivity(activityInput: CreateActivityInput): Promise<void> {
+    const userId = activityInput.userId;
+    const docRef = this.db.collection('users').doc(userId).collection('activities').doc();
     const now = getCurrentTimeAsISO();
-
-    const docRef = this.db.collection('users').doc(userId).collection('activities').doc(eventId);
 
     try {
       await docRef.create({
@@ -57,7 +57,7 @@ export class DatabaseService {
         updatedAt: now,
       });
 
-      logger.info('Created new user activity', { userId, eventId });
+      logger.info('Created new user activity', { userId });
     } catch (error) {
       logger.error('Failed to create user activity', error);
       throw error;
