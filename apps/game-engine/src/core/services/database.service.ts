@@ -39,19 +39,22 @@ export class DatabaseService {
     }
   }
 
-  async createUserActivity(userId: string, eventId: string, activityInput: CreateActivityInput): Promise<void> {
+async createUserActivity(userId: string, eventId: string, activityInput: CreateActivityInput): Promise<void> {
     try {
-      await this.db
-        .collection('users')
-        .doc(userId)
-        .collection('activities')
-        .doc(eventId)
-        .create(activityInput);
+        await this.db
+            .collection('users')
+            .doc(userId)
+            .collection('activities')
+            .doc(eventId)
+            .create({
+                ...activityInput,
+                processed: false
+            });
 
-      logger.info('Created new user activity', { userId, eventId });
+        logger.info('Created new user activity', { userId, eventId });
     } catch (error) {
-      logger.error('Failed to create user activity', error);
-      throw error;
+        logger.error('Failed to create user activity', error);
+        throw error;
     }
-  }
+}
 }
