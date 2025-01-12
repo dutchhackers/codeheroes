@@ -28,13 +28,13 @@ export abstract class BaseEventProcessor {
         id: this.webhookEvent.actor.id,
         username: this.webhookEvent.actor.username || '',
       },
-      data: await this.getEventDetails(),
-      eventTimestamp: await this.getEventTimestamp(),
+      data: this.getEventDetails(),
+      eventTimestamp: this.getEventTimestamp(),
     };
   }
 
-  protected abstract getEventDetails(): Promise<PushEventDetails | PullRequestEventDetails | IssueEventDetails>;
-  protected abstract getEventTimestamp(): Promise<string>;
+  protected abstract getEventDetails(): PushEventDetails | PullRequestEventDetails | IssueEventDetails;
+  protected abstract getEventTimestamp(): string;
 
   private async storeRawEvent(): Promise<void> {
     if (!this.storageService) {
@@ -81,7 +81,7 @@ export abstract class BaseEventProcessor {
 }
 
 export class PushEventProcessor extends BaseEventProcessor {
-  protected async getEventDetails(): Promise<PushEventDetails> {
+  protected getEventDetails(): PushEventDetails {
     const payload = this.webhookEvent.payload as PushEvent;
     return {
       repository: {
@@ -96,14 +96,14 @@ export class PushEventProcessor extends BaseEventProcessor {
     };
   }
 
-  protected async getEventTimestamp(): Promise<string> {
+  protected getEventTimestamp(): string {
     const payload = this.webhookEvent.payload as PushEvent;
     return new Date(payload.head_commit?.timestamp || new Date()).toISOString();
   }
 }
 
 export class PullRequestEventProcessor extends BaseEventProcessor {
-  protected async getEventDetails(): Promise<PullRequestEventDetails> {
+  protected getEventDetails(): PullRequestEventDetails {
     const payload = this.webhookEvent.payload as PullRequestEvent;
     return {
       repository: {
@@ -118,14 +118,14 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
     };
   }
 
-  protected async getEventTimestamp(): Promise<string> {
+  protected getEventTimestamp(): string {
     const payload = this.webhookEvent.payload as PullRequestEvent;
     return new Date(payload.pull_request.updated_at).toISOString();
   }
 }
 
 export class IssueEventProcessor extends BaseEventProcessor {
-  protected async getEventDetails(): Promise<IssueEventDetails> {
+  protected getEventDetails(): IssueEventDetails {
     const payload = this.webhookEvent.payload as IssueEvent;
     return {
       repository: {
@@ -140,7 +140,7 @@ export class IssueEventProcessor extends BaseEventProcessor {
     };
   }
 
-  protected async getEventTimestamp(): Promise<string> {
+  protected getEventTimestamp(): string {
     const payload = this.webhookEvent.payload as IssueEvent;
     return new Date(payload.issue.updated_at).toISOString();
   }
