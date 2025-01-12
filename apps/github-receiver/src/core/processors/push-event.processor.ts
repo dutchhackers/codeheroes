@@ -13,10 +13,6 @@ export class PushEventProcessor extends BaseEventProcessor {
       source: this.webhookEvent.source as ConnectedAccountProvider,
       processed: false,
       details: {
-        actor: {
-          id: payload.sender.id.toString(),
-          username: payload.sender.login,
-        },
         repository: {
           id: payload.repository.id.toString(),
           name: payload.repository.name,

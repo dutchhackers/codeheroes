@@ -49,6 +49,13 @@ export abstract class BaseEventProcessor {
       await this.storeRawEvent();
 
       const event = await this.processEvent();
+      
+      // Set the actor from webhook event
+      this.webhookEvent.actor = {
+        id: this.webhookEvent.payload.sender.id.toString(),
+        username: this.webhookEvent.payload.sender.login,
+      };
+      
       await this.eventService.createEvent(event);
       logger.info('Event created successfully');
 

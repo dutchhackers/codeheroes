@@ -11,7 +11,6 @@ export interface Repository {
 
 // Base details interface
 export interface BaseEventDetails extends Record<string, unknown> {
-  actor: Actor;
   repository: Repository;
   lastCommitMessage?: string;
 }
