@@ -39,10 +39,16 @@ export interface GitHubWebhookEvent {
 }
 
 // Event details interfaces
+export interface Sender {
+  id: string;
+  login: string;
+}
+
 export interface BaseEventDetails extends Record<string, unknown> {
   repository: Repository;
   lastCommitMessage?: string;
   action: string;
+  sender: Sender;
 }
 
 export interface PushEventDetails extends BaseEventDetails {

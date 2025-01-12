@@ -98,6 +98,10 @@ export class PushEventProcessor extends BaseEventProcessor {
       commitCount: payload.commits.length,
       branch: payload.ref,
       lastCommitMessage: payload.head_commit?.message || null,
+      sender: {
+        id: payload.sender.id.toString(),
+        login: payload.sender.login,
+      },
     };
   }
 
@@ -120,6 +124,10 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
       prNumber: payload.number,
       title: payload.pull_request.title,
       state: payload.pull_request.state,
+      sender: {
+        id: payload.sender.id.toString(),
+        login: payload.sender.login,
+      },
     };
   }
 
@@ -142,6 +150,10 @@ export class IssueEventProcessor extends BaseEventProcessor {
       issueNumber: payload.issue.number,
       title: payload.issue.title,
       state: payload.issue.state,
+      sender: {
+        id: payload.sender.id.toString(),
+        login: payload.sender.login,
+      },
     };
   }
 
