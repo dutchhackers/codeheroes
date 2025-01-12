@@ -1,11 +1,11 @@
-import * as logger from 'firebase-functions/logger';
-import { onRequest } from 'firebase-functions/v2/https';
+import { DEFAULT_REGION } from '@codeheroes/common';
+import { setGlobalOptions } from 'firebase-functions/v2';
 
-export const healthCheck = onRequest((request, response) => {
-  logger.info("Health check requested", {structuredData: true});
-  response.status(200).json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    service: 'game-engine'
-  });
-});
+import { initializeApp } from 'firebase-admin/app';
+initializeApp();
+
+import { handleEventCreation } from './events';
+
+setGlobalOptions({ region: DEFAULT_REGION });
+
+export { handleEventCreation };

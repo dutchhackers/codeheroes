@@ -29,7 +29,7 @@
     {
       "codebase": "game-engine",
       "source": "dist/apps/game-engine",
-      "runtime": "nodejs16",
+      "runtime": "nodejs20",
       "ignore": ["*.local"]
     },
     {

@@ -1,11 +1,11 @@
 import { logger } from '@codeheroes/common';
 import { Request, Response } from 'express';
+import { SupportedGitHubEventActions } from './core/constants/github.constants';
 import { HTTP_MESSAGES } from './core/constants/http.constants';
 import { GitHubEventError, UnsupportedEventError } from './core/errors/github-event.error';
-import { ProcessorFactory } from './core/factory/factory.processor';
-import { GitHubEventUtils } from './core/utils/github-event.utils';
 import { ResponseHandler } from './core/utils/response.handler';
-import { SupportedGitHubEventActions } from './core/constants/github.constants';
+import { ProcessorFactory } from './core/processors/factory';
+import { GitHubEventUtils } from './core/processors/utils';
 
 export const App = async (req: Request, res: Response): Promise<void> => {
   try {

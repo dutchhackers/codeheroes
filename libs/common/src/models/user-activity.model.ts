@@ -1,0 +1,20 @@
+import { BaseDocument, ConnectedAccountProvider } from './common.model';
+
+// Activity Document
+export interface UserActivity extends BaseDocument {
+  action: string;
+  eventId: string; // In the future this might become an optional field
+  userId: string;
+  details: UserActivityDetails;
+}
+
+export interface UserActivityDetails {
+  source: ConnectedAccountProvider;
+  externalEventId: string;
+  externalEventTimestamp: string; // ISO string
+}
+
+export type CreateActivityInput = Omit<
+  UserActivity,
+  'id' | 'createdAt' | 'updatedAt'
+>;
