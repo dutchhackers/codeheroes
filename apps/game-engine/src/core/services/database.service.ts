@@ -1,6 +1,6 @@
 import * as logger from 'firebase-functions/logger';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
-import { CreateActivityInput } from '@codeheroes/common';
+import { CreateActivityInput, getCurrentTimeAsISO } from '@codeheroes/common';
 
 export class DatabaseService {
   private db: Firestore;
@@ -45,18 +45,22 @@ export class DatabaseService {
   }
 
   async createUserActivity(userId: string, eventId: string, activityInput: CreateActivityInput): Promise<void> {
-    try {
-        await this.db
-            .collection('users')
-            .doc(userId)
-            .collection('activities')
-            .doc(eventId)
-            .create(activityInput);
+    const now = getCurrentTimeAsISO();
 
-        logger.info('Created new user activity', { userId, eventId });
+    const docRef = this.db.collection('users').doc(userId).collection('activities').doc(eventId);
+
+    try {
+      await docRef.create({
+        id: docRef.id,
+        ...activityInput,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      logger.info('Created new user activity', { userId, eventId });
     } catch (error) {
-        logger.error('Failed to create user activity', error);
-        throw error;
+      logger.error('Failed to create user activity', error);
+      throw error;
     }
   }
 }

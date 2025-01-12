@@ -32,7 +32,6 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
     action: (eventData.data as any)?.action,
     userId,
     activityId: eventData.eventId,
-    type: eventData.eventType,
     userFacingDescription: `${eventData.source} ${eventData.eventType}`,
     details: {
       source: eventData.source,
