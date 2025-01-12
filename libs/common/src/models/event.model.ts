@@ -12,7 +12,7 @@ export interface WebhookEvent extends BaseDocument {
   eventId: string;
   actor: Actor;
   eventTimestamp: string; // ISO string
-  details: Record<string, unknown>;
+  eventData: Record<string, unknown>;
   processed: boolean;
 }
 

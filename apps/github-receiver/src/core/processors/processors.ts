@@ -30,7 +30,7 @@ export abstract class BaseEventProcessor {
         id: this.webhookEvent.actor.id,
         username: this.webhookEvent.actor.username || '',
       },
-      details: await this.getEventDetails(),
+      eventData: await this.getEventDetails(),
       eventTimestamp: await this.getEventTimestamp(),
     };
   }
