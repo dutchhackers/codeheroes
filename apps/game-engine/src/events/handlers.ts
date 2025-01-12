@@ -33,13 +33,12 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
     userId,
     activityId: eventData.eventId,
     type: eventData.eventType,
-    source: eventData.source,
     eventTimestamp: eventData.eventTimestamp,
     userFacingDescription: `${eventData.source} ${eventData.eventType}`,
-
-    // core
     eventId: event.params.eventId,
-
+    details: {
+      source: eventData.source
+    }
   };
 
   await dbService.createUserActivity(userId, event.params.eventId, activityInput);
