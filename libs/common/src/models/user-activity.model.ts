@@ -1,7 +1,8 @@
 import { BaseDocument, ConnectedAccountProvider } from './common.model';
 
 // Activity Document
-export interface Activity extends BaseDocument {
+export interface UserActivity extends BaseDocument {
+  userId: string;
   activityId: string;
   type: string;
   source: ConnectedAccountProvider;
@@ -11,6 +12,6 @@ export interface Activity extends BaseDocument {
 }
 
 export type CreateActivityInput = Omit<
-  Activity,
+  UserActivity,
   'id' | 'createdAt' | 'updatedAt'
 >;
