@@ -1,8 +1,12 @@
 import { ConnectedAccountProvider, CreateEventInput, EventService, logger } from '@codeheroes/common';
-import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
-import { ProcessResult } from '../interfaces/process-result.interface';
-import { IssueEvent, PullRequestEvent, PushEvent } from '../interfaces/github.interface';
-import { PushEventDetails, PullRequestEventDetails, IssueEventDetails } from '../interfaces/event-details.interface';
+import {
+  GitHubWebhookEvent,
+  IssueEventDetails,
+  ProcessResult,
+  PullRequestEventDetails,
+  PushEventDetails,
+} from './interfaces';
+import { IssueEvent, PullRequestEvent, PushEvent } from '../../libs/github-models/external-github-interfaces';
 import { StorageService } from '../storage/storage.service';
 
 export abstract class BaseEventProcessor {
@@ -42,18 +46,13 @@ export abstract class BaseEventProcessor {
     try {
       await this.storageService.storeRawRequest(this.webhookEvent);
     } catch (error) {
-      logger.error(
-        `Failed to store raw event ${this.webhookEvent.eventId}:`,
-        error
-      );
+      logger.error(`Failed to store raw event ${this.webhookEvent.eventId}:`, error);
     }
   }
 
   async process(): Promise<ProcessResult> {
     try {
-      const existingEvent = await this.eventService.findByEventId(
-        this.webhookEvent.eventId
-      );
+      const existingEvent = await this.eventService.findByEventId(this.webhookEvent.eventId);
       if (existingEvent) {
         logger.info(`Event ${this.webhookEvent.eventId} already processed`);
         return {
@@ -65,7 +64,7 @@ export abstract class BaseEventProcessor {
       await this.storeRawEvent();
 
       const event = await this.processEvent();
-      
+
       await this.eventService.createEvent(event);
       logger.info('Event created successfully');
 

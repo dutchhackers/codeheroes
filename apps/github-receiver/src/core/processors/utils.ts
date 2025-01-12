@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
+import { GitHubWebhookEvent } from './interfaces';
 import {
   CheckRunEvent,
   CheckSuiteEvent,
@@ -8,7 +8,7 @@ import {
   PushEvent,
   WorkflowJobEvent,
   WorkflowRunEvent,
-} from '../interfaces/github.interface';
+} from '../../libs/github-models/external-github-interfaces';
 
 type GitHubPayload = PushEvent | PullRequestEvent | IssueEvent | WorkflowRunEvent | WorkflowJobEvent | CheckRunEvent | CheckSuiteEvent;
 

@@ -1,7 +1,7 @@
 import { logger } from '@codeheroes/common';
 import { Bucket } from '@google-cloud/storage';
 import { getStorage } from 'firebase-admin/storage';
-import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
+import { GitHubWebhookEvent } from '../processors/interfaces';
 
 export class StorageService {
   private bucket: Bucket;
