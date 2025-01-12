@@ -10,10 +10,10 @@ export class DatabaseService {
   }
 
   async lookupUserId(details: Record<string, unknown>): Promise<string | undefined> {
-    const authorId = details.authorExternalId;
+    const authorId = details.authorId;
 
     if (!authorId) {
-      logger.warn('No authorExternalId found in event details');
+      logger.warn('No authorId found in event details');
       return undefined;
     }
 
