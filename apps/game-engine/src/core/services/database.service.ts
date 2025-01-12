@@ -10,10 +10,10 @@ export class DatabaseService {
   }
 
   async lookupUserId(details: Record<string, unknown>): Promise<string | undefined> {
-    const authorId = details.authorId;
+    const sender = details.sender as { id: string; login: string } | undefined;
 
-    if (!authorId) {
-      logger.warn('No authorId found in event details');
+    if (!sender?.id) {
+      logger.warn('No sender ID found in event details');
       return undefined;
     }
 
@@ -21,25 +21,25 @@ export class DatabaseService {
       const connectedAccountSnapshot = await this.db
         .collectionGroup('connectedAccounts')
         .where('provider', '==', 'github')
-        .where('externalUserId', '==', authorId)
+        .where('externalUserId', '==', sender.id)
         .limit(1)
         .get();
 
       if (!connectedAccountSnapshot.empty) {
         const userId = connectedAccountSnapshot.docs[0].ref.parent.parent!.id;
-        logger.info('User ID found', { userId, authorId });
+        logger.info('User ID found', { userId, senderId: sender.id });
         return userId;
       }
 
-      logger.warn('No matching user found for author ID', { authorId });
+      logger.warn('No matching user found for sender', { senderId: sender.id, login: sender.login });
       return undefined;
     } catch (error) {
-      logger.error('Error looking up user ID', { error, authorId });
+      logger.error('Error looking up user ID', { error, senderId: sender.id });
       throw error;
     }
   }
 
-async createUserActivity(userId: string, eventId: string, activityInput: CreateActivityInput): Promise<void> {
+  async createUserActivity(userId: string, eventId: string, activityInput: CreateActivityInput): Promise<void> {
     try {
         await this.db
             .collection('users')
@@ -56,5 +56,5 @@ async createUserActivity(userId: string, eventId: string, activityInput: CreateA
         logger.error('Failed to create user activity', error);
         throw error;
     }
-}
+  }
 }
