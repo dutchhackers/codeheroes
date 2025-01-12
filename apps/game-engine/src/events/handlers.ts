@@ -1,6 +1,5 @@
-import * as logger from 'firebase-functions/logger';
+import { CreateActivityInput, WebhookEvent, logger } from '@codeheroes/common';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
-import { CreateActivityInput, WebhookEvent } from '@codeheroes/common';
 import { DatabaseService } from '../core/services/database.service';
 
 export const handleEventCreation = onDocumentCreated('events/{eventId}', async (event) => {
@@ -10,7 +9,7 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
 
   const dbService = new DatabaseService();
   const eventData = event.data?.data() as WebhookEvent;
-  
+
   if (!eventData) {
     logger.error('No event data found');
     return;
@@ -20,11 +19,11 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
     sender: (eventData.data as any)?.sender,
     repository: (eventData.data as any)?.repository,
   });
-  
+
   if (!userId) {
     logger.warn('Skipping activity creation - no matching user found', {
       eventId: event.params.eventId,
-      eventType: eventData.eventType
+      eventType: eventData.eventType,
     });
     return;
   }
