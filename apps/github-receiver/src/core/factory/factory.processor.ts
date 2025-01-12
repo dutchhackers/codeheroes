@@ -1,8 +1,7 @@
-import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
-import { IssueEventProcessor, PullRequestEventProcessor, PushEventProcessor } from '../processors';
-import { UnsupportedEventError } from '../errors/github-event.error';
-import { BaseEventProcessor } from '../processors/base-event.processor';
 import { GitHubEventType } from '../constants/github.constants';
+import { UnsupportedEventError } from '../errors/github-event.error';
+import { GitHubWebhookEvent } from '../interfaces/github-webhook-event.interface';
+import { BaseEventProcessor, IssueEventProcessor, PullRequestEventProcessor, PushEventProcessor } from '../processors';
 
 export class ProcessorFactory {
   static createProcessor(event: GitHubWebhookEvent): BaseEventProcessor {

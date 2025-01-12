@@ -1,4 +1,1 @@
-export * from './base-event.processor';
-export * from './pull-request-event.processor';
-export * from './push-event.processor';
-export * from './issue-event.processor';
+export { BaseEventProcessor, PullRequestEventProcessor, PushEventProcessor, IssueEventProcessor } from './github-event.processor';
