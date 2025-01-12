@@ -42,6 +42,7 @@ export interface GitHubWebhookEvent {
 export interface BaseEventDetails extends Record<string, unknown> {
   repository: Repository;
   lastCommitMessage?: string;
+  action: string;
 }
 
 export interface PushEventDetails extends BaseEventDetails {
@@ -59,5 +60,4 @@ export interface IssueEventDetails extends BaseEventDetails {
   issueNumber: number;
   title: string;
   state: string;
-  action: string;
 }

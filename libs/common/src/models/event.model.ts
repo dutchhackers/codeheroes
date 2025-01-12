@@ -7,7 +7,6 @@ interface Actor {
 
 // Event Document
 export interface WebhookEvent extends BaseDocument {
-  action: string; // e.g. 'github.push', 'github.pull_request.opened', 'github.pull_request.merged'
   source: ConnectedAccountProvider;
   eventId: string;
   actor: Actor;
