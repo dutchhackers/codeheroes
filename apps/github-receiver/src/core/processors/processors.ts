@@ -34,7 +34,12 @@ export abstract class BaseEventProcessor {
   }
 
   protected abstract getEventDetails(): PushEventDetails | PullRequestEventDetails | IssueEventDetails;
-  protected abstract getEventTimestamp(): string;
+  protected getEventTimestamp(): string {
+    const timestamp = this.getPayloadTimestamp();
+    return new Date(timestamp || new Date()).toISOString();
+  }
+
+  protected abstract getPayloadTimestamp(): string | undefined;
 
   private async storeRawEvent(): Promise<void> {
     if (!this.storageService) {
@@ -96,9 +101,9 @@ export class PushEventProcessor extends BaseEventProcessor {
     };
   }
 
-  protected getEventTimestamp(): string {
+  protected getPayloadTimestamp(): string | undefined {
     const payload = this.webhookEvent.payload as PushEvent;
-    return new Date(payload.head_commit?.timestamp || new Date()).toISOString();
+    return payload.head_commit?.timestamp;
   }
 }
 
@@ -118,9 +123,9 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
     };
   }
 
-  protected getEventTimestamp(): string {
+  protected getPayloadTimestamp(): string | undefined {
     const payload = this.webhookEvent.payload as PullRequestEvent;
-    return new Date(payload.pull_request.updated_at).toISOString();
+    return payload.pull_request.updated_at;
   }
 }
 
@@ -140,8 +145,8 @@ export class IssueEventProcessor extends BaseEventProcessor {
     };
   }
 
-  protected getEventTimestamp(): string {
+  protected getPayloadTimestamp(): string | undefined {
     const payload = this.webhookEvent.payload as IssueEvent;
-    return new Date(payload.issue.updated_at).toISOString();
+    return payload.issue.updated_at;
   }
 }
