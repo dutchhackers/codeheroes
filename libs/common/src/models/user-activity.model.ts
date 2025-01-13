@@ -1,12 +1,36 @@
 import { BaseDocument } from './common.model';
 import { EventSource } from './event.model';
 
-// Activity Document
+interface BaseActivityData {
+  type: string;
+}
+
+interface PushActivityData extends BaseActivityData {
+  type: 'push';
+  commitCount: number;
+  branch: string;
+}
+
+interface PullRequestActivityData extends BaseActivityData {
+  type: 'pull_request';
+  prNumber: number;
+  title: string;
+}
+
+interface IssueActivityData extends BaseActivityData {
+  type: 'issue';
+  issueNumber: number;
+  title: string;
+}
+
+export type ActivityData = PushActivityData | PullRequestActivityData | IssueActivityData;
+
 export interface UserActivity extends BaseDocument {
   action: string;
   eventId: string; // In the future this might become an optional field
   userId: string;
   eventSource: EventSource;
+  data?: ActivityData;
 }
 
 export type CreateActivityInput = Omit<
