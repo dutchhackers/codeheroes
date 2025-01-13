@@ -24,7 +24,7 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
   if (!userId) {
     logger.warn('Skipping activity creation - no matching user found', {
       eventId: event.params.eventId,
-      eventType: eventData.publisher.type,
+      eventType: eventData.source.type,
     });
     return;
   }
@@ -34,9 +34,9 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
     eventId: event.params.eventId,
     userId,
     details: {
-      source: eventData.publisher.source,
-      externalEventId: eventData.eventId,
-      externalEventTimestamp: eventData.eventTimestamp
+      source: eventData.source.provider,
+      externalEventId: eventData.source.externalEventId,
+      externalEventTimestamp: eventData.source.externalEventTimestamp
     }
   };
 
