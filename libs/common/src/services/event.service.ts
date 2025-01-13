@@ -17,7 +17,7 @@ export class EventService extends BaseFirestoreService<WebhookEvent> {
   async createEvent(eventData: CreateEventInput): Promise<WebhookEvent> {
     logger.info('Creating event:', eventData);
 
-    if (!eventData.eventId || !eventData.publisher) {
+    if (!eventData.source?.externalEventId || !eventData.source?.provider) {
       throw new Error('Required event fields missing');
     }
     return this.create(eventData);
@@ -25,7 +25,7 @@ export class EventService extends BaseFirestoreService<WebhookEvent> {
 
   async findByEventId(eventId: string): Promise<WebhookEvent | null> {
     const snapshot = await this.collection
-      .where('eventId', '==', eventId)
+      .where('source.externalEventId', '==', eventId)
       .limit(1)
       .get();
 
