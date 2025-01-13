@@ -8,7 +8,6 @@ export interface Publisher {
 export interface WebhookEvent extends BaseDocument {
   publisher: Publisher;
   eventId: string;
-  eventType: string;
   eventTimestamp: string; // ISO string
   data: Record<string, unknown>;
 }
