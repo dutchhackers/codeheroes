@@ -1,17 +1,12 @@
-import { BaseDocument, ConnectedAccountProvider } from './common.model';
+import { BaseDocument } from './common.model';
+import { EventSource } from './event.model';
 
 // Activity Document
 export interface UserActivity extends BaseDocument {
   action: string;
   eventId: string; // In the future this might become an optional field
   userId: string;
-  details: UserActivityDetails;
-}
-
-export interface UserActivityDetails {
-  source: ConnectedAccountProvider;
-  externalEventId: string;
-  externalEventTimestamp: string; // ISO string
+  eventSource: EventSource;
 }
 
 export type CreateActivityInput = Omit<
