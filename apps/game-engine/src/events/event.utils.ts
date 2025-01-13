@@ -1,14 +1,15 @@
 import { WebhookEvent } from '@codeheroes/common';
 
 export class EventUtils {
-  static getEventAction(event: WebhookEvent): string {
+    // Note: for now this will only work for GitHub events
+    static getEventAction(event: WebhookEvent): string {
+
     const source = event.publisher.source.toLowerCase();
     const eventType = event.publisher.type;
-    // Note: for now this will only work for GitHub events
-    const action = (event.data as any)?.action;
+    const eventAction = (event.data as any)?.action;
 
-    return action ? 
-      `${source}.${eventType}.${action}` : 
+    return eventAction ? 
+      `${source}.${eventType}.${eventAction}` : 
       `${source}.${eventType}`;
   }
 }

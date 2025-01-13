@@ -22,14 +22,10 @@ export class GitHubEventUtils {
     }
 
     const payload = req.body as GitHubPayload;
-    const githubEventAction = (payload as any).action ? 
-      `github.${githubEvent}.${(payload as any).action}` : 
-      `github.${githubEvent}`;
 
     return {
       eventId,
       eventType: githubEvent,
-      action: githubEventAction,
       payload,
       headers: req.headers,
       source: 'github',
