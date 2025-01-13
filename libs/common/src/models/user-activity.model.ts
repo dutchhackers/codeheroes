@@ -30,6 +30,7 @@ export interface UserActivity extends BaseDocument {
   eventId: string; // In the future this might become an optional field
   userId: string;
   eventSource: EventSource;
+  userFacingDescription: string;
   data?: ActivityData;
 }
 
