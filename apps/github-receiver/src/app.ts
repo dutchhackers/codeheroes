@@ -1,6 +1,5 @@
 import { logger } from '@codeheroes/common';
 import { Request, Response } from 'express';
-import { SupportedGitHubEventActions } from './core/constants/github.constants';
 import { HTTP_MESSAGES } from './core/constants/http.constants';
 import { GitHubEventError, UnsupportedEventError } from './core/errors/github-event.error';
 import { ResponseHandler } from './core/utils/response.handler';
@@ -12,15 +11,11 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     // Parse and validate request
     let eventDetails;
     try {
-      eventDetails = GitHubEventUtils.parseWebhookRequest(req);
+      eventDetails = GitHubEventUtils.validateAndParseWebhook(req);
+      logger.log('Processing event:', GitHubEventUtils.parseEventAction(req));
     } catch (error) {
       logger.error('Failed to parse GitHub event:', error);
-      throw new GitHubEventError(HTTP_MESSAGES.MISSING_GITHUB_EVENT);
-    }
-
-    // Validate action type
-    if (!SupportedGitHubEventActions.includes(eventDetails.action)) {
-      throw new UnsupportedEventError(`action:${eventDetails.action}`);
+      throw error instanceof Error ? error : new GitHubEventError(HTTP_MESSAGES.MISSING_GITHUB_EVENT);
     }
 
     // Process the event

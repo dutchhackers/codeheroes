@@ -23,8 +23,10 @@ export abstract class BaseEventProcessor {
   protected async processEvent(): Promise<CreateEventInput> {
     return {
       eventId: this.webhookEvent.eventId,
-      eventType: `${this.webhookEvent.source}_${this.webhookEvent.eventType}`,
-      source: this.webhookEvent.source as ConnectedAccountProvider,
+      publisher: {
+        source: this.webhookEvent.source as ConnectedAccountProvider,
+        type: this.webhookEvent.eventType,
+      },
       data: this.getEventDetails(),
       eventTimestamp: this.getEventTimestamp(),
     };
@@ -91,7 +93,6 @@ export class PushEventProcessor extends BaseEventProcessor {
         name: payload.repository.name,
         owner: payload.repository.owner.login,
       },
-      action: this.webhookEvent.action,
       commitCount: payload.commits.length,
       branch: payload.ref,
       lastCommitMessage: payload.head_commit?.message || null,
@@ -117,7 +118,7 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
         name: payload.repository.name,
         owner: payload.repository.owner.login,
       },
-      action: this.webhookEvent.action,
+      action: payload.action,
       prNumber: payload.number,
       title: payload.pull_request.title,
       state: payload.pull_request.state,
@@ -143,7 +144,7 @@ export class IssueEventProcessor extends BaseEventProcessor {
         name: payload.repository.name,
         owner: payload.repository.owner.login,
       },
-      action: this.webhookEvent.action,
+      action: payload.action,
       issueNumber: payload.issue.number,
       title: payload.issue.title,
       state: payload.issue.state,

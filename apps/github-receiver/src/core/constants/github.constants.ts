@@ -1,21 +1,15 @@
-export const GitHubEventType = {
-  PUSH: 'push',
-  PULL_REQUEST: 'pull_request',
-  ISSUES: 'issues',
+export const GitHubEventConfig = {
+  'pull_request': ['opened', 'closed', 'merged', 'reviewed', 'updated'],
+  'issue': ['opened', 'closed', 'updated'],
+  'push': [undefined], // push events don't have actions
 } as const;
 
-export type GitHubEventType =
-  (typeof GitHubEventType)[keyof typeof GitHubEventType];
+export type SupportedEventType = keyof typeof GitHubEventConfig;
+export type SupportedEventAction<T extends SupportedEventType> = typeof GitHubEventConfig[T][number];
 
-export const SupportedGitHubEventActions: string[] = [
-  'github.pull_request.opened',
-  'github.pull_request.closed',
-  'github.pull_request.merged',
-  'github.pull_request.reviewed',
-  'github.pull_request.updated',
-  'github.issue.opened',
-  'github.issue.closed',
-  'github.issue.updated',
-  'github.push',
-  'github.workflow_run.completed',
-];
+export const SupportedGitHubEventActions: string[] = Object.entries(GitHubEventConfig)
+  .flatMap(([eventType, actions]) => 
+    actions.map(action => 
+      action ? `github.${eventType}.${action}` : `github.${eventType}`
+    )
+  );
