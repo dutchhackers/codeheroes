@@ -1,4 +1,3 @@
-import { UnsupportedEventError } from '../errors/github-event.error';
 import { GitHubWebhookEvent } from './interfaces';
 import { BaseEventProcessor, PushEventProcessor, PullRequestEventProcessor, IssueEventProcessor } from './processors';
 
@@ -12,7 +11,8 @@ export class ProcessorFactory {
       case 'issue':
         return new IssueEventProcessor(event);
       default:
-        throw new UnsupportedEventError(event.eventType);
+        // This should never happen as GitHubEventUtils validates event types
+        throw new Error(`Unexpected event type: ${event.eventType}`);
     }
   }
 }
