@@ -1,4 +1,3 @@
-import { GitHubEventType } from '../constants/github.constants';
 import { UnsupportedEventError } from '../errors/github-event.error';
 import { GitHubWebhookEvent } from './interfaces';
 import { BaseEventProcessor, PushEventProcessor, PullRequestEventProcessor, IssueEventProcessor } from './processors';
@@ -6,11 +5,11 @@ import { BaseEventProcessor, PushEventProcessor, PullRequestEventProcessor, Issu
 export class ProcessorFactory {
   static createProcessor(event: GitHubWebhookEvent): BaseEventProcessor {
     switch (event.eventType) {
-      case GitHubEventType.PUSH:
+      case 'push':
         return new PushEventProcessor(event);
-      case GitHubEventType.PULL_REQUEST:
+      case 'pull_request':
         return new PullRequestEventProcessor(event);
-      case GitHubEventType.ISSUES:
+      case 'issue':
         return new IssueEventProcessor(event);
       default:
         throw new UnsupportedEventError(event.eventType);

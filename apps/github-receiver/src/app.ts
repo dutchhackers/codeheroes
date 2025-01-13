@@ -11,6 +11,7 @@ export const App = async (req: Request, res: Response): Promise<void> => {
   try {
     // Parse event action first
     const eventAction = GitHubEventUtils.parseEventAction(req);
+    logger.log('Processing event:', eventAction);
     
     // Validate action type
     if (!SupportedGitHubEventActions.includes(eventAction)) {
@@ -26,10 +27,10 @@ export const App = async (req: Request, res: Response): Promise<void> => {
       throw new GitHubEventError(HTTP_MESSAGES.MISSING_GITHUB_EVENT);
     }
 
-    // Validate event type
-    if (!SupportedGitHubEventActions.includes(eventDetails.eventType)) {
-      throw new UnsupportedEventError(`event:${eventDetails.eventType}`);
-    }
+    // // Validate event type
+    // if (!SupportedGitHubEventActions.includes(eventDetails.eventType)) {
+    //   throw new UnsupportedEventError(`event:${eventDetails.eventType}`);
+    // }
 
     // Process the event
     const processor = ProcessorFactory.createProcessor(eventDetails);
