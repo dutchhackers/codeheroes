@@ -1,11 +1,13 @@
-import { ConnectedAccountProvider, CreateEventInput, EventService, logger } from '@codeheroes/common';
 import {
-  GitHubWebhookEvent,
+  ConnectedAccountProvider,
+  CreateEventInput,
+  EventService,
   IssueEventDetails,
-  ProcessResult,
+  logger,
   PullRequestEventDetails,
   PushEventDetails,
-} from './interfaces';
+} from '@codeheroes/common';
+import { GitHubWebhookEvent, ProcessResult } from './interfaces';
 import { IssueEvent, PullRequestEvent, PushEvent } from '../../_external/external-github-interfaces';
 import { StorageService } from '../storage/storage.service';
 
