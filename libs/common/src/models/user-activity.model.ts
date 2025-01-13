@@ -1,17 +1,37 @@
-import { BaseDocument, ConnectedAccountProvider } from './common.model';
+import { BaseDocument } from './common.model';
+import { EventSource } from './event.model';
 
-// Activity Document
+interface BaseActivityData {
+  type: string;
+}
+
+interface PushActivityData extends BaseActivityData {
+  type: 'push';
+  commitCount: number;
+  branch: string;
+}
+
+interface PullRequestActivityData extends BaseActivityData {
+  type: 'pull_request';
+  prNumber: number;
+  title: string;
+}
+
+interface IssueActivityData extends BaseActivityData {
+  type: 'issue';
+  issueNumber: number;
+  title: string;
+}
+
+export type ActivityData = PushActivityData | PullRequestActivityData | IssueActivityData;
+
 export interface UserActivity extends BaseDocument {
   action: string;
   eventId: string; // In the future this might become an optional field
   userId: string;
-  details: UserActivityDetails;
-}
-
-export interface UserActivityDetails {
-  source: ConnectedAccountProvider;
-  externalEventId: string;
-  externalEventTimestamp: string; // ISO string
+  eventSource: EventSource;
+  userFacingDescription: string;
+  data?: ActivityData;
 }
 
 export type CreateActivityInput = Omit<

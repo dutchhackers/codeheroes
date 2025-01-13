@@ -1,11 +1,13 @@
-import { ConnectedAccountProvider, CreateEventInput, EventService, logger } from '@codeheroes/common';
 import {
-  GitHubWebhookEvent,
+  ConnectedAccountProvider,
+  CreateEventInput,
+  EventService,
   IssueEventDetails,
-  ProcessResult,
+  logger,
   PullRequestEventDetails,
   PushEventDetails,
-} from './interfaces';
+} from '@codeheroes/common';
+import { GitHubWebhookEvent, ProcessResult } from './interfaces';
 import { IssueEvent, PullRequestEvent, PushEvent } from '../../_external/external-github-interfaces';
 import { StorageService } from '../storage/storage.service';
 
@@ -22,13 +24,13 @@ export abstract class BaseEventProcessor {
 
   protected async processEvent(): Promise<CreateEventInput> {
     return {
-      eventId: this.webhookEvent.eventId,
-      publisher: {
-        source: this.webhookEvent.source as ConnectedAccountProvider,
+      source: {
+        provider: this.webhookEvent.source as ConnectedAccountProvider,
         type: this.webhookEvent.eventType,
+        externalEventId: this.webhookEvent.eventId,
+        externalEventTimestamp: this.getEventTimestamp(),
       },
       data: this.getEventDetails(),
-      eventTimestamp: this.getEventTimestamp(),
     };
   }
 

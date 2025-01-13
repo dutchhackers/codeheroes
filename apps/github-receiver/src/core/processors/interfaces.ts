@@ -5,16 +5,10 @@ import {
   PullRequestEvent,
   PushEvent,
   WorkflowJobEvent,
-  WorkflowRunEvent
+  WorkflowRunEvent,
 } from '../../_external/external-github-interfaces';
 
 // Core interfaces
-
-export interface Repository {
-  id: string;
-  name: string;
-  owner: string;
-}
 
 export interface ProcessResult {
   success: boolean;
@@ -27,39 +21,14 @@ export interface GitHubWebhookEvent {
   eventId: string;
   eventType: string;
   signature?: string;
-  payload: PushEvent | PullRequestEvent | IssueEvent | WorkflowRunEvent | WorkflowJobEvent | CheckRunEvent | CheckSuiteEvent;
+  payload:
+    | PushEvent
+    | PullRequestEvent
+    | IssueEvent
+    | WorkflowRunEvent
+    | WorkflowJobEvent
+    | CheckRunEvent
+    | CheckSuiteEvent;
   headers: Record<string, string | string[] | undefined>;
   source: string;
-}
-
-// Event details interfaces
-export interface Sender {
-  id: string;
-  login: string;
-}
-
-export interface BaseEventDetails extends Record<string, unknown> {
-  repository: Repository;
-  lastCommitMessage?: string;
-  sender: Sender;
-}
-
-export interface PushEventDetails extends BaseEventDetails {
-  commitCount: number;
-  branch: string;
-  // Push events don't have an action property
-}
-
-export interface PullRequestEventDetails extends BaseEventDetails {
-  action: 'opened' | 'closed' | 'reopened' | 'synchronize' | 'edited' | string;
-  prNumber: number;
-  title: string;
-  state: string;
-}
-
-export interface IssueEventDetails extends BaseEventDetails {
-  action: 'opened' | 'closed' | 'reopened' | 'edited' | string;
-  issueNumber: number;
-  title: string;
-  state: string;
 }
