@@ -1,6 +1,7 @@
 import { CreateActivityInput, WebhookEvent, logger } from '@codeheroes/common';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { DatabaseService } from '../core/services/database.service';
+import { EventUtils } from './event.utils';
 
 export const handleEventCreation = onDocumentCreated('events/{eventId}', async (event) => {
   logger.info('New event document created', {
@@ -29,7 +30,7 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
   }
 
   const activityInput: CreateActivityInput = {
-    action: (eventData.data as any)?.action,
+    action: EventUtils.getEventAction(eventData),
     eventId: event.params.eventId,
     userId,
     details: {
