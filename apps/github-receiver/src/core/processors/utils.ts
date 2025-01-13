@@ -31,4 +31,14 @@ export class GitHubEventUtils {
       source: 'github',
     };
   }
+
+  static parseEventAction(req: Request): string {
+    const githubEvent = req.header('X-GitHub-Event');
+    const source = 'github';
+    const action = req.body?.action;
+
+    return action ? 
+      `${source}.${githubEvent}.${action}` : 
+      `${source}.${githubEvent}`;
+  }  
 }

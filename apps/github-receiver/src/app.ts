@@ -9,6 +9,14 @@ import { GitHubEventUtils } from './core/processors/utils';
 
 export const App = async (req: Request, res: Response): Promise<void> => {
   try {
+    // Parse event action first
+    const eventAction = GitHubEventUtils.parseEventAction(req);
+    
+    // Validate action type
+    if (!SupportedGitHubEventActions.includes(eventAction)) {
+      throw new UnsupportedEventError(`action:${eventAction}`);
+    }
+
     // Parse and validate request
     let eventDetails;
     try {
@@ -18,9 +26,9 @@ export const App = async (req: Request, res: Response): Promise<void> => {
       throw new GitHubEventError(HTTP_MESSAGES.MISSING_GITHUB_EVENT);
     }
 
-    // Validate action type
-    if (!SupportedGitHubEventActions.includes(eventDetails.action)) {
-      throw new UnsupportedEventError(`action:${eventDetails.action}`);
+    // Validate event type
+    if (!SupportedGitHubEventActions.includes(eventDetails.eventType)) {
+      throw new UnsupportedEventError(`event:${eventDetails.eventType}`);
     }
 
     // Process the event
