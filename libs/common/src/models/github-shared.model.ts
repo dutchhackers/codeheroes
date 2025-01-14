@@ -10,19 +10,19 @@ export interface Sender {
   login: string;
 }
 
-export interface BaseEventDetails extends Record<string, unknown> {
+export interface BaseEventData extends Record<string, unknown> {
   repository: Repository;
   lastCommitMessage?: string;
   sender: Sender;
 }
 
-export interface PushEventDetails extends BaseEventDetails {
+export interface PushEventData extends BaseEventData {
   commitCount: number;
   branch: string;
   // Push events don't have an action property
 }
 
-export interface PullRequestEventDetails extends BaseEventDetails {
+export interface PullRequestEventData extends BaseEventData {
   action: 'opened' | 'closed' | 'reopened' | 'synchronize' | 'edited' | string;
   prNumber: number;
   title: string;
@@ -32,7 +32,7 @@ export interface PullRequestEventDetails extends BaseEventDetails {
   mergedBy?: Sender;
 }
 
-export interface IssueEventDetails extends BaseEventDetails {
+export interface IssueEventData extends BaseEventData {
   action: 'opened' | 'closed' | 'reopened' | 'edited' | string;
   issueNumber: number;
   title: string;

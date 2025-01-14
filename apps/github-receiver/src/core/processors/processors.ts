@@ -2,10 +2,10 @@ import {
   ConnectedAccountProvider,
   CreateEventInput,
   EventService,
-  IssueEventDetails,
+  IssueEventData,
   logger,
-  PullRequestEventDetails,
-  PushEventDetails,
+  PullRequestEventData,
+  PushEventData,
   StorageService,
 } from '@codeheroes/common';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
@@ -32,11 +32,11 @@ export abstract class BaseEventProcessor {
         externalEventId: this.webhookEvent.eventId,
         externalEventTimestamp: this.getEventTimestamp(),
       },
-      data: this.getEventDetails(),
+      data: this.getEventData(),
     };
   }
 
-  protected abstract getEventDetails(): PushEventDetails | PullRequestEventDetails | IssueEventDetails;
+  protected abstract getEventData(): PushEventData | PullRequestEventData | IssueEventData;
   protected getEventTimestamp(): string {
     const timestamp = this.getPayloadTimestamp();
     return new Date(timestamp || new Date()).toISOString();
@@ -89,7 +89,7 @@ export abstract class BaseEventProcessor {
 }
 
 export class PushEventProcessor extends BaseEventProcessor {
-  protected getEventDetails(): PushEventDetails {
+  protected getEventData(): PushEventData {
     const payload = this.webhookEvent.payload as PushEvent;
     return {
       repository: {
@@ -114,7 +114,7 @@ export class PushEventProcessor extends BaseEventProcessor {
 }
 
 export class PullRequestEventProcessor extends BaseEventProcessor {
-  protected getEventDetails(): PullRequestEventDetails {
+  protected getEventData(): PullRequestEventData {
     const payload = this.webhookEvent.payload as PullRequestEvent;
     return {
       repository: {
@@ -148,7 +148,7 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
 }
 
 export class IssueEventProcessor extends BaseEventProcessor {
-  protected getEventDetails(): IssueEventDetails {
+  protected getEventData(): IssueEventData {
     const payload = this.webhookEvent.payload as IssueEvent;
     return {
       repository: {
