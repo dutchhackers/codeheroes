@@ -28,11 +28,11 @@ export abstract class BaseEventProcessor {
         externalEventId: this.webhookEvent.eventId,
         externalEventTimestamp: this.getEventTimestamp(),
       },
-      data: this.getEventDetails(),
+      data: this.getEventData(),
     };
   }
 
-  protected abstract getEventDetails(): PushEventDetails | PullRequestEventDetails | IssueEventDetails;
+  abstract getEventData(): PushEventDetails | PullRequestEventDetails | IssueEventDetails;
   protected getEventTimestamp(): string {
     const timestamp = this.getPayloadTimestamp();
     return new Date(timestamp || new Date()).toISOString();
@@ -71,7 +71,7 @@ export abstract class BaseEventProcessor {
 }
 
 export class PushEventProcessor extends BaseEventProcessor {
-  protected getEventDetails(): PushEventDetails {
+  protected getEventData(): PushEventDetails {
     const payload = this.webhookEvent.payload as PushEvent;
     return {
       repository: {
@@ -96,7 +96,7 @@ export class PushEventProcessor extends BaseEventProcessor {
 }
 
 export class PullRequestEventProcessor extends BaseEventProcessor {
-  protected getEventDetails(): PullRequestEventDetails {
+  protected getEventData(): PullRequestEventDetails {
     const payload = this.webhookEvent.payload as PullRequestEvent;
     return {
       repository: {
@@ -128,7 +128,7 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
 }
 
 export class IssueEventProcessor extends BaseEventProcessor {
-  protected getEventDetails(): IssueEventDetails {
+  protected getEventData(): IssueEventDetails {
     const payload = this.webhookEvent.payload as IssueEvent;
     return {
       repository: {

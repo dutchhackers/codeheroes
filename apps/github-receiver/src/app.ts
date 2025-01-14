@@ -28,6 +28,10 @@ export const App = async (req: Request, res: Response): Promise<void> => {
 
     // Process the event
     const processor = ProcessorFactory.createProcessor(eventDetails);
+
+    const eventData = processor.getEventData();
+    logger.info('Processing event:', eventData);
+
     const result = await processor.process();
 
     // Handle the result
