@@ -60,5 +60,13 @@ export const calculateXp = onDocumentCreated(
       activityId: event.params.activityId,
       ...xpResult,
     });
+
+    const dbService = new DatabaseService();
+    await dbService.updateUserXp(
+      event.params.userId,
+      event.params.activityId,
+      xpResult,
+      activity
+    );
   }
 );
