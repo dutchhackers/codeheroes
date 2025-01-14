@@ -1,7 +1,8 @@
-import { CreateActivityInput, WebhookEvent, logger } from '@codeheroes/common';
+import { CreateActivityInput, UserActivity, WebhookEvent, logger } from '@codeheroes/common';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { DatabaseService } from '../core/services/database.service';
 import { EventUtils } from './event.utils';
+import { XpCalculatorService } from '../core/services/xp-calculator.service';
 
 export const handleEventCreation = onDocumentCreated('events/{eventId}', async (event) => {
   logger.info('New event document created', {
@@ -44,9 +45,22 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
 export const calculateXp = onDocumentCreated(
   'users/{userId}/activities/{activityId}',
   async (event) => {
-    logger.info('Calculating XP for activity', {
+    const activity = event.data?.data() as UserActivity;
+    
+    if (!activity) {
+      logger.error('No activity data found');
+      return;
+    }
+
+    const xpCalculator = new XpCalculatorService();
+    const earnedXp = xpCalculator.calculateXpForActivity(activity);
+    const xpBreakdown = xpCalculator.generateXpBreakdown(activity);
+
+    logger.info('Calculated XP for activity', {
       userId: event.params.userId,
       activityId: event.params.activityId,
+      earnedXp,
+      xpBreakdown,
     });
   }
 );
