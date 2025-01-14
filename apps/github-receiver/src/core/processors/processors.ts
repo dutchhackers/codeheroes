@@ -6,10 +6,11 @@ import {
   logger,
   PullRequestEventDetails,
   PushEventDetails,
+  StorageService,
 } from '@codeheroes/common';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
 import { IssueEvent, PullRequestEvent, PushEvent } from '../../_external/external-github-interfaces';
-import { StorageService } from '../storage/storage.service';
+import { GitHubStorageUtils } from '../utils/github-storage.utils';
 
 export abstract class BaseEventProcessor {
   protected readonly eventService: EventService;
@@ -49,7 +50,7 @@ export abstract class BaseEventProcessor {
     }
 
     try {
-      await this.storageService.storeRawRequest(this.webhookEvent);
+      await GitHubStorageUtils.storeGitHubEvent(this.storageService, this.webhookEvent);
     } catch (error) {
       logger.error(`Failed to store raw event ${this.webhookEvent.eventId}:`, error);
     }
