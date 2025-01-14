@@ -7,13 +7,13 @@ export interface EventSource {
   externalEventTimestamp: string; // ISO string
 }
 
-export interface WebhookEvent extends BaseDocument {
+export interface Event extends BaseDocument {
   type: string;
   source: EventSource;
   data: Record<string, unknown>;
 }
 
 export type CreateEventInput = Omit<
-  WebhookEvent,
+  Event,
   'id' | 'createdAt' | 'updatedAt'
 >;

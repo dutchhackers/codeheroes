@@ -2,13 +2,13 @@ import {
   ConnectedAccountProvider,
   CreateEventInput,
   EventService,
+  EventSource,
   IssueEventDetails,
-  logger,
   PullRequestEventDetails,
   PushEventDetails
 } from '@codeheroes/common';
 import { IssueEvent, PullRequestEvent, PushEvent } from '../../_external/external-github-interfaces';
-import { GitHubWebhookEvent, ProcessResult } from './interfaces';
+import { GitHubWebhookEvent } from './interfaces';
 
 export abstract class BaseEventProcessor {
   protected readonly eventService: EventService;
@@ -23,15 +23,19 @@ export abstract class BaseEventProcessor {
     return `${this.webhookEvent.source}_${this.webhookEvent.eventType}`;
   }
 
+  getEventSource(): EventSource {
+    return {
+      provider: this.webhookEvent.source as ConnectedAccountProvider,
+      type: this.webhookEvent.eventType,
+      externalEventId: this.webhookEvent.eventId,
+      externalEventTimestamp: this.getEventTimestamp(),
+    };
+  }
+
   protected async processEvent(): Promise<CreateEventInput> {
     return {
-      type: this.getEventType(),  // Use the new method here
-      source: {
-        provider: this.webhookEvent.source as ConnectedAccountProvider,
-        type: this.webhookEvent.eventType,
-        externalEventId: this.webhookEvent.eventId,
-        externalEventTimestamp: this.getEventTimestamp(),
-      },
+      type: this.getEventType(),
+      source: this.getEventSource(),
       data: this.getEventData(),
     };
   }
@@ -43,35 +47,6 @@ export abstract class BaseEventProcessor {
   }
 
   protected abstract getPayloadTimestamp(): string | undefined;
-
-  async process(): Promise<ProcessResult> {
-    try {
-      const existingEvent = await this.eventService.findByEventId(this.webhookEvent.eventId);
-      if (existingEvent) {
-        logger.info(`Event ${this.webhookEvent.eventId} already processed`);
-        return {
-          success: false,
-          message: `Event ${this.webhookEvent.eventId} already processed`,
-        };
-      }
-
-      const event = await this.processEvent();
-
-      await this.eventService.createEvent(event);
-      logger.info('Event created successfully');
-
-      return {
-        success: true,
-        message: 'Event processed successfully',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Failed to process event',
-        error: error instanceof Error ? error : new Error(String(error)),
-      };
-    }
-  }
 }
 
 export class PushEventProcessor extends BaseEventProcessor {

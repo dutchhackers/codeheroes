@@ -8,14 +8,6 @@ import {
   WorkflowRunEvent,
 } from '../../_external/external-github-interfaces';
 
-// Core interfaces
-
-export interface ProcessResult {
-  success: boolean;
-  message: string;
-  error?: Error;
-}
-
 // Webhook event interface
 export interface GitHubWebhookEvent {
   eventId: string;

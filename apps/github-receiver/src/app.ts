@@ -1,4 +1,4 @@
-import { EventService, getCurrentTimeAsISO, logger, StorageService } from '@codeheroes/common';
+import { EventService, logger, StorageService } from '@codeheroes/common';
 import { Request, Response } from 'express';
 import { HTTP_MESSAGES } from './core/constants/http.constants';
 import { GitHubEventError, UnsupportedEventError } from './core/errors/github-event.error';
@@ -30,33 +30,20 @@ export const App = async (req: Request, res: Response): Promise<void> => {
 
     const eventType = processor.getEventType();
     const eventData = processor.getEventData();
+    const eventSource = processor.getEventSource();
     logger.info('Processing event:', eventData);
 
     const eventService = new EventService();
-    await eventService.createSimpleEvent(
-      eventType,
-      {
-        provider: eventDetails.source,
-        type: eventDetails.eventType,
-        externalEventId: eventDetails.eventId,
-        externalEventTimestamp: getCurrentTimeAsISO(), // to be updated later
-      },
-      eventData
-    );
-
-    // const result = await processor.process();
-
-    // // Handle the result
-    // if (!result.success) {
-    //   if (result.error) {
-    //     throw result.error;
-    //   }
-    //   // Handle non-error cases (like duplicates)
-    //   ResponseHandler.success(res, result.message);
-    //   return;
-    // }
-
-    ResponseHandler.success(res, HTTP_MESSAGES.EVENT_PROCESSED);
+    try {
+      await eventService.createEvent(eventType, eventSource, eventData);
+      ResponseHandler.success(res, HTTP_MESSAGES.EVENT_PROCESSED);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already processed')) {
+        ResponseHandler.success(res, error.message);
+        return;
+      }
+      throw error;
+    }
   } catch (error) {
     handleError(error, res);
   }
