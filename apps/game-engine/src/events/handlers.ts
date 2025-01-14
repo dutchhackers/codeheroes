@@ -4,7 +4,7 @@ import { DatabaseService } from '../core/services/database.service';
 import { XpCalculatorService } from '../core/services/xp-calculator.service';
 import { EventUtils } from './event.utils';
 
-export const handleEventCreation = onDocumentCreated('events/{eventId}', async (event) => {
+export const createUserActivity = onDocumentCreated('events/{eventId}', async (event) => {
   logger.info('New event document created', {
     eventId: event.params.eventId,
   });
@@ -42,7 +42,7 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
   await dbService.createUserActivity(activityInput);
 });
 
-export const calculateXp = onDocumentCreated(
+export const calculateUserXp = onDocumentCreated(
   'users/{userId}/activities/{activityId}',
   async (event) => {
     const activity = event.data?.data() as UserActivity;
