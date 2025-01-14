@@ -1,10 +1,11 @@
-import { logger } from '@codeheroes/common';
+import { logger, StorageService } from '@codeheroes/common';
 import { Request, Response } from 'express';
 import { HTTP_MESSAGES } from './core/constants/http.constants';
 import { GitHubEventError, UnsupportedEventError } from './core/errors/github-event.error';
 import { ResponseHandler } from './core/utils/response.handler';
 import { ProcessorFactory } from './core/processors/factory';
 import { GitHubEventUtils } from './core/processors/utils';
+import { GitHubStorageUtils } from './core/utils/github-storage.utils';
 
 export const App = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -13,6 +14,13 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     try {
       eventDetails = GitHubEventUtils.validateAndParseWebhook(req);
       logger.log('Processing event:', GitHubEventUtils.parseEventAction(req));
+
+      // Store raw event
+      const storageService = new StorageService();
+      await GitHubStorageUtils.storeGitHubEvent(storageService, eventDetails).catch(error => {
+        logger.error(`Failed to store raw event ${eventDetails.eventId}:`, error);
+      });
+      
     } catch (error) {
       // logger.error('Failed to parse GitHub event:', error);
       throw error instanceof Error ? error : new GitHubEventError(HTTP_MESSAGES.MISSING_GITHUB_EVENT);
