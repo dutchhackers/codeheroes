@@ -32,6 +32,7 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     ResponseHandler.success(res, MESSAGES.EVENT_PROCESSED);
   } catch (error) {
     if (error instanceof GitHubError && error.type === ErrorType.UNSUPPORTED_EVENT) {
+      logger.info('Unsupported event:', GitHubEventUtils.parseEventAction(req));
       // Silently handle unsupported events
       ResponseHandler.handleError(error, res);
       return;
