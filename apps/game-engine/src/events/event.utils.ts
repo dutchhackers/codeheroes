@@ -1,10 +1,4 @@
-import {
-  WebhookEvent,
-  ActivityData,
-  PushEventDetails,
-  PullRequestEventDetails,
-  IssueEventDetails,
-} from '@codeheroes/common';
+import { WebhookEvent, ActivityData, PushEventData, PullRequestEventData, IssueEventData } from '@codeheroes/common';
 
 export class EventUtils {
   // Note: for now this will only work for GitHub events
@@ -18,11 +12,11 @@ export class EventUtils {
 
   static extractActivityData(event: WebhookEvent): ActivityData | undefined {
     const eventType = event.source.type;
-    const eventDetails = event.data as PushEventDetails | PullRequestEventDetails | IssueEventDetails;
+    const eventData = event.data as PushEventData | PullRequestEventData | IssueEventData;
 
     switch (eventType) {
       case 'push': {
-        const details = eventDetails as PushEventDetails;
+        const details = eventData as PushEventData;
         return {
           type: 'push',
           commitCount: details.commitCount,
@@ -30,16 +24,16 @@ export class EventUtils {
         };
       }
       case 'pull_request': {
-        const details = eventDetails as PullRequestEventDetails;
+        const details = eventData as PullRequestEventData;
         return {
           type: 'pull_request',
           prNumber: details.prNumber,
           title: details.title,
-          merged: details.merged
+          merged: details.merged,
         };
       }
       case 'issue': {
-        const details = eventDetails as IssueEventDetails;
+        const details = eventData as IssueEventData;
         return {
           type: 'issue',
           issueNumber: details.issueNumber,
@@ -53,23 +47,25 @@ export class EventUtils {
 
   static generateUserFacingDescription(event: WebhookEvent): string {
     const eventType = event.source.type;
-    const eventDetails = event.data as PushEventDetails | PullRequestEventDetails | IssueEventDetails;
-    const repoName = eventDetails.repository.name;
+    const eventData = event.data as PushEventData | PullRequestEventData | IssueEventData;
+    const repoName = eventData.repository.name;
 
     switch (eventType) {
       case 'push': {
-        const details = eventDetails as PushEventDetails;
-        const branch = details.branch.replace('refs/heads/', '');
-        return `Committed ${details.commitCount} time(s) to ${repoName} (${branch}) (GitHub)`;
+        const data = eventData as PushEventData;
+        const branch = data.branch.replace('refs/heads/', '');
+        return `Committed ${data.commitCount} time(s) to ${repoName} (${branch}) (GitHub)`;
       }
       case 'pull_request': {
-        const details = eventDetails as PullRequestEventDetails;
-        const action = details.action === 'closed' && details.state === 'closed' ? 'merged' : details.action;
-        return `${action.charAt(0).toUpperCase() + action.slice(1)} PR #${details.prNumber} in ${repoName} (GitHub)`;
+        const data = eventData as PullRequestEventData;
+        const action = data.action === 'closed' && data.state === 'closed' ? 'merged' : data.action;
+        return `${action.charAt(0).toUpperCase() + action.slice(1)} PR #${data.prNumber} in ${repoName} (GitHub)`;
       }
       case 'issue': {
-        const details = eventDetails as IssueEventDetails;
-        return `${details.action.charAt(0).toUpperCase() + details.action.slice(1)} issue #${details.issueNumber} in ${repoName} (GitHub)`;
+        const data = eventData as IssueEventData;
+        return `${data.action.charAt(0).toUpperCase() + data.action.slice(1)} issue #${
+          data.issueNumber
+        } in ${repoName} (GitHub)`;
       }
       default:
         return 'Performed an action on GitHub';
