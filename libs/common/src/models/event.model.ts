@@ -13,7 +13,3 @@ export interface Event extends BaseDocument {
   data: Record<string, unknown>;
 }
 
-export type CreateEventInput = Omit<
-  Event,
-  'id' | 'createdAt' | 'updatedAt'
->;

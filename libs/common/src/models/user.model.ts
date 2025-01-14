@@ -56,4 +56,3 @@ export interface UserActivity extends BaseDocument {
   data?: ActivityData;
 }
 
-export type CreateActivityInput = Omit<UserActivity, 'id' | 'createdAt' | 'updatedAt'>;
