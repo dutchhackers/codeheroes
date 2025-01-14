@@ -14,6 +14,11 @@ export interface GameXpSettings {
   [key: string]: XpSettings;
 }
 
+export interface XpCalculationResponse {
+  totalXp: number;
+  breakdown: XpBreakdownItem[];
+}
+
 export const DEFAULT_XP_SETTINGS: GameXpSettings = {
   'github.push': {
     base: 10,

@@ -53,14 +53,12 @@ export const calculateXp = onDocumentCreated(
     }
 
     const xpCalculator = new XpCalculatorService();
-    const earnedXp = xpCalculator.calculateXpForActivity(activity);
-    const xpBreakdown = xpCalculator.generateXpBreakdown(activity);
+    const xpResult = xpCalculator.calculateXp(activity);
 
     logger.info('Calculated XP for activity', {
       userId: event.params.userId,
       activityId: event.params.activityId,
-      earnedXp,
-      xpBreakdown,
+      ...xpResult,
     });
   }
 );

@@ -1,4 +1,4 @@
-import { UserActivity, XpBreakdownItem, GameXpSettings, DEFAULT_XP_SETTINGS } from '@codeheroes/common';
+import { UserActivity, XpBreakdownItem, GameXpSettings, DEFAULT_XP_SETTINGS, XpCalculationResponse } from '@codeheroes/common';
 
 export class XpCalculatorService {
   private xpSettings: GameXpSettings;
@@ -7,30 +7,13 @@ export class XpCalculatorService {
     this.xpSettings = xpSettings;
   }
 
-  public calculateXpForActivity(activity: UserActivity): number {
+  public calculateXp(activity: UserActivity): XpCalculationResponse {
     const xpSettings = this.xpSettings[activity.action];
-    if (!xpSettings) {
-      return 0;
-    }
-
-    let totalXp = xpSettings.base;
-
-    // Add bonuses based on activity type
-    if (activity.action === 'github.push' && activity.data?.type === 'push') {
-      if (activity.data.commitCount > 1) {
-        totalXp += xpSettings.bonuses?.multipleCommits || 0;
-      }
-    }
-
-    return totalXp;
-  }
-
-  public generateXpBreakdown(activity: UserActivity): XpBreakdownItem[] {
     const breakdown: XpBreakdownItem[] = [];
-    const xpSettings = this.xpSettings[activity.action];
+    let totalXp = 0;
 
     if (!xpSettings) {
-      return breakdown;
+      return { totalXp: 0, breakdown: [] };
     }
 
     // Add base XP
@@ -38,17 +21,23 @@ export class XpCalculatorService {
       description: `Base XP for ${activity.action}`,
       xp: xpSettings.base,
     });
+    totalXp += xpSettings.base;
 
-    // Add bonuses based on activity type
+    // Calculate bonuses based on activity type
     if (activity.action === 'github.push' && activity.data?.type === 'push') {
       if (activity.data.commitCount > 1) {
+        const bonus = xpSettings.bonuses?.multipleCommits || 0;
         breakdown.push({
           description: 'Bonus for multiple commits in push',
-          xp: xpSettings.bonuses?.multipleCommits || 0,
+          xp: bonus,
         });
+        totalXp += bonus;
       }
     }
 
-    return breakdown;
+    return {
+      totalXp,
+      breakdown,
+    };
   }
 }
