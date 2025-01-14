@@ -13,7 +13,14 @@ import { GitHubEventConfig, SupportedEventType } from '../constants/github.const
 import { GitHubEventError, UnsupportedEventError } from '../errors/github-event.error';
 import { ERROR_MESSAGES } from '../constants/error.constants';
 
-type GitHubPayload = PushEvent | PullRequestEvent | IssueEvent | WorkflowRunEvent | WorkflowJobEvent | CheckRunEvent | CheckSuiteEvent;
+type GitHubPayload =
+  | PushEvent
+  | PullRequestEvent
+  | IssueEvent
+  | WorkflowRunEvent
+  | WorkflowJobEvent
+  | CheckRunEvent
+  | CheckSuiteEvent;
 
 export class GitHubEventUtils {
   static isEventTypeSupported(eventType: string): eventType is SupportedEventType {
@@ -39,9 +46,7 @@ export class GitHubEventUtils {
     }
 
     if (!this.isEventActionSupported(githubEvent, action)) {
-      throw new UnsupportedEventError(
-        ERROR_MESSAGES.UNSUPPORTED_ACTION(action, githubEvent)
-      );
+      throw new UnsupportedEventError(ERROR_MESSAGES.UNSUPPORTED_ACTION(action, githubEvent));
     }
 
     const payload = req.body as GitHubPayload;
@@ -60,8 +65,6 @@ export class GitHubEventUtils {
     const source = 'github';
     const action = req.body?.action;
 
-    return action ? 
-      `${source}.${githubEvent}.${action}` : 
-      `${source}.${githubEvent}`;
-  }  
+    return action ? `${source}.${githubEvent}.${action}` : `${source}.${githubEvent}`;
+  }
 }
