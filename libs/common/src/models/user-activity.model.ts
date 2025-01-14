@@ -5,19 +5,20 @@ interface BaseActivityData {
   type: string;
 }
 
-interface PushActivityData extends BaseActivityData {
+export interface PushActivityData extends BaseActivityData {
   type: 'push';
   commitCount: number;
   branch: string;
 }
 
-interface PullRequestActivityData extends BaseActivityData {
+export interface PullRequestActivityData extends BaseActivityData {
   type: 'pull_request';
   prNumber: number;
   title: string;
+  merged: boolean;
 }
 
-interface IssueActivityData extends BaseActivityData {
+export interface IssueActivityData extends BaseActivityData {
   type: 'issue';
   issueNumber: number;
   title: string;
@@ -34,7 +35,4 @@ export interface UserActivity extends BaseDocument {
   data?: ActivityData;
 }
 
-export type CreateActivityInput = Omit<
-  UserActivity,
-  'id' | 'createdAt' | 'updatedAt'
->;
+export type CreateActivityInput = Omit<UserActivity, 'id' | 'createdAt' | 'updatedAt'>;

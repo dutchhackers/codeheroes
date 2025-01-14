@@ -52,7 +52,10 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
     base: 20
   },
   'github.pull_request.closed': {
-    base: 30
+    base: 30,
+    bonuses: {
+      merged: 20
+    }
   },
   'github.issue.opened': {
     base: 15

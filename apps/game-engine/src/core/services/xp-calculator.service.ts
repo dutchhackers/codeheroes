@@ -1,10 +1,38 @@
-import { UserActivity, XpBreakdownItem, GameXpSettings, DEFAULT_XP_SETTINGS, XpCalculationResponse } from '@codeheroes/common';
+import { UserActivity, XpBreakdownItem, GameXpSettings, DEFAULT_XP_SETTINGS, XpCalculationResponse, ActivityData, PushActivityData, PullRequestActivityData } from '@codeheroes/common';
 
 export class XpCalculatorService {
   private xpSettings: GameXpSettings;
 
   constructor(xpSettings: GameXpSettings = DEFAULT_XP_SETTINGS) {
     this.xpSettings = xpSettings;
+  }
+
+  private isPushActivity(data: ActivityData | undefined): data is PushActivityData {
+    return data?.type === 'push';
+  }
+
+  private isPullRequestActivity(data: ActivityData | undefined): data is PullRequestActivityData {
+    return data?.type === 'pull_request';
+  }
+
+  private calculatePushBonus(data: PushActivityData, settings: GameXpSettings['github.push']): XpBreakdownItem | null {
+    if (data.commitCount > 1) {
+      return {
+        description: 'Bonus for multiple commits in push',
+        xp: settings.bonuses?.multipleCommits || 0,
+      };
+    }
+    return null;
+  }
+
+  private calculatePullRequestBonus(data: PullRequestActivityData, settings: GameXpSettings['github.pull_request.closed']): XpBreakdownItem | null {
+    if (data.merged) {
+      return {
+        description: 'Bonus for merging pull request',
+        xp: settings.bonuses?.merged || 0,
+      };
+    }
+    return null;
   }
 
   public calculateXp(activity: UserActivity): XpCalculationResponse {
@@ -24,20 +52,19 @@ export class XpCalculatorService {
     totalXp += xpSettings.base;
 
     // Calculate bonuses based on activity type
-    if (activity.action === 'github.push' && activity.data?.type === 'push') {
-      if (activity.data.commitCount > 1) {
-        const bonus = xpSettings.bonuses?.multipleCommits || 0;
-        breakdown.push({
-          description: 'Bonus for multiple commits in push',
-          xp: bonus,
-        });
-        totalXp += bonus;
-      }
+    let bonus: XpBreakdownItem | null = null;
+
+    if (activity.action === 'github.push' && this.isPushActivity(activity.data)) {
+      bonus = this.calculatePushBonus(activity.data, xpSettings);
+    } else if (activity.action === 'github.pull_request.closed' && this.isPullRequestActivity(activity.data)) {
+      bonus = this.calculatePullRequestBonus(activity.data, xpSettings);
     }
 
-    return {
-      totalXp,
-      breakdown,
-    };
+    if (bonus) {
+      breakdown.push(bonus);
+      totalXp += bonus.xp;
+    }
+
+    return { totalXp, breakdown };
   }
 }
