@@ -10,8 +10,8 @@ import {
   WorkflowRunEvent,
 } from '../../_external/external-github-interfaces';
 import { GitHubEventConfig, SupportedEventType } from '../constants/github.constants';
-import { GitHubEventError, UnsupportedEventError } from '../errors/github-event.error';
-import { ERROR_MESSAGES } from '../constants/error.constants';
+import { GitHubError } from '../errors/github-event.error';
+import { ErrorType, MESSAGES } from '../constants/constants';
 
 type GitHubPayload =
   | PushEvent
@@ -38,15 +38,21 @@ export class GitHubEventUtils {
     const action = req.body?.action;
 
     if (!githubEvent || !eventId) {
-      throw new GitHubEventError(ERROR_MESSAGES.MISSING_HEADERS);
+      throw new GitHubError(MESSAGES.MISSING_HEADERS, ErrorType.VALIDATION);
     }
 
     if (!this.isEventTypeSupported(githubEvent)) {
-      throw new UnsupportedEventError(githubEvent);
+      throw new GitHubError(
+        MESSAGES.unsupportedEvent(githubEvent),
+        ErrorType.UNSUPPORTED_EVENT
+      );
     }
 
     if (!this.isEventActionSupported(githubEvent, action)) {
-      throw new UnsupportedEventError(ERROR_MESSAGES.UNSUPPORTED_ACTION(action, githubEvent));
+      throw new GitHubError(
+        MESSAGES.unsupportedAction(action, githubEvent),
+        ErrorType.UNSUPPORTED_EVENT
+      );
     }
 
     const payload = req.body as GitHubPayload;

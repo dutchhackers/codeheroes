@@ -1,7 +1,7 @@
 import { logger } from '@codeheroes/common';
 import { Request, Response } from 'express';
-import { HTTP_MESSAGES } from './core/constants/http.constants';
-import { GitHubEventError, UnsupportedEventError } from './core/errors/github-event.error';
+import { MESSAGES } from './core/constants/constants';
+import { GitHubError } from './core/errors/github-event.error';
 import { ResponseHandler } from './core/utils/response.handler';
 import { ProcessorFactory } from './core/processors/factory';
 import { GitHubEventUtils } from './core/processors/utils';
@@ -14,44 +14,24 @@ export const App = async (req: Request, res: Response): Promise<void> => {
       eventDetails = GitHubEventUtils.validateAndParseWebhook(req);
       logger.log('Processing event:', GitHubEventUtils.parseEventAction(req));
     } catch (error) {
-      // logger.error('Failed to parse GitHub event:', error);
-      throw error instanceof Error ? error : new GitHubEventError(HTTP_MESSAGES.MISSING_GITHUB_EVENT);
+      throw error instanceof Error ? error : new GitHubError(MESSAGES.MISSING_GITHUB_EVENT);
     }
 
     // Process the event
     const processor = ProcessorFactory.createProcessor(eventDetails);
     const result = await processor.process();
 
-    // Handle the result
     if (!result.success) {
       if (result.error) {
         throw result.error;
       }
-      // Handle non-error cases (like duplicates)
       ResponseHandler.success(res, result.message);
       return;
     }
 
-    ResponseHandler.success(res, HTTP_MESSAGES.EVENT_PROCESSED);
+    ResponseHandler.success(res, MESSAGES.EVENT_PROCESSED);
   } catch (error) {
-    handleError(error, res);
+    logger.error('Event processing error:', error);
+    ResponseHandler.handleError(error, res);
   }
-};
-
-const handleError = (error: unknown, res: Response): void => {
-  if (error instanceof UnsupportedEventError) {
-    const eventType = error.message.split(':')[1].trim();
-    logger.info(`Skipping unsupported event type: ${eventType}`);
-    ResponseHandler.success(res, HTTP_MESSAGES.UNSUPPORTED_EVENT(eventType));
-    return;
-  }
-
-  if (error instanceof GitHubEventError) {
-    logger.error('GitHub event error:', error);
-    ResponseHandler.badRequest(res, error.message);
-    return;
-  }
-
-  logger.error('Failed to process event:', error);
-  ResponseHandler.error(res, HTTP_MESSAGES.PROCESSING_ERROR);
 };

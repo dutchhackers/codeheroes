@@ -1,20 +1,11 @@
-export class UnsupportedEventError extends Error {
-  constructor(eventTypeOrAction: string) {
-    super(`Unsupported event: ${eventTypeOrAction}`);
-    this.name = 'UnsupportedEventError';
-  }
-}
+import { ErrorType } from '../constants/constants';
 
-export class GitHubEventError extends Error {
-  constructor(message: string) {
+export class GitHubError extends Error {
+  constructor(
+    message: string,
+    public readonly type: ErrorType = ErrorType.GITHUB_EVENT
+  ) {
     super(message);
-    this.name = 'GitHubEventError';
-  }
-}
-
-export class GitHubValidationError extends GitHubEventError {
-  constructor(message: string) {
-    super(message);
-    this.name = 'GitHubValidationError';
+    this.name = 'GitHubError';
   }
 }
