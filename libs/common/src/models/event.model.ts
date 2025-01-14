@@ -8,6 +8,7 @@ export interface EventSource {
 }
 
 export interface WebhookEvent extends BaseDocument {
+  type: string;
   source: EventSource;
   data: Record<string, unknown>;
 }
