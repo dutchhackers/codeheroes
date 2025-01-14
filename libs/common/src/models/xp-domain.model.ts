@@ -1,3 +1,5 @@
+import { BaseDocument } from './common.model';
+
 export interface XpBreakdownItem {
   description: string;
   xp: number;
@@ -17,6 +19,26 @@ export interface GameXpSettings {
 export interface XpCalculationResponse {
   totalXp: number;
   breakdown: XpBreakdownItem[];
+}
+
+export interface XpHistoryEntry extends BaseDocument {
+  xpChange: number;
+  newXp: number;
+  newLevel: number;
+  activityId: string;
+  activityType: string;
+  breakdown: XpBreakdownItem[];
+}
+
+export interface LevelCalculationResult {
+  level: number;
+  xpToNextLevel: number;
+}
+
+export interface UserXpData {
+  xp: number;
+  level: number;
+  xpToNextLevel: number;
 }
 
 export const DEFAULT_XP_SETTINGS: GameXpSettings = {
