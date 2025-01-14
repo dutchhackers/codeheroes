@@ -124,6 +124,12 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
       prNumber: payload.number,
       title: payload.pull_request.title,
       state: payload.pull_request.state,
+      merged: payload.pull_request.merged,
+      mergedAt: payload.pull_request.merged_at || undefined,
+      mergedBy: payload.pull_request.merged_by ? {
+        id: payload.pull_request.merged_by.id.toString(),
+        login: payload.pull_request.merged_by.login
+      } : undefined,
       sender: {
         id: payload.sender.id.toString(),
         login: payload.sender.login,

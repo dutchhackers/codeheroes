@@ -62,6 +62,8 @@ export interface PullRequestEvent {
     state: 'open' | 'closed';
     draft: boolean;
     merged: boolean;
+    merged_at: string | null;
+    merged_by: GitHubUser | null;
     updated_at: string;
     html_url: string;
     body?: string;

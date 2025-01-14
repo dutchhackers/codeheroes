@@ -14,7 +14,7 @@ export const App = async (req: Request, res: Response): Promise<void> => {
       eventDetails = GitHubEventUtils.validateAndParseWebhook(req);
       logger.log('Processing event:', GitHubEventUtils.parseEventAction(req));
     } catch (error) {
-      logger.error('Failed to parse GitHub event:', error);
+      // logger.error('Failed to parse GitHub event:', error);
       throw error instanceof Error ? error : new GitHubEventError(HTTP_MESSAGES.MISSING_GITHUB_EVENT);
     }
 

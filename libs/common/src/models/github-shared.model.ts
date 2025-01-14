@@ -27,6 +27,9 @@ export interface PullRequestEventDetails extends BaseEventDetails {
   prNumber: number;
   title: string;
   state: string;
+  merged: boolean;
+  mergedAt?: string;
+  mergedBy?: Sender;
 }
 
 export interface IssueEventDetails extends BaseEventDetails {

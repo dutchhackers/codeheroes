@@ -35,6 +35,7 @@ export class EventUtils {
           type: 'pull_request',
           prNumber: details.prNumber,
           title: details.title,
+          merged: details.merged
         };
       }
       case 'issue': {

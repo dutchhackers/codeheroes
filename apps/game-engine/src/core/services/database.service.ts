@@ -1,6 +1,7 @@
 import * as logger from 'firebase-functions/logger';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
-import { CreateActivityInput, getCurrentTimeAsISO } from '@codeheroes/common';
+import { CreateActivityInput, getCurrentTimeAsISO, UserActivity, XpCalculationResponse, XpHistoryEntry } from '@codeheroes/common';
+import { calculateLevel } from '../utils/level.utils';
 
 export class DatabaseService {
   private db: Firestore;
@@ -60,6 +61,71 @@ export class DatabaseService {
       logger.info('Created new user activity', { userId });
     } catch (error) {
       logger.error('Failed to create user activity', error);
+      throw error;
+    }
+  }
+
+  async updateUserXp(
+    userId: string,
+    activityId: string,
+    xpResult: XpCalculationResponse,
+    activity: UserActivity
+  ): Promise<void> {
+    const userRef = this.db.collection('users').doc(userId);
+
+    try {
+      await this.db.runTransaction(async (transaction) => {
+        const userDoc = await transaction.get(userRef);
+        if (!userDoc.exists) {
+          throw new Error('User document not found!');
+        }
+
+        const user = userDoc.data()!;
+        const updatedXp = (user.xp || 0) + xpResult.totalXp;
+        const levelUpResult = calculateLevel(
+          user.level || 1,
+          user.xpToNextLevel || 100,
+          updatedXp,
+          { baseXpPerLevel: 100, xpMultiplier: 1.5 }
+        );
+
+        const xpHistoryEntry: XpHistoryEntry = {
+          id: this.db.collection('users').doc().id,
+          xpChange: xpResult.totalXp,
+          newXp: updatedXp,
+          newLevel: levelUpResult.level,
+          activityId,
+          activityType: activity.action,
+          breakdown: xpResult.breakdown,
+          createdAt: getCurrentTimeAsISO(),
+          updatedAt: getCurrentTimeAsISO()
+        };
+
+        // Update user document
+        transaction.update(userRef, {
+          xp: updatedXp,
+          level: levelUpResult.level,
+          xpToNextLevel: levelUpResult.xpToNextLevel,
+          updatedAt: getCurrentTimeAsISO()
+        });
+
+        // Create XP history entry
+        const xpHistoryRef = userRef.collection('xpHistory').doc(xpHistoryEntry.id);
+        transaction.set(xpHistoryRef, xpHistoryEntry);
+
+        // Update activity document
+        const activityRef = userRef.collection('activities').doc(activityId);
+        transaction.update(activityRef, {
+          processed: true,
+          xpAwarded: xpResult.totalXp,
+          xpBreakdown: xpResult.breakdown,
+          updatedAt: getCurrentTimeAsISO()
+        });
+      });
+
+      logger.info('Successfully updated user XP and created history entry', { userId, activityId });
+    } catch (error) {
+      logger.error('Failed to update user XP', { error, userId, activityId });
       throw error;
     }
   }
