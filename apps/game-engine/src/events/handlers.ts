@@ -40,3 +40,13 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
 
   await dbService.createUserActivity(activityInput);
 });
+
+export const calculateXp = onDocumentCreated(
+  'users/{userId}/activities/{activityId}',
+  async (event) => {
+    logger.info('Calculating XP for activity', {
+      userId: event.params.userId,
+      activityId: event.params.activityId,
+    });
+  }
+);
