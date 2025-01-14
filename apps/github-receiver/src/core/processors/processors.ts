@@ -19,9 +19,13 @@ export abstract class BaseEventProcessor {
     this.webhookEvent = webhookEvent;
   }
 
+  getEventType(): string {
+    return `${this.webhookEvent.source}_${this.webhookEvent.eventType}`;
+  }
+
   protected async processEvent(): Promise<CreateEventInput> {
     return {
-      type: `${this.webhookEvent.source}_${this.webhookEvent.eventType}`,
+      type: this.getEventType(),  // Use the new method here
       source: {
         provider: this.webhookEvent.source as ConnectedAccountProvider,
         type: this.webhookEvent.eventType,
@@ -71,7 +75,7 @@ export abstract class BaseEventProcessor {
 }
 
 export class PushEventProcessor extends BaseEventProcessor {
-  protected getEventData(): PushEventDetails {
+  getEventData(): PushEventDetails {
     const payload = this.webhookEvent.payload as PushEvent;
     return {
       repository: {
@@ -96,7 +100,7 @@ export class PushEventProcessor extends BaseEventProcessor {
 }
 
 export class PullRequestEventProcessor extends BaseEventProcessor {
-  protected getEventData(): PullRequestEventDetails {
+  getEventData(): PullRequestEventDetails {
     const payload = this.webhookEvent.payload as PullRequestEvent;
     return {
       repository: {
@@ -128,7 +132,7 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
 }
 
 export class IssueEventProcessor extends BaseEventProcessor {
-  protected getEventData(): IssueEventDetails {
+  getEventData(): IssueEventDetails {
     const payload = this.webhookEvent.payload as IssueEvent;
     return {
       repository: {

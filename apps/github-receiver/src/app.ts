@@ -1,4 +1,4 @@
-import { logger, StorageService } from '@codeheroes/common';
+import { EventService, getCurrentTimeAsISO, logger, StorageService } from '@codeheroes/common';
 import { Request, Response } from 'express';
 import { HTTP_MESSAGES } from './core/constants/http.constants';
 import { GitHubEventError, UnsupportedEventError } from './core/errors/github-event.error';
@@ -17,10 +17,9 @@ export const App = async (req: Request, res: Response): Promise<void> => {
 
       // Store raw event
       const storageService = new StorageService();
-      await GitHubStorageUtils.storeGitHubEvent(storageService, eventDetails).catch(error => {
+      await GitHubStorageUtils.storeGitHubEvent(storageService, eventDetails).catch((error) => {
         logger.error(`Failed to store raw event ${eventDetails.eventId}:`, error);
       });
-      
     } catch (error) {
       // logger.error('Failed to parse GitHub event:', error);
       throw error instanceof Error ? error : new GitHubEventError(HTTP_MESSAGES.MISSING_GITHUB_EVENT);
@@ -29,20 +28,33 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     // Process the event
     const processor = ProcessorFactory.createProcessor(eventDetails);
 
+    const eventType = processor.getEventType();
     const eventData = processor.getEventData();
     logger.info('Processing event:', eventData);
 
-    const result = await processor.process();
+    const eventService = new EventService();
+    await eventService.createSimpleEvent(
+      eventType,
+      {
+        provider: eventDetails.source,
+        type: eventDetails.eventType,
+        externalEventId: eventDetails.eventId,
+        externalEventTimestamp: getCurrentTimeAsISO(), // to be updated later
+      },
+      eventData
+    );
 
-    // Handle the result
-    if (!result.success) {
-      if (result.error) {
-        throw result.error;
-      }
-      // Handle non-error cases (like duplicates)
-      ResponseHandler.success(res, result.message);
-      return;
-    }
+    // const result = await processor.process();
+
+    // // Handle the result
+    // if (!result.success) {
+    //   if (result.error) {
+    //     throw result.error;
+    //   }
+    //   // Handle non-error cases (like duplicates)
+    //   ResponseHandler.success(res, result.message);
+    //   return;
+    // }
 
     ResponseHandler.success(res, HTTP_MESSAGES.EVENT_PROCESSED);
   } catch (error) {
