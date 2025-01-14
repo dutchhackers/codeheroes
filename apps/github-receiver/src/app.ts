@@ -9,16 +9,16 @@ import { GitHubEventUtils } from './core/processors/utils';
 export const App = async (req: Request, res: Response): Promise<void> => {
   try {
     // Parse and validate request
-    let eventDetails;
+    let eventData;
     try {
-      eventDetails = GitHubEventUtils.validateAndParseWebhook(req);
+      eventData = GitHubEventUtils.validateAndParseWebhook(req);
       logger.log('Processing event:', GitHubEventUtils.parseEventAction(req));
     } catch (error) {
       throw error instanceof Error ? error : new GitHubError(MESSAGES.MISSING_GITHUB_EVENT);
     }
 
     // Process the event
-    const processor = ProcessorFactory.createProcessor(eventDetails);
+    const processor = ProcessorFactory.createProcessor(eventData);
     const result = await processor.process();
 
     if (!result.success) {
