@@ -1,6 +1,12 @@
 import { BaseDocument } from './common.model';
 import { EventSource } from './event.model';
 
+// Base interfaces
+interface BaseActivityData {
+  type: string;
+}
+
+// User interfaces
 export interface CreateUserInput {
   uid?: string;
   email: string | null;
@@ -18,15 +24,11 @@ export interface User extends BaseDocument {
   uid?: string;
 }
 
-
-interface BaseActivityData {
-  type: string;
-}
-
-export interface PushActivityData extends BaseActivityData {
-  type: 'push';
-  commitCount: number;
-  branch: string;
+// Activity data interfaces
+export interface IssueActivityData extends BaseActivityData {
+  type: 'issue';
+  issueNumber: number;
+  title: string;
 }
 
 export interface PullRequestActivityData extends BaseActivityData {
@@ -36,14 +38,15 @@ export interface PullRequestActivityData extends BaseActivityData {
   merged: boolean;
 }
 
-export interface IssueActivityData extends BaseActivityData {
-  type: 'issue';
-  issueNumber: number;
-  title: string;
+export interface PushActivityData extends BaseActivityData {
+  type: 'push';
+  commitCount: number;
+  branch: string;
 }
 
-export type ActivityData = PushActivityData | PullRequestActivityData | IssueActivityData;
+export type ActivityData = IssueActivityData | PullRequestActivityData | PushActivityData;
 
+// Activity interfaces
 export interface UserActivity extends BaseDocument {
   action: string;
   eventId: string; // In the future this might become an optional field
