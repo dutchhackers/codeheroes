@@ -1,6 +1,6 @@
 import { logger } from '@codeheroes/common';
 import { Request, Response } from 'express';
-import { MESSAGES } from './core/constants/constants';
+import { ErrorType, MESSAGES } from './core/constants/constants';
 import { GitHubError } from './core/errors/github-event.error';
 import { ResponseHandler } from './core/utils/response.handler';
 import { ProcessorFactory } from './core/processors/factory';
@@ -31,6 +31,12 @@ export const App = async (req: Request, res: Response): Promise<void> => {
 
     ResponseHandler.success(res, MESSAGES.EVENT_PROCESSED);
   } catch (error) {
+    if (error instanceof GitHubError && error.type === ErrorType.UNSUPPORTED_EVENT) {
+      // Silently handle unsupported events
+      ResponseHandler.handleError(error, res);
+      return;
+    }
+    
     logger.error('Event processing error:', error);
     ResponseHandler.handleError(error, res);
   }
