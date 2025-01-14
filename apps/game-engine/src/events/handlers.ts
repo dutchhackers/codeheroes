@@ -1,8 +1,8 @@
 import { CreateActivityInput, UserActivity, WebhookEvent, logger } from '@codeheroes/common';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { DatabaseService } from '../core/services/database.service';
-import { EventUtils } from './event.utils';
 import { XpCalculatorService } from '../core/services/xp-calculator.service';
+import { EventUtils } from './event.utils';
 
 export const handleEventCreation = onDocumentCreated('events/{eventId}', async (event) => {
   logger.info('New event document created', {
