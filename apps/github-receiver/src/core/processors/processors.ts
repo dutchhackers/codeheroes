@@ -2,14 +2,15 @@ import {
   ConnectedAccountProvider,
   CreateEventInput,
   EventService,
-  IssueEventDetails,
+  IssueEventData,
   logger,
-  PullRequestEventDetails,
-  PushEventDetails,
+  PullRequestEventData,
+  PushEventData,
+  StorageService,
 } from '@codeheroes/common';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
 import { IssueEvent, PullRequestEvent, PushEvent } from '../../_external/external-github-interfaces';
-import { StorageService } from '../storage/storage.service';
+import { GitHubStorageUtils } from '../utils/github-storage.utils';
 
 export abstract class BaseEventProcessor {
   protected readonly eventService: EventService;
@@ -24,17 +25,18 @@ export abstract class BaseEventProcessor {
 
   protected async processEvent(): Promise<CreateEventInput> {
     return {
+      type: `${this.webhookEvent.source}_${this.webhookEvent.eventType}`,
       source: {
         provider: this.webhookEvent.source as ConnectedAccountProvider,
         type: this.webhookEvent.eventType,
         externalEventId: this.webhookEvent.eventId,
         externalEventTimestamp: this.getEventTimestamp(),
       },
-      data: this.getEventDetails(),
+      data: this.getEventData(),
     };
   }
 
-  protected abstract getEventDetails(): PushEventDetails | PullRequestEventDetails | IssueEventDetails;
+  protected abstract getEventData(): PushEventData | PullRequestEventData | IssueEventData;
   protected getEventTimestamp(): string {
     const timestamp = this.getPayloadTimestamp();
     return new Date(timestamp || new Date()).toISOString();
@@ -48,7 +50,7 @@ export abstract class BaseEventProcessor {
     }
 
     try {
-      await this.storageService.storeRawRequest(this.webhookEvent);
+      await GitHubStorageUtils.storeGitHubEvent(this.storageService, this.webhookEvent);
     } catch (error) {
       logger.error(`Failed to store raw event ${this.webhookEvent.eventId}:`, error);
     }
@@ -87,7 +89,7 @@ export abstract class BaseEventProcessor {
 }
 
 export class PushEventProcessor extends BaseEventProcessor {
-  protected getEventDetails(): PushEventDetails {
+  protected getEventData(): PushEventData {
     const payload = this.webhookEvent.payload as PushEvent;
     return {
       repository: {
@@ -112,7 +114,7 @@ export class PushEventProcessor extends BaseEventProcessor {
 }
 
 export class PullRequestEventProcessor extends BaseEventProcessor {
-  protected getEventDetails(): PullRequestEventDetails {
+  protected getEventData(): PullRequestEventData {
     const payload = this.webhookEvent.payload as PullRequestEvent;
     return {
       repository: {
@@ -126,10 +128,12 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
       state: payload.pull_request.state,
       merged: payload.pull_request.merged,
       mergedAt: payload.pull_request.merged_at || undefined,
-      mergedBy: payload.pull_request.merged_by ? {
-        id: payload.pull_request.merged_by.id.toString(),
-        login: payload.pull_request.merged_by.login
-      } : undefined,
+      mergedBy: payload.pull_request.merged_by
+        ? {
+            id: payload.pull_request.merged_by.id.toString(),
+            login: payload.pull_request.merged_by.login,
+          }
+        : undefined,
       sender: {
         id: payload.sender.id.toString(),
         login: payload.sender.login,
@@ -144,7 +148,7 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
 }
 
 export class IssueEventProcessor extends BaseEventProcessor {
-  protected getEventDetails(): IssueEventDetails {
+  protected getEventData(): IssueEventData {
     const payload = this.webhookEvent.payload as IssueEvent;
     return {
       repository: {
