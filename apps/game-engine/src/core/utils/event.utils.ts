@@ -1,4 +1,4 @@
-import { WebhookEvent, ActivityData, PushEventData, PullRequestEventData, IssueEventData, ActivityType } from '@codeheroes/common';
+import { ActivityData, ActivityType, IssueEventData, PullRequestEventData, PushEventData, WebhookEvent } from '@codeheroes/common';
 
 export class EventUtils {
   static mapToActivityType(event: WebhookEvent): ActivityType {
