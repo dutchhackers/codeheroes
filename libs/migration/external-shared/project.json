@@ -1,0 +1,20 @@
+{
+  "name": "external-shared",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/migration/external-shared/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/migration/external-shared",
+        "tsConfig": "libs/migration/external-shared/tsconfig.lib.json",
+        "packageJson": "libs/migration/external-shared/package.json",
+        "main": "libs/migration/external-shared/src/index.ts",
+        "assets": ["libs/migration/external-shared/*.md"]
+      }
+    }
+  }
+}

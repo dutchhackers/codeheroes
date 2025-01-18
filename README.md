@@ -13,13 +13,18 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
 
 ### Libraries
 
-- [@codeheroes/common](libs/common) - Shared utilities and models
+#### Server Libraries (Shared Backend)
+- [@codeheroes/common](libs/server/common) - Shared server utilities and models
+- [@codeheroes/gamify](libs/server/gamify) - Game mechanics and rules
+
+#### Legacy Libraries (Deprecated)
+> The following libraries are deprecated and will be removed in future versions:
+- [@codeheroes/external-shared](libs/migration/external-shared) - External integrations shared code
+- [@codeheroes/migration](libs/migration/migration) - Database migration tools
+- [@codeheroes/migration-github-shared](libs/migration/migration-github-shared) - GitHub migration shared code
+
+> Note: Database seeds library is maintained for development purposes:
 - [@codeheroes/database-seeds](libs/database-seeds) - Database seeding tools
-- [@codeheroes/external-shared](libs/external-shared) - External integrations shared code
-- [@codeheroes/github-models](packages/github-models) - GitHub webhook models
-- [@codeheroes/migration](libs/migration) - Database migration tools
-- [@codeheroes/migration-github-shared](libs/migration-github-shared) - GitHub migration shared code
-- [@codeheroes/shared](libs/shared) - Core shared library
 
 ## Prerequisites
 
