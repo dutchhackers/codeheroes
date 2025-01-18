@@ -1,7 +1,6 @@
 import { BaseDocument } from './common.model';
 import { EventSource } from './event.model';
-import { ActivityXpResult } from './xp-domain.model';
-import { ActivityProcessingResult } from './rewards.model';
+import { ActivityProcessingResult } from './gamification-domain.model';
 
 // Base interfaces
 interface BaseActivityData {
