@@ -1,6 +1,6 @@
 import { UserActivity, logger } from '@codeheroes/common';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
-import { DatabaseService, XpCalculatorService } from '@codeheroes/gamify';
+import { XpDatabaseService, XpCalculatorService } from '@codeheroes/gamify';
 
 export const xpCalculationTrigger = onDocumentCreated('users/{userId}/activities/{activityId}', async (event) => {
   const activity = event.data?.data() as UserActivity;
@@ -19,6 +19,6 @@ export const xpCalculationTrigger = onDocumentCreated('users/{userId}/activities
     ...xpResult,
   });
 
-  const dbService = new DatabaseService();
+  const dbService = new XpDatabaseService();
   await dbService.updateUserXp(event.params.userId, event.params.activityId, xpResult, activity);
 });

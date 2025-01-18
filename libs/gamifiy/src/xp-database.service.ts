@@ -3,7 +3,7 @@ import { Firestore, getFirestore } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { calculateLevel } from './levels/level.utils';
 
-export class DatabaseService {
+export class XpDatabaseService {
   private db: Firestore;
 
   constructor() {
