@@ -6,7 +6,7 @@ import {
   PushEvent,
   WorkflowJobEvent,
   WorkflowRunEvent,
-} from '../../_external/external-github-interfaces';
+} from '@shared/github-interfaces';
 
 // Core interfaces
 

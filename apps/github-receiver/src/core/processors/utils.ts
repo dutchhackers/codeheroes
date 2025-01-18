@@ -8,7 +8,7 @@ import {
   PushEvent,
   WorkflowJobEvent,
   WorkflowRunEvent,
-} from '../../_external/external-github-interfaces';
+} from '@shared/github-interfaces';
 import { GitHubEventConfig, SupportedEventType } from '../constants/github.constants';
 import { GitHubError } from '../errors/github-event.error';
 import { ErrorType, MESSAGES } from '../constants/constants';
@@ -42,17 +42,11 @@ export class GitHubEventUtils {
     }
 
     if (!this.isEventTypeSupported(githubEvent)) {
-      throw new GitHubError(
-        MESSAGES.unsupportedEvent(githubEvent),
-        ErrorType.UNSUPPORTED_EVENT
-      );
+      throw new GitHubError(MESSAGES.unsupportedEvent(githubEvent), ErrorType.UNSUPPORTED_EVENT);
     }
 
     if (!this.isEventActionSupported(githubEvent, action)) {
-      throw new GitHubError(
-        MESSAGES.unsupportedAction(action, githubEvent),
-        ErrorType.UNSUPPORTED_EVENT
-      );
+      throw new GitHubError(MESSAGES.unsupportedAction(action, githubEvent), ErrorType.UNSUPPORTED_EVENT);
     }
 
     const payload = req.body as GitHubPayload;
