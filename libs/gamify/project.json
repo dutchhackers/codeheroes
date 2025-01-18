@@ -1,0 +1,20 @@
+{
+  "name": "gamify",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/gamify/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/gamify",
+        "tsConfig": "libs/gamify/tsconfig.lib.json",
+        "packageJson": "libs/gamify/package.json",
+        "main": "libs/gamify/src/index.ts",
+        "assets": ["libs/gamify/*.md"]
+      }
+    }
+  }
+}
