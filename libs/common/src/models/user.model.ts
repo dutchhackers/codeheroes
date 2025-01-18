@@ -48,8 +48,7 @@ export type ActivityData = IssueActivityData | PullRequestActivityData | PushAct
 
 // Activity interfaces
 export interface UserActivity extends BaseDocument {
-  type: ActivityType; // Update to use the enum
-  action: string;
+  type: ActivityType;
   eventId: string; // In the future this might become an optional field
   userId: string;
   eventSource: EventSource;

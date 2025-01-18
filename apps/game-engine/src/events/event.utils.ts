@@ -31,11 +31,6 @@ export class EventUtils {
     throw new Error(`Unsupported event type: ${eventType} with action: ${eventAction}`);
   }
 
-  // Note: for now this will only work for GitHub events
-  static getEventAction(event: WebhookEvent): string {
-    return this.mapToActivityType(event);
-  }
-
   static extractActivityData(event: WebhookEvent): ActivityData | undefined {
     const eventType = event.source.type;
     const eventData = event.data as PushEventData | PullRequestEventData | IssueEventData;

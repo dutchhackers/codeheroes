@@ -95,7 +95,7 @@ export class DatabaseService {
           newXp: updatedXp,
           newLevel: levelUpResult.level,
           activityId,
-          activityType: activity.action,
+          activityType: activity.type,
           breakdown: xpResult.breakdown,
           createdAt: getCurrentTimeAsISO(),
           updatedAt: getCurrentTimeAsISO()
