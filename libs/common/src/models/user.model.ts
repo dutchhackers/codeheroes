@@ -1,5 +1,7 @@
 import { BaseDocument } from './common.model';
 import { EventSource } from './event.model';
+import { ActivityXpResult } from './xp-domain.model';
+import { ActivityProcessingResult } from './rewards.model';
 
 // Base interfaces
 interface BaseActivityData {
@@ -54,6 +56,7 @@ export interface UserActivity extends BaseDocument {
   eventSource: EventSource;
   userFacingDescription: string;
   metadata?: ActivityData;
+  processingResult?: ActivityProcessingResult; // replaces xp field
 }
 
 export type CreateActivityInput = Omit<UserActivity, 'id' | 'createdAt' | 'updatedAt'>;

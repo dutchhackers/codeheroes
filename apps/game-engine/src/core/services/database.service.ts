@@ -116,9 +116,18 @@ export class DatabaseService {
         // Update activity document
         const activityRef = userRef.collection('activities').doc(activityId);
         transaction.update(activityRef, {
-          processed: true,
-          xpAwarded: xpResult.totalXp,
-          xpBreakdown: xpResult.breakdown,
+          processingResult: {
+            processed: true,
+            processedAt: getCurrentTimeAsISO(),
+            xp: {
+              processed: true,
+              awarded: xpResult.totalXp,
+              breakdown: xpResult.breakdown
+            }
+            // Future additions:
+            // badges: earnedBadges,
+            // achievements: updatedAchievements,
+          },
           updatedAt: getCurrentTimeAsISO()
         });
       });

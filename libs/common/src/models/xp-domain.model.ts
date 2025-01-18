@@ -41,6 +41,12 @@ export interface UserXpData {
   xpToNextLevel: number;
 }
 
+export interface ActivityXpResult {
+  processed: boolean;
+  awarded: number;
+  breakdown: XpBreakdownItem[];
+}
+
 export const DEFAULT_XP_SETTINGS: GameXpSettings = {
   'CODE_PUSH': {
     base: 10,
