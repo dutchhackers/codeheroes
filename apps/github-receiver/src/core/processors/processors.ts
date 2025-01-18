@@ -8,9 +8,9 @@ import {
   PushEventData,
   StorageService,
 } from '@codeheroes/common';
-import { GitHubWebhookEvent, ProcessResult } from './interfaces';
-import { IssueEvent, PullRequestEvent, PushEvent } from '../../_external/external-github-interfaces';
+import { IssueEvent, PullRequestEvent, PushEvent } from '@shared/github-interfaces';
 import { GitHubStorageUtils } from '../utils/github-storage.utils';
+import { GitHubWebhookEvent, ProcessResult } from './interfaces';
 
 export abstract class BaseEventProcessor {
   protected readonly eventService: EventService;
