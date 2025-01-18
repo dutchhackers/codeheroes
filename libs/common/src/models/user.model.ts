@@ -48,6 +48,7 @@ export type ActivityData = IssueActivityData | PullRequestActivityData | PushAct
 
 // Activity interfaces
 export interface UserActivity extends BaseDocument {
+  type: ActivityType; // Update to use the enum
   action: string;
   eventId: string; // In the future this might become an optional field
   userId: string;
@@ -57,3 +58,35 @@ export interface UserActivity extends BaseDocument {
 }
 
 export type CreateActivityInput = Omit<UserActivity, 'id' | 'createdAt' | 'updatedAt'>;
+
+/**
+ * Provider-agnostic activity types that can occur within a development workflow.
+ * These types represent standardized development activities regardless of the source
+ * (e.g. GitHub, GitLab, Bitbucket, etc).
+ *
+ * @enum {string}
+ *
+ * Core coding activities include:
+ * - Code pushes and commits
+ * - Pull request lifecycle events
+ * - Issue tracking events
+ * - Code review interactions
+ *
+ * Additional activities track:
+ * - Code quality metrics
+ * - Deployment events
+ */
+export enum ActivityType {
+  // Core coding activities;
+  CODE_PUSH = 'CODE_PUSH',
+  PR_CREATED = 'PR_CREATED',
+  PR_MERGED = 'PR_MERGED',
+  PR_REVIEW = 'PR_REVIEW',
+  ISSUE_CREATED = 'ISSUE_CREATED',
+  ISSUE_CLOSED = 'ISSUE_CLOSED',
+  CODE_COMMENT = 'CODE_COMMENT',
+
+  // Additional (future) activities
+  CODE_COVERAGE = 'CODE_COVERAGE',
+  DEPLOYMENT = 'DEPLOYMENT',
+}

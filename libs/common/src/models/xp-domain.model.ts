@@ -42,25 +42,25 @@ export interface UserXpData {
 }
 
 export const DEFAULT_XP_SETTINGS: GameXpSettings = {
-  'github.push': {
+  'CODE_PUSH': {
     base: 10,
     bonuses: {
       multipleCommits: 5
     }
   },
-  'github.pull_request.opened': {
+  'PR_CREATED': {
     base: 20
   },
-  'github.pull_request.closed': {
+  'PR_MERGED': {
     base: 30,
     bonuses: {
       merged: 20
     }
   },
-  'github.issue.opened': {
+  'ISSUE_CREATED': {
     base: 15
   },
-  'github.issue.closed': {
+  'ISSUE_CLOSED': {
     base: 20
   }
 };
