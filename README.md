@@ -13,7 +13,11 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
 
 ### Libraries
 
-#### Server Libraries (Shared Backend)
+#### Shared Libraries (Cross-platform)
+> Libraries that can be used in both server and client applications
+- [@shared/github-interfaces](libs/shared/github-interfaces) - GitHub interface definitions
+
+#### Server Libraries (Backend Only)
 - [@codeheroes/common](libs/server/common) - Shared server utilities and models
 - [@codeheroes/gamify](libs/server/gamify) - Game mechanics and rules
 
