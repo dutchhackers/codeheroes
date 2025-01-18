@@ -1,13 +1,13 @@
 import {
+  ActivityData,
+  ActivityType,
+  DEFAULT_XP_SETTINGS,
+  GameXpSettings,
+  PullRequestActivityData,
+  PushActivityData,
   UserActivity,
   XpBreakdownItem,
-  GameXpSettings,
-  DEFAULT_XP_SETTINGS,
   XpCalculationResponse,
-  ActivityData,
-  PushActivityData,
-  PullRequestActivityData,
-  ActivityType,
 } from '@codeheroes/common';
 
 export class XpCalculatorService {

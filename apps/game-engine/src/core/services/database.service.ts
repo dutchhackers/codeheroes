@@ -1,7 +1,7 @@
 import * as logger from 'firebase-functions/logger';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import { CreateActivityInput, getCurrentTimeAsISO, UserActivity, XpCalculationResponse, XpHistoryEntry } from '@codeheroes/common';
-import { calculateLevel } from '../utils/level.utils';
+import { calculateLevel } from '@codeheroes/gamify';
 
 export class DatabaseService {
   private db: Firestore;

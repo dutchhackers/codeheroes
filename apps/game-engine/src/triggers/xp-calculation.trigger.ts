@@ -1,7 +1,7 @@
 import { UserActivity, logger } from '@codeheroes/common';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { DatabaseService } from '../core/services/database.service';
-import { XpCalculatorService } from '../core/services/xp-calculator.service';
+import { XpCalculatorService } from '@codeheroes/gamify';
 
 
 export const xpCalculationTrigger = onDocumentCreated(
