@@ -11,9 +11,7 @@ export function calculateLevel(
 
   while (totalXp >= xpForNextLevel) {
     level++;
-    xpForNextLevel = Math.floor(
-      gameSettings.baseXpPerLevel * Math.pow(gameSettings.xpMultiplier, level - 1)
-    );
+    xpForNextLevel = Math.floor(gameSettings.baseXpPerLevel * Math.pow(gameSettings.xpMultiplier, level - 1));
   }
 
   return {
