@@ -1,6 +1,6 @@
 import { CreateActivityInput, DatabaseService, WebhookEvent, logger } from '@codeheroes/common';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
-import { EventUtils } from '../core/utils/event.utils';
+import { EventUtils } from '../core/event.utils';
 
 
 export const activityCreationTrigger = onDocumentCreated('events/{eventId}', async (event) => {
