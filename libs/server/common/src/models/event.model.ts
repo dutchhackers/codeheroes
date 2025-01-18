@@ -2,7 +2,7 @@ import { BaseDocument, ConnectedAccountProvider } from '.';
 
 export interface EventSource {
   provider: ConnectedAccountProvider;
-  type: string;  // e.g., 'push', 'pull_request', etc.
+  type: string; // e.g., 'push', 'pull_request', etc.
   externalEventId: string;
   externalEventTimestamp: string; // ISO string
 }
@@ -13,7 +13,4 @@ export interface WebhookEvent extends BaseDocument {
   data: Record<string, unknown>;
 }
 
-export type CreateEventInput = Omit<
-  WebhookEvent,
-  'id' | 'createdAt' | 'updatedAt'
->;
+export type CreateEventInput = Omit<WebhookEvent, 'id' | 'createdAt' | 'updatedAt'>;

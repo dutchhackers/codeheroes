@@ -21,11 +21,7 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
   }
 
   private getUserActivitiesCollection(userId: string): CollectionReference<UserActivity> {
-    return this.db
-      .collection('users')
-      .doc(userId)
-      .collection('activities')
-      .withConverter(activityConverter);
+    return this.db.collection('users').doc(userId).collection('activities').withConverter(activityConverter);
   }
 
   async handleNewEvent(eventId: string, eventData: WebhookEvent): Promise<void> {
@@ -48,7 +44,7 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
       userId,
       eventSource: eventData.source,
       metadata: EventUtils.extractActivityData(eventData),
-      userFacingDescription: EventUtils.generateUserFacingDescription(eventData)
+      userFacingDescription: EventUtils.generateUserFacingDescription(eventData),
     };
 
     await this.createUserActivity(userId, activityInput);
@@ -77,12 +73,9 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
   async getUserActivities(userId: string): Promise<UserActivity[]> {
     try {
       const collection = this.getUserActivitiesCollection(userId);
-      const snapshot = await collection
-        .orderBy('createdAt', 'desc')
-        .limit(100)
-        .get();
-      
-      return snapshot.docs.map(doc => doc.data());
+      const snapshot = await collection.orderBy('createdAt', 'desc').limit(100).get();
+
+      return snapshot.docs.map((doc) => doc.data());
     } catch (error) {
       logger.error('Failed to get user activities', { userId, error });
       throw error;

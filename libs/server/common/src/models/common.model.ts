@@ -1,8 +1,4 @@
-export type ConnectedAccountProvider =
-  | 'github'
-  | 'strava'
-  | 'azure'
-  | 'bitbucket';
+export type ConnectedAccountProvider = 'github' | 'strava' | 'azure' | 'bitbucket';
 
 export interface BaseDocument {
   id: string;

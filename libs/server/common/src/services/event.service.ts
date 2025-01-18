@@ -9,9 +9,7 @@ export class EventService extends BaseFirestoreService<WebhookEvent> {
 
   constructor() {
     super();
-    this.collection = getFirestore()
-      .collection('events')
-      .withConverter(eventConverter);
+    this.collection = getFirestore().collection('events').withConverter(eventConverter);
   }
 
   async createEvent(eventData: CreateEventInput): Promise<WebhookEvent> {
@@ -24,10 +22,7 @@ export class EventService extends BaseFirestoreService<WebhookEvent> {
   }
 
   async findByEventId(eventId: string): Promise<WebhookEvent | null> {
-    const snapshot = await this.collection
-      .where('source.externalEventId', '==', eventId)
-      .limit(1)
-      .get();
+    const snapshot = await this.collection.where('source.externalEventId', '==', eventId).limit(1).get();
 
     if (snapshot.empty) {
       return null;

@@ -1,4 +1,3 @@
-
 export interface PaginationParams {
   limit?: number;
   startAfterId?: string;

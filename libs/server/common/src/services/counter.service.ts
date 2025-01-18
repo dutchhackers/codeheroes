@@ -16,11 +16,15 @@ export class CounterService {
     return this.db.runTransaction(async (transaction) => {
       const doc = await transaction.get(this.counterRef);
       const currentId = doc.exists ? doc.data()?.nextUserId || startAt : startAt;
-      
-      transaction.set(this.counterRef, {
-        nextUserId: currentId + 1,
-        updatedAt: Timestamp.now()
-      }, { merge: true });
+
+      transaction.set(
+        this.counterRef,
+        {
+          nextUserId: currentId + 1,
+          updatedAt: Timestamp.now(),
+        },
+        { merge: true }
+      );
 
       return currentId.toString();
     });

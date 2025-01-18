@@ -1,8 +1,4 @@
-import {
-  CollectionReference,
-  DocumentData,
-  Timestamp,
-} from 'firebase-admin/firestore';
+import { CollectionReference, DocumentData, Timestamp } from 'firebase-admin/firestore';
 import { getCurrentTimeAsISO } from '../utils/time';
 
 interface FirestoreTimestamps {

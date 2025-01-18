@@ -1,9 +1,6 @@
 import { CollectionReference, getFirestore } from 'firebase-admin/firestore';
 import { userConverter } from '../utils/converters.util';
-import {
-  PaginatedResponse,
-  PaginationParams,
-} from '../interfaces/pagination.interface';
+import { PaginatedResponse, PaginationParams } from '../interfaces/pagination.interface';
 import { CreateUserInput, User } from '../models';
 import { getCurrentTimeAsISO } from '../utils';
 import { BaseFirestoreService } from './base.service';
@@ -19,9 +16,7 @@ export class UserService extends BaseFirestoreService<User> {
 
   constructor() {
     super();
-    this.collection = getFirestore()
-      .collection('users')
-      .withConverter(userConverter);
+    this.collection = getFirestore().collection('users').withConverter(userConverter);
   }
 
   // async createUser(input: CreateUserInput): Promise<User> {
@@ -60,16 +55,12 @@ export class UserService extends BaseFirestoreService<User> {
     return snapshot.data();
   }
 
-  async getUsers(
-    params: PaginationParams = {}
-  ): Promise<PaginatedResponse<User>> {
+  async getUsers(params: PaginationParams = {}): Promise<PaginatedResponse<User>> {
     const limit = params.limit || 10;
     let query = this.collection.orderBy('createdAt', 'desc').limit(limit + 1);
 
     if (params.startAfterId) {
-      const startAfterDoc = await this.collection
-        .doc(params.startAfterId)
-        .get();
+      const startAfterDoc = await this.collection.doc(params.startAfterId).get();
       if (startAfterDoc.exists) {
         query = query.startAfter(startAfterDoc);
       }
