@@ -19,7 +19,6 @@
       "@codeheroes/database-seeds": ["libs/database-seeds/src/index.ts"],
       "@codeheroes/external-shared": ["libs/external-shared/src/index.ts"],
       "@codeheroes/gamify": ["libs/gamifiy/src/index.ts"],
-      "@codeheroes/github-models": ["packages/github-models/src/index.ts"],
       "@codeheroes/migration": ["libs/migration/src/index.ts"],
       "@codeheroes/migration-github-shared": ["libs/migration-github-shared/src/index.ts"],
       "@codeheroes/shared": ["libs/shared/src/index.ts"]
