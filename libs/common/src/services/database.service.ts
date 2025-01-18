@@ -1,7 +1,5 @@
 import { Firestore, getFirestore } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
-import { CreateActivityInput } from '../models/user.model';
-import { getCurrentTimeAsISO } from '../utils/time/time.utils';
 
 export class DatabaseService {
   private db: Firestore;
@@ -41,26 +39,6 @@ export class DatabaseService {
       return undefined;
     } catch (error) {
       logger.error('Error looking up user ID', { error, senderId: sender.id });
-      throw error;
-    }
-  }
-
-  async createUserActivity(activityInput: CreateActivityInput): Promise<void> {
-    const userId = activityInput.userId;
-    const docRef = this.db.collection('users').doc(userId).collection('activities').doc();
-    const now = getCurrentTimeAsISO();
-
-    try {
-      await docRef.create({
-        id: docRef.id,
-        ...activityInput,
-        createdAt: now,
-        updatedAt: now,
-      });
-
-      logger.info('Created new user activity', { userId });
-    } catch (error) {
-      logger.error('Failed to create user activity', error);
       throw error;
     }
   }

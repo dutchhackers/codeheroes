@@ -1,4 +1,6 @@
-import { ActivityData, ActivityType, IssueEventData, PullRequestEventData, PushEventData, WebhookEvent } from '@codeheroes/common';
+import { PullRequestEventData, PushEventData, IssueEventData } from "../models";
+import { WebhookEvent } from "../models/event.model";
+import { ActivityData, ActivityType } from "../models/user.model";
 
 export class EventUtils {
   static mapToActivityType(event: WebhookEvent): ActivityType {
