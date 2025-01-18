@@ -53,7 +53,7 @@ export interface UserActivity extends BaseDocument {
   userId: string;
   eventSource: EventSource;
   userFacingDescription: string;
-  data?: ActivityData;
+  metadata?: ActivityData;
 }
 
 export type CreateActivityInput = Omit<UserActivity, 'id' | 'createdAt' | 'updatedAt'>;

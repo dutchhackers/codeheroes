@@ -35,7 +35,7 @@ export const createUserActivity = onDocumentCreated('events/{eventId}', async (e
     eventId: event.params.eventId,
     userId,
     eventSource: eventData.source,
-    data: EventUtils.extractActivityData(eventData),
+    metadata: EventUtils.extractActivityData(eventData),
     userFacingDescription: EventUtils.generateUserFacingDescription(eventData)
   };
 

@@ -54,10 +54,10 @@ export class XpCalculatorService {
     // Calculate bonuses based on activity type
     let bonus: XpBreakdownItem | null = null;
 
-    if (activity.action === 'github.push' && this.isPushActivity(activity.data)) {
-      bonus = this.calculatePushBonus(activity.data, xpSettings);
-    } else if (activity.action === 'github.pull_request.closed' && this.isPullRequestActivity(activity.data)) {
-      bonus = this.calculatePullRequestBonus(activity.data, xpSettings);
+    if (activity.action === 'github.push' && this.isPushActivity(activity.metadata)) {
+      bonus = this.calculatePushBonus(activity.metadata, xpSettings);
+    } else if (activity.action === 'github.pull_request.closed' && this.isPullRequestActivity(activity.metadata)) {
+      bonus = this.calculatePullRequestBonus(activity.metadata, xpSettings);
     }
 
     if (bonus) {
