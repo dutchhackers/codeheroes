@@ -41,26 +41,62 @@ export interface UserXpData {
   xpToNextLevel: number;
 }
 
+export interface ActivityXpResult {
+  processed: boolean;
+  awarded: number;
+  breakdown: XpBreakdownItem[];
+}
+
+export interface BadgeReward {
+  id: string;
+  name: string;
+  description: string;
+  achievedAt: string;
+}
+
+export interface AchievementReward {
+  id: string;
+  name: string;
+  description: string;
+  progress: number;
+  completed: boolean;
+  completedAt?: string;
+}
+
+export interface XpReward {
+  processed: boolean;
+  awarded: number;
+  breakdown: XpBreakdownItem[];
+}
+
+export interface ActivityProcessingResult {
+  processed: boolean;
+  processedAt: string;
+  xp?: XpReward;
+  badges?: BadgeReward[];
+  achievements?: AchievementReward[];
+}
+
 export const DEFAULT_XP_SETTINGS: GameXpSettings = {
-  'github.push': {
+  CODE_PUSH: {
     base: 10,
     bonuses: {
-      multipleCommits: 5
-    }
+      multipleCommits: 5,
+    },
   },
-  'github.pull_request.opened': {
-    base: 20
+  PR_CREATED: {
+    base: 20,
   },
-  'github.pull_request.closed': {
+  PR_MERGED: {
     base: 30,
     bonuses: {
-      merged: 20
-    }
+      merged: 20,
+    },
   },
-  'github.issue.opened': {
-    base: 15
+  ISSUE_CREATED: {
+    base: 15,
   },
-  'github.issue.closed': {
-    base: 20
-  }
+  ISSUE_CLOSED: {
+    base: 20,
+  },
 };

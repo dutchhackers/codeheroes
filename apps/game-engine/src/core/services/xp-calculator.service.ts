@@ -1,4 +1,14 @@
-import { UserActivity, XpBreakdownItem, GameXpSettings, DEFAULT_XP_SETTINGS, XpCalculationResponse, ActivityData, PushActivityData, PullRequestActivityData } from '@codeheroes/common';
+import {
+  UserActivity,
+  XpBreakdownItem,
+  GameXpSettings,
+  DEFAULT_XP_SETTINGS,
+  XpCalculationResponse,
+  ActivityData,
+  PushActivityData,
+  PullRequestActivityData,
+  ActivityType,
+} from '@codeheroes/common';
 
 export class XpCalculatorService {
   private xpSettings: GameXpSettings;
@@ -25,7 +35,10 @@ export class XpCalculatorService {
     return null;
   }
 
-  private calculatePullRequestBonus(data: PullRequestActivityData, settings: GameXpSettings['github.pull_request.closed']): XpBreakdownItem | null {
+  private calculatePullRequestBonus(
+    data: PullRequestActivityData,
+    settings: GameXpSettings['github.pull_request.closed']
+  ): XpBreakdownItem | null {
     if (data.merged) {
       return {
         description: 'Bonus for merging pull request',
@@ -36,7 +49,7 @@ export class XpCalculatorService {
   }
 
   public calculateXp(activity: UserActivity): XpCalculationResponse {
-    const xpSettings = this.xpSettings[activity.action];
+    const xpSettings = this.xpSettings[activity.type];
     const breakdown: XpBreakdownItem[] = [];
     let totalXp = 0;
 
@@ -46,7 +59,7 @@ export class XpCalculatorService {
 
     // Add base XP
     breakdown.push({
-      description: `Base XP for ${activity.action}`,
+      description: `Base XP for ${activity.type}`,
       xp: xpSettings.base,
     });
     totalXp += xpSettings.base;
@@ -54,10 +67,10 @@ export class XpCalculatorService {
     // Calculate bonuses based on activity type
     let bonus: XpBreakdownItem | null = null;
 
-    if (activity.action === 'github.push' && this.isPushActivity(activity.data)) {
-      bonus = this.calculatePushBonus(activity.data, xpSettings);
-    } else if (activity.action === 'github.pull_request.closed' && this.isPullRequestActivity(activity.data)) {
-      bonus = this.calculatePullRequestBonus(activity.data, xpSettings);
+    if (activity.type === ActivityType.CODE_PUSH && this.isPushActivity(activity.metadata)) {
+      bonus = this.calculatePushBonus(activity.metadata, xpSettings);
+    } else if (activity.type === ActivityType.PR_MERGED && this.isPullRequestActivity(activity.metadata)) {
+      bonus = this.calculatePullRequestBonus(activity.metadata, xpSettings);
     }
 
     if (bonus) {
