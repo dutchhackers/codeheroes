@@ -1,13 +1,39 @@
-import { WebhookEvent, ActivityData, PushEventData, PullRequestEventData, IssueEventData } from '@codeheroes/common';
+import { WebhookEvent, ActivityData, PushEventData, PullRequestEventData, IssueEventData, ActivityType } from '@codeheroes/common';
 
 export class EventUtils {
-  // Note: for now this will only work for GitHub events
-  static getEventAction(event: WebhookEvent): string {
-    const source = event.source.provider.toLowerCase();
+  static mapToActivityType(event: WebhookEvent): ActivityType {
     const eventType = event.source.type;
     const eventAction = (event.data as any)?.action;
 
-    return eventAction ? `${source}.${eventType}.${eventAction}` : `${source}.${eventType}`;
+    switch (eventType) {
+      case 'push':
+        return ActivityType.CODE_PUSH;
+      case 'pull_request':
+        if (eventAction === 'closed' && (event.data as PullRequestEventData).merged) {
+          return ActivityType.PR_MERGED;
+        }
+        if (eventAction === 'opened') {
+          return ActivityType.PR_CREATED;
+        }
+        if (eventAction === 'reviewed') {
+          return ActivityType.PR_REVIEW;
+        }
+        break;
+      case 'issue':
+        if (eventAction === 'opened') {
+          return ActivityType.ISSUE_CREATED;
+        }
+        if (eventAction === 'closed') {
+          return ActivityType.ISSUE_CLOSED;
+        }
+        break;
+    }
+    throw new Error(`Unsupported event type: ${eventType} with action: ${eventAction}`);
+  }
+
+  // Note: for now this will only work for GitHub events
+  static getEventAction(event: WebhookEvent): string {
+    return this.mapToActivityType(event);
   }
 
   static extractActivityData(event: WebhookEvent): ActivityData | undefined {

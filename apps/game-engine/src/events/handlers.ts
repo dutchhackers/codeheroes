@@ -31,6 +31,7 @@ export const createUserActivity = onDocumentCreated('events/{eventId}', async (e
   }
 
   const activityInput: CreateActivityInput = {
+    type: EventUtils.mapToActivityType(eventData),
     action: EventUtils.getEventAction(eventData),
     eventId: event.params.eventId,
     userId,
