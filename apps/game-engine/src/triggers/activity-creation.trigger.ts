@@ -1,6 +1,5 @@
-import { CreateActivityInput, WebhookEvent, logger } from '@codeheroes/common';
+import { CreateActivityInput, DatabaseService, WebhookEvent, logger } from '@codeheroes/common';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
-import { DatabaseService } from '../core/services/database.service';
 import { EventUtils } from '../core/utils/event.utils';
 
 
