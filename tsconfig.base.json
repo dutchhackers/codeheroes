@@ -19,8 +19,8 @@
       "@codeheroes/database-seeds": ["libs/database-seeds/src/index.ts"],
       "@codeheroes/external-shared": ["libs/external-shared/src/index.ts"],
       "@codeheroes/gamify": ["libs/server/gamify/src/index.ts"],
-      "@codeheroes/migration": ["libs/migration/src/index.ts"],
-      "@codeheroes/migration-github-shared": ["libs/migration-github-shared/src/index.ts"]
+      "@codeheroes/migration": ["libs/migration/migration/src/index.ts"],
+      "@codeheroes/migration-github-shared": ["libs/migration/migration-github-shared/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
