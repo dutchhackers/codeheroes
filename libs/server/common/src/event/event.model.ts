@@ -1,4 +1,4 @@
-import { BaseDocument, ConnectedAccountProvider } from '.';
+import { BaseDocument, ConnectedAccountProvider } from '../core/models/common.model';
 
 export interface WebhookEvent extends BaseDocument {
   type: string;
@@ -8,5 +8,3 @@ export interface WebhookEvent extends BaseDocument {
   externalEventTimestamp: string; // ISO string
   data: Record<string, unknown>;
 }
-
-export type CreateEventInput = Omit<WebhookEvent, 'id' | 'createdAt' | 'updatedAt'>;

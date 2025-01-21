@@ -1,8 +1,9 @@
 import { CollectionReference, getFirestore } from 'firebase-admin/firestore';
-import { eventConverter } from '../utils/converters.util';
-import { CreateEventInput, WebhookEvent } from '../models/event.model';
-import { BaseFirestoreService } from './base.service';
-import { logger } from '../utils';
+import { BaseFirestoreService } from '../core/services/base.service';
+import { logger } from '../firebase';
+import { eventConverter } from './event.converter';
+import { CreateEventInput } from './event.dto';
+import { WebhookEvent } from './event.model';
 
 export class EventService extends BaseFirestoreService<WebhookEvent> {
   protected collection: CollectionReference<WebhookEvent>;

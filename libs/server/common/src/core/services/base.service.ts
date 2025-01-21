@@ -1,5 +1,5 @@
 import { CollectionReference, DocumentData, Timestamp } from 'firebase-admin/firestore';
-import { getCurrentTimeAsISO } from '../utils/time';
+import { getCurrentTimeAsISO } from '../../firebase';
 
 interface FirestoreTimestamps {
   createdAt: string; // ISO string

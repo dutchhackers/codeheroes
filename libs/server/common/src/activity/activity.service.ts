@@ -1,11 +1,12 @@
 import { CollectionReference, getFirestore } from 'firebase-admin/firestore';
-import { WebhookEvent } from '../models/event.model';
-import { CreateActivityInput, UserActivity } from '../models/user.model';
-import { logger } from '../utils';
-import { activityConverter } from '../utils/converters.util';
-import { EventUtils } from '../utils/event.utils';
-import { BaseFirestoreService } from './base.service';
-import { DatabaseService } from './database.service';
+import { BaseFirestoreService, DatabaseService } from '../core';
+import { WebhookEvent } from '../event/event.model';
+import { EventUtils } from '../event/event.utils';
+import { logger } from '../firebase';
+import { activityConverter } from './activity.converter';
+import { CreateActivityInput } from './activity.dto';
+import { UserActivity } from './activity.model';
+import { ActivityUtils } from './activity.util';
 
 export class ActivityService extends BaseFirestoreService<UserActivity> {
   protected collection: CollectionReference<UserActivity>; // This will be set per user
@@ -39,14 +40,14 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
     }
 
     const activityInput: CreateActivityInput = {
-      type: EventUtils.mapToActivityType(eventData),
+      type: ActivityUtils.mapToActivityType(eventData),
       eventId,
       userId,
       provider: eventData.source,
       eventType: eventData.eventType,
       externalEventId: eventData.externalEventId,
       externalEventTimestamp: eventData.externalEventTimestamp,
-      metadata: EventUtils.extractActivityData(eventData),
+      metadata: ActivityUtils.extractActivityData(eventData),
       userFacingDescription: EventUtils.generateUserFacingDescription(eventData),
     };
 

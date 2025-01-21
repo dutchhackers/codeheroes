@@ -1,27 +1,8 @@
-import { BaseDocument, ConnectedAccountProvider } from './common.model';
-import { ActivityProcessingResult } from './gamification-domain.model';
+import { ActivityProcessingResult, BaseDocument, ConnectedAccountProvider } from "../core";
 
 // Base interfaces
 interface BaseActivityData {
   type: string;
-}
-
-// User interfaces
-export interface CreateUserInput {
-  uid?: string;
-  email: string | null;
-  displayName: string | null;
-  photoUrl: string | null;
-}
-
-// later TODO: User could additionaly extend UserXpData
-export interface User extends BaseDocument {
-  email: string;
-  displayName: string;
-  photoUrl: string;
-  lastLogin: string;
-  active: boolean;
-  uid?: string;
 }
 
 // Activity data interfaces
@@ -44,8 +25,6 @@ export interface PushActivityData extends BaseActivityData {
   branch: string;
 }
 
-export type ActivityData = IssueActivityData | PullRequestActivityData | PushActivityData;
-
 // Activity interfaces
 export interface UserActivity extends BaseDocument {
   type: ActivityType;
@@ -60,7 +39,7 @@ export interface UserActivity extends BaseDocument {
   processingResult?: ActivityProcessingResult; // replaces xp field
 }
 
-export type CreateActivityInput = Omit<UserActivity, 'id' | 'createdAt' | 'updatedAt'>;
+export type ActivityData = IssueActivityData | PullRequestActivityData | PushActivityData;
 
 /**
  * Provider-agnostic activity types that can occur within a development workflow.
