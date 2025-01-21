@@ -1,11 +1,11 @@
-import { CollectionReference, DocumentReference, getFirestore } from 'firebase-admin/firestore';
-import { BaseFirestoreService } from './base.service';
-import { CreateActivityInput, UserActivity } from '../models/user.model';
+import { CollectionReference, getFirestore } from 'firebase-admin/firestore';
 import { WebhookEvent } from '../models/event.model';
-import { DatabaseService } from './database.service';
+import { CreateActivityInput, UserActivity } from '../models/user.model';
 import { logger } from '../utils';
 import { activityConverter } from '../utils/converters.util';
 import { EventUtils } from '../utils/event.utils';
+import { BaseFirestoreService } from './base.service';
+import { DatabaseService } from './database.service';
 
 export class ActivityService extends BaseFirestoreService<UserActivity> {
   protected collection: CollectionReference<UserActivity>; // This will be set per user
