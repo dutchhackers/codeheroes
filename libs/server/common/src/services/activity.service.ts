@@ -42,7 +42,7 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
       type: EventUtils.mapToActivityType(eventData),
       eventId,
       userId,
-      provider: eventData.provider,
+      provider: eventData.source,
       eventType: eventData.eventType,
       externalEventId: eventData.externalEventId,
       externalEventTimestamp: eventData.externalEventTimestamp,

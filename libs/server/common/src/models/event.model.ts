@@ -2,7 +2,7 @@ import { BaseDocument, ConnectedAccountProvider } from '.';
 
 export interface WebhookEvent extends BaseDocument {
   type: string;
-  provider: ConnectedAccountProvider;
+  source: ConnectedAccountProvider;
   eventType: string; // e.g., 'push', 'pull_request', etc.
   externalEventId: string;
   externalEventTimestamp: string; // ISO string

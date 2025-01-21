@@ -15,7 +15,7 @@ export class EventService extends BaseFirestoreService<WebhookEvent> {
   async createEvent(eventData: CreateEventInput): Promise<WebhookEvent> {
     logger.info('Creating event:', eventData);
 
-    if (!eventData.externalEventId || !eventData.provider) {
+    if (!eventData.externalEventId || !eventData.source) {
       throw new Error('Required event fields missing');
     }
     return this.create(eventData);
