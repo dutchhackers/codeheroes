@@ -4,7 +4,7 @@ import { ActivityData, ActivityType } from '../models/user.model';
 
 export class EventUtils {
   static mapToActivityType(event: WebhookEvent): ActivityType {
-    const eventType = event.source.type;
+    const eventType = event.eventType;
     const eventAction = (event.data as any)?.action;
 
     switch (eventType) {
@@ -34,7 +34,7 @@ export class EventUtils {
   }
 
   static extractActivityData(event: WebhookEvent): ActivityData | undefined {
-    const eventType = event.source.type;
+    const eventType = event.eventType;
     const eventData = event.data as PushEventData | PullRequestEventData | IssueEventData;
 
     switch (eventType) {
@@ -69,7 +69,7 @@ export class EventUtils {
   }
 
   static generateUserFacingDescription(event: WebhookEvent): string {
-    const eventType = event.source.type;
+    const eventType = event.eventType;
     const eventData = event.data as PushEventData | PullRequestEventData | IssueEventData;
     const repoName = eventData.repository.name;
 

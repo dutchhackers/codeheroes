@@ -1,5 +1,4 @@
-import { BaseDocument } from './common.model';
-import { EventSource } from './event.model';
+import { BaseDocument, ConnectedAccountProvider } from './common.model';
 import { ActivityProcessingResult } from './gamification-domain.model';
 
 // Base interfaces
@@ -52,7 +51,10 @@ export interface UserActivity extends BaseDocument {
   type: ActivityType;
   eventId: string; // In the future this might become an optional field
   userId: string;
-  eventSource: EventSource;
+  provider: ConnectedAccountProvider;
+  eventType: string;
+  externalEventId: string;
+  externalEventTimestamp: string;
   userFacingDescription: string;
   metadata?: ActivityData;
   processingResult?: ActivityProcessingResult; // replaces xp field

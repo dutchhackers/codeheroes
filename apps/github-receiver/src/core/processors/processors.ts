@@ -26,12 +26,10 @@ export abstract class BaseEventProcessor {
   protected async processEvent(): Promise<CreateEventInput> {
     return {
       type: `${this.webhookEvent.source}_${this.webhookEvent.eventType}`,
-      source: {
-        provider: this.webhookEvent.source as ConnectedAccountProvider,
-        type: this.webhookEvent.eventType,
-        externalEventId: this.webhookEvent.eventId,
-        externalEventTimestamp: this.getEventTimestamp(),
-      },
+      provider: this.webhookEvent.source as ConnectedAccountProvider,
+      eventType: this.webhookEvent.eventType,
+      externalEventId: this.webhookEvent.eventId,
+      externalEventTimestamp: this.getEventTimestamp(),
       data: this.getEventData(),
     };
   }
