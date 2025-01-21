@@ -1,9 +1,10 @@
 import { CollectionReference, getFirestore } from 'firebase-admin/firestore';
-import { userConverter } from '../utils/converters.util';
-import { PaginatedResponse, PaginationParams } from '../interfaces/pagination.interface';
-import { CreateUserInput, User } from '../models';
-import { getCurrentTimeAsISO } from '../utils';
-import { BaseFirestoreService } from './base.service';
+import { PaginatedResponse, PaginationParams } from '../core/interfaces/pagination.interface';
+import { BaseFirestoreService } from '../core/services';
+import { getCurrentTimeAsISO } from '../firebase';
+import { userConverter } from './user.converter';
+import { CreateUserInput } from './user.dto';
+import { User } from './user.model';
 
 // const USER_DEFAULTS = {
 //   level: 1,
