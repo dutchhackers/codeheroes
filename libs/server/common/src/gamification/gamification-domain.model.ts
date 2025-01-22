@@ -1,4 +1,4 @@
-import { BaseDocument } from './common.model';
+import { BaseDocument } from '../core/models/common.model';
 
 export interface XpBreakdownItem {
   description: string;

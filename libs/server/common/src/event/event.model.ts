@@ -1,10 +1,14 @@
 import { BaseDocument, ConnectedAccountProvider } from '../core/models/common.model';
 
+export interface EventSource {
+  id: string;
+  timestamp: string; // ISO string
+  event: string;
+}
+
 export interface WebhookEvent extends BaseDocument {
   type: string;
-  source: ConnectedAccountProvider;
-  eventType: string; // e.g., 'push', 'pull_request', etc.
-  externalEventId: string;
-  externalEventTimestamp: string; // ISO string
+  provider: ConnectedAccountProvider;
+  source: EventSource;
   data: Record<string, unknown>;
 }

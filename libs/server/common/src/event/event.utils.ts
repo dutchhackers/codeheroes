@@ -3,7 +3,7 @@ import { WebhookEvent } from './event.model';
 
 export class EventUtils {
   static generateUserFacingDescription(event: WebhookEvent): string {
-    const eventType = event.eventType;
+    const eventType = event.source.event;
     const eventData = event.data as PushEventData | PullRequestEventData | IssueEventData;
     const repoName = eventData.repository.name;
 

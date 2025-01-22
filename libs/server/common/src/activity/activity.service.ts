@@ -9,7 +9,7 @@ import { UserActivity } from './activity.model';
 import { ActivityUtils } from './activity.util';
 
 export class ActivityService extends BaseFirestoreService<UserActivity> {
-  protected collection: CollectionReference<UserActivity>; // This will be set per user
+  protected collection: CollectionReference<UserActivity>; 
   private databaseService: DatabaseService;
   private db: FirebaseFirestore.Firestore;
 
@@ -34,7 +34,7 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
     if (!userId) {
       logger.warn('Skipping activity creation - no matching user found', {
         eventId,
-        eventType: eventData.eventType,
+        eventType: eventData.source.event,
       });
       return;
     }
@@ -43,10 +43,10 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
       type: ActivityUtils.mapToActivityType(eventData),
       eventId,
       userId,
-      provider: eventData.source,
-      eventType: eventData.eventType,
-      externalEventId: eventData.externalEventId,
-      externalEventTimestamp: eventData.externalEventTimestamp,
+      provider: eventData.provider,
+      eventType: eventData.source.event,
+      externalEventId: eventData.source.id,
+      externalEventTimestamp: eventData.source.timestamp,
       metadata: ActivityUtils.extractActivityData(eventData),
       userFacingDescription: EventUtils.generateUserFacingDescription(eventData),
     };

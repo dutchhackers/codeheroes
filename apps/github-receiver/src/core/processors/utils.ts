@@ -56,15 +56,15 @@ export class GitHubEventUtils {
       eventType: githubEvent,
       payload,
       headers: req.headers,
-      source: 'github',
+      provider: 'github',
     };
   }
 
   static parseEventAction(req: Request): string {
     const githubEvent = req.header('X-GitHub-Event');
-    const source = 'github';
+    const provider = 'github';
     const action = req.body?.action;
 
-    return action ? `${source}.${githubEvent}.${action}` : `${source}.${githubEvent}`;
+    return action ? `${provider}.${githubEvent}.${action}` : `${provider}.${githubEvent}`;
   }
 }

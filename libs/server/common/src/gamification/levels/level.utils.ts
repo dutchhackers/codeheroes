@@ -1,4 +1,4 @@
-import { LevelCalculationResult } from "../../core/models/gamification-domain.model";
+import { LevelCalculationResult } from "../gamification-domain.model";
 
 export function calculateLevel(
   currentLevel: number,

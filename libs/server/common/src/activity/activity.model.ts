@@ -1,4 +1,5 @@
-import { ActivityProcessingResult, BaseDocument, ConnectedAccountProvider } from "../core";
+import { BaseDocument, ConnectedAccountProvider } from "../core/models/common.model";
+import { ActivityProcessingResult } from "../gamification/gamification-domain.model";
 
 // Base interfaces
 interface BaseActivityData {

@@ -1,10 +1,10 @@
-import { IssueEventData, PullRequestEventData, PushEventData } from "../core";
-import { WebhookEvent } from "../event/event.model";
-import { ActivityData, ActivityType } from "./activity.model";
+import { IssueEventData, PullRequestEventData, PushEventData } from '../core';
+import { WebhookEvent } from '../event/event.model';
+import { ActivityData, ActivityType } from './activity.model';
 
 export class ActivityUtils {
   static mapToActivityType(event: WebhookEvent): ActivityType {
-    const eventType = event.eventType;
+    const eventType = event.source.event;
     const eventAction = (event.data as any)?.action;
 
     switch (eventType) {
@@ -34,7 +34,7 @@ export class ActivityUtils {
   }
 
   static extractActivityData(event: WebhookEvent): ActivityData | undefined {
-    const eventType = event.eventType;
+    const eventType = event.source.event;
     const eventData = event.data as PushEventData | PullRequestEventData | IssueEventData;
 
     switch (eventType) {

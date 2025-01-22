@@ -25,11 +25,13 @@ export abstract class BaseEventProcessor {
 
   protected async processEvent(): Promise<CreateEventInput> {
     return {
-      type: `${this.webhookEvent.source}_${this.webhookEvent.eventType}`,
-      source: this.webhookEvent.source as ConnectedAccountProvider,
-      eventType: this.webhookEvent.eventType,
-      externalEventId: this.webhookEvent.eventId,
-      externalEventTimestamp: this.getEventTimestamp(),
+      type: `${this.webhookEvent.provider}_${this.webhookEvent.eventType}`,
+      provider: this.webhookEvent.provider as ConnectedAccountProvider,
+      source: {
+        id: this.webhookEvent.eventId,
+        timestamp: this.getEventTimestamp(),
+        event: this.webhookEvent.eventType,
+      },
       data: this.getEventData(),
     };
   }
@@ -94,6 +96,7 @@ export class PushEventProcessor extends BaseEventProcessor {
         id: payload.repository.id.toString(),
         name: payload.repository.name,
         owner: payload.repository.owner.login,
+        ownerType: payload.repository.owner.type,
       },
       commitCount: payload.commits.length,
       branch: payload.ref,
@@ -119,19 +122,20 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
         id: payload.repository.id.toString(),
         name: payload.repository.name,
         owner: payload.repository.owner.login,
+        ownerType: payload.repository.owner.type,
       },
       action: payload.action,
       prNumber: payload.number,
       title: payload.pull_request.title,
       state: payload.pull_request.state,
       merged: payload.pull_request.merged,
-      mergedAt: payload.pull_request.merged_at || undefined,
-      mergedBy: payload.pull_request.merged_by
-        ? {
-            id: payload.pull_request.merged_by.id.toString(),
-            login: payload.pull_request.merged_by.login,
-          }
-        : undefined,
+      ...(payload.pull_request.merged_at && {
+        mergedAt: payload.pull_request.merged_at,
+        mergedBy: {
+          id: payload.pull_request.merged_by!.id.toString(),
+          login: payload.pull_request.merged_by!.login,
+        },
+      }),
       sender: {
         id: payload.sender.id.toString(),
         login: payload.sender.login,
@@ -153,6 +157,7 @@ export class IssueEventProcessor extends BaseEventProcessor {
         id: payload.repository.id.toString(),
         name: payload.repository.name,
         owner: payload.repository.owner.login,
+        ownerType: payload.repository.owner.type,
       },
       action: payload.action,
       issueNumber: payload.issue.number,

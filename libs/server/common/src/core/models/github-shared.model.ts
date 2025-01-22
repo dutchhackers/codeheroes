@@ -2,6 +2,7 @@ export interface Repository {
   id: string;
   name: string;
   owner: string;
+  ownerType: 'User' | 'Organization';  // Added this line
 }
 
 // Event details interfaces

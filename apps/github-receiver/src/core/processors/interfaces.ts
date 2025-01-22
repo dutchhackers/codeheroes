@@ -30,5 +30,5 @@ export interface GitHubWebhookEvent {
     | CheckRunEvent
     | CheckSuiteEvent;
   headers: Record<string, string | string[] | undefined>;
-  source: string;
+  provider: string;
 }
