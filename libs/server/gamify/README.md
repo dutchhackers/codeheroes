@@ -1,7 +1,0 @@
-# gamifiy
-
-This library was generated with [Nx](https://nx.dev).
-
-## Building
-
-Run `nx build gamifiy` to build the library.
