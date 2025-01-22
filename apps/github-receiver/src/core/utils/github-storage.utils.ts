@@ -13,7 +13,7 @@ export class GitHubStorageUtils {
     const timestamp = now.toISOString().replace(/[:.]/g, '-');
     const [year, month, day] = now.toISOString().split('T')[0].split('-');
 
-    return `event-history/${event.source}/${event.eventType}/${year}/${month}/${day}/${event.eventId}-${timestamp}.txt`;
+    return `event-history/${event.provider}/${event.eventType}/${year}/${month}/${day}/${event.eventId}-${timestamp}.txt`;
   }
 
   static async storeGitHubEvent(storageService: StorageService, event: GitHubWebhookEvent): Promise<void> {

@@ -2,7 +2,7 @@ import { BaseDocument, ConnectedAccountProvider } from '../core/models/common.mo
 
 export interface WebhookEvent extends BaseDocument {
   type: string;
-  source: ConnectedAccountProvider;
+  provider: ConnectedAccountProvider;
   eventType: string; // e.g., 'push', 'pull_request', etc.
   externalId: string;
   externalTimestamp: string; // ISO string
