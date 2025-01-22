@@ -19,7 +19,6 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
 
 #### Server Libraries (Backend Only)
 - [@codeheroes/common](libs/server/common) - Shared server utilities and models
-- [@codeheroes/gamify](libs/server/gamify) - Game mechanics and rules
 
 #### Legacy Libraries (Deprecated)
 > The following libraries are deprecated and will be removed in future versions:
