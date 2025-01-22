@@ -9,7 +9,7 @@ import { UserActivity } from './activity.model';
 import { ActivityUtils } from './activity.util';
 
 export class ActivityService extends BaseFirestoreService<UserActivity> {
-  protected collection: CollectionReference<UserActivity>; // This will be set per user
+  protected collection: CollectionReference<UserActivity>; 
   private databaseService: DatabaseService;
   private db: FirebaseFirestore.Firestore;
 
