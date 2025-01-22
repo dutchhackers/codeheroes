@@ -3,12 +3,12 @@ import { BaseDocument, ConnectedAccountProvider } from '../core/models/common.mo
 export interface Source {
   id: string;
   timestamp: string; // ISO string
+  eventType: string;  // Added here
 }
 
 export interface WebhookEvent extends BaseDocument {
   type: string;
   provider: ConnectedAccountProvider;
-  eventType: string; // e.g., 'push', 'pull_request', etc.
   source: Source;
   data: Record<string, unknown>;
 }

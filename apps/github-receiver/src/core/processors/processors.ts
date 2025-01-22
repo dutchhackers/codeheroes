@@ -27,10 +27,10 @@ export abstract class BaseEventProcessor {
     return {
       type: `${this.webhookEvent.provider}_${this.webhookEvent.eventType}`,
       provider: this.webhookEvent.provider as ConnectedAccountProvider,
-      eventType: this.webhookEvent.eventType,
       source: {
         id: this.webhookEvent.eventId,
         timestamp: this.getEventTimestamp(),
+        eventType: this.webhookEvent.eventType,
       },
       data: this.getEventData(),
     };

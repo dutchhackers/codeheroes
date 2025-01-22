@@ -34,7 +34,7 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
     if (!userId) {
       logger.warn('Skipping activity creation - no matching user found', {
         eventId,
-        eventType: eventData.eventType,
+        eventType: eventData.source.eventType,
       });
       return;
     }
@@ -44,7 +44,7 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
       eventId,
       userId,
       provider: eventData.provider,
-      eventType: eventData.eventType,
+      eventType: eventData.source.eventType,
       externalEventId: eventData.source.id,
       externalEventTimestamp: eventData.source.timestamp,
       metadata: ActivityUtils.extractActivityData(eventData),
