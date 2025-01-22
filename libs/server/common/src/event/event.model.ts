@@ -3,7 +3,7 @@ import { BaseDocument, ConnectedAccountProvider } from '../core/models/common.mo
 export interface Source {
   id: string;
   timestamp: string; // ISO string
-  eventType: string;  // Added here
+  event: string;  // Added here
 }
 
 export interface WebhookEvent extends BaseDocument {

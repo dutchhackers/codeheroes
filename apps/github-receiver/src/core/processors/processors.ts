@@ -30,7 +30,7 @@ export abstract class BaseEventProcessor {
       source: {
         id: this.webhookEvent.eventId,
         timestamp: this.getEventTimestamp(),
-        eventType: this.webhookEvent.eventType,
+        event: this.webhookEvent.eventType,
       },
       data: this.getEventData(),
     };
