@@ -1,6 +1,16 @@
-import { ActivityData, ActivityType, PullRequestActivityData, PushActivityData, UserActivity } from "../../activity/activity.model";
-import { GameXpSettings, DEFAULT_XP_SETTINGS, XpBreakdownItem, XpCalculationResponse } from "../../core";
-
+import {
+  ActivityData,
+  ActivityType,
+  PullRequestActivityData,
+  PushActivityData,
+  UserActivity,
+} from '../../activity/activity.model';
+import {
+  DEFAULT_XP_SETTINGS,
+  GameXpSettings,
+  XpBreakdownItem,
+  XpCalculationResponse,
+} from '../gamification-domain.model';
 
 export class XpCalculatorService {
   private xpSettings: GameXpSettings;
@@ -29,7 +39,7 @@ export class XpCalculatorService {
 
   private calculatePullRequestBonus(
     data: PullRequestActivityData,
-    settings: GameXpSettings['github.pull_request.closed']
+    settings: GameXpSettings['github.pull_request.closed'],
   ): XpBreakdownItem | null {
     if (data.merged) {
       return {

@@ -1,7 +1,7 @@
 import { Firestore, getFirestore } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { calculateLevel } from './levels/level.utils';
-import { XpCalculationResponse, XpHistoryEntry } from '../core/models/gamification-domain.model';
+import { XpCalculationResponse, XpHistoryEntry } from './gamification-domain.model';
 import { UserActivity } from '../activity';
 import { getCurrentTimeAsISO } from '../firebase';
 
