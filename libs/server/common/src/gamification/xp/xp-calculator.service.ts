@@ -1,14 +1,6 @@
-import {
-  ActivityData,
-  ActivityType,
-  DEFAULT_XP_SETTINGS,
-  GameXpSettings,
-  PullRequestActivityData,
-  PushActivityData,
-  UserActivity,
-  XpBreakdownItem,
-  XpCalculationResponse,
-} from '@codeheroes/common';
+import { ActivityData, ActivityType, PullRequestActivityData, PushActivityData, UserActivity } from "../../activity/activity.model";
+import { GameXpSettings, DEFAULT_XP_SETTINGS, XpBreakdownItem, XpCalculationResponse } from "../../core";
+
 
 export class XpCalculatorService {
   private xpSettings: GameXpSettings;
