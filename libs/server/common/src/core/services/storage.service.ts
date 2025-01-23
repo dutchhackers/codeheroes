@@ -1,6 +1,6 @@
 import { Bucket } from '@google-cloud/storage';
 import { getStorage } from 'firebase-admin/storage';
-import { logger } from '../../firebase';
+import { logger } from '../firebase';
 
 export class StorageService {
   private bucket: Bucket;

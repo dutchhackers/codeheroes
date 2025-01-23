@@ -1,6 +1,6 @@
-import { CollectionReference, getFirestore } from 'firebase-admin/firestore';
+import { CollectionReference } from 'firebase-admin/firestore';
 import { BaseFirestoreService } from '../core/services/base.service';
-import { logger } from '../firebase';
+import { logger } from '../core/firebase';
 import { eventConverter } from './event.converter';
 import { CreateEventInput } from './event.dto';
 import { WebhookEvent } from './event.model';
@@ -10,7 +10,7 @@ export class EventService extends BaseFirestoreService<WebhookEvent> {
 
   constructor() {
     super();
-    this.collection = getFirestore().collection('events').withConverter(eventConverter);
+    this.collection = this.db.collection('events').withConverter(eventConverter);
   }
 
   async createEvent(eventData: CreateEventInput): Promise<WebhookEvent> {
