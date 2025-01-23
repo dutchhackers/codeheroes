@@ -1,6 +1,6 @@
 import { CollectionReference } from 'firebase-admin/firestore';
 import { BaseFirestoreService } from '../core/services/base.service';
-import { logger } from '../firebase';
+import { logger } from '../core/firebase';
 import { eventConverter } from './event.converter';
 import { CreateEventInput } from './event.dto';
 import { WebhookEvent } from './event.model';

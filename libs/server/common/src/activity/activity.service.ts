@@ -2,7 +2,7 @@ import { CollectionReference } from 'firebase-admin/firestore';
 import { BaseFirestoreService, DatabaseService } from '../core';
 import { WebhookEvent } from '../event/event.model';
 import { EventUtils } from '../event/event.utils';
-import { logger } from '../firebase';
+import { logger } from '../core/firebase';
 import { activityConverter } from './activity.converter';
 import { CreateActivityInput } from './activity.dto';
 import { UserActivity } from './activity.model';
