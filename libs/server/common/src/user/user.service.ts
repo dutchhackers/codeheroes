@@ -1,4 +1,4 @@
-import { CollectionReference, getFirestore } from 'firebase-admin/firestore';
+import { CollectionReference } from 'firebase-admin/firestore';
 import { PaginatedResponse, PaginationParams } from '../core/interfaces/pagination.interface';
 import { BaseFirestoreService } from '../core/services';
 import { getCurrentTimeAsISO } from '../firebase';
@@ -17,7 +17,7 @@ export class UserService extends BaseFirestoreService<User> {
 
   constructor() {
     super();
-    this.collection = getFirestore().collection('users').withConverter(userConverter);
+    this.collection = this.db.collection('users').withConverter(userConverter);
   }
 
   // async createUser(input: CreateUserInput): Promise<User> {
