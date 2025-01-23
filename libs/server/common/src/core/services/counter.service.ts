@@ -1,8 +1,17 @@
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { Timestamp } from 'firebase-admin/firestore';
+import { BaseFirestoreService } from './base.service';
 
-export class CounterService {
-  private db = getFirestore();
-  private counterRef = this.db.collection('system').doc('counters');
+interface CounterData {
+  nextUserId: number;
+  updatedAt: Timestamp;
+}
+
+export class CounterService extends BaseFirestoreService<CounterData> {
+  protected collection = this.db.collection('system').withConverter<CounterData>({
+    toFirestore: (data) => data,
+    fromFirestore: (snap) => snap.data() as CounterData,
+  });
+  private counterRef = this.collection.doc('counters');
 
   /**
    * Generates the next sequential user ID
@@ -23,7 +32,7 @@ export class CounterService {
           nextUserId: currentId + 1,
           updatedAt: Timestamp.now(),
         },
-        { merge: true }
+        { merge: true },
       );
 
       return currentId.toString();

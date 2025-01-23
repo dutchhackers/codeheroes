@@ -1,11 +1,12 @@
-import { Firestore, getFirestore } from 'firebase-admin/firestore';
+import { DocumentData } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
+import { BaseFirestoreService } from './base.service';
 
-export class DatabaseService {
-  private db: Firestore;
+export class DatabaseService extends BaseFirestoreService<DocumentData> {
+  protected collection = this.db.collection('users'); // You might want to adjust this collection name
 
   constructor() {
-    this.db = getFirestore();
+    super();
   }
 
   async lookupUserId(details: Record<string, unknown>): Promise<string | undefined> {

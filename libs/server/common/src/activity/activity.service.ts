@@ -1,4 +1,4 @@
-import { CollectionReference, getFirestore } from 'firebase-admin/firestore';
+import { CollectionReference } from 'firebase-admin/firestore';
 import { BaseFirestoreService, DatabaseService } from '../core';
 import { WebhookEvent } from '../event/event.model';
 import { EventUtils } from '../event/event.utils';
@@ -9,13 +9,11 @@ import { UserActivity } from './activity.model';
 import { ActivityUtils } from './activity.util';
 
 export class ActivityService extends BaseFirestoreService<UserActivity> {
-  protected collection: CollectionReference<UserActivity>; 
+  protected collection: CollectionReference<UserActivity>;
   private databaseService: DatabaseService;
-  private db: FirebaseFirestore.Firestore;
 
   constructor() {
     super();
-    this.db = getFirestore();
     this.databaseService = new DatabaseService();
     // Set a temporary collection to satisfy the abstract class requirement
     this.collection = this.getUserActivitiesCollection('temporary');

@@ -1,5 +1,6 @@
-import { CollectionReference, DocumentData, Timestamp } from 'firebase-admin/firestore';
+import { CollectionReference, DocumentData, Firestore, Timestamp } from 'firebase-admin/firestore';
 import { getCurrentTimeAsISO } from '../../firebase';
+import { DatabaseInstance } from '../../firebase/firestore.util';
 
 interface FirestoreTimestamps {
   createdAt: string; // ISO string
@@ -8,6 +9,11 @@ interface FirestoreTimestamps {
 
 export abstract class BaseFirestoreService<T extends DocumentData> {
   protected abstract collection: CollectionReference<T>;
+  protected readonly db: Firestore;
+
+  constructor() {
+    this.db = DatabaseInstance.getInstance();
+  }
 
   protected createTimestamps(): FirestoreTimestamps {
     const now = getCurrentTimeAsISO();
