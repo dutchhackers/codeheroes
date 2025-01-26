@@ -1,6 +1,6 @@
 import * as admin from 'firebase-admin';
 
-import { IUser } from '../models';
+import { IUser } from '@codeheroes/migration-shared';
 import { CoreService } from './abstract-service';
 import { isNullOrUndefined } from 'util';
 

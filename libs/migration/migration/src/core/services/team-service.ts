@@ -1,5 +1,5 @@
 import { CoreService } from './abstract-service';
-import { Game, Team, Player, IUser } from '../models';
+import { Game, Player, IUser, Team } from '@codeheroes/migration-shared';
 
 const TEAMS_COLLECTION = 'teams';
 const GAMES_COLLECTION = 'games';

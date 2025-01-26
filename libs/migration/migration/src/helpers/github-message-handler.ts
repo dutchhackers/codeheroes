@@ -1,6 +1,6 @@
 import * as logger from 'firebase-functions/logger';
 import { IPubSubEvent } from '../core/interfaces';
-import { Game } from '../core/models';
+import { Game } from '@codeheroes/migration-shared';
 import { ActivityService } from '../core/services/activity-service';
 import { GameService } from '../core/services/game-service';
 import { GitHubService } from '../core/services/github-service';

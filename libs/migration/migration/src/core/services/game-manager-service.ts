@@ -1,11 +1,10 @@
-import { CoreService } from '../services/abstract-service';
-import { GameService } from './game-service';
-import { TeamService } from './team-service';
+import { Game, GameState, Team } from '@codeheroes/migration-shared';
 import { assignPlayerToTeam } from '../../helpers/assign-players';
-import { TeamCharacterService } from './team-character-service';
-import { Game, Team } from '../models';
-import { GameState } from '../enums';
+import { CoreService } from '../services/abstract-service';
 import { logger } from '../utils';
+import { GameService } from './game-service';
+import { TeamCharacterService } from './team-character-service';
+import { TeamService } from './team-service';
 
 export interface IGameManagerService {
   startNewGame(options: any): Promise<Game>;

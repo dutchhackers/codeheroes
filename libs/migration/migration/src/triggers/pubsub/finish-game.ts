@@ -1,6 +1,6 @@
-import { GameService } from '../../core/services/game-service';
-import { GameState } from '../../core/enums';
+import { GameState } from '@codeheroes/migration-shared';
 import { IPubSubEvent } from '../../core/interfaces';
+import { GameService } from '../../core/services/game-service';
 
 const gameService = new GameService();
 

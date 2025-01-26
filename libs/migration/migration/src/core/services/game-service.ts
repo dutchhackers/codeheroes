@@ -1,8 +1,8 @@
 import { FieldValue } from 'firebase-admin/firestore';
 
-import { FirestoreCollections, GameState } from '../enums';
+import { FirestoreCollections } from '../enums';
 
-import { Game, Player, IUser } from '../models';
+import { Game, Player, IUser, GameState } from '@codeheroes/migration-shared';
 import { CoreService } from './abstract-service';
 import { logger } from '../utils';
 

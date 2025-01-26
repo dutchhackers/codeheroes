@@ -18,7 +18,7 @@ export class CheckRunEvent {
 
   log() {
     console.log(
-      `[GitHub Checks] [CheckRun ${this.action}] [${this.checkRun.appName}] [${this.sender.login}] [${this.repository.fullName}] [${this.checkRun.status}, conclusion: ${this.checkRun.conclusion}]`
+      `[GitHub Checks] [CheckRun ${this.action}] [${this.checkRun.appName}] [${this.sender.login}] [${this.repository.fullName}] [${this.checkRun.status}, conclusion: ${this.checkRun.conclusion}]`,
     );
   }
 }

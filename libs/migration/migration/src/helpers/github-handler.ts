@@ -7,8 +7,8 @@ import {
   PullRequestReviewEvent,
   PushEvent,
   ReleaseEvent,
-} from '@codeheroes/migration-github-shared';
-import { IActivity } from '../core/models';
+} from '@codeheroes/migration-shared';
+import { IActivity } from '@codeheroes/migration-shared';
 import { Publisher } from '../core/utils/publisher';
 import { PUB_SUB_PROJECT_ID } from '../core/config/app.config';
 import { PublisherTopics } from '../core/utils/publisher-topics';

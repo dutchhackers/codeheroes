@@ -1,4 +1,4 @@
-import { Employee } from '../models';
+import { Employee } from '@codeheroes/migration-shared';
 import { CoreService } from './abstract-service';
 
 export interface ILookupService {
