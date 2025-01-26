@@ -16,7 +16,7 @@ export class XpDatabaseService {
     userId: string,
     activityId: string,
     xpResult: XpCalculationResponse,
-    activity: UserActivity
+    activity: UserActivity,
   ): Promise<void> {
     const userRef = this.db.collection('users').doc(userId);
 
@@ -30,7 +30,7 @@ export class XpDatabaseService {
         const user = userDoc.data()!;
         const currentXp = user.xp || 0;
         const updatedXp = currentXp + xpResult.totalXp;
-        
+
         // Calculate level progress with potential overflow XP
         const levelProgress = calculateLevelProgress(updatedXp, user.achievements || [], user.tasks || []);
 
@@ -75,6 +75,7 @@ export class XpDatabaseService {
             // badges: earnedBadges,
             // achievements: updatedAchievements,
             // rewards: earnedRewards,
+            rewards: levelProgress.unlockedRewards || [],
           },
           updatedAt: getCurrentTimeAsISO(),
         });
