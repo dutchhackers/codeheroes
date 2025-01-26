@@ -32,6 +32,7 @@ export interface XpHistoryEntry extends BaseDocument {
   xpChange: number;
   newXp: number;
   newLevel: number;
+  currentLevelXp: number;  // Add this line
   activityId: string;
   activityType: string;
   breakdown: XpBreakdownItem[];

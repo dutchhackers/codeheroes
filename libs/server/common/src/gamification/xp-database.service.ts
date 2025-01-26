@@ -28,7 +28,10 @@ export class XpDatabaseService {
         }
 
         const user = userDoc.data()!;
-        const updatedXp = (user.xp || 0) + xpResult.totalXp;
+        const currentXp = user.xp || 0;
+        const updatedXp = currentXp + xpResult.totalXp;
+        
+        // Calculate level progress with potential overflow XP
         const levelProgress = calculateLevelProgress(updatedXp, user.achievements || [], user.tasks || []);
 
         const xpHistoryEntry: XpHistoryEntry = {
@@ -36,6 +39,7 @@ export class XpDatabaseService {
           xpChange: xpResult.totalXp,
           newXp: updatedXp,
           newLevel: levelProgress.currentLevel,
+          currentLevelXp: levelProgress.currentLevelXp,
           activityId,
           activityType: activity.type,
           breakdown: xpResult.breakdown,
@@ -43,10 +47,11 @@ export class XpDatabaseService {
           updatedAt: getCurrentTimeAsISO(),
         };
 
-        // Update user document
+        // Update user document with current level XP
         transaction.update(userRef, {
           xp: updatedXp,
           level: levelProgress.currentLevel,
+          currentLevelXp: levelProgress.currentLevelXp,
           xpToNextLevel: levelProgress.xpToNextLevel,
           updatedAt: getCurrentTimeAsISO(),
         });

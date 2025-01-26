@@ -2,7 +2,9 @@ import { LEVEL_CONFIGURATION, LevelRequirement } from './models/level.model';
 
 export interface LevelProgressResult {
   currentLevel: number;
-  currentXp: number;
+  totalXp: number;
+  currentLevelXp: number;  // XP within current level
+  xpForCurrentLevel: number;  // XP needed for current level
   xpToNextLevel: number;
   progressPercentage: number;
   unlockedRewards: LevelRequirement['rewards'];
@@ -25,10 +27,14 @@ export function calculateLevelProgress(
   }
 
   const nextLevel = LEVEL_CONFIGURATION[currentLevelConfig.level];
+  const xpForCurrentLevel = currentLevelConfig.xpRequired;
+  const currentLevelXp = totalXp - xpForCurrentLevel;
   
   return {
     currentLevel: currentLevelConfig.level,
-    currentXp: totalXp,
+    totalXp,
+    currentLevelXp,
+    xpForCurrentLevel,
     xpToNextLevel: nextLevel ? nextLevel.xpRequired - totalXp : 0,
     progressPercentage: calculateProgress(totalXp, currentLevelConfig, nextLevel),
     unlockedRewards: currentLevelConfig.rewards || [],
