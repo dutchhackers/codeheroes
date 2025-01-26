@@ -1,9 +1,22 @@
 import { BaseDocument, ConnectedAccountProvider } from "../core/models/common.model";
-import { ActivityProcessingResult } from "../gamification/gamification-domain.model";
+import { ActivityProcessingResult } from "../gamification/gamification.model";
+
+export interface ActivityMetrics {
+  [key: string]: number | undefined;
+}
+
+export interface PullRequestActivityMetrics {
+  commits: number;
+  additions: number;
+  deletions: number;
+  changedFiles: number;
+  timeInvested: number; // in seconds
+}
 
 // Base interfaces
 interface BaseActivityData {
   type: string;
+  metrics?: ActivityMetrics;
 }
 
 // Activity data interfaces
@@ -11,6 +24,8 @@ export interface IssueActivityData extends BaseActivityData {
   type: 'issue';
   issueNumber: number;
   title: string;
+  state: string;
+  stateReason?: string | null;
 }
 
 export interface PullRequestActivityData extends BaseActivityData {
@@ -22,7 +37,6 @@ export interface PullRequestActivityData extends BaseActivityData {
 
 export interface PushActivityData extends BaseActivityData {
   type: 'push';
-  commitCount: number;
   branch: string;
 }
 
@@ -63,10 +77,13 @@ export enum ActivityType {
   // Core coding activities;
   CODE_PUSH = 'CODE_PUSH',
   PR_CREATED = 'PR_CREATED',
+  PR_UPDATED = 'PR_UPDATED',
   PR_MERGED = 'PR_MERGED',
   PR_REVIEW = 'PR_REVIEW',
   ISSUE_CREATED = 'ISSUE_CREATED',
   ISSUE_CLOSED = 'ISSUE_CLOSED',
+  ISSUE_UPDATED = 'ISSUE_UPDATED',
+  ISSUE_REOPENED = 'ISSUE_REOPENED',
   CODE_COMMENT = 'CODE_COMMENT',
 
   // Additional (future) activities

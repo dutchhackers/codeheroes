@@ -11,6 +11,7 @@ import {
 import { IssueEvent, PullRequestEvent, PushEvent } from '@shared/github-interfaces';
 import { GitHubStorageUtils } from '../utils/github-storage.utils';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
+import { TimeUtils } from '../../../../../libs/server/common/src/activity/time.utils';
 
 export abstract class BaseEventProcessor {
   protected readonly eventService: EventService;
@@ -98,7 +99,9 @@ export class PushEventProcessor extends BaseEventProcessor {
         owner: payload.repository.owner.login,
         ownerType: payload.repository.owner.type,
       },
-      commitCount: payload.commits.length,
+      metrics: {
+        commits: payload.commits.length,
+      },
       branch: payload.ref,
       lastCommitMessage: payload.head_commit?.message || null,
       sender: {
@@ -117,6 +120,8 @@ export class PushEventProcessor extends BaseEventProcessor {
 export class PullRequestEventProcessor extends BaseEventProcessor {
   protected getEventData(): PullRequestEventData {
     const payload = this.webhookEvent.payload as PullRequestEvent;
+    const { pull_request } = payload;
+
     return {
       repository: {
         id: payload.repository.id.toString(),
@@ -128,7 +133,10 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
       prNumber: payload.number,
       title: payload.pull_request.title,
       state: payload.pull_request.state,
-      merged: payload.pull_request.merged,
+      merged: payload.pull_request.merged || false,
+      draft: payload.pull_request.draft || false,
+      createdAt: payload.pull_request.created_at,
+      updatedAt: payload.pull_request.updated_at,
       ...(payload.pull_request.merged_at && {
         mergedAt: payload.pull_request.merged_at,
         mergedBy: {
@@ -136,6 +144,12 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
           login: payload.pull_request.merged_by!.login,
         },
       }),
+      metrics: {
+        commits: pull_request.commits,
+        additions: pull_request.additions,
+        deletions: pull_request.deletions,
+        changedFiles: pull_request.changed_files,
+      },
       sender: {
         id: payload.sender.id.toString(),
         login: payload.sender.login,
@@ -163,6 +177,7 @@ export class IssueEventProcessor extends BaseEventProcessor {
       issueNumber: payload.issue.number,
       title: payload.issue.title,
       state: payload.issue.state,
+      stateReason: payload.issue.state_reason || null,
       sender: {
         id: payload.sender.id.toString(),
         login: payload.sender.login,

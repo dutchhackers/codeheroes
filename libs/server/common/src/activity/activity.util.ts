@@ -1,6 +1,7 @@
 import { IssueEventData, PullRequestEventData, PushEventData } from '../core';
 import { WebhookEvent } from '../event/event.model';
 import { ActivityData, ActivityType } from './activity.model';
+import { TimeUtils } from './time.utils';
 
 export class ActivityUtils {
   static mapToActivityType(event: WebhookEvent): ActivityType {
@@ -20,13 +21,22 @@ export class ActivityUtils {
         if (eventAction === 'reviewed') {
           return ActivityType.PR_REVIEW;
         }
+        if (eventAction === 'synchronize') {
+          return ActivityType.PR_UPDATED;
+        }
         break;
-      case 'issue':
+      case 'issues':
         if (eventAction === 'opened') {
           return ActivityType.ISSUE_CREATED;
         }
         if (eventAction === 'closed') {
           return ActivityType.ISSUE_CLOSED;
+        }
+        if (eventAction === 'edited') {
+          return ActivityType.ISSUE_UPDATED;
+        }
+        if (eventAction === 'reopened') {
+          return ActivityType.ISSUE_REOPENED;
         }
         break;
     }
@@ -42,8 +52,8 @@ export class ActivityUtils {
         const details = eventData as PushEventData;
         return {
           type: 'push',
-          commitCount: details.commitCount,
           branch: details.branch,
+          metrics: { ...details.metrics },
         };
       }
       case 'pull_request': {
@@ -53,14 +63,21 @@ export class ActivityUtils {
           prNumber: details.prNumber,
           title: details.title,
           merged: details.merged,
+          metrics: {
+            ...details.metrics,
+            timeInvested: TimeUtils.calculateTimeBetween(details.createdAt, details.updatedAt),
+          },
         };
       }
-      case 'issue': {
+      case 'issues': {
+        // Changed from 'issue' to 'issues'
         const details = eventData as IssueEventData;
         return {
           type: 'issue',
           issueNumber: details.issueNumber,
           title: details.title,
+          state: details.state,
+          stateReason: details.stateReason,
         };
       }
       default:

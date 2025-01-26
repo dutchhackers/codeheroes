@@ -11,14 +11,14 @@ export class EventUtils {
       case 'push': {
         const data = eventData as PushEventData;
         const branch = data.branch.replace('refs/heads/', '');
-        return `Committed ${data.commitCount} time(s) to ${repoName} (${branch}) (GitHub)`;
+        return `Committed ${data.metrics?.commits} time(s) to ${repoName} (${branch}) (GitHub)`;
       }
       case 'pull_request': {
         const data = eventData as PullRequestEventData;
         const action = data.action === 'closed' && data.state === 'closed' ? 'merged' : data.action;
         return `${action.charAt(0).toUpperCase() + action.slice(1)} PR #${data.prNumber} in ${repoName} (GitHub)`;
       }
-      case 'issue': {
+      case 'issues': {
         const data = eventData as IssueEventData;
         return `${data.action.charAt(0).toUpperCase() + data.action.slice(1)} issue #${
           data.issueNumber

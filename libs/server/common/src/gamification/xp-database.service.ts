@@ -2,8 +2,8 @@ import { Firestore } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { UserActivity } from '../activity';
 import { DatabaseInstance, getCurrentTimeAsISO } from '../core/firebase';
-import { XpCalculationResponse, XpHistoryEntry } from './gamification-domain.model';
-import { calculateLevel } from './levels/level.utils';
+import { XpCalculationResponse, XpHistoryEntry } from './gamification.model';
+import { calculateLevel } from './level.utils';
 
 export class XpDatabaseService {
   private db: Firestore;
