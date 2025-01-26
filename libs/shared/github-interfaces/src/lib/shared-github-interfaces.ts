@@ -65,9 +65,14 @@ export interface PullRequestEvent {
     merged: boolean;
     merged_at: string | null;
     merged_by: GitHubUser | null;
-    updated_at: string;
     html_url: string;
     body?: string;
+    commits: number;
+    additions: number;
+    deletions: number;
+    changed_files: number;
+    created_at: string;
+    updated_at: string;
   };
   repository: GitHubRepository;
   sender: GitHubUser;

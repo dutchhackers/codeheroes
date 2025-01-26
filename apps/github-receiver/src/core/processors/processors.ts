@@ -11,6 +11,7 @@ import {
 import { IssueEvent, PullRequestEvent, PushEvent } from '@shared/github-interfaces';
 import { GitHubStorageUtils } from '../utils/github-storage.utils';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
+import { TimeUtils } from '../utils/time.utils';
 
 export abstract class BaseEventProcessor {
   protected readonly eventService: EventService;
@@ -117,6 +118,8 @@ export class PushEventProcessor extends BaseEventProcessor {
 export class PullRequestEventProcessor extends BaseEventProcessor {
   protected getEventData(): PullRequestEventData {
     const payload = this.webhookEvent.payload as PullRequestEvent;
+    const { pull_request } = payload;
+
     return {
       repository: {
         id: payload.repository.id.toString(),
@@ -136,6 +139,16 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
           login: payload.pull_request.merged_by!.login,
         },
       }),
+      metrics: {
+        commits: pull_request.commits,
+        additions: pull_request.additions,
+        deletions: pull_request.deletions,
+        changedFiles: pull_request.changed_files,
+        timeInvested: TimeUtils.calculateTimeBetween(
+          pull_request.created_at,
+          pull_request.updated_at
+        ),
+      },
       sender: {
         id: payload.sender.id.toString(),
         login: payload.sender.login,
