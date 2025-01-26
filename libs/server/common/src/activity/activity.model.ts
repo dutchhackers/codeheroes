@@ -65,6 +65,7 @@ export enum ActivityType {
   // Core coding activities;
   CODE_PUSH = 'CODE_PUSH',
   PR_CREATED = 'PR_CREATED',
+  PR_UPDATED = 'PR_UPDATED',
   PR_MERGED = 'PR_MERGED',
   PR_REVIEW = 'PR_REVIEW',
   ISSUE_CREATED = 'ISSUE_CREATED',

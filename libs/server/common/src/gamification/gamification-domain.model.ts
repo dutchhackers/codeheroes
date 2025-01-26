@@ -87,6 +87,9 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
   PR_CREATED: {
     base: 20,
   },
+  PR_UPDATED: {
+    base: 5,  // Small XP for updates/synchronize
+  },
   PR_MERGED: {
     base: 30,
     bonuses: {
