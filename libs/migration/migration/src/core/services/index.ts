@@ -7,5 +7,6 @@ export * from './github-service';
 export * from './lookup-service';
 export * from './player-state-manager';
 export * from './scores-service';
+export * from './team-character-service';
 export * from './team-service';
 export * from './user-service-v2';
