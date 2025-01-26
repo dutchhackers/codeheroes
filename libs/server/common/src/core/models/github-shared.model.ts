@@ -39,7 +39,10 @@ export interface PullRequestEventData extends BaseEventData {
   prNumber: number;
   title: string;
   state: string;
+  draft: boolean;
   merged: boolean;
+  createdAt: string;
+  updatedAt: string;
   mergedAt?: string;
   mergedBy?: Sender;
   metrics?: PullRequestMetrics;
