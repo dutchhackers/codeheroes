@@ -25,7 +25,7 @@ export interface PullRequestMetrics {
   timeInvested: number; // in seconds
 }
 
-export interface ActivityMetrics {
+export interface EventMetrics {
   [key: string]: number | undefined;
 }
 
@@ -33,7 +33,7 @@ export interface PushEventData extends BaseEventData {
   commitCount: number;
   branch: string;
   // Push events don't have an action property
-  metrics?: ActivityMetrics;
+  metrics?: EventMetrics;
 }
 
 export interface PullRequestEventData extends BaseEventData {
@@ -55,5 +55,5 @@ export interface IssueEventData extends BaseEventData {
   title: string;
   state: string;
   stateReason?: IssueStateReason;
-  metrics?: ActivityMetrics;
+  metrics?: EventMetrics;
 }
