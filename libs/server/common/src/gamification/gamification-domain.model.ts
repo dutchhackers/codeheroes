@@ -98,7 +98,7 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
     bonuses: {
       multipleFiles: {
         threshold: 5,
-        xp: 3     // Bonus for updating multiple files
+        xp: 5     // Bonus for updating multiple files
       },
       significantChanges: {
         threshold: 50,
@@ -106,7 +106,7 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       },
       quickUpdate: {
         timeThreshold: '1h',
-        xp: 2     // Bonus for quick iterations
+        xp: 5     // Bonus for quick iterations
       }
     }
   },
