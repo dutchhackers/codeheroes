@@ -2,7 +2,7 @@ export interface Repository {
   id: string;
   name: string;
   owner: string;
-  ownerType: 'User' | 'Organization';  // Added this line
+  ownerType: 'User' | 'Organization'; // Added this line
 }
 
 // Event details interfaces
@@ -22,7 +22,6 @@ export interface PullRequestMetrics {
   additions: number;
   deletions: number;
   changedFiles: number;
-  timeInvested: number; // in seconds
 }
 
 export interface EventMetrics {

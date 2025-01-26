@@ -1,6 +1,7 @@
 import { IssueEventData, PullRequestEventData, PushEventData } from '../core';
 import { WebhookEvent } from '../event/event.model';
 import { ActivityData, ActivityType } from './activity.model';
+import { TimeUtils } from './time.utils';
 
 export class ActivityUtils {
   static mapToActivityType(event: WebhookEvent): ActivityType {
@@ -62,7 +63,10 @@ export class ActivityUtils {
           prNumber: details.prNumber,
           title: details.title,
           merged: details.merged,
-          metrics: { ...details.metrics },
+          metrics: {
+            ...details.metrics,
+            timeInvested: TimeUtils.calculateTimeBetween(details.createdAt, details.updatedAt),
+          },
         };
       }
       case 'issues': {

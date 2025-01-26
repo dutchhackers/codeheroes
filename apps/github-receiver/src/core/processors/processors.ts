@@ -11,7 +11,7 @@ import {
 import { IssueEvent, PullRequestEvent, PushEvent } from '@shared/github-interfaces';
 import { GitHubStorageUtils } from '../utils/github-storage.utils';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
-import { TimeUtils } from '../utils/time.utils';
+import { TimeUtils } from '../../../../../libs/server/common/src/activity/time.utils';
 
 export abstract class BaseEventProcessor {
   protected readonly eventService: EventService;
@@ -149,7 +149,6 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
         additions: pull_request.additions,
         deletions: pull_request.deletions,
         changedFiles: pull_request.changed_files,
-        timeInvested: TimeUtils.calculateTimeBetween(pull_request.created_at, pull_request.updated_at),
       },
       sender: {
         id: payload.sender.id.toString(),
