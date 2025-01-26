@@ -99,6 +99,9 @@ export class PushEventProcessor extends BaseEventProcessor {
         owner: payload.repository.owner.login,
         ownerType: payload.repository.owner.type,
       },
+      metrics: {
+        commits: payload.commits.length,
+      },
       commitCount: payload.commits.length,
       branch: payload.ref,
       lastCommitMessage: payload.head_commit?.message || null,
@@ -144,10 +147,7 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
         additions: pull_request.additions,
         deletions: pull_request.deletions,
         changedFiles: pull_request.changed_files,
-        timeInvested: TimeUtils.calculateTimeBetween(
-          pull_request.created_at,
-          pull_request.updated_at
-        ),
+        timeInvested: TimeUtils.calculateTimeBetween(pull_request.created_at, pull_request.updated_at),
       },
       sender: {
         id: payload.sender.id.toString(),
