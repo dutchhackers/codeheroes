@@ -5,10 +5,16 @@ export interface XpBreakdownItem {
   xp: number;
 }
 
+export interface BonusConfig {
+  threshold?: number;
+  timeThreshold?: string;
+  xp: number;
+}
+
 export interface XpSettings {
   base: number;
   bonuses?: {
-    [key: string]: number;
+    [key: string]: number | BonusConfig;
   };
 }
 
@@ -88,7 +94,21 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
     base: 20,
   },
   PR_UPDATED: {
-    base: 5,  // Small XP for updates/synchronize
+    base: 5,  // Base XP for updating PR
+    bonuses: {
+      multipleFiles: {
+        threshold: 5,
+        xp: 3     // Bonus for updating multiple files
+      },
+      significantChanges: {
+        threshold: 50,
+        xp: 5     // Bonus for substantial code changes
+      },
+      quickUpdate: {
+        timeThreshold: '1h',
+        xp: 2     // Bonus for quick iterations
+      }
+    }
   },
   PR_MERGED: {
     base: 30,

@@ -7,6 +7,7 @@ import {
   UserActivity,
 } from '../../activity/activity.model';
 import {
+  BonusConfig,
   DEFAULT_XP_SETTINGS,
   GameXpSettings,
   XpBreakdownItem,
@@ -36,7 +37,7 @@ export class XpCalculatorService {
     if (data.commitCount > 1) {
       return {
         description: 'Bonus for multiple commits in push',
-        xp: settings.bonuses?.multipleCommits || 0,
+        xp: typeof settings.bonuses?.multipleCommits === 'number' ? settings.bonuses.multipleCommits : settings.bonuses?.multipleCommits?.xp || 0,
       };
     }
     return null;
@@ -49,10 +50,43 @@ export class XpCalculatorService {
     if (data.merged) {
       return {
         description: 'Bonus for merging pull request',
-        xp: settings.bonuses?.merged || 0,
+        xp: typeof settings.bonuses?.merged === 'number' ? settings.bonuses.merged : settings.bonuses?.merged?.xp || 0,
       };
     }
     return null;
+  }
+
+  private calculatePrUpdateBonus(
+    data: PullRequestActivityData,
+    settings: GameXpSettings['PR_UPDATED']
+  ): XpBreakdownItem[] {
+    const bonuses: XpBreakdownItem[] = [];
+    const metrics = data.metrics;
+    
+    if (!metrics) {
+      return bonuses;
+    }
+
+    // Multiple files bonus
+    const multipleFilesBonus = settings.bonuses?.multipleFiles as BonusConfig;
+    if (multipleFilesBonus && metrics.changedFiles > multipleFilesBonus.threshold!) {
+      bonuses.push({
+        description: 'Bonus for updating multiple files',
+        xp: multipleFilesBonus.xp
+      });
+    }
+    
+    // Significant changes bonus
+    const significantChangesBonus = settings.bonuses?.significantChanges as BonusConfig;
+    if (significantChangesBonus && 
+        (metrics.additions + metrics.deletions) > significantChangesBonus.threshold!) {
+      bonuses.push({
+        description: 'Bonus for significant code changes',
+        xp: significantChangesBonus.xp
+      });
+    }
+
+    return bonuses;
   }
 
   private calculateIssueBonus(
@@ -62,7 +96,7 @@ export class XpCalculatorService {
     if (data.state === 'closed' && data.stateReason === 'completed') {
       return {
         description: 'Bonus for completing issue',
-        xp: settings.bonuses?.completed || 0,
+        xp: typeof settings.bonuses?.completed === 'number' ? settings.bonuses.completed : settings.bonuses?.completed?.xp || 0,
       };
     }
     return null;
@@ -85,22 +119,30 @@ export class XpCalculatorService {
     totalXp += xpSettings.base;
 
     // Calculate bonuses based on activity type
-    let bonus: XpBreakdownItem | null = null;
-
     if (activity.type === ActivityType.CODE_PUSH && this.isPushActivity(activity.metadata)) {
-      bonus = this.calculatePushBonus(activity.metadata, xpSettings);
+      const bonus = this.calculatePushBonus(activity.metadata, xpSettings);
+      if (bonus) {
+        breakdown.push(bonus);
+        totalXp += bonus.xp;
+      }
     } else if (activity.type === ActivityType.PR_MERGED && this.isPullRequestActivity(activity.metadata)) {
-      bonus = this.calculatePullRequestBonus(activity.metadata, xpSettings);
+      const bonus = this.calculatePullRequestBonus(activity.metadata, xpSettings);
+      if (bonus) {
+        breakdown.push(bonus);
+        totalXp += bonus.xp;
+      }
     } else if (activity.type === ActivityType.PR_UPDATED && this.isPullRequestActivity(activity.metadata)) {
-      // PR updates get base XP only, no bonus
-      bonus = null;
+      const bonuses = this.calculatePrUpdateBonus(activity.metadata, xpSettings);
+      bonuses.forEach(bonus => {
+        breakdown.push(bonus);
+        totalXp += bonus.xp;
+      });
     } else if (activity.type === ActivityType.ISSUE_CLOSED && this.isIssueActivity(activity.metadata)) {
-      bonus = this.calculateIssueBonus(activity.metadata, xpSettings);
-    }
-
-    if (bonus) {
-      breakdown.push(bonus);
-      totalXp += bonus.xp;
+      const bonus = this.calculateIssueBonus(activity.metadata, xpSettings);
+      if (bonus) {
+        breakdown.push(bonus);
+        totalXp += bonus.xp;
+      }
     }
 
     return { totalXp, breakdown };
