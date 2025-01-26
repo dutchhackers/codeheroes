@@ -24,7 +24,7 @@ export const LEVEL_CONFIGURATION: LevelRequirement[] = [
   },
   {
     level: 2,
-    xpRequired: 1000,
+    xpRequired: 5,//1000,
     rewards: [
       { type: 'FEATURE_UNLOCK', id: 'pr_creation', name: 'Pull Request Creation' }
     ]

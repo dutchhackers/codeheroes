@@ -74,6 +74,7 @@ export class XpDatabaseService {
             // Future additions:
             // badges: earnedBadges,
             // achievements: updatedAchievements,
+            // rewards: earnedRewards,
           },
           updatedAt: getCurrentTimeAsISO(),
         });
