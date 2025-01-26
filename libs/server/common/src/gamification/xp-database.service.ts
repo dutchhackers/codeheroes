@@ -2,7 +2,7 @@ import { Firestore } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { UserActivity } from '../activity';
 import { DatabaseInstance, getCurrentTimeAsISO } from '../core/firebase';
-import { XpCalculationResponse, XpHistoryEntry } from './gamification.model';
+import { XpCalculationResponse, XpHistoryEntry } from './models/gamification.model';
 import { calculateLevelProgress } from './level.utils';
 
 export class XpDatabaseService {
