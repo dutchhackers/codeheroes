@@ -68,6 +68,7 @@ export enum ActivityType {
   ISSUE_CREATED = 'ISSUE_CREATED',
   ISSUE_CLOSED = 'ISSUE_CLOSED',
   ISSUE_UPDATED = 'ISSUE_UPDATED',
+  ISSUE_REOPENED = 'ISSUE_REOPENED',
   CODE_COMMENT = 'CODE_COMMENT',
 
   // Additional (future) activities

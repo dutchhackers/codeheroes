@@ -31,6 +31,9 @@ export class ActivityUtils {
         if (eventAction === 'edited') {
           return ActivityType.ISSUE_UPDATED;
         }
+        if (eventAction === 'reopened') {
+          return ActivityType.ISSUE_REOPENED;
+        }
         break;
     }
     throw new Error(`Unsupported event type: ${eventType} with action: ${eventAction}`);

@@ -1,6 +1,6 @@
 export const GitHubEventConfig = {
   'pull_request': ['opened', 'closed', 'merged', 'reviewed', 'updated'],
-  'issues': ['opened', 'closed', 'edited'], // Changed from 'issue' to 'issues'
+  'issues': ['opened', 'closed', 'edited', 'reopened'],
   'push': [undefined], // push events don't have actions
 } as const;
 
