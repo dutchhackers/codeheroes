@@ -32,7 +32,7 @@ export interface XpHistoryEntry extends BaseDocument {
   xpChange: number;
   newXp: number;
   newLevel: number;
-  currentLevelXp: number;  // Add this line
+  currentLevelXp: number; // Add this line
   activityId: string;
   activityType: string;
   breakdown: XpBreakdownItem[];
@@ -82,61 +82,61 @@ export interface ActivityProcessingResult {
 
 export const DEFAULT_XP_SETTINGS: GameXpSettings = {
   CODE_PUSH: {
-    base: 10,
+    base: 25,
     bonuses: {
       multipleCommits: {
-        threshold: 1,
-        xp: 5,
+        threshold: 2,
+        xp: 15,
         description: 'Bonus for multiple commits in push',
       },
     },
   },
   PR_CREATED: {
-    base: 20,
+    base: 50,
   },
   PR_UPDATED: {
-    base: 5, // Base XP for updating PR
+    base: 15,
     bonuses: {
       multipleFiles: {
         threshold: 5,
-        xp: 5,
+        xp: 20,
         description: 'Bonus for updating multiple files',
       },
       significantChanges: {
-        threshold: 50,
-        xp: 5,
+        threshold: 100,
+        xp: 25,
         description: 'Bonus for significant code changes',
       },
       quickUpdate: {
         timeThreshold: '1h',
-        xp: 5,
+        xp: 10,
         description: 'Bonus for quick PR iteration',
       },
     },
   },
   PR_MERGED: {
-    base: 30,
+    base: 75,
     bonuses: {
       merged: {
-        xp: 20,
+        xp: 50,
         description: 'Bonus for merging pull request',
       },
     },
   },
   ISSUE_CREATED: {
-    base: 15,
+    base: 30,
   },
   ISSUE_CLOSED: {
-    base: 20,
+    base: 40,
     bonuses: {
       completed: {
-        xp: 5,
+        xp: 20,
         description: 'Bonus for completing issue',
       },
     },
   },
   ISSUE_UPDATED: {
-    base: 5,
+    base: 10,
   },
   ISSUE_REOPENED: {
     base: 5,
