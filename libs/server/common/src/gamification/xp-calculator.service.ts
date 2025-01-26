@@ -11,7 +11,7 @@ import {
   GameXpSettings,
   XpBreakdownItem,
   XpCalculationResponse,
-} from './gamification.model';
+} from './models/gamification.model';
 
 export class XpCalculatorService {
   private xpSettings: GameXpSettings;

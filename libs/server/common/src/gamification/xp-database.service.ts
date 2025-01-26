@@ -2,8 +2,8 @@ import { Firestore } from 'firebase-admin/firestore';
 import * as logger from 'firebase-functions/logger';
 import { UserActivity } from '../activity';
 import { DatabaseInstance, getCurrentTimeAsISO } from '../core/firebase';
-import { XpCalculationResponse, XpHistoryEntry } from './gamification.model';
-import { calculateLevel } from './level.utils';
+import { XpCalculationResponse, XpHistoryEntry } from './models/gamification.model';
+import { calculateLevelProgress } from './level.utils';
 
 export class XpDatabaseService {
   private db: Firestore;
@@ -16,7 +16,7 @@ export class XpDatabaseService {
     userId: string,
     activityId: string,
     xpResult: XpCalculationResponse,
-    activity: UserActivity
+    activity: UserActivity,
   ): Promise<void> {
     const userRef = this.db.collection('users').doc(userId);
 
@@ -28,17 +28,18 @@ export class XpDatabaseService {
         }
 
         const user = userDoc.data()!;
-        const updatedXp = (user.xp || 0) + xpResult.totalXp;
-        const levelUpResult = calculateLevel(user.level || 1, user.xpToNextLevel || 100, updatedXp, {
-          baseXpPerLevel: 100,
-          xpMultiplier: 1.5,
-        });
+        const currentXp = user.xp || 0;
+        const updatedXp = currentXp + xpResult.totalXp;
+
+        // Calculate level progress with potential overflow XP
+        const levelProgress = calculateLevelProgress(updatedXp, user.achievements || [], user.tasks || []);
 
         const xpHistoryEntry: XpHistoryEntry = {
           id: this.db.collection('users').doc().id,
           xpChange: xpResult.totalXp,
           newXp: updatedXp,
-          newLevel: levelUpResult.level,
+          newLevel: levelProgress.currentLevel,
+          currentLevelXp: levelProgress.currentLevelXp,
           activityId,
           activityType: activity.type,
           breakdown: xpResult.breakdown,
@@ -46,11 +47,12 @@ export class XpDatabaseService {
           updatedAt: getCurrentTimeAsISO(),
         };
 
-        // Update user document
+        // Update user document with current level XP
         transaction.update(userRef, {
           xp: updatedXp,
-          level: levelUpResult.level,
-          xpToNextLevel: levelUpResult.xpToNextLevel,
+          level: levelProgress.currentLevel,
+          currentLevelXp: levelProgress.currentLevelXp,
+          xpToNextLevel: levelProgress.xpToNextLevel,
           updatedAt: getCurrentTimeAsISO(),
         });
 
@@ -72,6 +74,8 @@ export class XpDatabaseService {
             // Future additions:
             // badges: earnedBadges,
             // achievements: updatedAchievements,
+            // rewards: earnedRewards,
+            rewards: levelProgress.unlockedRewards || [],
           },
           updatedAt: getCurrentTimeAsISO(),
         });
