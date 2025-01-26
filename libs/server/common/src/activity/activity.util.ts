@@ -21,7 +21,7 @@ export class ActivityUtils {
           return ActivityType.PR_REVIEW;
         }
         break;
-      case 'issues': // Changed from 'issue' to 'issues'
+      case 'issues':
         if (eventAction === 'opened') {
           return ActivityType.ISSUE_CREATED;
         }
