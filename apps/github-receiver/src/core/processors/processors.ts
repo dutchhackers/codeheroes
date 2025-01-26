@@ -163,6 +163,7 @@ export class IssueEventProcessor extends BaseEventProcessor {
       issueNumber: payload.issue.number,
       title: payload.issue.title,
       state: payload.issue.state,
+      stateReason: payload.issue.state_reason || null,
       sender: {
         id: payload.sender.id.toString(),
         login: payload.sender.login,

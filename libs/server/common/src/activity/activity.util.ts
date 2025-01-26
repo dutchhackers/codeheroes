@@ -61,12 +61,14 @@ export class ActivityUtils {
           merged: details.merged,
         };
       }
-      case 'issue': {
+      case 'issues': { // Changed from 'issue' to 'issues'
         const details = eventData as IssueEventData;
         return {
           type: 'issue',
           issueNumber: details.issueNumber,
           title: details.title,
+          state: details.state,
+          stateReason: details.stateReason,
         };
       }
       default:

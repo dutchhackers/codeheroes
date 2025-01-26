@@ -33,9 +33,12 @@ export interface PullRequestEventData extends BaseEventData {
   mergedBy?: Sender;
 }
 
+export type IssueStateReason = 'completed' | 'not_planned' | 'reopened' | null;
+
 export interface IssueEventData extends BaseEventData {
   action: 'opened' | 'closed' | 'reopened' | 'edited' | string;
   issueNumber: number;
   title: string;
   state: string;
+  stateReason?: IssueStateReason;
 }

@@ -11,6 +11,8 @@ export interface IssueActivityData extends BaseActivityData {
   type: 'issue';
   issueNumber: number;
   title: string;
+  state: string;
+  stateReason?: string | null;
 }
 
 export interface PullRequestActivityData extends BaseActivityData {

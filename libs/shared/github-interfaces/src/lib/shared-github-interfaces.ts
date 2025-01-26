@@ -80,6 +80,7 @@ export interface IssueEvent {
     number: number;
     title: string;
     state: 'open' | 'closed';
+    state_reason?: 'completed' | 'not_planned' | 'reopened' | null;
     updated_at: string;
     html_url: string;
     body?: string;
