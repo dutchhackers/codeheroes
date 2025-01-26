@@ -30,9 +30,7 @@ export interface EventMetrics {
 }
 
 export interface PushEventData extends BaseEventData {
-  commitCount: number;
   branch: string;
-  // Push events don't have an action property
   metrics?: EventMetrics;
 }
 

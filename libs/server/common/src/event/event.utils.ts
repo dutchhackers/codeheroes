@@ -11,7 +11,7 @@ export class EventUtils {
       case 'push': {
         const data = eventData as PushEventData;
         const branch = data.branch.replace('refs/heads/', '');
-        return `Committed ${data.commitCount} time(s) to ${repoName} (${branch}) (GitHub)`;
+        return `Committed ${data.metrics?.commits} time(s) to ${repoName} (${branch}) (GitHub)`;
       }
       case 'pull_request': {
         const data = eventData as PullRequestEventData;

@@ -37,7 +37,6 @@ export interface PullRequestActivityData extends BaseActivityData {
 
 export interface PushActivityData extends BaseActivityData {
   type: 'push';
-  commitCount: number;
   branch: string;
 }
 

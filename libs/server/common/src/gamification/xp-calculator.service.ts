@@ -34,7 +34,7 @@ export class XpCalculatorService {
 
   private calculatePushBonus(data: PushActivityData, settings: GameXpSettings['CODE_PUSH']): XpBreakdownItem | null {
     const multipleCommitsBonus = settings.bonuses?.multipleCommits;
-    if (multipleCommitsBonus && data.commitCount > multipleCommitsBonus.threshold!) {
+    if (multipleCommitsBonus && data.metrics?.commits > multipleCommitsBonus.threshold!) {
       return {
         description: multipleCommitsBonus.description,
         xp: multipleCommitsBonus.xp,

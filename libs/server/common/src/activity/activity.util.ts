@@ -51,8 +51,8 @@ export class ActivityUtils {
         const details = eventData as PushEventData;
         return {
           type: 'push',
-          commitCount: details.commitCount,
           branch: details.branch,
+          metrics: { ...details.metrics },
         };
       }
       case 'pull_request': {

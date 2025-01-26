@@ -102,7 +102,6 @@ export class PushEventProcessor extends BaseEventProcessor {
       metrics: {
         commits: payload.commits.length,
       },
-      commitCount: payload.commits.length,
       branch: payload.ref,
       lastCommitMessage: payload.head_commit?.message || null,
       sender: {
