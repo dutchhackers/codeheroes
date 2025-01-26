@@ -75,7 +75,6 @@ export class XpDatabaseService {
             // badges: earnedBadges,
             // achievements: updatedAchievements,
             // rewards: earnedRewards,
-            rewards: levelProgress.unlockedRewards || [],
           },
           updatedAt: getCurrentTimeAsISO(),
         });
