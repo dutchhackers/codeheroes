@@ -3,7 +3,7 @@ import * as logger from 'firebase-functions/logger';
 import { UserActivity } from '../activity';
 import { DatabaseInstance, getCurrentTimeAsISO } from '../core/firebase';
 import { XpCalculationResponse, XpHistoryEntry } from './gamification.model';
-import { calculateLevel } from './level.utils';
+import { calculateLevelProgress } from './level.utils';
 
 export class XpDatabaseService {
   private db: Firestore;
@@ -29,16 +29,13 @@ export class XpDatabaseService {
 
         const user = userDoc.data()!;
         const updatedXp = (user.xp || 0) + xpResult.totalXp;
-        const levelUpResult = calculateLevel(user.level || 1, user.xpToNextLevel || 100, updatedXp, {
-          baseXpPerLevel: 100,
-          xpMultiplier: 1.5,
-        });
+        const levelProgress = calculateLevelProgress(updatedXp, user.achievements || [], user.tasks || []);
 
         const xpHistoryEntry: XpHistoryEntry = {
           id: this.db.collection('users').doc().id,
           xpChange: xpResult.totalXp,
           newXp: updatedXp,
-          newLevel: levelUpResult.level,
+          newLevel: levelProgress.currentLevel,
           activityId,
           activityType: activity.type,
           breakdown: xpResult.breakdown,
@@ -49,8 +46,8 @@ export class XpDatabaseService {
         // Update user document
         transaction.update(userRef, {
           xp: updatedXp,
-          level: levelUpResult.level,
-          xpToNextLevel: levelUpResult.xpToNextLevel,
+          level: levelProgress.currentLevel,
+          xpToNextLevel: levelProgress.xpToNextLevel,
           updatedAt: getCurrentTimeAsISO(),
         });
 

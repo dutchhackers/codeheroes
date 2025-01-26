@@ -37,11 +37,6 @@ export interface XpHistoryEntry extends BaseDocument {
   breakdown: XpBreakdownItem[];
 }
 
-export interface LevelCalculationResult {
-  level: number;
-  xpToNextLevel: number;
-}
-
 export interface UserXpData {
   xp: number;
   level: number;
