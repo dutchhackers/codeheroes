@@ -20,6 +20,9 @@ export class ActivityUtils {
         if (eventAction === 'reviewed') {
           return ActivityType.PR_REVIEW;
         }
+        if (eventAction === 'syncronized') {
+          return ActivityType.PR_UPDATED;
+        }
         break;
       case 'issues':
         if (eventAction === 'opened') {
@@ -59,9 +62,11 @@ export class ActivityUtils {
           prNumber: details.prNumber,
           title: details.title,
           merged: details.merged,
+          metrics: { ...details.metrics },
         };
       }
-      case 'issues': { // Changed from 'issue' to 'issues'
+      case 'issues': {
+        // Changed from 'issue' to 'issues'
         const details = eventData as IssueEventData;
         return {
           type: 'issue',

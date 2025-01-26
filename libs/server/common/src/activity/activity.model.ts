@@ -1,9 +1,22 @@
 import { BaseDocument, ConnectedAccountProvider } from "../core/models/common.model";
 import { ActivityProcessingResult } from "../gamification/gamification-domain.model";
 
+export interface ActivityMetrics {
+  [key: string]: number | undefined;
+}
+
+export interface PullRequestActivityMetrics {
+  commits: number;
+  additions: number;
+  deletions: number;
+  changedFiles: number;
+  timeInvested: number; // in seconds
+}
+
 // Base interfaces
 interface BaseActivityData {
   type: string;
+  metrics?: ActivityMetrics;
 }
 
 // Activity data interfaces
