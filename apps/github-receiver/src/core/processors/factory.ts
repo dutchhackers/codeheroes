@@ -8,7 +8,7 @@ export class ProcessorFactory {
         return new PushEventProcessor(event);
       case 'pull_request':
         return new PullRequestEventProcessor(event);
-      case 'issue':
+      case 'issues':
         return new IssueEventProcessor(event);
       default:
         // This should never happen as GitHubEventUtils validates event types

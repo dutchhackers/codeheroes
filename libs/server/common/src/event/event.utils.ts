@@ -18,7 +18,7 @@ export class EventUtils {
         const action = data.action === 'closed' && data.state === 'closed' ? 'merged' : data.action;
         return `${action.charAt(0).toUpperCase() + action.slice(1)} PR #${data.prNumber} in ${repoName} (GitHub)`;
       }
-      case 'issue': {
+      case 'issues': {
         const data = eventData as IssueEventData;
         return `${data.action.charAt(0).toUpperCase() + data.action.slice(1)} issue #${
           data.issueNumber

@@ -67,6 +67,7 @@ export enum ActivityType {
   PR_REVIEW = 'PR_REVIEW',
   ISSUE_CREATED = 'ISSUE_CREATED',
   ISSUE_CLOSED = 'ISSUE_CLOSED',
+  ISSUE_UPDATED = 'ISSUE_UPDATED',
   CODE_COMMENT = 'CODE_COMMENT',
 
   // Additional (future) activities

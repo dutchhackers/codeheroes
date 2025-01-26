@@ -99,4 +99,7 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
   ISSUE_CLOSED: {
     base: 20,
   },
+  ISSUE_UPDATED: {
+    base: 5,
+  },
 };

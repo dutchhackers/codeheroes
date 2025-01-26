@@ -21,12 +21,15 @@ export class ActivityUtils {
           return ActivityType.PR_REVIEW;
         }
         break;
-      case 'issue':
+      case 'issues': // Changed from 'issue' to 'issues'
         if (eventAction === 'opened') {
           return ActivityType.ISSUE_CREATED;
         }
         if (eventAction === 'closed') {
           return ActivityType.ISSUE_CLOSED;
+        }
+        if (eventAction === 'edited') {
+          return ActivityType.ISSUE_UPDATED;
         }
         break;
     }
