@@ -1,5 +1,5 @@
 import { BaseDocument, ConnectedAccountProvider } from "../core/models/common.model";
-import { ActivityProcessingResult } from "../gamification/gamification-domain.model";
+import { ActivityProcessingResult } from "../gamification/gamification.model";
 
 export interface ActivityMetrics {
   [key: string]: number | undefined;
