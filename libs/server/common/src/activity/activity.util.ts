@@ -20,7 +20,7 @@ export class ActivityUtils {
         if (eventAction === 'reviewed') {
           return ActivityType.PR_REVIEW;
         }
-        if (eventAction === 'syncronized') {
+        if (eventAction === 'syncronize') {
           return ActivityType.PR_UPDATED;
         }
         break;

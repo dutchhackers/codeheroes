@@ -91,6 +91,9 @@ export class XpCalculatorService {
       bonus = this.calculatePushBonus(activity.metadata, xpSettings);
     } else if (activity.type === ActivityType.PR_MERGED && this.isPullRequestActivity(activity.metadata)) {
       bonus = this.calculatePullRequestBonus(activity.metadata, xpSettings);
+    } else if (activity.type === ActivityType.PR_UPDATED && this.isPullRequestActivity(activity.metadata)) {
+      // PR updates get base XP only, no bonus
+      bonus = null;
     } else if (activity.type === ActivityType.ISSUE_CLOSED && this.isIssueActivity(activity.metadata)) {
       bonus = this.calculateIssueBonus(activity.metadata, xpSettings);
     }
