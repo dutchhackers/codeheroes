@@ -1,26 +1,15 @@
-import { Request } from 'express';
-import { GitHubWebhookEvent } from './interfaces';
 import {
-  CheckRunEvent,
-  CheckSuiteEvent,
   IssueEvent,
   PullRequestEvent,
-  PushEvent,
-  WorkflowJobEvent,
-  WorkflowRunEvent,
+  PushEvent
 } from '@shared/github-interfaces';
+import { Request } from 'express';
+import { ErrorType, MESSAGES } from '../constants/constants';
 import { GitHubEventConfig, SupportedEventType } from '../constants/github.constants';
 import { GitHubError } from '../errors/github-event.error';
-import { ErrorType, MESSAGES } from '../constants/constants';
+import { GitHubWebhookEvent } from './interfaces';
 
-type GitHubPayload =
-  | PushEvent
-  | PullRequestEvent
-  | IssueEvent
-  | WorkflowRunEvent
-  | WorkflowJobEvent
-  | CheckRunEvent
-  | CheckSuiteEvent;
+type GitHubPayload = PushEvent | PullRequestEvent | IssueEvent;
 
 export class GitHubEventUtils {
   static isEventTypeSupported(eventType: string): eventType is SupportedEventType {
