@@ -3,6 +3,7 @@ import {
   ActivityType,
   PullRequestActivityData,
   PushActivityData,
+  IssueActivityData,
   UserActivity,
 } from '../../activity/activity.model';
 import {
@@ -27,6 +28,10 @@ export class XpCalculatorService {
     return data?.type === 'pull_request';
   }
 
+  private isIssueActivity(data: ActivityData | undefined): data is IssueActivityData {
+    return data?.type === 'issue';
+  }
+
   private calculatePushBonus(data: PushActivityData, settings: GameXpSettings['github.push']): XpBreakdownItem | null {
     if (data.commitCount > 1) {
       return {
@@ -45,6 +50,19 @@ export class XpCalculatorService {
       return {
         description: 'Bonus for merging pull request',
         xp: settings.bonuses?.merged || 0,
+      };
+    }
+    return null;
+  }
+
+  private calculateIssueBonus(
+    data: IssueActivityData,
+    settings: GameXpSettings['ISSUE_CLOSED']
+  ): XpBreakdownItem | null {
+    if (data.state === 'closed' && data.stateReason === 'completed') {
+      return {
+        description: 'Bonus for completing issue',
+        xp: settings.bonuses?.completed || 0,
       };
     }
     return null;
@@ -73,6 +91,8 @@ export class XpCalculatorService {
       bonus = this.calculatePushBonus(activity.metadata, xpSettings);
     } else if (activity.type === ActivityType.PR_MERGED && this.isPullRequestActivity(activity.metadata)) {
       bonus = this.calculatePullRequestBonus(activity.metadata, xpSettings);
+    } else if (activity.type === ActivityType.ISSUE_CLOSED && this.isIssueActivity(activity.metadata)) {
+      bonus = this.calculateIssueBonus(activity.metadata, xpSettings);
     }
 
     if (bonus) {
