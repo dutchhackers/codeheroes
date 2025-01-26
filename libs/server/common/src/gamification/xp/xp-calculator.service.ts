@@ -1,13 +1,12 @@
 import {
   ActivityData,
   ActivityType,
+  IssueActivityData,
   PullRequestActivityData,
   PushActivityData,
-  IssueActivityData,
   UserActivity,
 } from '../../activity/activity.model';
 import {
-  BonusConfig,
   DEFAULT_XP_SETTINGS,
   GameXpSettings,
   XpBreakdownItem,
@@ -33,11 +32,12 @@ export class XpCalculatorService {
     return data?.type === 'issue';
   }
 
-  private calculatePushBonus(data: PushActivityData, settings: GameXpSettings['github.push']): XpBreakdownItem | null {
-    if (data.commitCount > 1) {
+  private calculatePushBonus(data: PushActivityData, settings: GameXpSettings['CODE_PUSH']): XpBreakdownItem | null {
+    const multipleCommitsBonus = settings.bonuses?.multipleCommits;
+    if (multipleCommitsBonus && data.commitCount > multipleCommitsBonus.threshold!) {
       return {
-        description: 'Bonus for multiple commits in push',
-        xp: typeof settings.bonuses?.multipleCommits === 'number' ? settings.bonuses.multipleCommits : settings.bonuses?.multipleCommits?.xp || 0,
+        description: multipleCommitsBonus.description,
+        xp: multipleCommitsBonus.xp,
       };
     }
     return null;
@@ -45,12 +45,13 @@ export class XpCalculatorService {
 
   private calculatePullRequestBonus(
     data: PullRequestActivityData,
-    settings: GameXpSettings['github.pull_request.closed'],
+    settings: GameXpSettings['PR_MERGED'],
   ): XpBreakdownItem | null {
-    if (data.merged) {
+    const mergedBonus = settings.bonuses?.merged;
+    if (mergedBonus && data.merged) {
       return {
-        description: 'Bonus for merging pull request',
-        xp: typeof settings.bonuses?.merged === 'number' ? settings.bonuses.merged : settings.bonuses?.merged?.xp || 0,
+        description: mergedBonus.description,
+        xp: mergedBonus.xp,
       };
     }
     return null;
@@ -58,31 +59,28 @@ export class XpCalculatorService {
 
   private calculatePrUpdateBonus(
     data: PullRequestActivityData,
-    settings: GameXpSettings['PR_UPDATED']
+    settings: GameXpSettings['PR_UPDATED'],
   ): XpBreakdownItem[] {
     const bonuses: XpBreakdownItem[] = [];
     const metrics = data.metrics;
-    
+
     if (!metrics) {
       return bonuses;
     }
 
-    // Multiple files bonus
-    const multipleFilesBonus = settings.bonuses?.multipleFiles as BonusConfig;
+    const multipleFilesBonus = settings.bonuses?.multipleFiles;
     if (multipleFilesBonus && metrics.changedFiles > multipleFilesBonus.threshold!) {
       bonuses.push({
-        description: 'Bonus for updating multiple files',
-        xp: multipleFilesBonus.xp
+        description: multipleFilesBonus.description,
+        xp: multipleFilesBonus.xp,
       });
     }
-    
-    // Significant changes bonus
-    const significantChangesBonus = settings.bonuses?.significantChanges as BonusConfig;
-    if (significantChangesBonus && 
-        (metrics.additions + metrics.deletions) > significantChangesBonus.threshold!) {
+
+    const significantChangesBonus = settings.bonuses?.significantChanges;
+    if (significantChangesBonus && metrics.additions + metrics.deletions > significantChangesBonus.threshold!) {
       bonuses.push({
-        description: 'Bonus for significant code changes',
-        xp: significantChangesBonus.xp
+        description: significantChangesBonus.description,
+        xp: significantChangesBonus.xp,
       });
     }
 
@@ -91,12 +89,13 @@ export class XpCalculatorService {
 
   private calculateIssueBonus(
     data: IssueActivityData,
-    settings: GameXpSettings['ISSUE_CLOSED']
+    settings: GameXpSettings['ISSUE_CLOSED'],
   ): XpBreakdownItem | null {
-    if (data.state === 'closed' && data.stateReason === 'completed') {
+    const completedBonus = settings.bonuses?.completed;
+    if (completedBonus && data.state === 'closed' && data.stateReason === 'completed') {
       return {
-        description: 'Bonus for completing issue',
-        xp: typeof settings.bonuses?.completed === 'number' ? settings.bonuses.completed : settings.bonuses?.completed?.xp || 0,
+        description: completedBonus.description,
+        xp: completedBonus.xp,
       };
     }
     return null;
@@ -133,7 +132,7 @@ export class XpCalculatorService {
       }
     } else if (activity.type === ActivityType.PR_UPDATED && this.isPullRequestActivity(activity.metadata)) {
       const bonuses = this.calculatePrUpdateBonus(activity.metadata, xpSettings);
-      bonuses.forEach(bonus => {
+      bonuses.forEach((bonus) => {
         breakdown.push(bonus);
         totalXp += bonus.xp;
       });

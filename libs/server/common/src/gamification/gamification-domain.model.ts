@@ -9,12 +9,13 @@ export interface BonusConfig {
   threshold?: number;
   timeThreshold?: string;
   xp: number;
+  description: string;
 }
 
 export interface XpSettings {
   base: number;
   bonuses?: {
-    [key: string]: number | BonusConfig;
+    [key: string]: BonusConfig;
   };
 }
 
@@ -87,33 +88,43 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
   CODE_PUSH: {
     base: 10,
     bonuses: {
-      multipleCommits: 5,
+      multipleCommits: {
+        threshold: 1,
+        xp: 5,
+        description: 'Bonus for multiple commits in push',
+      },
     },
   },
   PR_CREATED: {
     base: 20,
   },
   PR_UPDATED: {
-    base: 5,  // Base XP for updating PR
+    base: 5, // Base XP for updating PR
     bonuses: {
       multipleFiles: {
         threshold: 5,
-        xp: 5     // Bonus for updating multiple files
+        xp: 5,
+        description: 'Bonus for updating multiple files',
       },
       significantChanges: {
         threshold: 50,
-        xp: 5     // Bonus for substantial code changes
+        xp: 5,
+        description: 'Bonus for significant code changes',
       },
       quickUpdate: {
         timeThreshold: '1h',
-        xp: 5     // Bonus for quick iterations
-      }
-    }
+        xp: 5,
+        description: 'Bonus for quick PR iteration',
+      },
+    },
   },
   PR_MERGED: {
     base: 30,
     bonuses: {
-      merged: 20,
+      merged: {
+        xp: 20,
+        description: 'Bonus for merging pull request',
+      },
     },
   },
   ISSUE_CREATED: {
@@ -122,7 +133,10 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
   ISSUE_CLOSED: {
     base: 20,
     bonuses: {
-      completed: 5
+      completed: {
+        xp: 5,
+        description: 'Bonus for completing issue',
+      },
     },
   },
   ISSUE_UPDATED: {
