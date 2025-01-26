@@ -22,9 +22,8 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
 
 #### Legacy Libraries (Deprecated)
 > The following libraries are deprecated and will be removed in future versions:
-- [@codeheroes/external-shared](libs/migration/external-shared) - External integrations shared code
-- [@codeheroes/migration](libs/migration/migration) - Database migration tools
-- [@codeheroes/migration-github-shared](libs/migration/migration-github-shared) - GitHub migration shared code
+- [@codeheroes/migration](libs/migration/migration) - Legacy Core library
+- [@codeheroes/migration-github](libs/migration/migration-github) - Legacy core models library
 
 > Note: Database seeds library is maintained for development purposes:
 - [@codeheroes/database-seeds](libs/database-seeds) - Database seeding tools
