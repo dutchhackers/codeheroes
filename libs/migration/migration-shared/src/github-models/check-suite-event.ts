@@ -18,7 +18,7 @@ export class CheckSuiteEvent {
 
   log() {
     console.log(
-      `[GitHub Checks] [CheckSuite ${this.action}] [${this.checkSuite.appName}] [${this.sender.login}] [${this.repository.fullName}] [${this.checkSuite.status}, conclusion: ${this.checkSuite.conclusion}]`
+      `[GitHub Checks] [CheckSuite ${this.action}] [${this.checkSuite.appName}] [${this.sender.login}] [${this.repository.fullName}] [${this.checkSuite.status}, conclusion: ${this.checkSuite.conclusion}]`,
     );
   }
 }

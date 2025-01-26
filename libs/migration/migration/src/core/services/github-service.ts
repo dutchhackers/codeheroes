@@ -1,6 +1,6 @@
 import { Scores } from '../enums';
 import { ICreateScore } from '../interfaces';
-import { Game } from '../models';
+import { Game } from '@codeheroes/migration-shared';
 import { CoreService } from './abstract-service';
 import { ScoresService } from './scores-service';
 import { TeamService } from './team-service';

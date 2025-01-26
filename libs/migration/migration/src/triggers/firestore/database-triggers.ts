@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import * as logger from 'firebase-functions/logger';
 import { assignPlayerToTeam } from '../../helpers/assign-players';
-import { Score } from '../../core/models';
+import { Score } from '@codeheroes/migration-shared';
 
 export class DatabaseTriggers {
   static async onScoreEvent(event): Promise<any> {

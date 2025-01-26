@@ -22,5 +22,3 @@ export enum Scores {
   TravisBuildCanceled = 0,
 }
 
-import { lib } from '@codeheroes/external-shared';
-export import GameState = lib.codeheroes.enums.GameState;

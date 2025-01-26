@@ -1,6 +1,5 @@
-import { GameState } from '../../core/enums';
+import { GameState, IUser } from '@codeheroes/migration-shared';
 import { IPubSubEvent } from '../../core/interfaces';
-import { IUser } from '../../core/models';
 import { GameService } from '../../core/services/game-service';
 import { TeamService } from '../../core/services/team-service';
 import { UserService } from '../../core/services/user-service';

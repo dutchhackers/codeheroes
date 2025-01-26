@@ -1,4 +1,4 @@
-import { IUser, Game } from '../models';
+import { Game, IUser } from '@codeheroes/migration-shared';
 import { CoreService } from './abstract-service';
 // import { Game, IUser } from "../models";
 
