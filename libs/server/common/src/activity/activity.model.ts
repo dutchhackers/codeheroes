@@ -33,6 +33,8 @@ export interface PullRequestActivityData extends BaseActivityData {
   prNumber: number;
   title: string;
   merged: boolean;
+  draft: boolean;
+  action: string;  // Add this field
   updatedAt?: string;
 }
 

@@ -139,6 +139,24 @@ export class XpCalculatorService {
     return bonuses;
   }
 
+  private calculatePullRequestCreatedBonus(
+    data: PullRequestActivityData,
+    settings: GameXpSettings['PR_CREATED'],
+  ): XpBreakdownItem[] {
+    const bonuses: XpBreakdownItem[] = [];
+    
+    // Add bonus for ready for review
+    const readyForReviewBonus = settings.bonuses?.readyForReview;
+    if (readyForReviewBonus && !data.draft && data.action === 'ready_for_review') {
+      bonuses.push({
+        description: readyForReviewBonus.description,
+        xp: readyForReviewBonus.xp,
+      });
+    }
+
+    return bonuses;
+  }
+
   public calculateXp(activity: UserActivity): XpCalculationResponse {
     const xpSettings = this.xpSettings[activity.type];
     const breakdown: XpBreakdownItem[] = [];
@@ -185,6 +203,11 @@ export class XpCalculatorService {
       case ActivityType.PR_REVIEW_SUBMITTED:
         if (this.isReviewActivity(activity.metadata)) {
           bonuses = this.calculateReviewBonus(activity.metadata, xpSettings);
+        }
+        break;
+      case ActivityType.PR_CREATED:
+        if (this.isPullRequestActivity(activity.metadata)) {
+          bonuses = this.calculatePullRequestCreatedBonus(activity.metadata, xpSettings);
         }
         break;
     }

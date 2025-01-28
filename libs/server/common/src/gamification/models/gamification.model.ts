@@ -93,6 +93,12 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
   },
   PR_CREATED: {
     base: 50,
+    bonuses: {
+      readyForReview: {
+        xp: 15,
+        description: 'Bonus for marking PR as ready for review',
+      },
+    },
   },
   PR_UPDATED: {
     base: 15,

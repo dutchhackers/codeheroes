@@ -22,7 +22,7 @@ export class ActivityUtils {
         if (eventAction === 'closed' && (event.data as PullRequestEventData).merged) {
           return ActivityType.PR_MERGED;
         }
-        if (eventAction === 'opened') {
+        if (eventAction === 'opened' || eventAction === 'ready_for_review') {
           return ActivityType.PR_CREATED;
         }
         if (eventAction === 'reviewed') {
@@ -98,6 +98,8 @@ export class ActivityUtils {
           prNumber: details.prNumber,
           title: details.title,
           merged: details.merged,
+          draft: details.draft,
+          action: details.action,
           metrics: {
             ...details.metrics,
             timeInvested: TimeUtils.calculateTimeBetween(details.createdAt, details.updatedAt),
