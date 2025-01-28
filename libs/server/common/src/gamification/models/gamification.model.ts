@@ -1,4 +1,5 @@
 import { BaseDocument } from '../../core/models/common.model';
+import { ActivityType } from '../../activity/activity.model';
 
 export interface XpBreakdownItem {
   description: string;
@@ -19,9 +20,7 @@ export interface XpSettings {
   };
 }
 
-export interface GameXpSettings {
-  [key: string]: XpSettings;
-}
+export type GameXpSettings = Partial<Record<ActivityType, XpSettings>>;
 
 export interface XpCalculationResponse {
   totalXp: number;
@@ -80,8 +79,9 @@ export interface ActivityProcessingResult {
   achievements?: AchievementReward[];
 }
 
+// Type-safe XP settings using ActivityType enum
 export const DEFAULT_XP_SETTINGS: GameXpSettings = {
-  CODE_PUSH: {
+  [ActivityType.CODE_PUSH]: {
     base: 25,
     bonuses: {
       multipleCommits: {
@@ -91,7 +91,7 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       },
     },
   },
-  PR_CREATED: {
+  [ActivityType.PR_CREATED]: {
     base: 50,
     bonuses: {
       readyForReview: {
@@ -100,7 +100,7 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       },
     },
   },
-  PR_UPDATED: {
+  [ActivityType.PR_UPDATED]: {
     base: 15,
     bonuses: {
       multipleFiles: {
@@ -120,7 +120,7 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       },
     },
   },
-  PR_MERGED: {
+  [ActivityType.PR_MERGED]: {
     base: 75,
     bonuses: {
       merged: {
@@ -129,10 +129,10 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       },
     },
   },
-  ISSUE_CREATED: {
+  [ActivityType.ISSUE_CREATED]: {
     base: 30,
   },
-  ISSUE_CLOSED: {
+  [ActivityType.ISSUE_CLOSED]: {
     base: 40,
     bonuses: {
       completed: {
@@ -141,14 +141,13 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       },
     },
   },
-  ISSUE_UPDATED: {
+  [ActivityType.ISSUE_UPDATED]: {
     base: 10,
   },
-  ISSUE_REOPENED: {
+  [ActivityType.ISSUE_REOPENED]: {
     base: 5,
   },
-  // Code review activities
-  PR_REVIEW_SUBMITTED: {
+  [ActivityType.PR_REVIEW_SUBMITTED]: {
     base: 40,
     bonuses: {
       approved: {
@@ -161,7 +160,7 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       }
     }
   },
-  PR_REVIEW_UPDATED: {
+  [ActivityType.PR_REVIEW_UPDATED]: {
     base: 15,
     bonuses: {
       quickUpdate: {
@@ -171,12 +170,10 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       }
     }
   },
-  PR_REVIEW_DISMISSED: {
+  [ActivityType.PR_REVIEW_DISMISSED]: {
     base: 10,
   },
-  
-  // Review thread activities
-  PR_REVIEW_THREAD_RESOLVED: {
+  [ActivityType.PR_REVIEW_THREAD_RESOLVED]: {
     base: 25,
     bonuses: {
       quickResolution: {
@@ -186,12 +183,10 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       }
     }
   },
-  PR_REVIEW_THREAD_UNRESOLVED: {
+  [ActivityType.PR_REVIEW_THREAD_UNRESOLVED]: {
     base: 10,
   },
-  
-  // Review comments
-  PR_REVIEW_COMMENT_CREATED: {
+  [ActivityType.PR_REVIEW_COMMENT_CREATED]: {
     base: 20,
     bonuses: {
       detailed: {
@@ -205,7 +200,7 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       }
     }
   },
-  PR_REVIEW_COMMENT_UPDATED: {
+  [ActivityType.PR_REVIEW_COMMENT_UPDATED]: {
     base: 10,
     bonuses: {
       significant: {
@@ -215,9 +210,7 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       }
     }
   },
-  
-  // General code comments
-  CODE_COMMENT: {
+  [ActivityType.CODE_COMMENT]: {
     base: 15,
     bonuses: {
       detailed: {
@@ -227,4 +220,4 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       }
     }
   }
-};
+} as const;

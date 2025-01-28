@@ -60,7 +60,7 @@ export class XpCalculatorService {
 
   private calculatePullRequestBonus(
     data: PullRequestActivityData,
-    settings: GameXpSettings['PR_MERGED'],
+    settings: GameXpSettings[ActivityType.PR_MERGED],  // Use enum instead of string literal
   ): XpBreakdownItem | null {
     const mergedBonus = settings.bonuses?.merged;
     if (mergedBonus && data.merged) {
@@ -74,7 +74,7 @@ export class XpCalculatorService {
 
   private calculatePrUpdateBonus(
     data: PullRequestActivityData,
-    settings: GameXpSettings['PR_UPDATED'],
+    settings: GameXpSettings[ActivityType.PR_UPDATED],  // Use enum instead of string literal
   ): XpBreakdownItem[] {
     const bonuses: XpBreakdownItem[] = [];
     const metrics = data.metrics;
