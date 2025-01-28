@@ -15,7 +15,6 @@ import {
   XpBreakdownItem,
   XpCalculationResponse,
 } from './models/gamification.model';
-import { TimeUtils } from '../activity/time.utils';
 
 export class XpCalculatorService {
   private xpSettings: GameXpSettings;
@@ -140,39 +139,6 @@ export class XpCalculatorService {
     return bonuses;
   }
 
-  private calculateReviewThreadBonus(
-    data: ReviewThreadActivityData,
-    settings: GameXpSettings['PR_REVIEW_THREAD_RESOLVED'],
-  ): XpBreakdownItem[] {
-    const bonuses: XpBreakdownItem[] = [];
-
-    // Later: quickResolutionBonus ( settings.bonuses?.quickResolution )
-
-    return bonuses;
-  }
-
-  private calculateReviewCommentBonus(
-    data: ReviewCommentActivityData,
-    settings: GameXpSettings['PR_REVIEW_COMMENT_CREATED'],
-  ): XpBreakdownItem[] {
-    const bonuses: XpBreakdownItem[] = [];
-
-    // Later: add thread participation bonus if it's a reply
-
-    return bonuses;
-  }
-
-  private calculateReviewUpdateBonus(
-    data: ReviewActivityData,
-    settings: GameXpSettings['PR_REVIEW_UPDATED'],
-  ): XpBreakdownItem[] {
-    const bonuses: XpBreakdownItem[] = [];
-
-    // Later: quickUpdateBonus
-
-    return bonuses;
-  }
-
   public calculateXp(activity: UserActivity): XpCalculationResponse {
     const xpSettings = this.xpSettings[activity.type];
     const breakdown: XpBreakdownItem[] = [];
@@ -219,21 +185,6 @@ export class XpCalculatorService {
       case ActivityType.PR_REVIEW_SUBMITTED:
         if (this.isReviewActivity(activity.metadata)) {
           bonuses = this.calculateReviewBonus(activity.metadata, xpSettings);
-        }
-        break;
-      case ActivityType.PR_REVIEW_THREAD_RESOLVED:
-        if (this.isReviewThreadActivity(activity.metadata)) {
-          bonuses = this.calculateReviewThreadBonus(activity.metadata, xpSettings);
-        }
-        break;
-      case ActivityType.PR_REVIEW_COMMENT_CREATED:
-        if (this.isReviewCommentActivity(activity.metadata)) {
-          bonuses = this.calculateReviewCommentBonus(activity.metadata, xpSettings);
-        }
-        break;
-      case ActivityType.PR_REVIEW_UPDATED:
-        if (this.isReviewActivity(activity.metadata)) {
-          bonuses = this.calculateReviewUpdateBonus(activity.metadata, xpSettings);
         }
         break;
     }
