@@ -55,7 +55,7 @@ export interface GitHubHeaders {
 }
 
 export interface PullRequestEvent {
-  action: 'opened' | 'closed' | 'reopened' | 'synchronize' | 'edited' | 'ready_for_review' | 'draft';
+  action: 'opened' | 'closed' | 'reopened' | 'synchronize' | 'edited' | 'ready_for_review' | 'draft' | 'converted_to_draft';
   number: number;
   pull_request: {
     id: number;

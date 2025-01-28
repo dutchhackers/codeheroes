@@ -1,5 +1,5 @@
 export const GitHubEventConfig = {
-  'pull_request': ['opened', 'closed', 'synchronize', 'merged', 'reviewed', 'updated'],
+  'pull_request': ['opened', 'closed', 'synchronize', 'merged', 'reviewed', 'updated', 'converted_to_draft'],
   'issues': ['opened', 'closed', 'edited', 'reopened'],
   'push': [undefined], // push events don't have actions
   'pull_request_review': ['submitted', 'edited', 'dismissed'],
