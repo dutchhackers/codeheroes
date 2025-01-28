@@ -190,3 +190,52 @@ export interface PullRequestReviewEvent {
   repository: GitHubRepository;
   sender: GitHubUser;
 }
+
+export interface PullRequestReviewThreadEvent {
+  action: 'resolved' | 'unresolved';
+  thread: {
+    id: number;
+    comments: number;
+    resolved: boolean;
+    resolution: {
+      user: GitHubUser;
+      commit_id: string;
+    } | null;
+    line: number;
+    start_line?: number;
+    original_line?: number;
+  };
+  pull_request: {
+    id: number;
+    number: number;
+    title: string;
+    state: 'open' | 'closed';
+    html_url: string;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}
+
+export interface PullRequestReviewCommentEvent {
+  action: 'created' | 'edited' | 'deleted';
+  comment: {
+    id: number;
+    user: GitHubUser;
+    body: string;
+    created_at: string;
+    updated_at: string;
+    line: number;
+    start_line?: number;
+    original_line?: number;
+    in_reply_to_id?: number;
+  };
+  pull_request: {
+    id: number;
+    number: number;
+    title: string;
+    state: 'open' | 'closed';
+    html_url: string;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}

@@ -7,6 +7,8 @@ import {
   PullRequestEventProcessor,
   PullRequestReviewEventProcessor,
   PushEventProcessor,
+  PullRequestReviewThreadProcessor,
+  PullRequestReviewCommentProcessor,
 } from './processors';
 
 export class ProcessorFactory {
@@ -20,8 +22,15 @@ export class ProcessorFactory {
         return new IssueEventProcessor(webhookEvent);
       case 'pull_request_review':
         return new PullRequestReviewEventProcessor(webhookEvent);
+      case 'pull_request_review_thread':
+        return new PullRequestReviewThreadProcessor(webhookEvent);
+      case 'pull_request_review_comment':
+        return new PullRequestReviewCommentProcessor(webhookEvent);
       default:
-        throw new GitHubError(MESSAGES.unsupportedEvent(webhookEvent.eventType), ErrorType.UNSUPPORTED_EVENT);
+        throw new GitHubError(
+          MESSAGES.unsupportedEvent(webhookEvent.eventType),
+          ErrorType.UNSUPPORTED_EVENT
+        );
     }
   }
 }

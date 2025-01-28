@@ -3,13 +3,21 @@ import {
   PullRequestEventData,
   PullRequestReviewEventData,
   PushEventData,
+  PullRequestReviewThreadEventData,
+  PullRequestReviewCommentEventData,
 } from '../core/models/github-shared.model';
 import { WebhookEvent } from './event.model';
 
 export class EventUtils {
   static generateUserFacingDescription(event: WebhookEvent): string {
     const eventType = event.source.event;
-    const eventData = event.data as PushEventData | PullRequestEventData | IssueEventData | PullRequestReviewEventData;
+    const eventData = event.data as
+      | PushEventData
+      | PullRequestEventData
+      | IssueEventData
+      | PullRequestReviewEventData
+      | PullRequestReviewThreadEventData
+      | PullRequestReviewCommentEventData;
     const repoName = eventData.repository.name;
 
     switch (eventType) {
@@ -32,6 +40,15 @@ export class EventUtils {
       case 'pull_request_review': {
         const data = eventData as PullRequestReviewEventData;
         return `${data.reviewer.login} ${data.state} PR #${data.prNumber} in ${repoName} (GitHub)`;
+      }
+      case 'pull_request_review_thread': {
+        const data = eventData as PullRequestReviewThreadEventData;
+        const action = data.resolved ? 'resolved' : 'unresolved';
+        return `${data.sender.login} ${action} a review thread on PR #${data.prNumber} in ${repoName} (GitHub)`;
+      }
+      case 'pull_request_review_comment': {
+        const data = eventData as PullRequestReviewCommentEventData;
+        return `${data.sender.login} ${data.action} a review comment on PR #${data.prNumber} in ${repoName} (GitHub)`;
       }
       default:
         return 'Performed an action on GitHub';
