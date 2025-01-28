@@ -1,4 +1,11 @@
-import { IssueEventData, PullRequestEventData, PushEventData } from '../core';
+import {
+  IssueEventData,
+  PullRequestEventData,
+  PushEventData,
+  PullRequestReviewEventData,
+  PullRequestReviewThreadEventData,
+  PullRequestReviewCommentEventData,
+} from '../core';
 import { WebhookEvent } from '../event/event.model';
 import { ActivityData, ActivityType } from './activity.model';
 import { TimeUtils } from './time.utils';
@@ -15,7 +22,7 @@ export class ActivityUtils {
         if (eventAction === 'closed' && (event.data as PullRequestEventData).merged) {
           return ActivityType.PR_MERGED;
         }
-        if (eventAction === 'opened') {
+        if (eventAction === 'opened' || eventAction === 'ready_for_review') {
           return ActivityType.PR_CREATED;
         }
         if (eventAction === 'reviewed') {
@@ -39,13 +46,41 @@ export class ActivityUtils {
           return ActivityType.ISSUE_REOPENED;
         }
         break;
+      case 'pull_request_review':
+        switch (eventAction) {
+          case 'submitted':
+            return ActivityType.PR_REVIEW_SUBMITTED;
+          case 'edited':
+            return ActivityType.PR_REVIEW_UPDATED;
+          case 'dismissed':
+            return ActivityType.PR_REVIEW_DISMISSED;
+        }
+        break;
+      case 'pull_request_review_thread':
+        return eventAction === 'resolved'
+          ? ActivityType.PR_REVIEW_THREAD_RESOLVED
+          : ActivityType.PR_REVIEW_THREAD_UNRESOLVED;
+      case 'pull_request_review_comment':
+        switch (eventAction) {
+          case 'created':
+            return ActivityType.PR_REVIEW_COMMENT_CREATED;
+          case 'edited':
+            return ActivityType.PR_REVIEW_COMMENT_UPDATED;
+        }
+        break;
     }
     throw new Error(`Unsupported event type: ${eventType} with action: ${eventAction}`);
   }
 
   static extractActivityData(event: WebhookEvent): ActivityData | undefined {
     const eventType = event.source.event;
-    const eventData = event.data as PushEventData | PullRequestEventData | IssueEventData;
+    const eventData = event.data as
+      | PushEventData
+      | PullRequestEventData
+      | IssueEventData
+      | PullRequestReviewEventData
+      | PullRequestReviewThreadEventData
+      | PullRequestReviewCommentEventData;
 
     switch (eventType) {
       case 'push': {
@@ -63,6 +98,8 @@ export class ActivityUtils {
           prNumber: details.prNumber,
           title: details.title,
           merged: details.merged,
+          draft: details.draft,
+          action: details.action,
           metrics: {
             ...details.metrics,
             timeInvested: TimeUtils.calculateTimeBetween(details.createdAt, details.updatedAt),
@@ -78,6 +115,33 @@ export class ActivityUtils {
           title: details.title,
           state: details.state,
           stateReason: details.stateReason,
+        };
+      }
+      case 'pull_request_review': {
+        const details = eventData as PullRequestReviewEventData;
+        return {
+          type: 'review',
+          prNumber: details.prNumber,
+          state: details.state,
+          submittedAt: details.submittedAt,
+        };
+      }
+      case 'pull_request_review_thread': {
+        const details = eventData as PullRequestReviewThreadEventData;
+        return {
+          type: 'review_thread',
+          prNumber: details.prNumber,
+          threadId: details.threadId,
+          resolved: details.resolved,
+        };
+      }
+      case 'pull_request_review_comment': {
+        const details = eventData as PullRequestReviewCommentEventData;
+        return {
+          type: 'review_comment',
+          prNumber: details.prNumber,
+          commentId: details.comment.id,
+          inReplyToId: details.comment.inReplyToId,
         };
       }
       default:

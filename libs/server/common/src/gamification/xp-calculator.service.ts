@@ -4,6 +4,9 @@ import {
   IssueActivityData,
   PullRequestActivityData,
   PushActivityData,
+  ReviewActivityData,
+  ReviewCommentActivityData,
+  ReviewThreadActivityData,
   UserActivity,
 } from '../activity/activity.model';
 import {
@@ -30,6 +33,18 @@ export class XpCalculatorService {
 
   private isIssueActivity(data: ActivityData | undefined): data is IssueActivityData {
     return data?.type === 'issue';
+  }
+
+  private isReviewActivity(data: ActivityData | undefined): data is ReviewActivityData {
+    return data?.type === 'review';
+  }
+
+  private isReviewThreadActivity(data: ActivityData | undefined): data is ReviewThreadActivityData {
+    return data?.type === 'review_thread';
+  }
+
+  private isReviewCommentActivity(data: ActivityData | undefined): data is ReviewCommentActivityData {
+    return data?.type === 'review_comment';
   }
 
   private calculatePushBonus(data: PushActivityData, settings: GameXpSettings['CODE_PUSH']): XpBreakdownItem | null {
@@ -101,6 +116,47 @@ export class XpCalculatorService {
     return null;
   }
 
+  private calculateReviewBonus(
+    data: ReviewActivityData,
+    settings: GameXpSettings['PR_REVIEW_SUBMITTED'],
+  ): XpBreakdownItem[] {
+    const bonuses: XpBreakdownItem[] = [];
+
+    if (settings.bonuses?.approved && data.state === 'approved') {
+      bonuses.push({
+        description: settings.bonuses.approved.description,
+        xp: settings.bonuses.approved.xp,
+      });
+    }
+
+    if (settings.bonuses?.changesRequested && data.state === 'changes_requested') {
+      bonuses.push({
+        description: settings.bonuses.changesRequested.description,
+        xp: settings.bonuses.changesRequested.xp,
+      });
+    }
+
+    return bonuses;
+  }
+
+  private calculatePullRequestCreatedBonus(
+    data: PullRequestActivityData,
+    settings: GameXpSettings['PR_CREATED'],
+  ): XpBreakdownItem[] {
+    const bonuses: XpBreakdownItem[] = [];
+    
+    // Add bonus for ready for review
+    const readyForReviewBonus = settings.bonuses?.readyForReview;
+    if (readyForReviewBonus && !data.draft && data.action === 'ready_for_review') {
+      bonuses.push({
+        description: readyForReviewBonus.description,
+        xp: readyForReviewBonus.xp,
+      });
+    }
+
+    return bonuses;
+  }
+
   public calculateXp(activity: UserActivity): XpCalculationResponse {
     const xpSettings = this.xpSettings[activity.type];
     const breakdown: XpBreakdownItem[] = [];
@@ -118,31 +174,49 @@ export class XpCalculatorService {
     totalXp += xpSettings.base;
 
     // Calculate bonuses based on activity type
-    if (activity.type === ActivityType.CODE_PUSH && this.isPushActivity(activity.metadata)) {
-      const bonus = this.calculatePushBonus(activity.metadata, xpSettings);
-      if (bonus) {
-        breakdown.push(bonus);
-        totalXp += bonus.xp;
-      }
-    } else if (activity.type === ActivityType.PR_MERGED && this.isPullRequestActivity(activity.metadata)) {
-      const bonus = this.calculatePullRequestBonus(activity.metadata, xpSettings);
-      if (bonus) {
-        breakdown.push(bonus);
-        totalXp += bonus.xp;
-      }
-    } else if (activity.type === ActivityType.PR_UPDATED && this.isPullRequestActivity(activity.metadata)) {
-      const bonuses = this.calculatePrUpdateBonus(activity.metadata, xpSettings);
-      bonuses.forEach((bonus) => {
-        breakdown.push(bonus);
-        totalXp += bonus.xp;
-      });
-    } else if (activity.type === ActivityType.ISSUE_CLOSED && this.isIssueActivity(activity.metadata)) {
-      const bonus = this.calculateIssueBonus(activity.metadata, xpSettings);
-      if (bonus) {
-        breakdown.push(bonus);
-        totalXp += bonus.xp;
-      }
+    let bonuses: XpBreakdownItem[] = [];
+
+    switch (activity.type) {
+      case ActivityType.CODE_PUSH:
+        if (this.isPushActivity(activity.metadata)) {
+          const bonus = this.calculatePushBonus(activity.metadata, xpSettings);
+          if (bonus) bonuses = [bonus];
+        }
+        break;
+      case ActivityType.PR_MERGED:
+        if (this.isPullRequestActivity(activity.metadata)) {
+          const bonus = this.calculatePullRequestBonus(activity.metadata, xpSettings);
+          if (bonus) bonuses = [bonus];
+        }
+        break;
+      case ActivityType.PR_UPDATED:
+        if (this.isPullRequestActivity(activity.metadata)) {
+          bonuses = this.calculatePrUpdateBonus(activity.metadata, xpSettings);
+        }
+        break;
+      case ActivityType.ISSUE_CLOSED:
+        if (this.isIssueActivity(activity.metadata)) {
+          const bonus = this.calculateIssueBonus(activity.metadata, xpSettings);
+          if (bonus) bonuses = [bonus];
+        }
+        break;
+      case ActivityType.PR_REVIEW_SUBMITTED:
+        if (this.isReviewActivity(activity.metadata)) {
+          bonuses = this.calculateReviewBonus(activity.metadata, xpSettings);
+        }
+        break;
+      case ActivityType.PR_CREATED:
+        if (this.isPullRequestActivity(activity.metadata)) {
+          bonuses = this.calculatePullRequestCreatedBonus(activity.metadata, xpSettings);
+        }
+        break;
     }
+
+    // Add all bonuses to breakdown and total
+    bonuses.forEach((bonus) => {
+      breakdown.push(bonus);
+      totalXp += bonus.xp;
+    });
 
     return { totalXp, breakdown };
   }

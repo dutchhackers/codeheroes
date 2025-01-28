@@ -57,3 +57,69 @@ export interface IssueEventData extends BaseEventData {
   stateReason?: IssueStateReason;
   metrics?: EventMetrics;
 }
+
+export interface PullRequestReviewEventData extends BaseEventData {
+  repository: {
+    id: string;
+    name: string;
+    owner: string;
+    ownerType: 'User' | 'Organization';
+  };
+  action: 'submitted' | 'edited' | 'dismissed';
+  state: 'approved' | 'commented' | 'changes_requested';
+  prNumber: number;
+  prTitle: string;
+  reviewer: {
+    id: string;
+    login: string;
+  };
+  submittedAt: string;
+}
+
+export interface PullRequestReviewThreadEventData extends BaseEventData {
+  repository: {
+    id: string;
+    name: string;
+    owner: string;
+    ownerType: 'User' | 'Organization';
+  };
+  action: 'resolved' | 'unresolved';
+  prNumber: number;
+  prTitle: string;
+  threadId: number;
+  resolved: boolean;
+  resolver?: {
+    id: string;
+    login: string;
+  };
+  sender: {
+    id: string;
+    login: string;
+  };
+}
+
+export interface PullRequestReviewCommentEventData extends BaseEventData {
+  repository: {
+    id: string;
+    name: string;
+    owner: string;
+    ownerType: 'User' | 'Organization';
+  };
+  action: 'created' | 'edited' | 'deleted';
+  prNumber: number;
+  prTitle: string;
+  comment: {
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+    inReplyToId?: number;
+  };
+  author: {
+    id: string;
+    login: string;
+  };
+  sender: {
+    id: string;
+    login: string;
+  };
+}

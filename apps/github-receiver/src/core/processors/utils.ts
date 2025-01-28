@@ -17,8 +17,8 @@ export class GitHubEventUtils {
   }
 
   static isEventActionSupported(eventType: SupportedEventType, action?: string): boolean {
-    const supportedActions = GitHubEventConfig[eventType];
-    return supportedActions.includes(action as any);
+    const supportedActions = GitHubEventConfig[eventType] as readonly string[];
+    return action ? supportedActions.includes(action) : false;
   }
 
   static validateAndParseWebhook(req: Request): GitHubWebhookEvent {

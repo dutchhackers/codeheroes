@@ -1,18 +1,36 @@
+import { ErrorType, MESSAGES } from '../constants/constants';
+import { GitHubError } from '../errors/github-event.error';
 import { GitHubWebhookEvent } from './interfaces';
-import { BaseEventProcessor, PushEventProcessor, PullRequestEventProcessor, IssueEventProcessor } from './processors';
+import {
+  BaseEventProcessor,
+  IssueEventProcessor,
+  PullRequestEventProcessor,
+  PullRequestReviewEventProcessor,
+  PushEventProcessor,
+  PullRequestReviewThreadProcessor,
+  PullRequestReviewCommentProcessor,
+} from './processors';
 
 export class ProcessorFactory {
-  static createProcessor(event: GitHubWebhookEvent): BaseEventProcessor {
-    switch (event.eventType) {
+  static createProcessor(webhookEvent: GitHubWebhookEvent): BaseEventProcessor {
+    switch (webhookEvent.eventType) {
       case 'push':
-        return new PushEventProcessor(event);
+        return new PushEventProcessor(webhookEvent);
       case 'pull_request':
-        return new PullRequestEventProcessor(event);
+        return new PullRequestEventProcessor(webhookEvent);
       case 'issues':
-        return new IssueEventProcessor(event);
+        return new IssueEventProcessor(webhookEvent);
+      case 'pull_request_review':
+        return new PullRequestReviewEventProcessor(webhookEvent);
+      case 'pull_request_review_thread':
+        return new PullRequestReviewThreadProcessor(webhookEvent);
+      case 'pull_request_review_comment':
+        return new PullRequestReviewCommentProcessor(webhookEvent);
       default:
-        // This should never happen as GitHubEventUtils validates event types
-        throw new Error(`Unexpected event type: ${event.eventType}`);
+        throw new GitHubError(
+          MESSAGES.unsupportedEvent(webhookEvent.eventType),
+          ErrorType.UNSUPPORTED_EVENT
+        );
     }
   }
 }

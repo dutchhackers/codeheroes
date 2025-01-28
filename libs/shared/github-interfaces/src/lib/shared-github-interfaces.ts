@@ -55,7 +55,7 @@ export interface GitHubHeaders {
 }
 
 export interface PullRequestEvent {
-  action: 'opened' | 'closed' | 'reopened' | 'synchronize' | 'edited' | 'ready_for_review' | 'draft';
+  action: 'opened' | 'closed' | 'reopened' | 'synchronize' | 'edited' | 'ready_for_review' | 'draft' | 'converted_to_draft';
   number: number;
   pull_request: {
     id: number;
@@ -164,6 +164,77 @@ export interface CheckSuiteEvent {
     conclusion: string | null;
     before: string;
     after: string;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}
+
+export interface PullRequestReviewEvent {
+  action: 'submitted' | 'edited' | 'dismissed';
+  review: {
+    id: number;
+    user: GitHubUser;
+    body: string | null;
+    state: 'approved' | 'commented' | 'changes_requested';
+    submitted_at: string;
+    commit_id: string;
+    html_url: string;
+  };
+  pull_request: {
+    id: number;
+    number: number;
+    title: string;
+    state: 'open' | 'closed';
+    html_url: string;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}
+
+export interface PullRequestReviewThreadEvent {
+  action: 'resolved' | 'unresolved';
+  thread: {
+    id: number;
+    comments: number;
+    resolved: boolean;
+    resolution: {
+      user: GitHubUser;
+      commit_id: string;
+    } | null;
+    line: number;
+    start_line?: number;
+    original_line?: number;
+  };
+  pull_request: {
+    id: number;
+    number: number;
+    title: string;
+    state: 'open' | 'closed';
+    html_url: string;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}
+
+export interface PullRequestReviewCommentEvent {
+  action: 'created' | 'edited' | 'deleted';
+  comment: {
+    id: number;
+    user: GitHubUser;
+    body: string;
+    created_at: string;
+    updated_at: string;
+    line: number;
+    start_line?: number;
+    original_line?: number;
+    in_reply_to_id?: number;
+  };
+  pull_request: {
+    id: number;
+    number: number;
+    title: string;
+    state: 'open' | 'closed';
+    html_url: string;
   };
   repository: GitHubRepository;
   sender: GitHubUser;

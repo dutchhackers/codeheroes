@@ -1,5 +1,5 @@
-import { BaseDocument, ConnectedAccountProvider } from "../core/models/common.model";
-import { ActivityProcessingResult } from "../gamification/models/gamification.model";
+import { BaseDocument, ConnectedAccountProvider } from '../core/models/common.model';
+import { ActivityProcessingResult } from '../gamification/models/gamification.model';
 
 export interface ActivityMetrics {
   [key: string]: number | undefined;
@@ -33,11 +33,37 @@ export interface PullRequestActivityData extends BaseActivityData {
   prNumber: number;
   title: string;
   merged: boolean;
+  draft: boolean;
+  action: string;  // Add this field
+  updatedAt?: string;
 }
 
 export interface PushActivityData extends BaseActivityData {
   type: 'push';
   branch: string;
+}
+
+export interface ReviewActivityData extends BaseActivityData {
+  type: 'review';
+  prNumber: number;
+  state: string;
+  submittedAt: string;
+  updatedAt?: string;
+}
+
+export interface ReviewThreadActivityData extends BaseActivityData {
+  type: 'review_thread';
+  prNumber: number;
+  threadId: number;
+  resolved: boolean;
+  resolvedAt?: string;
+}
+
+export interface ReviewCommentActivityData extends BaseActivityData {
+  type: 'review_comment';
+  prNumber: number;
+  commentId: number;
+  inReplyToId?: number;
 }
 
 // Activity interfaces
@@ -54,7 +80,14 @@ export interface UserActivity extends BaseDocument {
   processingResult?: ActivityProcessingResult; // replaces xp field
 }
 
-export type ActivityData = IssueActivityData | PullRequestActivityData | PushActivityData;
+// Update ActivityData type union
+export type ActivityData =
+  | IssueActivityData
+  | PullRequestActivityData
+  | PushActivityData
+  | ReviewActivityData
+  | ReviewThreadActivityData
+  | ReviewCommentActivityData;
 
 /**
  * Provider-agnostic activity types that can occur within a development workflow.
@@ -89,4 +122,13 @@ export enum ActivityType {
   // Additional (future) activities
   CODE_COVERAGE = 'CODE_COVERAGE',
   DEPLOYMENT = 'DEPLOYMENT',
+
+  // New activity types
+  PR_REVIEW_SUBMITTED = 'PR_REVIEW_SUBMITTED',
+  PR_REVIEW_UPDATED = 'PR_REVIEW_UPDATED',
+  PR_REVIEW_DISMISSED = 'PR_REVIEW_DISMISSED',
+  PR_REVIEW_THREAD_RESOLVED = 'PR_REVIEW_THREAD_RESOLVED',
+  PR_REVIEW_THREAD_UNRESOLVED = 'PR_REVIEW_THREAD_UNRESOLVED',
+  PR_REVIEW_COMMENT_CREATED = 'PR_REVIEW_COMMENT_CREATED',
+  PR_REVIEW_COMMENT_UPDATED = 'PR_REVIEW_COMMENT_UPDATED',
 }
