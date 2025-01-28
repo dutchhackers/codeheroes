@@ -168,3 +168,25 @@ export interface CheckSuiteEvent {
   repository: GitHubRepository;
   sender: GitHubUser;
 }
+
+export interface PullRequestReviewEvent {
+  action: 'submitted' | 'edited' | 'dismissed';
+  review: {
+    id: number;
+    user: GitHubUser;
+    body: string | null;
+    state: 'approved' | 'commented' | 'changes_requested';
+    submitted_at: string;
+    commit_id: string;
+    html_url: string;
+  };
+  pull_request: {
+    id: number;
+    number: number;
+    title: string;
+    state: 'open' | 'closed';
+    html_url: string;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}

@@ -1,10 +1,15 @@
-import { IssueEventData, PullRequestEventData, PushEventData } from '../core/models/github-shared.model';
+import {
+  IssueEventData,
+  PullRequestEventData,
+  PullRequestReviewEventData,
+  PushEventData,
+} from '../core/models/github-shared.model';
 import { WebhookEvent } from './event.model';
 
 export class EventUtils {
   static generateUserFacingDescription(event: WebhookEvent): string {
     const eventType = event.source.event;
-    const eventData = event.data as PushEventData | PullRequestEventData | IssueEventData;
+    const eventData = event.data as PushEventData | PullRequestEventData | IssueEventData | PullRequestReviewEventData;
     const repoName = eventData.repository.name;
 
     switch (eventType) {
@@ -23,6 +28,10 @@ export class EventUtils {
         return `${data.action.charAt(0).toUpperCase() + data.action.slice(1)} issue #${
           data.issueNumber
         } in ${repoName} (GitHub)`;
+      }
+      case 'pull_request_review': {
+        const data = eventData as PullRequestReviewEventData;
+        return `${data.reviewer.login} ${data.state} PR #${data.prNumber} in ${repoName} (GitHub)`;
       }
       default:
         return 'Performed an action on GitHub';

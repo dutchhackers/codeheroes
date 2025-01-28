@@ -7,11 +7,11 @@ import {
   PullRequestEventData,
   PushEventData,
   StorageService,
+  PullRequestReviewEventData,
 } from '@codeheroes/common';
-import { IssueEvent, PullRequestEvent, PushEvent } from '@shared/github-interfaces';
+import { IssueEvent, PullRequestEvent, PushEvent, PullRequestReviewEvent } from '@shared/github-interfaces';
 import { GitHubStorageUtils } from '../utils/github-storage.utils';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
-import { TimeUtils } from '../../../../../libs/server/common/src/activity/time.utils';
 
 export abstract class BaseEventProcessor {
   protected readonly eventService: EventService;
@@ -37,7 +37,7 @@ export abstract class BaseEventProcessor {
     };
   }
 
-  protected abstract getEventData(): PushEventData | PullRequestEventData | IssueEventData;
+  protected abstract getEventData(): PushEventData | PullRequestEventData | IssueEventData | PullRequestReviewEventData;
   protected getEventTimestamp(): string {
     const timestamp = this.getPayloadTimestamp();
     return new Date(timestamp || new Date()).toISOString();
@@ -188,5 +188,38 @@ export class IssueEventProcessor extends BaseEventProcessor {
   protected getPayloadTimestamp(): string | undefined {
     const payload = this.webhookEvent.payload as IssueEvent;
     return payload.issue.updated_at;
+  }
+}
+
+export class PullRequestReviewEventProcessor extends BaseEventProcessor {
+  protected getEventData(): PullRequestReviewEventData {
+    const payload = this.webhookEvent.payload as PullRequestReviewEvent;
+
+    return {
+      repository: {
+        id: payload.repository.id.toString(),
+        name: payload.repository.name,
+        owner: payload.repository.owner.login,
+        ownerType: payload.repository.owner.type,
+      },
+      action: payload.action,
+      state: payload.review.state,
+      prNumber: payload.pull_request.number,
+      prTitle: payload.pull_request.title,
+      reviewer: {
+        id: payload.review.user.id.toString(),
+        login: payload.review.user.login,
+      },
+      submittedAt: payload.review.submitted_at,
+      sender: {
+        id: payload.sender.id.toString(),
+        login: payload.sender.login,
+      },
+    };
+  }
+
+  protected getPayloadTimestamp(): string | undefined {
+    const payload = this.webhookEvent.payload as PullRequestReviewEvent;
+    return payload.review.submitted_at;
   }
 }
