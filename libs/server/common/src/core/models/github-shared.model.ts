@@ -118,11 +118,6 @@ export interface PullRequestReviewCommentEventData extends BaseEventData {
     body: string;
     createdAt: string;
     updatedAt: string;
-    lineDetails: {
-      line: number;
-      startLine?: number;
-      originalLine?: number;
-    };
     inReplyToId?: number;
   };
   author: {

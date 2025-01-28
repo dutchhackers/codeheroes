@@ -298,11 +298,6 @@ export class PullRequestReviewCommentProcessor extends BaseEventProcessor {
         body: payload.comment.body,
         createdAt: payload.comment.created_at,
         updatedAt: payload.comment.updated_at,
-        lineDetails: {
-          line: payload.comment.line,
-          startLine: payload.comment.start_line,
-          originalLine: payload.comment.original_line,
-        },
         inReplyToId: payload.comment.in_reply_to_id,
       },
       author: {
