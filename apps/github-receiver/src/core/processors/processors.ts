@@ -295,7 +295,6 @@ export class PullRequestReviewCommentProcessor extends BaseEventProcessor {
       prTitle: payload.pull_request.title,
       comment: {
         id: payload.comment.id,
-        body: payload.comment.body,
         createdAt: payload.comment.created_at,
         updatedAt: payload.comment.updated_at,
         inReplyToId: payload.comment.in_reply_to_id,

@@ -92,11 +92,6 @@ export interface PullRequestReviewThreadEventData extends BaseEventData {
     id: string;
     login: string;
   };
-  lineDetails: {
-    line: number;
-    startLine?: number;
-    originalLine?: number;
-  };
   sender: {
     id: string;
     login: string;
@@ -115,7 +110,6 @@ export interface PullRequestReviewCommentEventData extends BaseEventData {
   prTitle: string;
   comment: {
     id: number;
-    body: string;
     createdAt: string;
     updatedAt: string;
     inReplyToId?: number;
