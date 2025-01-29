@@ -10,7 +10,6 @@ export * from './activities/base/activity-calculator.base';
 export * from './activities/base/activity-processor.base';
 export * from './activities/push/push-calculator';
 export * from './activities/push/push-processor';
-// ... other activity exports
 
 // Factories
 export * from './factories/calculator.factory';
