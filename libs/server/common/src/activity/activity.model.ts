@@ -34,7 +34,7 @@ export interface PullRequestActivityData extends BaseActivityData {
   title: string;
   merged: boolean;
   draft: boolean;
-  action: string;  // Add this field
+  action: string; // Add this field
   updatedAt?: string;
 }
 
@@ -46,7 +46,7 @@ export interface PushActivityData extends BaseActivityData {
 export interface ReviewActivityData extends BaseActivityData {
   type: 'review';
   prNumber: number;
-  state: string;
+  state: 'approved' | 'changes_requested' | 'commented' | 'dismissed';
   submittedAt: string;
   updatedAt?: string;
 }
@@ -117,7 +117,6 @@ export enum ActivityType {
   ISSUE_CLOSED = 'ISSUE_CLOSED',
   ISSUE_UPDATED = 'ISSUE_UPDATED',
   ISSUE_REOPENED = 'ISSUE_REOPENED',
-  CODE_COMMENT = 'CODE_COMMENT',
 
   // Additional (future) activities
   CODE_COVERAGE = 'CODE_COVERAGE',

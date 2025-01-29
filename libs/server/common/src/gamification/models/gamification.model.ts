@@ -3,6 +3,7 @@ import { BaseDocument } from '../../core/models/common.model';
 import { PR_XP_SETTINGS } from '../activities/pull-request/pr-xp-settings';
 import { PUSH_XP_SETTINGS } from '../activities/push/push-xp-settings';
 import { ISSUE_XP_SETTINGS } from '../activities/issue/issue-xp-settings';
+import { PR_REVIEW_XP_SETTINGS } from '../activities/pr-review/pr-review-xp-settings';
 
 // Add interface for activity settings if not exists
 export interface ActivitySettings {
@@ -90,7 +91,6 @@ export interface ActivityProcessingResult {
   achievements?: AchievementReward[];
 }
 
-// Type-safe XP settings using ActivityType enum
 export const DEFAULT_XP_SETTINGS: GameXpSettings = {
   // Push activities
   [ActivityType.CODE_PUSH]: PUSH_XP_SETTINGS,
@@ -106,77 +106,12 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
   [ActivityType.ISSUE_UPDATED]: ISSUE_XP_SETTINGS[ActivityType.ISSUE_UPDATED],
   [ActivityType.ISSUE_REOPENED]: ISSUE_XP_SETTINGS[ActivityType.ISSUE_REOPENED],
 
-  [ActivityType.PR_REVIEW_SUBMITTED]: {
-    base: 40,
-    bonuses: {
-      approved: {
-        xp: 20,
-        description: 'Bonus for approving PR',
-      },
-      changesRequested: {
-        xp: 30,
-        description: 'Bonus for detailed review with change requests',
-      },
-    },
-  },
-  [ActivityType.PR_REVIEW_UPDATED]: {
-    base: 15,
-    bonuses: {
-      quickUpdate: {
-        timeThreshold: '1h',
-        xp: 10,
-        description: 'Bonus for quick review update',
-      },
-    },
-  },
-  [ActivityType.PR_REVIEW_DISMISSED]: {
-    base: 10,
-  },
-  [ActivityType.PR_REVIEW_THREAD_RESOLVED]: {
-    base: 25,
-    bonuses: {
-      quickResolution: {
-        timeThreshold: '4h',
-        xp: 15,
-        description: 'Bonus for quick thread resolution',
-      },
-    },
-  },
-  [ActivityType.PR_REVIEW_THREAD_UNRESOLVED]: {
-    base: 10,
-  },
-  [ActivityType.PR_REVIEW_COMMENT_CREATED]: {
-    base: 20,
-    bonuses: {
-      detailed: {
-        threshold: 100, // characters
-        xp: 15,
-        description: 'Bonus for detailed comment',
-      },
-      inThread: {
-        xp: 10,
-        description: 'Bonus for participating in discussion thread',
-      },
-    },
-  },
-  [ActivityType.PR_REVIEW_COMMENT_UPDATED]: {
-    base: 10,
-    bonuses: {
-      significant: {
-        threshold: 50, // characters added
-        xp: 5,
-        description: 'Bonus for significant comment update',
-      },
-    },
-  },
-  [ActivityType.CODE_COMMENT]: {
-    base: 15,
-    bonuses: {
-      detailed: {
-        threshold: 100, // characters
-        xp: 10,
-        description: 'Bonus for detailed code comment',
-      },
-    },
-  },
+  // PR Review activities
+  [ActivityType.PR_REVIEW_SUBMITTED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_SUBMITTED],
+  [ActivityType.PR_REVIEW_UPDATED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_UPDATED],
+  [ActivityType.PR_REVIEW_DISMISSED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_DISMISSED],
+  [ActivityType.PR_REVIEW_THREAD_RESOLVED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_THREAD_RESOLVED],
+  [ActivityType.PR_REVIEW_THREAD_UNRESOLVED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_THREAD_UNRESOLVED],
+  [ActivityType.PR_REVIEW_COMMENT_CREATED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_COMMENT_CREATED],
+  [ActivityType.PR_REVIEW_COMMENT_UPDATED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_COMMENT_UPDATED],
 } as const;
