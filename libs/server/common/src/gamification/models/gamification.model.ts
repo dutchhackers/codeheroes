@@ -2,6 +2,7 @@ import { ActivityType } from '../../activity/activity.model';
 import { BaseDocument } from '../../core/models/common.model';
 import { PR_XP_SETTINGS } from '../activities/pull-request/pr-xp-settings';
 import { PUSH_XP_SETTINGS } from '../activities/push/push-xp-settings';
+import { ISSUE_XP_SETTINGS } from '../activities/issue/issue-xp-settings';
 
 // Add interface for activity settings if not exists
 export interface ActivitySettings {
@@ -91,7 +92,6 @@ export interface ActivityProcessingResult {
 
 // Type-safe XP settings using ActivityType enum
 export const DEFAULT_XP_SETTINGS: GameXpSettings = {
-
   // Push activities
   [ActivityType.CODE_PUSH]: PUSH_XP_SETTINGS,
 
@@ -100,25 +100,12 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
   [ActivityType.PR_UPDATED]: PR_XP_SETTINGS.updated,
   [ActivityType.PR_MERGED]: PR_XP_SETTINGS.merged,
 
+  // Issue activities
+  [ActivityType.ISSUE_CREATED]: ISSUE_XP_SETTINGS[ActivityType.ISSUE_CREATED],
+  [ActivityType.ISSUE_CLOSED]: ISSUE_XP_SETTINGS[ActivityType.ISSUE_CLOSED],
+  [ActivityType.ISSUE_UPDATED]: ISSUE_XP_SETTINGS[ActivityType.ISSUE_UPDATED],
+  [ActivityType.ISSUE_REOPENED]: ISSUE_XP_SETTINGS[ActivityType.ISSUE_REOPENED],
 
-  [ActivityType.ISSUE_CREATED]: {
-    base: 30,
-  },
-  [ActivityType.ISSUE_CLOSED]: {
-    base: 40,
-    bonuses: {
-      completed: {
-        xp: 20,
-        description: 'Bonus for completing issue',
-      },
-    },
-  },
-  [ActivityType.ISSUE_UPDATED]: {
-    base: 10,
-  },
-  [ActivityType.ISSUE_REOPENED]: {
-    base: 5,
-  },
   [ActivityType.PR_REVIEW_SUBMITTED]: {
     base: 40,
     bonuses: {
@@ -129,8 +116,8 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       changesRequested: {
         xp: 30,
         description: 'Bonus for detailed review with change requests',
-      }
-    }
+      },
+    },
   },
   [ActivityType.PR_REVIEW_UPDATED]: {
     base: 15,
@@ -138,9 +125,9 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       quickUpdate: {
         timeThreshold: '1h',
         xp: 10,
-        description: 'Bonus for quick review update'
-      }
-    }
+        description: 'Bonus for quick review update',
+      },
+    },
   },
   [ActivityType.PR_REVIEW_DISMISSED]: {
     base: 10,
@@ -151,9 +138,9 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       quickResolution: {
         timeThreshold: '4h',
         xp: 15,
-        description: 'Bonus for quick thread resolution'
-      }
-    }
+        description: 'Bonus for quick thread resolution',
+      },
+    },
   },
   [ActivityType.PR_REVIEW_THREAD_UNRESOLVED]: {
     base: 10,
@@ -164,13 +151,13 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       detailed: {
         threshold: 100, // characters
         xp: 15,
-        description: 'Bonus for detailed comment'
+        description: 'Bonus for detailed comment',
       },
       inThread: {
         xp: 10,
-        description: 'Bonus for participating in discussion thread'
-      }
-    }
+        description: 'Bonus for participating in discussion thread',
+      },
+    },
   },
   [ActivityType.PR_REVIEW_COMMENT_UPDATED]: {
     base: 10,
@@ -178,9 +165,9 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       significant: {
         threshold: 50, // characters added
         xp: 5,
-        description: 'Bonus for significant comment update'
-      }
-    }
+        description: 'Bonus for significant comment update',
+      },
+    },
   },
   [ActivityType.CODE_COMMENT]: {
     base: 15,
@@ -188,9 +175,8 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
       detailed: {
         threshold: 100, // characters
         xp: 10,
-        description: 'Bonus for detailed code comment'
-      }
-    }
-  }
+        description: 'Bonus for detailed code comment',
+      },
+    },
+  },
 } as const;
-
