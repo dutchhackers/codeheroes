@@ -10,7 +10,7 @@ export const GitHubEventConfig = {
     'ready_for_review',
   ],
   issues: ['opened', 'closed', 'edited', 'reopened'],
-  push: [undefined], // push events don't have actions
+  push: [], // push events don't need actions
   pull_request_review: ['submitted', 'edited', 'dismissed'],
   pull_request_review_thread: ['resolved', 'unresolved'],
   pull_request_review_comment: ['created', 'edited', 'deleted'],

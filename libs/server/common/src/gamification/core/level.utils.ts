@@ -1,4 +1,4 @@
-import { LEVEL_CONFIGURATION, LevelRequirement } from './models/level.model';
+import { LEVEL_CONFIGURATION, LevelRequirement } from './../models/level.model';
 
 export interface LevelProgressResult {
   currentLevel: number;

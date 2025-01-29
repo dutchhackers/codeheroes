@@ -1,5 +1,18 @@
-import { BaseDocument } from '../../core/models/common.model';
 import { ActivityType } from '../../activity/activity.model';
+import { BaseDocument } from '../../core/models/common.model';
+import { PR_XP_SETTINGS } from '../activities/pull-request/pr-xp-settings';
+import { PUSH_XP_SETTINGS } from '../activities/push/push-xp-settings';
+
+// 1. UPDATE: models/gamification.model.ts
+// Only showing additions/changes needed
+
+// Add interface for activity settings if not exists
+export interface ActivitySettings {
+  base: number;
+  bonuses?: {
+    [key: string]: BonusConfig;
+  };
+}
 
 export interface XpBreakdownItem {
   description: string;
@@ -81,54 +94,16 @@ export interface ActivityProcessingResult {
 
 // Type-safe XP settings using ActivityType enum
 export const DEFAULT_XP_SETTINGS: GameXpSettings = {
-  [ActivityType.CODE_PUSH]: {
-    base: 25,
-    bonuses: {
-      multipleCommits: {
-        threshold: 2,
-        xp: 15,
-        description: 'Bonus for multiple commits in push',
-      },
-    },
-  },
-  [ActivityType.PR_CREATED]: {
-    base: 50,
-    bonuses: {
-      readyForReview: {
-        xp: 15,
-        description: 'Bonus for marking PR as ready for review',
-      },
-    },
-  },
-  [ActivityType.PR_UPDATED]: {
-    base: 15,
-    bonuses: {
-      multipleFiles: {
-        threshold: 5,
-        xp: 20,
-        description: 'Bonus for updating multiple files',
-      },
-      significantChanges: {
-        threshold: 100,
-        xp: 25,
-        description: 'Bonus for significant code changes',
-      },
-      quickUpdate: {
-        timeThreshold: '1h',
-        xp: 10,
-        description: 'Bonus for quick PR iteration',
-      },
-    },
-  },
-  [ActivityType.PR_MERGED]: {
-    base: 75,
-    bonuses: {
-      merged: {
-        xp: 50,
-        description: 'Bonus for merging pull request',
-      },
-    },
-  },
+
+  // Push activities
+  [ActivityType.CODE_PUSH]: PUSH_XP_SETTINGS,
+
+  // Pull Request activities
+  [ActivityType.PR_CREATED]: PR_XP_SETTINGS.created,
+  [ActivityType.PR_UPDATED]: PR_XP_SETTINGS.updated,
+  [ActivityType.PR_MERGED]: PR_XP_SETTINGS.merged,
+
+
   [ActivityType.ISSUE_CREATED]: {
     base: 30,
   },
@@ -221,3 +196,4 @@ export const DEFAULT_XP_SETTINGS: GameXpSettings = {
     }
   }
 } as const;
+
