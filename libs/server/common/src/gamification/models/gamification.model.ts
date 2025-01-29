@@ -1,9 +1,9 @@
 import { ActivityType } from '../../activity/activity.model';
 import { BaseDocument } from '../../core/models/common.model';
-import { PR_XP_SETTINGS } from '../activities/pull-request/pr-xp-settings';
-import { PUSH_XP_SETTINGS } from '../activities/push/push-xp-settings';
 import { ISSUE_XP_SETTINGS } from '../activities/issue/issue-xp-settings';
 import { PR_REVIEW_XP_SETTINGS } from '../activities/pr-review/pr-review-xp-settings';
+import { PR_XP_SETTINGS } from '../activities/pull-request/pr-xp-settings';
+import { PUSH_XP_SETTINGS } from '../activities/push/push-xp-settings';
 
 // Add interface for activity settings if not exists
 export interface ActivitySettings {

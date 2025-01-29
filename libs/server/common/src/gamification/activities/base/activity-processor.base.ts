@@ -1,9 +1,7 @@
-// 1. Base Activity Processor
-// activities/base/activity-processor.base.ts
 import { Firestore } from 'firebase-admin/firestore';
 import { UserActivity } from '../../../activity/activity.model';
-import { XpCalculationResponse, ActivityProcessingResult } from '../../models/gamification.model';
 import { DatabaseInstance, getCurrentTimeAsISO } from '../../../core/firebase';
+import { ActivityProcessingResult, XpCalculationResponse } from '../../models/gamification.model';
 
 export abstract class BaseActivityProcessor {
   protected db: Firestore;

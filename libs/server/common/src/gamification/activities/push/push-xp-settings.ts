@@ -1,5 +1,3 @@
-// 5. Activity Settings
-// activities/push/push-xp-settings.ts
 import { XpSettings } from '../../models/gamification.model';
 
 export const PUSH_XP_SETTINGS: XpSettings = {

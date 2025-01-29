@@ -1,5 +1,5 @@
-import { XpBreakdownItem, XpCalculationResponse, GameXpSettings } from '../../models/gamification.model';
 import { UserActivity } from '../../../activity/activity.model';
+import { GameXpSettings, XpBreakdownItem, XpCalculationResponse } from '../../models/gamification.model';
 
 export abstract class BaseActivityCalculator {
   protected settings: GameXpSettings;

@@ -1,6 +1,6 @@
-import { BaseActivityCalculator } from '../base/activity-calculator.base';
 import { ActivityType, IssueActivityData, UserActivity } from '../../../activity/activity.model';
-import { XpCalculationResponse, XpBreakdownItem } from '../../models/gamification.model';
+import { XpBreakdownItem, XpCalculationResponse } from '../../models/gamification.model';
+import { BaseActivityCalculator } from '../base/activity-calculator.base';
 
 export class IssueCalculator extends BaseActivityCalculator {
   calculateXp(activity: UserActivity): XpCalculationResponse {
@@ -90,16 +90,16 @@ export class IssueCalculator extends BaseActivityCalculator {
         xp: bonusSettings.completed.xp,
       });
 
-    //   // Quick resolution bonus
-    //   if (
-    //     bonusSettings?.quickResolution &&
-    //     this.isWithinTimeThreshold(data.createdAt, bonusSettings.quickResolution.timeThreshold)
-    //   ) {
-    //     bonuses.push({
-    //       description: bonusSettings.quickResolution.description,
-    //       xp: bonusSettings.quickResolution.xp,
-    //     });
-    //   }
+      //   // Quick resolution bonus
+      //   if (
+      //     bonusSettings?.quickResolution &&
+      //     this.isWithinTimeThreshold(data.createdAt, bonusSettings.quickResolution.timeThreshold)
+      //   ) {
+      //     bonuses.push({
+      //       description: bonusSettings.quickResolution.description,
+      //       xp: bonusSettings.quickResolution.xp,
+      //     });
+      //   }
     }
 
     return bonuses;

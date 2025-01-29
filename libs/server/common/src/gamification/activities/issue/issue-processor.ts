@@ -1,9 +1,8 @@
-import { BaseActivityProcessor } from '../base/activity-processor.base';
 import { ActivityType, UserActivity } from '../../../activity/activity.model';
-import { XpCalculationResponse, ActivityProcessingResult } from '../../models/gamification.model';
+import { getCurrentTimeAsISO, logger } from '../../../core/firebase';
 import { calculateLevelProgress } from '../../core/level.utils';
-import * as logger from 'firebase-functions/logger';
-import { getCurrentTimeAsISO } from '../../../core/firebase';
+import { ActivityProcessingResult, XpCalculationResponse } from '../../models/gamification.model';
+import { BaseActivityProcessor } from '../base/activity-processor.base';
 
 export class IssueProcessor extends BaseActivityProcessor {
   async processActivity(

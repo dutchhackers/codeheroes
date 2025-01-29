@@ -1,5 +1,3 @@
-// 2. Push Activity Processor
-// activities/push/push-processor.ts
 import { BaseActivityProcessor } from '../base/activity-processor.base';
 import { UserActivity } from '../../../activity/activity.model';
 import { XpCalculationResponse } from '../../models/gamification.model';
@@ -33,8 +31,7 @@ export class PushActivityProcessor extends BaseActivityProcessor {
         // Create processing result
         const processingResult = this.createBaseProcessingResult(xpResult);
 
-        // Add any push-specific processing logic here
-        // For example, checking for streak-based achievements
+        // Note: This is a placeholder for the actual streak logic
         if (this.checkForPushStreak(userData)) {
           processingResult.achievements = [
             {
