@@ -1,11 +1,7 @@
-// factories/processor.factory.ts
 import { ActivityType } from '../../activity/activity.model';
 import { BaseActivityProcessor } from '../activities/base/activity-processor.base';
-
-// Import all specific activity processors
+import { PullRequestProcessor } from '../activities/pull-request/pr-processor';
 import { PushActivityProcessor } from '../activities/push/push-processor';
-// import { PullRequestProcessor } from '../activities/pull-request/pr-processor';
-// Import other processors as needed...
 
 export class ProcessorFactory {
   // Map to store processor classes for each activity type
@@ -14,8 +10,9 @@ export class ProcessorFactory {
   static initialize() {
     // Register all processors
     this.processors.set(ActivityType.CODE_PUSH, PushActivityProcessor);
-    // this.processors.set(ActivityType.PR_CREATED, PullRequestProcessor);
-    // Register other processors...
+    this.processors.set(ActivityType.PR_CREATED, PullRequestProcessor);
+    this.processors.set(ActivityType.PR_UPDATED, PullRequestProcessor);
+    this.processors.set(ActivityType.PR_MERGED, PullRequestProcessor);
   }
 
   static getProcessor(type: ActivityType): BaseActivityProcessor {

@@ -5,6 +5,7 @@ import { GameXpSettings } from '../models/gamification.model';
 
 // Import all specific activity calculators
 import { PushActivityCalculator } from '../activities/push/push-calculator';
+import { PullRequestCalculator } from '../activities/pull-request/pr-calculator';
 // import { PullRequestActivityCalculator } from '../activities/pull-request/pr-calculator';
 // Import other calculators as needed...
 
@@ -15,8 +16,9 @@ export class CalculatorFactory {
   static initialize() {
     // Register all calculators
     this.calculators.set(ActivityType.CODE_PUSH, PushActivityCalculator);
-    // this.calculators.set(ActivityType.PR_CREATED, PullRequestActivityCalculator);
-    // Register other calculators...
+    this.calculators.set(ActivityType.PR_CREATED, PullRequestCalculator);
+    this.calculators.set(ActivityType.PR_UPDATED, PullRequestCalculator);
+    this.calculators.set(ActivityType.PR_MERGED, PullRequestCalculator);    // Register other calculators...
   }
 
   static getCalculator(type: ActivityType, settings: GameXpSettings): BaseActivityCalculator {

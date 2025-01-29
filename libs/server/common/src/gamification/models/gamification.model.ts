@@ -3,9 +3,6 @@ import { BaseDocument } from '../../core/models/common.model';
 import { PR_XP_SETTINGS } from '../activities/pull-request/pr-xp-settings';
 import { PUSH_XP_SETTINGS } from '../activities/push/push-xp-settings';
 
-// 1. UPDATE: models/gamification.model.ts
-// Only showing additions/changes needed
-
 // Add interface for activity settings if not exists
 export interface ActivitySettings {
   base: number;
