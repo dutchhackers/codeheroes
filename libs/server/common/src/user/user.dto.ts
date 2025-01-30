@@ -4,3 +4,9 @@ export interface CreateUserInput {
   displayName: string | null;
   photoUrl: string | null;
 }
+
+export interface UpdateUserInput {
+  uid?: string;
+  displayName?: string;
+  photoUrl?: string;
+}

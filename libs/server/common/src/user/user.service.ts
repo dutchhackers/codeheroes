@@ -3,7 +3,7 @@ import { PaginatedResponse, PaginationParams } from '../core/interfaces/paginati
 import { BaseFirestoreService } from '../core/services';
 import { getCurrentTimeAsISO } from '../core/firebase';
 import { userConverter } from './user.converter';
-import { CreateUserInput } from './user.dto';
+import { CreateUserInput, UpdateUserInput } from './user.dto';
 import { User } from './user.model';
 
 // const USER_DEFAULTS = {
@@ -77,5 +77,30 @@ export class UserService extends BaseFirestoreService<User> {
       lastId,
       hasMore,
     };
+  }
+
+  async updateUser(userId: string, input: UpdateUserInput): Promise<User> {
+    const docRef = this.collection.doc(userId);
+    const timestamps = this.updateTimestamps();
+    
+    await docRef.update({
+      ...input,
+      ...timestamps,
+    });
+
+    return this.getUser(userId);
+  }
+
+  async findUserByEmail(email: string): Promise<User | null> {
+    const snapshot = await this.collection
+      .where('email', '==', email)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) {
+      return null;
+    }
+
+    return snapshot.docs[0].data();
   }
 }

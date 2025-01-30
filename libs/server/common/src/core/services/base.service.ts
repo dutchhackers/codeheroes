@@ -23,6 +23,12 @@ export abstract class BaseFirestoreService<T extends DocumentData> {
     };
   }
 
+  protected updateTimestamps(): Pick<FirestoreTimestamps, 'updatedAt'> {
+    return {
+      updatedAt: getCurrentTimeAsISO(),
+    };
+  }
+
   async findById(id: string): Promise<T | null> {
     const doc = await this.collection.doc(id).get();
     return doc.exists ? doc.data() : null;
