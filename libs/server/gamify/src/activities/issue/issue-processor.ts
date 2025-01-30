@@ -1,4 +1,5 @@
-import { ActivityType, getCurrentTimeAsISO, logger, UserActivity } from '@codeheroes/common';
+import { ActivityType, UserActivity } from '@codeheroes/activity';
+import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { calculateLevelProgress } from '../../core/level.utils';
 import { ActivityProcessingResult, XpCalculationResponse } from '../../models/gamification.model';
 import { BaseActivityProcessor } from '../base/activity-processor.base';

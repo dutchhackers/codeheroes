@@ -1,4 +1,4 @@
-import { ActivityType } from '@codeheroes/common';
+import { ActivityType } from '@codeheroes/activity';
 import { BaseActivityCalculator } from '../activities/base/activity-calculator.base';
 import { IssueCalculator } from '../activities/issue/issue-calculator';
 import { PrReviewCalculator } from '../activities/pr-review/pr-review-calculator';

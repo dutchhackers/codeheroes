@@ -4,7 +4,7 @@ import {
   ReviewCommentActivityData,
   ReviewThreadActivityData,
   UserActivity,
-} from '@codeheroes/common';
+} from '@codeheroes/activity';
 import { XpBreakdownItem, XpCalculationResponse } from '../../models/gamification.model';
 import { BaseActivityCalculator } from '../base/activity-calculator.base';
 

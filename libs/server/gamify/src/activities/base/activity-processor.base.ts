@@ -1,4 +1,5 @@
-import { DatabaseInstance, getCurrentTimeAsISO, UserActivity } from '@codeheroes/common';
+import { UserActivity } from '@codeheroes/activity';
+import { DatabaseInstance, getCurrentTimeAsISO } from '@codeheroes/common';
 import { Firestore } from 'firebase-admin/firestore';
 import { ActivityProcessingResult, XpCalculationResponse } from '../../models/gamification.model';
 

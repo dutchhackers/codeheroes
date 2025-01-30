@@ -1,4 +1,4 @@
-import { ActivityType } from '@codeheroes/common';
+import { ActivityType } from '@codeheroes/activity';
 import { BaseActivityProcessor } from '../activities/base/activity-processor.base';
 import { IssueProcessor } from '../activities/issue/issue-processor';
 import { PrReviewProcessor } from '../activities/pr-review/pr-review-processor';

@@ -1,7 +1,8 @@
-import { BaseActivityProcessor } from '../base/activity-processor.base';
-import { XpCalculationResponse } from '../../models/gamification.model';
+import { UserActivity } from '@codeheroes/activity';
 import { calculateLevelProgress } from '../../core/level.utils';
-import { getCurrentTimeAsISO, UserActivity } from '@codeheroes/common';
+import { XpCalculationResponse } from '../../models/gamification.model';
+import { BaseActivityProcessor } from '../base/activity-processor.base';
+import { getCurrentTimeAsISO } from '@codeheroes/common';
 
 export class PushActivityProcessor extends BaseActivityProcessor {
   async processActivity(

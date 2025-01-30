@@ -1,4 +1,4 @@
-import { UserActivity } from '@codeheroes/common';
+import { UserActivity } from '@codeheroes/activity';
 import * as logger from 'firebase-functions/logger';
 import { ProcessorFactory } from '../factories/processor.factory';
 import { XpCalculationResponse } from '../models/gamification.model';

@@ -1,4 +1,4 @@
-import { ActivityType } from '@codeheroes/common';
+import { ActivityType } from '@codeheroes/activity';
 import { XpSettings } from '../../models/gamification.model';
 
 export const PR_REVIEW_XP_SETTINGS: Record<string, XpSettings> = {

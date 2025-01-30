@@ -1,4 +1,4 @@
-import { UserActivity } from '@codeheroes/common';
+import { UserActivity } from '@codeheroes/activity';
 import { CalculatorFactory } from '../factories/calculator.factory';
 import { DEFAULT_XP_SETTINGS, GameXpSettings, XpCalculationResponse } from '../models/gamification.model';
 
