@@ -1,7 +1,7 @@
 import { ActivityService, WebhookEvent, logger } from '@codeheroes/common';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 
-export const activityCreationTrigger = onDocumentCreated('events/{eventId}', async (event) => {
+export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async (event) => {
   logger.info('New event document created', {
     eventId: event.params.eventId,
   });

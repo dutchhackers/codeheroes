@@ -1,3 +1,3 @@
-export * from './activity-creation.trigger';
+export * from './on-event-created.trigger';
 export * from './xp-calculation.trigger';
 
