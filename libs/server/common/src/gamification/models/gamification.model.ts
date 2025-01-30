@@ -1,4 +1,17 @@
+import { ActivityType } from '../../activity/activity.model';
 import { BaseDocument } from '../../core/models/common.model';
+import { ISSUE_XP_SETTINGS } from '../activities/issue/issue-xp-settings';
+import { PR_REVIEW_XP_SETTINGS } from '../activities/pr-review/pr-review-xp-settings';
+import { PR_XP_SETTINGS } from '../activities/pull-request/pr-xp-settings';
+import { PUSH_XP_SETTINGS } from '../activities/push/push-xp-settings';
+
+// Add interface for activity settings if not exists
+export interface ActivitySettings {
+  base: number;
+  bonuses?: {
+    [key: string]: BonusConfig;
+  };
+}
 
 export interface XpBreakdownItem {
   description: string;
@@ -19,9 +32,7 @@ export interface XpSettings {
   };
 }
 
-export interface GameXpSettings {
-  [key: string]: XpSettings;
-}
+export type GameXpSettings = Partial<Record<ActivityType, XpSettings>>;
 
 export interface XpCalculationResponse {
   totalXp: number;
@@ -81,150 +92,26 @@ export interface ActivityProcessingResult {
 }
 
 export const DEFAULT_XP_SETTINGS: GameXpSettings = {
-  CODE_PUSH: {
-    base: 25,
-    bonuses: {
-      multipleCommits: {
-        threshold: 2,
-        xp: 15,
-        description: 'Bonus for multiple commits in push',
-      },
-    },
-  },
-  PR_CREATED: {
-    base: 50,
-    bonuses: {
-      readyForReview: {
-        xp: 15,
-        description: 'Bonus for marking PR as ready for review',
-      },
-    },
-  },
-  PR_UPDATED: {
-    base: 15,
-    bonuses: {
-      multipleFiles: {
-        threshold: 5,
-        xp: 20,
-        description: 'Bonus for updating multiple files',
-      },
-      significantChanges: {
-        threshold: 100,
-        xp: 25,
-        description: 'Bonus for significant code changes',
-      },
-      quickUpdate: {
-        timeThreshold: '1h',
-        xp: 10,
-        description: 'Bonus for quick PR iteration',
-      },
-    },
-  },
-  PR_MERGED: {
-    base: 75,
-    bonuses: {
-      merged: {
-        xp: 50,
-        description: 'Bonus for merging pull request',
-      },
-    },
-  },
-  ISSUE_CREATED: {
-    base: 30,
-  },
-  ISSUE_CLOSED: {
-    base: 40,
-    bonuses: {
-      completed: {
-        xp: 20,
-        description: 'Bonus for completing issue',
-      },
-    },
-  },
-  ISSUE_UPDATED: {
-    base: 10,
-  },
-  ISSUE_REOPENED: {
-    base: 5,
-  },
-  // Code review activities
-  PR_REVIEW_SUBMITTED: {
-    base: 40,
-    bonuses: {
-      approved: {
-        xp: 20,
-        description: 'Bonus for approving PR',
-      },
-      changesRequested: {
-        xp: 30,
-        description: 'Bonus for detailed review with change requests',
-      }
-    }
-  },
-  PR_REVIEW_UPDATED: {
-    base: 15,
-    bonuses: {
-      quickUpdate: {
-        timeThreshold: '1h',
-        xp: 10,
-        description: 'Bonus for quick review update'
-      }
-    }
-  },
-  PR_REVIEW_DISMISSED: {
-    base: 10,
-  },
-  
-  // Review thread activities
-  PR_REVIEW_THREAD_RESOLVED: {
-    base: 25,
-    bonuses: {
-      quickResolution: {
-        timeThreshold: '4h',
-        xp: 15,
-        description: 'Bonus for quick thread resolution'
-      }
-    }
-  },
-  PR_REVIEW_THREAD_UNRESOLVED: {
-    base: 10,
-  },
-  
-  // Review comments
-  PR_REVIEW_COMMENT_CREATED: {
-    base: 20,
-    bonuses: {
-      detailed: {
-        threshold: 100, // characters
-        xp: 15,
-        description: 'Bonus for detailed comment'
-      },
-      inThread: {
-        xp: 10,
-        description: 'Bonus for participating in discussion thread'
-      }
-    }
-  },
-  PR_REVIEW_COMMENT_UPDATED: {
-    base: 10,
-    bonuses: {
-      significant: {
-        threshold: 50, // characters added
-        xp: 5,
-        description: 'Bonus for significant comment update'
-      }
-    }
-  },
-  
-  // General code comments
-  CODE_COMMENT: {
-    base: 15,
-    bonuses: {
-      detailed: {
-        threshold: 100, // characters
-        xp: 10,
-        description: 'Bonus for detailed code comment'
-      }
-    }
-  }
-};
+  // Push activities
+  [ActivityType.CODE_PUSH]: PUSH_XP_SETTINGS,
+
+  // Pull Request activities
+  [ActivityType.PR_CREATED]: PR_XP_SETTINGS.created,
+  [ActivityType.PR_UPDATED]: PR_XP_SETTINGS.updated,
+  [ActivityType.PR_MERGED]: PR_XP_SETTINGS.merged,
+
+  // Issue activities
+  [ActivityType.ISSUE_CREATED]: ISSUE_XP_SETTINGS[ActivityType.ISSUE_CREATED],
+  [ActivityType.ISSUE_CLOSED]: ISSUE_XP_SETTINGS[ActivityType.ISSUE_CLOSED],
+  [ActivityType.ISSUE_UPDATED]: ISSUE_XP_SETTINGS[ActivityType.ISSUE_UPDATED],
+  [ActivityType.ISSUE_REOPENED]: ISSUE_XP_SETTINGS[ActivityType.ISSUE_REOPENED],
+
+  // PR Review activities
+  [ActivityType.PR_REVIEW_SUBMITTED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_SUBMITTED],
+  [ActivityType.PR_REVIEW_UPDATED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_UPDATED],
+  [ActivityType.PR_REVIEW_DISMISSED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_DISMISSED],
+  [ActivityType.PR_REVIEW_THREAD_RESOLVED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_THREAD_RESOLVED],
+  [ActivityType.PR_REVIEW_THREAD_UNRESOLVED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_THREAD_UNRESOLVED],
+  [ActivityType.PR_REVIEW_COMMENT_CREATED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_COMMENT_CREATED],
+  [ActivityType.PR_REVIEW_COMMENT_UPDATED]: PR_REVIEW_XP_SETTINGS[ActivityType.PR_REVIEW_COMMENT_UPDATED],
+} as const;
