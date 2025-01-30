@@ -1,11 +1,11 @@
 import {
-  IssueEventData,
-  PullRequestEventData,
-  PullRequestReviewEventData,
   PushEventData,
+  PullRequestEventData,
+  IssueEventData,
+  PullRequestReviewEventData,
   PullRequestReviewThreadEventData,
   PullRequestReviewCommentEventData,
-} from '../core/models/github-shared.model';
+} from '@codeheroes/common';
 import { WebhookEvent } from './event.model';
 
 export class EventUtils {
