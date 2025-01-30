@@ -6,8 +6,8 @@ import {
   PullRequestReviewThreadEventData,
   PushEventData,
   TimeUtils,
-  WebhookEvent,
 } from '@codeheroes/common';
+import { WebhookEvent } from '@codeheroes/event';
 import { ActivityData, ActivityType } from './activity.model';
 
 export class ActivityUtils {

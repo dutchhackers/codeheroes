@@ -1,23 +1,22 @@
 import {
   ConnectedAccountProvider,
-  CreateEventInput,
-  EventService,
   IssueEventData,
   logger,
   PullRequestEventData,
+  PullRequestReviewCommentEventData,
+  PullRequestReviewEventData,
+  PullRequestReviewThreadEventData,
   PushEventData,
   StorageService,
-  PullRequestReviewEventData,
-  PullRequestReviewCommentEventData,
-  PullRequestReviewThreadEventData,
 } from '@codeheroes/common';
+import { CreateEventInput, EventService } from '@codeheroes/event';
 import {
   IssueEvent,
   PullRequestEvent,
-  PushEvent,
+  PullRequestReviewCommentEvent,
   PullRequestReviewEvent,
   PullRequestReviewThreadEvent,
-  PullRequestReviewCommentEvent,
+  PushEvent,
 } from '@shared/github-interfaces';
 import { GitHubStorageUtils } from '../utils/github-storage.utils';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
