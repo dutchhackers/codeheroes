@@ -18,7 +18,10 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
 - [@shared/github-interfaces](libs/shared/github-interfaces) - GitHub interface definitions
 
 #### Server Libraries (Backend Only)
-- [@codeheroes/common](libs/server/common) - Shared server utilities and models
+- [@codeheroes/activity](libs/server/activity) - Activity tracking and processing
+- [@codeheroes/common](libs/server/common) - Core utilities and shared functions
+- [@codeheroes/event](libs/server/event) - Event handling and processing
+- [@codeheroes/gamify](libs/server/gamify) - Gamification logic and rules
 
 #### Legacy Libraries (Deprecated)
 > The following libraries are deprecated and will be removed in future versions:
