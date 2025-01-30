@@ -1,5 +1,5 @@
+import { ActivityType } from '@codeheroes/common';
 import { XpSettings } from '../../models/gamification.model';
-import { ActivityType } from '../../../activity/activity.model';
 
 export const ISSUE_XP_SETTINGS: Record<string, XpSettings> = {
   [ActivityType.ISSUE_CREATED]: {

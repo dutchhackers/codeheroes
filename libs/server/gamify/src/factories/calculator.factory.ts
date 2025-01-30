@@ -1,10 +1,10 @@
-import { ActivityType } from '../../activity/activity.model';
+import { ActivityType } from '@codeheroes/common';
 import { BaseActivityCalculator } from '../activities/base/activity-calculator.base';
-import { GameXpSettings } from '../models/gamification.model';
-import { PushActivityCalculator } from '../activities/push/push-calculator';
-import { PullRequestActivityCalculator } from '../activities/pull-request/pr-calculator';
 import { IssueCalculator } from '../activities/issue/issue-calculator';
 import { PrReviewCalculator } from '../activities/pr-review/pr-review-calculator';
+import { PullRequestActivityCalculator } from '../activities/pull-request/pr-calculator';
+import { PushActivityCalculator } from '../activities/push/push-calculator';
+import { GameXpSettings } from '../models/gamification.model';
 
 export class CalculatorFactory {
   // Map to store calculator classes for each activity type

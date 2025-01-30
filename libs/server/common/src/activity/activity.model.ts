@@ -1,5 +1,4 @@
 import { BaseDocument, ConnectedAccountProvider } from '../core/models/common.model';
-import { ActivityProcessingResult } from '../gamification/models/gamification.model';
 
 export interface ActivityMetrics {
   [key: string]: number | undefined;
@@ -77,7 +76,7 @@ export interface UserActivity extends BaseDocument {
   externalEventTimestamp: string;
   userFacingDescription: string;
   metadata?: ActivityData;
-  processingResult?: ActivityProcessingResult; // replaces xp field
+  processingResult?: any; //ActivityProcessingResult; // replaces xp field
 }
 
 // Update ActivityData type union

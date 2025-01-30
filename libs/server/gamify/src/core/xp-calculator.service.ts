@@ -1,5 +1,5 @@
+import { UserActivity } from '@codeheroes/common';
 import { CalculatorFactory } from '../factories/calculator.factory';
-import { UserActivity } from '../../activity/activity.model';
 import { DEFAULT_XP_SETTINGS, GameXpSettings, XpCalculationResponse } from '../models/gamification.model';
 
 export class XpCalculatorService {

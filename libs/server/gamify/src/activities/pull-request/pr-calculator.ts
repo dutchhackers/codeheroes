@@ -1,6 +1,6 @@
+import { ActivityType, PullRequestActivityData, UserActivity } from '@codeheroes/common';
+import { XpBreakdownItem, XpCalculationResponse } from '../../models/gamification.model';
 import { BaseActivityCalculator } from '../base/activity-calculator.base';
-import { ActivityType, PullRequestActivityData, UserActivity } from '../../../activity/activity.model';
-import { XpCalculationResponse, XpBreakdownItem } from '../../models/gamification.model';
 
 export class PullRequestActivityCalculator extends BaseActivityCalculator {
   calculateXp(activity: UserActivity): XpCalculationResponse {

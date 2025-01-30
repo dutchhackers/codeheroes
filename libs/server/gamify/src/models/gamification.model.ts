@@ -1,5 +1,4 @@
-import { ActivityType } from '../../activity/activity.model';
-import { BaseDocument } from '../../core/models/common.model';
+import { ActivityType, BaseDocument } from '@codeheroes/common';
 import { ISSUE_XP_SETTINGS } from '../activities/issue/issue-xp-settings';
 import { PR_REVIEW_XP_SETTINGS } from '../activities/pr-review/pr-review-xp-settings';
 import { PR_XP_SETTINGS } from '../activities/pull-request/pr-xp-settings';

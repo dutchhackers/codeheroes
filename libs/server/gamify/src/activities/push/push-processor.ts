@@ -1,10 +1,9 @@
-import { UserActivity } from '../../../activity/activity.model';
-import { getCurrentTimeAsISO, logger } from '../../../core/firebase';
-import { calculateLevelProgress } from '../../core/level.utils';
-import { ActivityProcessingResult, XpCalculationResponse } from '../../models/gamification.model';
 import { BaseActivityProcessor } from '../base/activity-processor.base';
+import { XpCalculationResponse } from '../../models/gamification.model';
+import { calculateLevelProgress } from '../../core/level.utils';
+import { getCurrentTimeAsISO, UserActivity } from '@codeheroes/common';
 
-export class PrReviewProcessor extends BaseActivityProcessor {
+export class PushActivityProcessor extends BaseActivityProcessor {
   async processActivity(
     userId: string,
     activityId: string,
@@ -28,18 +27,24 @@ export class PrReviewProcessor extends BaseActivityProcessor {
         const updatedXp = currentXp + xpResult.totalXp;
         const levelProgress = calculateLevelProgress(updatedXp, userData.achievements || [], userData.tasks || []);
 
-        // Create basic processing result
-        const processingResult: ActivityProcessingResult = {
-          processed: true,
-          processedAt: getCurrentTimeAsISO(),
-          xp: {
-            processed: true,
-            awarded: xpResult.totalXp,
-            breakdown: xpResult.breakdown,
-          },
-        };
+        // Create processing result
+        const processingResult = this.createBaseProcessingResult(xpResult);
 
-        // Update user document with XP and level
+        // Note: This is a placeholder for the actual streak logic
+        if (this.checkForPushStreak(userData)) {
+          processingResult.achievements = [
+            {
+              id: 'push_streak',
+              name: 'Push Streak',
+              description: 'Made commits for 5 consecutive days',
+              progress: 100,
+              completed: true,
+              completedAt: getCurrentTimeAsISO(),
+            },
+          ];
+        }
+
+        // Update user document
         transaction.update(userRef, {
           xp: updatedXp,
           level: levelProgress.currentLevel,
@@ -61,20 +66,15 @@ export class PrReviewProcessor extends BaseActivityProcessor {
           levelProgress.currentLevelXp,
         );
       });
-
-      logger.info('Successfully processed review activity', {
-        userId,
-        activityId,
-        activityType: activity.type,
-      });
     } catch (error) {
-      logger.error('Failed to process review activity', {
-        error,
-        userId,
-        activityId,
-        activityType: activity.type,
-      });
+      console.error('Failed to process push activity', { error, userId, activityId });
       throw error;
     }
+  }
+
+  private checkForPushStreak(userData: any): boolean {
+    // Implement push streak checking logic
+    // This is just a placeholder - you would implement your actual streak logic here
+    return false;
   }
 }

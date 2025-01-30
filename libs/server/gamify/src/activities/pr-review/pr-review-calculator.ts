@@ -1,12 +1,12 @@
-import { BaseActivityCalculator } from '../base/activity-calculator.base';
 import {
   ActivityType,
   ReviewActivityData,
   ReviewCommentActivityData,
   ReviewThreadActivityData,
   UserActivity,
-} from '../../../activity/activity.model';
-import { XpCalculationResponse, XpBreakdownItem } from '../../models/gamification.model';
+} from '@codeheroes/common';
+import { XpBreakdownItem, XpCalculationResponse } from '../../models/gamification.model';
+import { BaseActivityCalculator } from '../base/activity-calculator.base';
 
 export class PrReviewCalculator extends BaseActivityCalculator {
   calculateXp(activity: UserActivity): XpCalculationResponse {

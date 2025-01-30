@@ -1,6 +1,5 @@
+import { DatabaseInstance, getCurrentTimeAsISO, UserActivity } from '@codeheroes/common';
 import { Firestore } from 'firebase-admin/firestore';
-import { UserActivity } from '../../../activity/activity.model';
-import { DatabaseInstance, getCurrentTimeAsISO } from '../../../core/firebase';
 import { ActivityProcessingResult, XpCalculationResponse } from '../../models/gamification.model';
 
 export abstract class BaseActivityProcessor {

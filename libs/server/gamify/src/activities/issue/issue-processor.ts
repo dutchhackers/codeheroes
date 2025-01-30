@@ -1,10 +1,9 @@
-import { ActivityType, UserActivity } from '../../../activity/activity.model';
-import { getCurrentTimeAsISO, logger } from '../../../core/firebase';
+import { ActivityType, getCurrentTimeAsISO, logger, UserActivity } from '@codeheroes/common';
 import { calculateLevelProgress } from '../../core/level.utils';
 import { ActivityProcessingResult, XpCalculationResponse } from '../../models/gamification.model';
 import { BaseActivityProcessor } from '../base/activity-processor.base';
 
-export class PullRequestProcessor extends BaseActivityProcessor {
+export class IssueProcessor extends BaseActivityProcessor {
   async processActivity(
     userId: string,
     activityId: string,
@@ -28,8 +27,8 @@ export class PullRequestProcessor extends BaseActivityProcessor {
         const updatedXp = currentXp + xpResult.totalXp;
         const levelProgress = calculateLevelProgress(updatedXp, userData.achievements || [], userData.tasks || []);
 
-        // Check for PR-specific achievements
-        const processingResult = await this.processPullRequestAchievements(userData, activity);
+        // Check for issue-specific achievements
+        const processingResult = await this.processIssueAchievements(userData, activity);
 
         // Add XP calculation results
         processingResult.xp = {
@@ -45,14 +44,8 @@ export class PullRequestProcessor extends BaseActivityProcessor {
           currentLevelXp: levelProgress.currentLevelXp,
           xpToNextLevel: levelProgress.xpToNextLevel,
           updatedAt: getCurrentTimeAsISO(),
-          //   // Update PR-specific stats
-          //   'stats.pullRequests': {
-          //     total: (userData.stats?.pullRequests?.total || 0) + 1,
-          //     merged:
-          //       activity.type === ActivityType.PR_MERGED
-          //         ? (userData.stats?.pullRequests?.merged || 0) + 1
-          //         : userData.stats?.pullRequests?.merged || 0,
-          //   },
+          // Update issue-specific stats
+          'stats.issues': this.updateIssueStats(userData, activity),
         });
 
         // Update activity document
@@ -69,13 +62,13 @@ export class PullRequestProcessor extends BaseActivityProcessor {
         );
       });
 
-      logger.info('Successfully processed pull request activity', {
+      logger.info('Successfully processed issue activity', {
         userId,
         activityId,
         activityType: activity.type,
       });
     } catch (error) {
-      logger.error('Failed to process pull request activity', {
+      logger.error('Failed to process issue activity', {
         error,
         userId,
         activityId,
@@ -85,55 +78,75 @@ export class PullRequestProcessor extends BaseActivityProcessor {
     }
   }
 
-  private async processPullRequestAchievements(
-    userData: any,
-    activity: UserActivity,
-  ): Promise<ActivityProcessingResult> {
+  private updateIssueStats(userData: any, activity: UserActivity): any {
+    const currentStats = userData.stats?.issues || {
+      total: 0,
+      closed: 0,
+      reopened: 0,
+    };
+
+    switch (activity.type) {
+      case ActivityType.ISSUE_CREATED:
+        return {
+          ...currentStats,
+          total: currentStats.total + 1,
+        };
+      case ActivityType.ISSUE_CLOSED:
+        return {
+          ...currentStats,
+          closed: currentStats.closed + 1,
+        };
+      case ActivityType.ISSUE_REOPENED:
+        return {
+          ...currentStats,
+          reopened: currentStats.reopened + 1,
+        };
+      default:
+        return currentStats;
+    }
+  }
+
+  private async processIssueAchievements(userData: any, activity: UserActivity): Promise<ActivityProcessingResult> {
     const processingResult: ActivityProcessingResult = {
       processed: true,
       processedAt: getCurrentTimeAsISO(),
       achievements: [],
     };
 
-    // always return for now
-    if (userData) {
-      return processingResult;
-    }
+    const currentStats = userData.stats?.issues || { total: 0, closed: 0 };
 
-    // Check for first PR achievement
-    if (!userData.stats?.pullRequests?.total) {
+    // First issue created achievement
+    if (activity.type === ActivityType.ISSUE_CREATED && currentStats.total === 0) {
       processingResult.achievements?.push({
-        id: 'first_pr',
-        name: 'First Pull Request',
-        description: 'Created your first pull request',
+        id: 'first_issue',
+        name: 'Issue Reporter',
+        description: 'Created your first issue',
         progress: 100,
         completed: true,
         completedAt: getCurrentTimeAsISO(),
       });
     }
 
-    // Check for PR merge achievements
-    if (activity.type === ActivityType.PR_MERGED) {
-      const mergedCount = (userData.stats?.pullRequests?.merged || 0) + 1;
+    // Issue resolution achievements
+    if (activity.type === ActivityType.ISSUE_CLOSED) {
+      const closedCount = currentStats.closed + 1;
 
-      // Achievement for first merged PR
-      if (mergedCount === 1) {
+      if (closedCount === 1) {
         processingResult.achievements?.push({
-          id: 'first_merged_pr',
-          name: 'First Merged PR',
-          description: 'Got your first pull request merged',
+          id: 'first_issue_closed',
+          name: 'Problem Solver',
+          description: 'Closed your first issue',
           progress: 100,
           completed: true,
           completedAt: getCurrentTimeAsISO(),
         });
       }
 
-      // Achievement for 10 merged PRs
-      if (mergedCount === 10) {
+      if (closedCount === 10) {
         processingResult.achievements?.push({
-          id: 'pr_master',
-          name: 'PR Master',
-          description: 'Got 10 pull requests merged',
+          id: 'issue_master',
+          name: 'Issue Master',
+          description: 'Closed 10 issues',
           progress: 100,
           completed: true,
           completedAt: getCurrentTimeAsISO(),

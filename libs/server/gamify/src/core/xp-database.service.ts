@@ -1,7 +1,7 @@
-import { ProcessorFactory } from '../factories/processor.factory';
-import { UserActivity } from '../../activity/activity.model';
-import { XpCalculationResponse } from '../models/gamification.model';
+import { UserActivity } from '@codeheroes/common';
 import * as logger from 'firebase-functions/logger';
+import { ProcessorFactory } from '../factories/processor.factory';
+import { XpCalculationResponse } from '../models/gamification.model';
 
 export class XpDatabaseService {
   constructor() {
