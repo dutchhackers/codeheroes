@@ -1,14 +1,14 @@
 import {
   IssueEventData,
   PullRequestEventData,
-  PushEventData,
+  PullRequestReviewCommentEventData,
   PullRequestReviewEventData,
   PullRequestReviewThreadEventData,
-  PullRequestReviewCommentEventData,
-} from '../core';
-import { WebhookEvent } from '../event/event.model';
+  PushEventData,
+  TimeUtils,
+  WebhookEvent,
+} from '@codeheroes/common';
 import { ActivityData, ActivityType } from './activity.model';
-import { TimeUtils } from './time.utils';
 
 export class ActivityUtils {
   static mapToActivityType(event: WebhookEvent): ActivityType {

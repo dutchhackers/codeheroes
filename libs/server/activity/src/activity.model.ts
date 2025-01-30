@@ -1,4 +1,4 @@
-import { BaseDocument, ConnectedAccountProvider } from '../core/models/common.model';
+import { BaseDocument, ConnectedAccountProvider } from '@codeheroes/common';
 
 export interface ActivityMetrics {
   [key: string]: number | undefined;
