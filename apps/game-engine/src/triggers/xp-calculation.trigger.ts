@@ -1,11 +1,6 @@
-import {
-  CalculatorFactory,
-  logger,
-  ProcessorFactory,
-  UserActivity,
-  XpCalculatorService,
-  XpDatabaseService,
-} from '@codeheroes/common';
+import { UserActivity } from '@codeheroes/activity';
+import { logger } from '@codeheroes/common';
+import { CalculatorFactory, ProcessorFactory, XpCalculatorService, XpDatabaseService } from '@codeheroes/gamify';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 
 // Initialize factories once at the top level

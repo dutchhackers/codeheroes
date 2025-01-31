@@ -6,6 +6,6 @@
     "types": ["node"],
     "target": "es2020"
   },
-  "include": ["src/**/*.ts", "../../libs/server/common/src/activity/time.utils.ts"],
+  "include": ["src/**/*.ts", "../../libs/server/common/src/core/time.utils.ts"],
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
 }
