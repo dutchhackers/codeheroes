@@ -8,5 +8,5 @@ export interface EventSource {
 export interface Event extends BaseDocument {
   provider: ConnectedAccountProvider;
   source: EventSource;
-  data: Record<string, unknown>;
+  data?: Record<string, unknown>;
 }
