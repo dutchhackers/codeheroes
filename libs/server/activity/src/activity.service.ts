@@ -1,5 +1,5 @@
 import { BaseFirestoreService, DatabaseService, logger } from '@codeheroes/common';
-import { EventUtils, WebhookEvent } from '@codeheroes/event';
+import { WebhookEvent } from '@codeheroes/event';
 import { CollectionReference } from 'firebase-admin/firestore';
 import { activityConverter } from './activity.converter';
 import { CreateActivityInput } from './activity.dto';
@@ -44,7 +44,7 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
       externalEventId: eventData.source.id,
       externalEventTimestamp: eventData.source.timestamp,
       metadata: ActivityUtils.extractActivityData(eventData),
-      userFacingDescription: EventUtils.generateUserFacingDescription(eventData),
+      //userFacingDescription: '', // TODO: for later // EventUtils.generateUserFacingDescription(eventData),
     };
 
     await this.createUserActivity(userId, activityInput);
