@@ -1,15 +1,13 @@
 import { ErrorType, MESSAGES } from '../constants/constants';
 import { GitHubError } from '../errors/github-event.error';
 import { GitHubWebhookEvent } from '../processors/interfaces';
-import {
-  GitHubParser,
-  IssueParser,
-  PullRequestParser,
-  PullRequestReviewCommentParser,
-  PullRequestReviewParser,
-  PullRequestReviewThreadParser,
-  PushEventParser,
-} from './github.parser';
+import { PushEventParser } from './push.parser';
+import { PullRequestParser } from './pull-request.parser';
+import { IssueParser } from './issue.parser';
+import { PullRequestReviewParser } from './pull-request-review.parser';
+import { PullRequestReviewThreadParser } from './pull-request-review-thread.parser';
+import { PullRequestReviewCommentParser } from './pull-request-review-comment.parser';
+import { GitHubParser } from './base.parser';
 
 export class ParserFactory {
   static createParser(webhookEvent: GitHubWebhookEvent): GitHubParser<any, any> {
