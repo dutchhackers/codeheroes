@@ -1,8 +1,6 @@
 import { ConnectedAccountProvider, logger } from '@codeheroes/common';
 import { CreateEventInput, EventService } from '@codeheroes/event';
-import {
-  GitHubProvider
-} from '@codeheroes/providers';
+import { GitHubProvider } from '@codeheroes/providers';
 
 import { ParserFactory } from '../parsers/factory';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
@@ -18,20 +16,14 @@ export abstract class BaseEventProcessor {
     this.webhookEvent = webhookEvent;
   }
 
-  protected async processEvent(): Promise<CreateEventInput> {
+  protected async generateCreateEventInput(): Promise<CreateEventInput> {
     return {
       provider: this.webhookEvent.provider as ConnectedAccountProvider,
       source: {
         id: this.webhookEvent.eventId,
         event: this.webhookEvent.eventType,
       },
-      data: this.getEventData(),
     };
-  }
-
-  protected getEventData() {
-    const parser = ParserFactory.createParser(this.webhookEvent);
-    return parser.parse(this.webhookEvent.payload);
   }
 
   async process(): Promise<ProcessResult> {
@@ -45,8 +37,11 @@ export abstract class BaseEventProcessor {
         };
       }
 
-      const event = await this.processEvent();
-      await this.eventService.createEvent(event);
+      const parser = ParserFactory.createParser(this.webhookEvent);
+      const eventData = parser.parse(this.webhookEvent.payload);
+
+      const createEventInput = await this.generateCreateEventInput();
+      await this.eventService.createEvent(createEventInput, eventData);
       logger.info('Event created successfully');
 
       return {

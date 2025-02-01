@@ -12,13 +12,17 @@ export class EventService extends BaseFirestoreService<Event> {
     this.collection = this.db.collection('events').withConverter(eventConverter);
   }
 
-  async createEvent(eventData: CreateEventInput): Promise<Event> {
-    logger.info('Creating event:', eventData);
+  async createEvent(eventInputData: CreateEventInput, eventData: Record<string, unknown>): Promise<Event> {
+    logger.info('Creating event:', { eventInputData, eventData });
 
-    if (!eventData.source?.id || !eventData.provider) {
+    if (!eventInputData.source?.id || !eventInputData.provider) {
       throw new Error('Required event fields missing');
     }
-    return this.create(eventData);
+    
+    return this.create({
+      ...eventInputData,
+      data: eventData,
+    });
   }
 
   async findByEventId(eventId: string): Promise<Event | null> {
