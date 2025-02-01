@@ -2,7 +2,6 @@ import { BaseDocument, ConnectedAccountProvider } from '@codeheroes/common';
 
 export interface EventSource {
   id: string;
-  timestamp: string; // Date ISO string
   event: string;
 }
 

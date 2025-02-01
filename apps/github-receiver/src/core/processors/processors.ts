@@ -39,7 +39,6 @@ export abstract class BaseEventProcessor {
       provider: this.webhookEvent.provider as ConnectedAccountProvider,
       source: {
         id: this.webhookEvent.eventId,
-        timestamp: this.getEventTimestamp(),
         event: this.webhookEvent.eventType,
       },
       data: this.getEventData(),
@@ -53,12 +52,6 @@ export abstract class BaseEventProcessor {
     | PullRequestReviewEventData
     | PullRequestReviewCommentEventData
     | PullRequestReviewThreadEventData;
-  protected getEventTimestamp(): string {
-    const timestamp = this.getPayloadTimestamp();
-    return new Date(timestamp || new Date()).toISOString();
-  }
-
-  protected abstract getPayloadTimestamp(): string | undefined;
 
   private async storeRawEvent(): Promise<void> {
     if (!this.storageService) {
@@ -125,11 +118,6 @@ export class PushEventProcessor extends BaseEventProcessor {
       },
     };
   }
-
-  protected getPayloadTimestamp(): string | undefined {
-    const payload = this.webhookEvent.payload as PushEvent;
-    return payload.head_commit?.timestamp;
-  }
 }
 
 export class PullRequestEventProcessor extends BaseEventProcessor {
@@ -171,11 +159,6 @@ export class PullRequestEventProcessor extends BaseEventProcessor {
       },
     };
   }
-
-  protected getPayloadTimestamp(): string | undefined {
-    const payload = this.webhookEvent.payload as PullRequestEvent;
-    return payload.pull_request.updated_at;
-  }
 }
 
 export class IssueEventProcessor extends BaseEventProcessor {
@@ -198,11 +181,6 @@ export class IssueEventProcessor extends BaseEventProcessor {
         login: payload.sender.login,
       },
     };
-  }
-
-  protected getPayloadTimestamp(): string | undefined {
-    const payload = this.webhookEvent.payload as IssueEvent;
-    return payload.issue.updated_at;
   }
 }
 
@@ -231,11 +209,6 @@ export class PullRequestReviewEventProcessor extends BaseEventProcessor {
         login: payload.sender.login,
       },
     };
-  }
-
-  protected getPayloadTimestamp(): string | undefined {
-    const payload = this.webhookEvent.payload as PullRequestReviewEvent;
-    return payload.review.submitted_at;
   }
 }
 
@@ -272,11 +245,6 @@ export class PullRequestReviewThreadProcessor extends BaseEventProcessor {
       },
     };
   }
-
-  protected getPayloadTimestamp(): string | undefined {
-    // Use current timestamp as the event doesn't provide one
-    return new Date().toISOString();
-  }
 }
 
 export class PullRequestReviewCommentProcessor extends BaseEventProcessor {
@@ -308,10 +276,5 @@ export class PullRequestReviewCommentProcessor extends BaseEventProcessor {
         login: payload.sender.login,
       },
     };
-  }
-
-  protected getPayloadTimestamp(): string | undefined {
-    const payload = this.webhookEvent.payload as PullRequestReviewCommentEvent;
-    return payload.comment.updated_at || payload.comment.created_at;
   }
 }

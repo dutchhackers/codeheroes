@@ -11,7 +11,7 @@ export interface Sender {
 }
 
 export interface GitHubBaseEventData extends Record<string, unknown> {
+  sender: Sender;
   repository: Repository;
   lastCommitMessage?: string;
-  sender: Sender;
 }
