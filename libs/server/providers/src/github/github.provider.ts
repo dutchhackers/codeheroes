@@ -4,6 +4,9 @@ import { GitHubEventData } from './models/github-event.model';
 import { PushEventData } from './models/push-event.model';
 import { PullRequestEventData } from './models/pull-request-event.model';
 import { IssueEventData } from './models/issue-event.model';
+import { PullRequestReviewEventData } from './models/pull-request-review-event.model';
+import { PullRequestReviewThreadEventData } from './models/pull-request-review-thread-event.model';
+import { PullRequestReviewCommentEventData } from './models/pull-request-review-comment-event.model';
 
 export class GitHubProvider implements IEventProvider<GitHubEventData> {
   readonly name = 'github';
@@ -17,19 +20,21 @@ export class GitHubProvider implements IEventProvider<GitHubEventData> {
         return { pullRequest: event.data as PullRequestEventData };
       case 'issues':
         return { issue: event.data as IssueEventData };
+      case 'pull_request_review':
+        return { pullRequestReview: event.data as PullRequestReviewEventData };
+      case 'pull_request_review_thread':
+        return { pullRequestReviewThread: event.data as PullRequestReviewThreadEventData };
+      case 'pull_request_review_comment':
+        return { pullRequestReviewComment: event.data as PullRequestReviewCommentEventData };
       default:
         throw new Error(`Unsupported event type: ${eventType}`);
     }
   }
 
   formatDescription(event: WebhookEvent): string {
-    // Move existing formatting logic here
-
     const eventType = event.source.event;
-    const eventData = event.data as PushEventData | PullRequestEventData | IssueEventData;
-    // | PullRequestReviewEventData
-    // | PullRequestReviewThreadEventData
-    // | PullRequestReviewCommentEventData;
+    const eventData = event.data as PushEventData | PullRequestEventData | IssueEventData |
+      PullRequestReviewEventData | PullRequestReviewThreadEventData | PullRequestReviewCommentEventData;
     const repoName = eventData.repository.name;
 
     switch (eventType) {
@@ -49,19 +54,19 @@ export class GitHubProvider implements IEventProvider<GitHubEventData> {
           data.issueNumber
         } in ${repoName} (GitHub)`;
       }
-      // case 'pull_request_review': {
-      //   const data = eventData as PullRequestReviewEventData;
-      //   return `${data.reviewer.login} ${data.state} PR #${data.prNumber} in ${repoName} (GitHub)`;
-      // }
-      // case 'pull_request_review_thread': {
-      //   const data = eventData as PullRequestReviewThreadEventData;
-      //   const action = data.resolved ? 'resolved' : 'unresolved';
-      //   return `${data.sender.login} ${action} a review thread on PR #${data.prNumber} in ${repoName} (GitHub)`;
-      // }
-      // case 'pull_request_review_comment': {
-      //   const data = eventData as PullRequestReviewCommentEventData;
-      //   return `${data.sender.login} ${data.action} a review comment on PR #${data.prNumber} in ${repoName} (GitHub)`;
-      // }
+      case 'pull_request_review': {
+        const data = eventData as PullRequestReviewEventData;
+        return `${data.reviewer.login} ${data.state} PR #${data.prNumber} in ${repoName} (GitHub)`;
+      }
+      case 'pull_request_review_thread': {
+        const data = eventData as PullRequestReviewThreadEventData;
+        const action = data.resolved ? 'resolved' : 'unresolved';
+        return `${data.sender.login} ${action} a review thread on PR #${data.prNumber} in ${repoName} (GitHub)`;
+      }
+      case 'pull_request_review_comment': {
+        const data = eventData as PullRequestReviewCommentEventData;
+        return `${data.sender.login} ${data.action} a review comment on PR #${data.prNumber} in ${repoName} (GitHub)`;
+      }
       default:
         return 'Performed an action on GitHub';
     }
