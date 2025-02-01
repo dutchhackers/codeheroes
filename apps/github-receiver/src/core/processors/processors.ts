@@ -1,15 +1,14 @@
+import { ConnectedAccountProvider, logger, StorageService } from '@codeheroes/common';
+import { CreateEventInput, EventService } from '@codeheroes/event';
 import {
-  ConnectedAccountProvider,
+  GitHubProvider,
   IssueEventData,
-  logger,
   PullRequestEventData,
   PullRequestReviewCommentEventData,
   PullRequestReviewEventData,
   PullRequestReviewThreadEventData,
   PushEventData,
-  StorageService,
-} from '@codeheroes/common';
-import { CreateEventInput, EventService } from '@codeheroes/event';
+} from '@codeheroes/providers';
 import {
   IssueEvent,
   PullRequestEvent,
@@ -22,11 +21,13 @@ import { GitHubStorageUtils } from '../utils/github-storage.utils';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
 
 export abstract class BaseEventProcessor {
+  protected readonly githubProvider: GitHubProvider;
   protected readonly eventService: EventService;
   protected readonly webhookEvent: GitHubWebhookEvent;
   protected readonly storageService: StorageService;
 
   constructor(webhookEvent: GitHubWebhookEvent) {
+    this.githubProvider = new GitHubProvider();
     this.eventService = new EventService();
     this.webhookEvent = webhookEvent;
     this.storageService = new StorageService();
