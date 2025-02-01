@@ -1,10 +1,11 @@
-import { logger } from '@codeheroes/common';
+import { logger, StorageService } from '@codeheroes/common';
 import { Request, Response } from 'express';
 import { ErrorType, MESSAGES } from './core/constants/constants';
 import { GitHubError } from './core/errors/github-event.error';
 import { ResponseHandler } from './core/utils/response.handler';
 import { ProcessorFactory } from './core/processors/factory';
 import { GitHubEventUtils } from './core/processors/utils';
+import { EventStorageUtils } from './core/utils/event-storage.utils';
 
 export const App = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -16,6 +17,13 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     } catch (error) {
       throw error instanceof Error ? error : new GitHubError(MESSAGES.MISSING_GITHUB_EVENT);
     }
+
+    // Store the raw event
+    const storageService = new StorageService();
+    const filePath = EventStorageUtils.generateFilePath(eventData);
+    const headers = EventStorageUtils.formatHeaders(eventData.headers);
+    const content = `${headers}\n\n${JSON.stringify(eventData.payload, null, 2)}`;
+    await storageService.storeFile(filePath, content, { contentType: 'text/plain' });
 
     // Process the event
     const processor = ProcessorFactory.createProcessor(eventData);

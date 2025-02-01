@@ -1,37 +1,21 @@
-import { ConnectedAccountProvider, logger, StorageService } from '@codeheroes/common';
+import { ConnectedAccountProvider, logger } from '@codeheroes/common';
 import { CreateEventInput, EventService } from '@codeheroes/event';
 import {
-  GitHubProvider,
-  IssueEventData,
-  PullRequestEventData,
-  PullRequestReviewCommentEventData,
-  PullRequestReviewEventData,
-  PullRequestReviewThreadEventData,
-  PushEventData,
+  GitHubProvider
 } from '@codeheroes/providers';
 
-import {
-  IssueEvent,
-  PullRequestEvent,
-  PullRequestReviewCommentEvent,
-  PullRequestReviewEvent,
-  PullRequestReviewThreadEvent,
-  PushEvent,
-} from '../interfaces/github.interfaces';
-import { GitHubStorageUtils } from '../utils/github-storage.utils';
+import { ParserFactory } from '../parsers/factory';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
 
 export abstract class BaseEventProcessor {
   protected readonly githubProvider: GitHubProvider;
   protected readonly eventService: EventService;
   protected readonly webhookEvent: GitHubWebhookEvent;
-  protected readonly storageService: StorageService;
 
   constructor(webhookEvent: GitHubWebhookEvent) {
     this.githubProvider = new GitHubProvider();
     this.eventService = new EventService();
     this.webhookEvent = webhookEvent;
-    this.storageService = new StorageService();
   }
 
   protected async processEvent(): Promise<CreateEventInput> {
@@ -45,24 +29,9 @@ export abstract class BaseEventProcessor {
     };
   }
 
-  protected abstract getEventData():
-    | PushEventData
-    | PullRequestEventData
-    | IssueEventData
-    | PullRequestReviewEventData
-    | PullRequestReviewCommentEventData
-    | PullRequestReviewThreadEventData;
-
-  private async storeRawEvent(): Promise<void> {
-    if (!this.storageService) {
-      return;
-    }
-
-    try {
-      await GitHubStorageUtils.storeGitHubEvent(this.storageService, this.webhookEvent);
-    } catch (error) {
-      logger.error(`Failed to store raw event ${this.webhookEvent.eventId}:`, error);
-    }
+  protected getEventData() {
+    const parser = ParserFactory.createParser(this.webhookEvent);
+    return parser.parse(this.webhookEvent.payload);
   }
 
   async process(): Promise<ProcessResult> {
@@ -76,10 +45,7 @@ export abstract class BaseEventProcessor {
         };
       }
 
-      await this.storeRawEvent();
-
       const event = await this.processEvent();
-
       await this.eventService.createEvent(event);
       logger.info('Event created successfully');
 
@@ -97,184 +63,9 @@ export abstract class BaseEventProcessor {
   }
 }
 
-export class PushEventProcessor extends BaseEventProcessor {
-  protected getEventData(): PushEventData {
-    const payload = this.webhookEvent.payload as PushEvent;
-    return {
-      repository: {
-        id: payload.repository.id.toString(),
-        name: payload.repository.name,
-        owner: payload.repository.owner.login,
-        ownerType: payload.repository.owner.type,
-      },
-      metrics: {
-        commits: payload.commits.length,
-      },
-      branch: payload.ref,
-      lastCommitMessage: payload.head_commit?.message || null,
-      sender: {
-        id: payload.sender.id.toString(),
-        login: payload.sender.login,
-      },
-    };
-  }
-}
-
-export class PullRequestEventProcessor extends BaseEventProcessor {
-  protected getEventData(): PullRequestEventData {
-    const payload = this.webhookEvent.payload as PullRequestEvent;
-    const { pull_request } = payload;
-
-    return {
-      repository: {
-        id: payload.repository.id.toString(),
-        name: payload.repository.name,
-        owner: payload.repository.owner.login,
-        ownerType: payload.repository.owner.type,
-      },
-      action: payload.action,
-      prNumber: payload.number,
-      title: payload.pull_request.title,
-      state: payload.pull_request.state,
-      merged: payload.pull_request.merged || false,
-      draft: payload.pull_request.draft || false,
-      createdAt: payload.pull_request.created_at,
-      updatedAt: payload.pull_request.updated_at,
-      ...(payload.pull_request.merged_at && {
-        mergedAt: payload.pull_request.merged_at,
-        mergedBy: {
-          id: payload.pull_request.merged_by!.id.toString(),
-          login: payload.pull_request.merged_by!.login,
-        },
-      }),
-      metrics: {
-        commits: pull_request.commits,
-        additions: pull_request.additions,
-        deletions: pull_request.deletions,
-        changedFiles: pull_request.changed_files,
-      },
-      sender: {
-        id: payload.sender.id.toString(),
-        login: payload.sender.login,
-      },
-    };
-  }
-}
-
-export class IssueEventProcessor extends BaseEventProcessor {
-  protected getEventData(): IssueEventData {
-    const payload = this.webhookEvent.payload as IssueEvent;
-    return {
-      repository: {
-        id: payload.repository.id.toString(),
-        name: payload.repository.name,
-        owner: payload.repository.owner.login,
-        ownerType: payload.repository.owner.type,
-      },
-      action: payload.action,
-      issueNumber: payload.issue.number,
-      title: payload.issue.title,
-      state: payload.issue.state,
-      stateReason: payload.issue.state_reason || null,
-      sender: {
-        id: payload.sender.id.toString(),
-        login: payload.sender.login,
-      },
-    };
-  }
-}
-
-export class PullRequestReviewEventProcessor extends BaseEventProcessor {
-  protected getEventData(): PullRequestReviewEventData {
-    const payload = this.webhookEvent.payload as PullRequestReviewEvent;
-
-    return {
-      repository: {
-        id: payload.repository.id.toString(),
-        name: payload.repository.name,
-        owner: payload.repository.owner.login,
-        ownerType: payload.repository.owner.type,
-      },
-      action: payload.action,
-      state: payload.review.state,
-      prNumber: payload.pull_request.number,
-      prTitle: payload.pull_request.title,
-      reviewer: {
-        id: payload.review.user.id.toString(),
-        login: payload.review.user.login,
-      },
-      submittedAt: payload.review.submitted_at,
-      sender: {
-        id: payload.sender.id.toString(),
-        login: payload.sender.login,
-      },
-    };
-  }
-}
-
-export class PullRequestReviewThreadProcessor extends BaseEventProcessor {
-  protected getEventData(): PullRequestReviewThreadEventData {
-    const payload = this.webhookEvent.payload as PullRequestReviewThreadEvent;
-
-    return {
-      repository: {
-        id: payload.repository.id.toString(),
-        name: payload.repository.name,
-        owner: payload.repository.owner.login,
-        ownerType: payload.repository.owner.type,
-      },
-      action: payload.action,
-      prNumber: payload.pull_request.number,
-      prTitle: payload.pull_request.title,
-      threadId: payload.thread.id,
-      resolved: payload.thread.resolved,
-      ...(payload.thread.resolution && {
-        resolver: {
-          id: payload.thread.resolution.user.id.toString(),
-          login: payload.thread.resolution.user.login,
-        },
-      }),
-      lineDetails: {
-        line: payload.thread.line,
-        startLine: payload.thread.start_line,
-        originalLine: payload.thread.original_line,
-      },
-      sender: {
-        id: payload.sender.id.toString(),
-        login: payload.sender.login,
-      },
-    };
-  }
-}
-
-export class PullRequestReviewCommentProcessor extends BaseEventProcessor {
-  protected getEventData(): PullRequestReviewCommentEventData {
-    const payload = this.webhookEvent.payload as PullRequestReviewCommentEvent;
-
-    return {
-      repository: {
-        id: payload.repository.id.toString(),
-        name: payload.repository.name,
-        owner: payload.repository.owner.login,
-        ownerType: payload.repository.owner.type,
-      },
-      action: payload.action,
-      prNumber: payload.pull_request.number,
-      prTitle: payload.pull_request.title,
-      comment: {
-        id: payload.comment.id,
-        createdAt: payload.comment.created_at,
-        updatedAt: payload.comment.updated_at,
-        inReplyToId: payload.comment.in_reply_to_id,
-      },
-      author: {
-        id: payload.comment.user.id.toString(),
-        login: payload.comment.user.login,
-      },
-      sender: {
-        id: payload.sender.id.toString(),
-        login: payload.sender.login,
-      },
-    };
-  }
-}
+export class PushEventProcessor extends BaseEventProcessor {}
+export class PullRequestEventProcessor extends BaseEventProcessor {}
+export class IssueEventProcessor extends BaseEventProcessor {}
+export class PullRequestReviewEventProcessor extends BaseEventProcessor {}
+export class PullRequestReviewThreadProcessor extends BaseEventProcessor {}
+export class PullRequestReviewCommentProcessor extends BaseEventProcessor {}
