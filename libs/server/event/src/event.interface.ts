@@ -1,6 +1,6 @@
-import { WebhookEvent } from './event.model';
+import { Event } from './event.model';
 
 export interface IEventFormatter {
   getProvider(): string;
-  formatDescription(event: WebhookEvent): string;
+  formatDescription(event: Event): string;
 }

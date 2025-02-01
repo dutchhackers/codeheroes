@@ -1,7 +1,7 @@
-import { WebhookEvent } from '@codeheroes/event';
+import { Event } from '@codeheroes/event';
 
 export interface IEventProvider<T = any> {
   readonly name: string;
-  parseEventData(event: WebhookEvent): T;
-  formatDescription(event: WebhookEvent): string;
+  parseEventData(event: Event): T;
+  formatDescription(event: Event): string;
 }

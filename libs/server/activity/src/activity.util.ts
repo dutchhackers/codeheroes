@@ -2,12 +2,12 @@ import {
 
   TimeUtils,
 } from '@codeheroes/common';
-import { WebhookEvent } from '@codeheroes/event';
+import { Event } from '@codeheroes/event';
 import { ActivityData, ActivityType } from './activity.model';
 import { IssueEventData, PullRequestEventData, PullRequestReviewCommentEventData, PullRequestReviewEventData, PullRequestReviewThreadEventData, PushEventData } from '@codeheroes/providers';
 
 export class ActivityUtils {
-  static mapToActivityType(event: WebhookEvent): ActivityType {
+  static mapToActivityType(event: Event): ActivityType {
     const eventType = event.source.event;
     const eventAction = (event.data as any)?.action;
 
@@ -68,7 +68,7 @@ export class ActivityUtils {
     throw new Error(`Unsupported event type: ${eventType} with action: ${eventAction}`);
   }
 
-  static extractActivityData(event: WebhookEvent): ActivityData | undefined {
+  static extractActivityData(event: Event): ActivityData | undefined {
     const eventType = event.source.event;
     const eventData = event.data as
       | PushEventData

@@ -1,4 +1,4 @@
-import { WebhookEvent } from '@codeheroes/event';
+import { Event } from '@codeheroes/event';
 import { IEventProvider } from '../interfaces/event-provider.interface';
 import { GitHubEventData } from './models/github-event.model';
 import { PushEventData } from './models/push-event.model';
@@ -13,7 +13,7 @@ export class GitHubProvider implements IEventProvider<GitHubEventData> {
   readonly name = 'github';
   private formatter = new GitHubEventFormatter();
 
-  parseEventData(event: WebhookEvent): GitHubEventData {
+  parseEventData(event: Event): GitHubEventData {
     const eventType = event.source.event;
     switch (eventType) {
       case 'push':
@@ -33,7 +33,7 @@ export class GitHubProvider implements IEventProvider<GitHubEventData> {
     }
   }
 
-  formatDescription(event: WebhookEvent): string {
+  formatDescription(event: Event): string {
     const description = this.formatter.formatDescription(event);
     return `${description} (${this.name})`;
   }

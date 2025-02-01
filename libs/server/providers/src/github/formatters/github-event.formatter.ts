@@ -1,4 +1,4 @@
-import { WebhookEvent } from '@codeheroes/event';
+import { Event } from '@codeheroes/event';
 import { IEventFormatter } from '../../interfaces/event-formatter.interface';
 import {
   PushEventData,
@@ -14,7 +14,7 @@ export class GitHubEventFormatter implements IEventFormatter {
     return 'github';
   }
 
-  formatDescription(event: WebhookEvent): string {
+  formatDescription(event: Event): string {
     const eventType = event.source.event;
     const eventData = event.data as
       | PushEventData

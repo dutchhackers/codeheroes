@@ -6,7 +6,7 @@ export interface EventSource {
   event: string;
 }
 
-export interface WebhookEvent extends BaseDocument {
+export interface Event extends BaseDocument {
   type: string;
   provider: ConnectedAccountProvider;
   source: EventSource;
