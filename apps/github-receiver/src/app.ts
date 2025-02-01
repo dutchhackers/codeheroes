@@ -2,10 +2,10 @@ import { logger, StorageService } from '@codeheroes/common';
 import { Request, Response } from 'express';
 import { ErrorType, MESSAGES } from './core/constants/constants';
 import { GitHubError } from './core/errors/github-event.error';
-import { ResponseHandler } from './core/utils/response.handler';
-import { EventProcessor } from './core/processors/event-processor';
-import { GitHubEventUtils } from './core/processors/utils';
 import { EventStorageUtils } from './core/utils/event-storage.utils';
+import { ResponseHandler } from './core/utils/response.handler';
+import { EventProcessor } from './processor/event-processor';
+import { GitHubEventUtils } from './processor/utils';
 
 export const App = async (req: Request, res: Response): Promise<void> => {
   try {

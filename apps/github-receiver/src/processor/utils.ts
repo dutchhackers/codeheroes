@@ -1,7 +1,7 @@
 import { Request } from 'express';
-import { ErrorType, MESSAGES } from '../constants/constants';
-import { GitHubEventConfig, SupportedEventType } from '../constants/github.constants';
-import { GitHubError } from '../errors/github-event.error';
+import { ErrorType, MESSAGES } from '../core/constants/constants';
+import { GitHubEventConfig, SupportedEventType } from '../core/constants/github.constants';
+import { GitHubError } from '../core/errors/github-event.error';
 import { GitHubWebhookEvent } from './interfaces';
 import { logger } from '@codeheroes/common';
 import {
@@ -11,7 +11,7 @@ import {
   PullRequestReviewEvent,
   PullRequestReviewThreadEvent,
   PushEvent,
-} from '../interfaces/github.interfaces';
+} from '../core/interfaces/github.interfaces';
 
 type GitHubPayload =
   | IssueEvent

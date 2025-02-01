@@ -1,5 +1,5 @@
 import { PullRequestReviewEventData } from '@codeheroes/providers';
-import { PullRequestReviewEvent } from '../interfaces/github.interfaces';
+import { PullRequestReviewEvent } from '../core/interfaces/github.interfaces';
 import { GitHubParser } from './base.parser';
 
 export class PullRequestReviewParser extends GitHubParser<PullRequestReviewEvent, PullRequestReviewEventData> {

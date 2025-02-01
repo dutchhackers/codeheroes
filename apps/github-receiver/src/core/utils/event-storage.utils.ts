@@ -1,4 +1,4 @@
-import { GitHubWebhookEvent } from '../processors/interfaces';
+import { GitHubWebhookEvent } from "../../processor/interfaces";
 
 export class EventStorageUtils {
   static formatHeaders(headers: Record<string, string | string[] | undefined>): string {

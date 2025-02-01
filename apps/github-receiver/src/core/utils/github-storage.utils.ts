@@ -1,5 +1,5 @@
 import { StorageService } from '@codeheroes/common';
-import { GitHubWebhookEvent } from '../processors/interfaces';
+import { GitHubWebhookEvent } from '../../processor/interfaces';
 
 export class GitHubStorageUtils {
   private static formatHeaders(headers: Record<string, string | string[] | undefined>): string {
