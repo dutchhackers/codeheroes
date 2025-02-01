@@ -9,6 +9,7 @@ import {
   PullRequestReviewThreadEventData,
   PushEventData,
 } from '@codeheroes/providers';
+
 import {
   IssueEvent,
   PullRequestEvent,
@@ -16,7 +17,7 @@ import {
   PullRequestReviewEvent,
   PullRequestReviewThreadEvent,
   PushEvent,
-} from '@shared/github-interfaces';
+} from '../interfaces/github.interfaces';
 import { GitHubStorageUtils } from '../utils/github-storage.utils';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
 

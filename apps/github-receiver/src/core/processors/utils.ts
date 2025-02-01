@@ -1,16 +1,25 @@
-import {
-  IssueEvent,
-  PullRequestEvent,
-  PushEvent
-} from '@shared/github-interfaces';
 import { Request } from 'express';
 import { ErrorType, MESSAGES } from '../constants/constants';
 import { GitHubEventConfig, SupportedEventType } from '../constants/github.constants';
 import { GitHubError } from '../errors/github-event.error';
 import { GitHubWebhookEvent } from './interfaces';
 import { logger } from '@codeheroes/common';
+import {
+  IssueEvent,
+  PullRequestEvent,
+  PullRequestReviewCommentEvent,
+  PullRequestReviewEvent,
+  PullRequestReviewThreadEvent,
+  PushEvent,
+} from '../interfaces/github.interfaces';
 
-type GitHubPayload = PushEvent | PullRequestEvent | IssueEvent;
+type GitHubPayload =
+  | IssueEvent
+  | PullRequestEvent
+  | PullRequestReviewCommentEvent
+  | PullRequestReviewEvent
+  | PullRequestReviewThreadEvent
+  | PushEvent;
 
 export class GitHubEventUtils {
   static isEventTypeSupported(eventType: string): eventType is SupportedEventType {

@@ -1,1 +1,1 @@
-export * from './lib/shared-github-interfaces';
+export const dummy = true;

@@ -5,7 +5,7 @@ import {
   PullRequestReviewEvent,
   PullRequestReviewThreadEvent,
   PushEvent,
-} from '@shared/github-interfaces';
+} from '../interfaces/github.interfaces';
 
 export interface ProcessResult {
   success: boolean;
