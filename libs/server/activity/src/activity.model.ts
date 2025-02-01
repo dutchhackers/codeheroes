@@ -74,7 +74,7 @@ export interface UserActivity extends BaseDocument {
   eventType: string;
   externalEventId: string;
   externalEventTimestamp: string;
-  userFacingDescription: string;
+  userFacingDescription?: string; // Optional for time being
   metadata?: ActivityData;
   processingResult?: any; //ActivityProcessingResult; // replaces xp field
 }

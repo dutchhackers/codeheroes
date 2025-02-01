@@ -1,11 +1,11 @@
 import * as admin from 'firebase-admin';
-import { WebhookEvent } from './event.model';
+import { Event } from './event.model';
 
-export const eventConverter: admin.firestore.FirestoreDataConverter<WebhookEvent> = {
-  toFirestore: (user: WebhookEvent): admin.firestore.DocumentData => {
+export const eventConverter: admin.firestore.FirestoreDataConverter<Event> = {
+  toFirestore: (user: Event): admin.firestore.DocumentData => {
     return user;
   },
-  fromFirestore: (snapshot: admin.firestore.QueryDocumentSnapshot): WebhookEvent => {
+  fromFirestore: (snapshot: admin.firestore.QueryDocumentSnapshot): Event => {
     const data = snapshot.data();
     if (!data) {
       throw new Error('Document data is undefined');
@@ -15,6 +15,6 @@ export const eventConverter: admin.firestore.FirestoreDataConverter<WebhookEvent
     return {
       id: snapshot.id,
       ...restData,
-    } as WebhookEvent;
+    } as Event;
   },
 };

@@ -1,6 +1,6 @@
 import { ActivityService } from '@codeheroes/activity';
 import { logger } from '@codeheroes/common';
-import { WebhookEvent } from '@codeheroes/event';
+import { Event } from '@codeheroes/event';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 
 export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async (event) => {
@@ -8,7 +8,7 @@ export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async
     eventId: event.params.eventId,
   });
 
-  const eventData = event.data?.data() as WebhookEvent;
+  const eventData = event.data?.data() as Event;
   if (!eventData) {
     logger.error('No event data found');
     return;

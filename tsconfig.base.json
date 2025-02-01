@@ -22,7 +22,7 @@
       "@codeheroes/gamify": ["libs/server/gamify/src/index.ts"],
       "@codeheroes/migration": ["libs/migration/migration/src/index.ts"],
       "@codeheroes/migration-shared": ["libs/migration/migration-shared/src/index.ts"],
-      "@shared/github-interfaces": ["libs/shared/github-interfaces/src/index.ts"]
+      "@codeheroes/providers": ["libs/server/providers/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

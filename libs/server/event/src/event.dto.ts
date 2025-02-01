@@ -1,3 +1,3 @@
-import { WebhookEvent } from "./event.model";
+import { Event } from "./event.model";
 
-export type CreateEventInput = Omit<WebhookEvent, 'id' | 'createdAt' | 'updatedAt'>;
+export type CreateEventInput = Omit<Event, 'id' | 'createdAt' | 'updatedAt'>;

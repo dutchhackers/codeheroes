@@ -1,5 +1,5 @@
 import { BaseFirestoreService, DatabaseService, logger } from '@codeheroes/common';
-import { EventUtils, WebhookEvent } from '@codeheroes/event';
+import { Event } from '@codeheroes/event';
 import { CollectionReference } from 'firebase-admin/firestore';
 import { activityConverter } from './activity.converter';
 import { CreateActivityInput } from './activity.dto';
@@ -21,7 +21,7 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
     return this.db.collection('users').doc(userId).collection('activities').withConverter(activityConverter);
   }
 
-  async handleNewEvent(eventId: string, eventData: WebhookEvent): Promise<void> {
+  async handleNewEvent(eventId: string, eventData: Event): Promise<void> {
     const userId = await this.databaseService.lookupUserId({
       sender: (eventData.data as any)?.sender,
       repository: (eventData.data as any)?.repository,
@@ -44,7 +44,7 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
       externalEventId: eventData.source.id,
       externalEventTimestamp: eventData.source.timestamp,
       metadata: ActivityUtils.extractActivityData(eventData),
-      userFacingDescription: EventUtils.generateUserFacingDescription(eventData),
+      //userFacingDescription: '', // TODO: for later // EventUtils.generateUserFacingDescription(eventData),
     };
 
     await this.createUserActivity(userId, activityInput);
