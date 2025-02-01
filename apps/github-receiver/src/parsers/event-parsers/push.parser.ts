@@ -1,5 +1,5 @@
 import { PushEventData } from '@codeheroes/providers';
-import { PushEvent } from '../core/interfaces/github.interfaces';
+import { PushEvent } from '../../core/interfaces/github.interfaces';
 import { GitHubParser } from './base.parser';
 
 export class PushEventParser extends GitHubParser<PushEvent, PushEventData> {

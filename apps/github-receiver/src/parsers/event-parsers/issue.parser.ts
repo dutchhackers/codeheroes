@@ -1,5 +1,5 @@
 import { IssueEventData } from '@codeheroes/providers';
-import { IssueEvent } from '../core/interfaces/github.interfaces';
+import { IssueEvent } from '../../core/interfaces/github.interfaces';
 import { GitHubParser } from './base.parser';
 
 export class IssueParser extends GitHubParser<IssueEvent, IssueEventData> {
