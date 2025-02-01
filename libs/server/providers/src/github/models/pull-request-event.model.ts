@@ -1,4 +1,4 @@
-import { BaseEventData, Sender } from './base-event.model';
+import { GitHubBaseEventData, Sender } from './base-event.model';
 
 export interface PullRequestMetrics {
   commits: number;
@@ -7,7 +7,7 @@ export interface PullRequestMetrics {
   changedFiles: number;
 }
 
-export interface PullRequestEventData extends BaseEventData {
+export interface PullRequestEventData extends GitHubBaseEventData {
   action: 'opened' | 'closed' | 'reopened' | 'synchronize' | 'edited' | string;
   prNumber: number;
   title: string;

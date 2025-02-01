@@ -10,7 +10,7 @@ export interface Sender {
   login: string;
 }
 
-export interface BaseEventData extends Record<string, unknown> {
+export interface GitHubBaseEventData extends Record<string, unknown> {
   repository: Repository;
   lastCommitMessage?: string;
   sender: Sender;

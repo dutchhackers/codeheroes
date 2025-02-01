@@ -1,10 +1,10 @@
-import { BaseEventData } from './base-event.model';
+import { GitHubBaseEventData } from './base-event.model';
 
 export interface PushEventMetrics {
   commits: number;
 }
 
-export interface PushEventData extends BaseEventData {
+export interface PushEventData extends GitHubBaseEventData {
   branch: string;
   metrics?: PushEventMetrics;
 }
