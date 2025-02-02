@@ -1,4 +1,11 @@
-import { CommonMappedData, CommonPayload, GitHubRepository, GitHubUser } from '../../core/interfaces/github.interfaces';
+import { CommitData } from '@codeheroes/providers';
+import {
+  CommonMappedData,
+  CommonPayload,
+  GitHubCommit,
+  GitHubRepository,
+  GitHubUser,
+} from '../../core/interfaces/github.interfaces';
 
 export abstract class GitHubParser<T extends CommonPayload, R extends CommonMappedData> {
   protected mapCommonProperties(payload: T): CommonMappedData {
@@ -29,6 +36,19 @@ export abstract class GitHubParser<T extends CommonPayload, R extends CommonMapp
       id: user.id.toString(),
       login: user.login,
     };
+  }
+
+  protected mapCommits(commits: GitHubCommit[]): CommitData[] {
+    return commits.map((commit) => ({
+      id: commit.id,
+      message: commit.message,
+      timestamp: commit.timestamp,
+      author: {
+        name: commit.author.name,
+        email: commit.author.email,
+      },
+      url: commit.url,
+    }));
   }
 
   parse(payload: T): R {

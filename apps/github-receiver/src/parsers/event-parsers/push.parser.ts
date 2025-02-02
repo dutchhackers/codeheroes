@@ -1,5 +1,5 @@
-import { CommitData, PushEventData } from '@codeheroes/providers';
-import { CommonMappedData, GitHubCommit, PushEvent } from '../../core/interfaces/github.interfaces';
+import { PushEventData } from '@codeheroes/providers';
+import { CommonMappedData, PushEvent } from '../../core/interfaces/github.interfaces';
 import { GitHubParser } from './base.parser';
 
 export class PushParser extends GitHubParser<PushEvent, PushEventData> {
@@ -18,18 +18,5 @@ export class PushParser extends GitHubParser<PushEvent, PushEventData> {
         commits: payload.commits.length,
       },
     };
-  }
-
-  private mapCommits(commits: GitHubCommit[]): CommitData[] {
-    return commits.map(commit => ({
-      id: commit.id,
-      message: commit.message,
-      timestamp: commit.timestamp,
-      author: {
-        name: commit.author.name,
-        email: commit.author.email,
-      },
-      url: commit.url,
-    }));
   }
 }
