@@ -1,0 +1,56 @@
+import { Event } from '@codeheroes/event';
+import { PullRequestEventData } from '@codeheroes/providers';
+import { BaseActivityHandler } from '../base.handler';
+import { ActivityType, PullRequestActivityData, PullRequestMetrics } from '../../types';
+import { TimeUtils } from '@codeheroes/common';
+
+export class PrMergeHandler extends BaseActivityHandler {
+  protected activityType = ActivityType.PR_MERGED;
+  protected eventTypes = ['pull_request'];
+  protected eventActions = ['closed'];
+
+  canHandle(event: Event): boolean {
+    if (!super.canHandle(event)) return false;
+
+    const details = event.data as PullRequestEventData;
+    return details.merged === true;
+  }
+
+  handle(event: Event): PullRequestActivityData {
+    const details = event.data as PullRequestEventData;
+
+    return {
+      type: 'pull_request',
+      prNumber: details.prNumber,
+      title: details.title,
+      merged: true,
+      draft: false,
+      action: 'merged',
+    };
+  }
+
+  getMetrics(event: Event): PullRequestMetrics {
+    const details = event.data as PullRequestEventData;
+
+    return {
+      commits: details.metrics.commits,
+      // additions: details.metrics.additions,
+      // deletions: details.metrics.deletions,
+      // changedFiles: details.metrics.changedFiles,
+      // timeToMerge: TimeUtils.calculateTimeBetween(details.createdAt, details.mergedAt),
+      // timeToFirstReview: details.metrics.timeToFirstReview,
+      // reviewCount: details.metrics.reviewCount || 0,
+      // commentCount: details.metrics.commentCount || 0,
+    };
+  }
+
+  generateDescription(event: Event): string {
+    const details = event.data as PullRequestEventData;
+    const { commits } = details.metrics;
+
+    return (
+      `Merged pull request #${details.prNumber}: ${details.title} ` +
+      `(${this.formatNumber(commits)} ${this.pluralize(commits, 'commit')}, `
+    );
+  }
+}
