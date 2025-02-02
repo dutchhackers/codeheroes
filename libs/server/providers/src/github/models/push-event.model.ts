@@ -1,5 +1,16 @@
 import { GitHubBaseEventData } from './base-event.model';
 
+export interface CommitData {
+  id: string;
+  message: string;
+  timestamp: string;
+  author: {
+    name: string;
+    email: string;
+  };
+  url: string;
+}
+
 export interface PushEventMetrics {
   commits: number;
 }
@@ -14,4 +25,5 @@ export interface PushEventData extends GitHubBaseEventData {
     name: string;
     email: string;
   };
+  commits: CommitData[];
 }

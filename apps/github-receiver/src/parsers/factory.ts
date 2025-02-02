@@ -7,13 +7,13 @@ import { PullRequestReviewCommentParser } from './event-parsers/pull-request-rev
 import { PullRequestReviewThreadParser } from './event-parsers/pull-request-review-thread.parser';
 import { PullRequestReviewParser } from './event-parsers/pull-request-review.parser';
 import { PullRequestParser } from './event-parsers/pull-request.parser';
-import { PushEventParser } from './event-parsers/push.parser';
+import { PushParser } from './event-parsers/push.parser';
 
 export class ParserFactory {
   static createParser(webhookEvent: GitHubWebhookEvent): GitHubParser<any, any> {
     switch (webhookEvent.eventType) {
       case 'push':
-        return new PushEventParser();
+        return new PushParser();
       case 'pull_request':
         return new PullRequestParser();
       case 'issues':
