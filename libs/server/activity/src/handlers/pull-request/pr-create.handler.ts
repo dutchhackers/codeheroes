@@ -1,8 +1,7 @@
 import { Event } from '@codeheroes/event';
 import { PullRequestEventData } from '@codeheroes/providers';
-import { BaseActivityHandler } from '../base.handler';
 import { ActivityType, PullRequestActivityData, PullRequestMetrics } from '../../types';
-import { TimeUtils } from '@codeheroes/common';
+import { BaseActivityHandler } from '../base.handler';
 
 export class PrCreateHandler extends BaseActivityHandler {
   protected activityType = ActivityType.PR_CREATED;
@@ -30,8 +29,6 @@ export class PrCreateHandler extends BaseActivityHandler {
       additions: details.metrics.additions,
       deletions: details.metrics.deletions,
       changedFiles: details.metrics.changedFiles,
-      reviewCount: 0,
-      commentCount: 0,
     };
   }
 
