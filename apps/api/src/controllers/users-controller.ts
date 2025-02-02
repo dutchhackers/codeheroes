@@ -1,5 +1,4 @@
-import { UserService } from '@codeheroes/common';
-import { logger } from '@codeheroes/migration';
+import { logger, UserService } from '@codeheroes/common';
 import * as express from 'express';
 import { transformTo, transformArrayTo } from '../core/utils/transformer.utils';
 import { UserDto } from '../core/dto/user.dto';
