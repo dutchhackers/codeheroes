@@ -1,14 +1,15 @@
 import { Event } from '@codeheroes/event';
 import {
-    PushHandler,
-    IssueCloseHandler,
-    IssueCreateHandler,
-    IssueUpdateHandler,
-    PrCreateHandler,
-    PrMergeHandler,
-    PrUpdateHandler,
-    ReviewSubmitHandler,
-    ReviewThreadHandler,
+  DeleteHandler,
+  IssueCloseHandler,
+  IssueCreateHandler,
+  IssueUpdateHandler,
+  PrCreateHandler,
+  PrMergeHandler,
+  PrUpdateHandler,
+  PushHandler,
+  ReviewSubmitHandler,
+  ReviewThreadHandler,
 } from '../handlers';
 import { ActivityCategory, ActivityHandler, ActivityType } from '../types';
 
@@ -16,6 +17,7 @@ export class ActivityHandlerFactory {
   private static handlers: ActivityHandler[] = [
     // Code handlers
     new PushHandler(),
+    new DeleteHandler(), // Add this line
 
     // Pull request handlers
     new PrCreateHandler(),
@@ -35,6 +37,7 @@ export class ActivityHandlerFactory {
   private static typeToCategory = new Map<ActivityType, ActivityCategory>([
     [ActivityType.CODE_PUSH, ActivityCategory.CODE],
     [ActivityType.CODE_COVERAGE, ActivityCategory.CODE],
+    [ActivityType.BRANCH_DELETED, ActivityCategory.CODE],
 
     [ActivityType.PR_CREATED, ActivityCategory.PULL_REQUEST],
     [ActivityType.PR_UPDATED, ActivityCategory.PULL_REQUEST],

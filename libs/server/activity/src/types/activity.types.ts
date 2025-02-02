@@ -14,6 +14,7 @@ export enum ActivityType {
   // Code activities
   CODE_PUSH = 'CODE_PUSH',
   CODE_COVERAGE = 'CODE_COVERAGE',
+  BRANCH_DELETED = 'BRANCH_DELETED',
 
   // Pull request activities
   PR_CREATED = 'PR_CREATED',
@@ -43,6 +44,7 @@ export enum ActivityType {
 export const ActivityTypeToCategory: Record<ActivityType, ActivityCategory> = {
   [ActivityType.CODE_PUSH]: ActivityCategory.CODE,
   [ActivityType.CODE_COVERAGE]: ActivityCategory.CODE,
+  [ActivityType.BRANCH_DELETED]: ActivityCategory.CODE, // Add this new mapping
 
   [ActivityType.PR_CREATED]: ActivityCategory.PULL_REQUEST,
   [ActivityType.PR_UPDATED]: ActivityCategory.PULL_REQUEST,

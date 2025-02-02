@@ -89,6 +89,12 @@ export interface DeploymentActivityData extends BaseActivityData {
   status: 'pending' | 'success' | 'failure';
 }
 
+export interface DeleteActivityData extends BaseActivityData {
+  type: 'delete';
+  ref: string;
+  refType: 'branch' | 'tag';
+}
+
 export type ActivityData =
   | IssueActivityData
   | PullRequestActivityData
@@ -96,4 +102,5 @@ export type ActivityData =
   | ReviewActivityData
   | ReviewThreadActivityData
   | ReviewCommentActivityData
-  | DeploymentActivityData;
+  | DeploymentActivityData
+  | DeleteActivityData;
