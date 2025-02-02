@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
 import {
-    CodePushHandler,
+    PushHandler,
     IssueCloseHandler,
     IssueCreateHandler,
     IssueUpdateHandler,
@@ -15,7 +15,7 @@ import { ActivityCategory, ActivityHandler, ActivityType } from '../types';
 export class ActivityHandlerFactory {
   private static handlers: ActivityHandler[] = [
     // Code handlers
-    new CodePushHandler(),
+    new PushHandler(),
 
     // Pull request handlers
     new PrCreateHandler(),
