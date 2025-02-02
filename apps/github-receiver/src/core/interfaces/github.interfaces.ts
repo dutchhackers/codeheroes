@@ -1,3 +1,21 @@
+export interface CommonPayload {
+  repository?: GitHubRepository;
+  sender?: GitHubUser;
+}
+
+export interface CommonMappedData {
+  repository?: {
+    id: string;
+    name: string;
+    owner: string;
+    ownerType: string;
+  };
+  sender?: {
+    id: string;
+    login: string;
+  };
+}
+
 export interface GitHubUser {
   id: number;
   login: string;
@@ -55,7 +73,15 @@ export interface GitHubHeaders {
 }
 
 export interface PullRequestEvent {
-  action: 'opened' | 'closed' | 'reopened' | 'synchronize' | 'edited' | 'ready_for_review' | 'draft' | 'converted_to_draft';
+  action:
+    | 'opened'
+    | 'closed'
+    | 'reopened'
+    | 'synchronize'
+    | 'edited'
+    | 'ready_for_review'
+    | 'draft'
+    | 'converted_to_draft';
   number: number;
   pull_request: {
     id: number;

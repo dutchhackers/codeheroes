@@ -1,36 +1,25 @@
 import { PullRequestReviewCommentEventData } from '@codeheroes/providers';
-import { PullRequestReviewCommentEvent } from '../../core/interfaces/github.interfaces';
+import { CommonMappedData, PullRequestReviewCommentEvent } from '../../core/interfaces/github.interfaces';
 import { GitHubParser } from './base.parser';
 
 export class PullRequestReviewCommentParser extends GitHubParser<
   PullRequestReviewCommentEvent,
   PullRequestReviewCommentEventData
 > {
-  parse(payload: PullRequestReviewCommentEvent): PullRequestReviewCommentEventData {
+  protected parseSpecific(payload: PullRequestReviewCommentEvent): Omit<PullRequestReviewCommentEventData, keyof CommonMappedData> {
+    const { comment, pull_request } = payload;
+    
     return {
-      repository: {
-        id: payload.repository.id.toString(),
-        name: payload.repository.name,
-        owner: payload.repository.owner.login,
-        ownerType: payload.repository.owner.type,
-      },
       action: payload.action,
-      prNumber: payload.pull_request.number,
-      prTitle: payload.pull_request.title,
+      prNumber: pull_request.number,
+      prTitle: pull_request.title,
       comment: {
-        id: payload.comment.id,
-        createdAt: payload.comment.created_at,
-        updatedAt: payload.comment.updated_at,
-        inReplyToId: payload.comment.in_reply_to_id,
+        id: comment.id,
+        createdAt: comment.created_at,
+        updatedAt: comment.updated_at,
+        inReplyToId: comment.in_reply_to_id,
       },
-      author: {
-        id: payload.comment.user.id.toString(),
-        login: payload.comment.user.login,
-      },
-      sender: {
-        id: payload.sender.id.toString(),
-        login: payload.sender.login,
-      },
+      author: this.mapUser(comment.user),
     };
   }
 }
