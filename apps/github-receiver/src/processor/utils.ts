@@ -28,8 +28,8 @@ export class GitHubEventUtils {
 
   static isEventActionSupported(eventType: SupportedEventType, action?: string): boolean {
     const supportedActions = GitHubEventConfig[eventType] as readonly string[];
-    if (eventType === 'push') {
-      return true; // Push events don't have actions, so always return true
+    if (supportedActions.length === 0) {
+      return true; // Events without actions (like push, delete) are always valid
     }
     return action ? supportedActions.includes(action) : false;
   }
