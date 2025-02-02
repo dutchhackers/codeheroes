@@ -1,11 +1,12 @@
-import { ActivityType, PullRequestActivityData, UserActivity } from '@codeheroes/activity';
+import { ActivityType, PullRequestActivityData, PullRequestActivityMetrics, UserActivity } from '@codeheroes/activity';
 import { XpBreakdownItem, XpCalculationResponse } from '../../models/gamification.model';
 import { BaseActivityCalculator } from '../base/activity-calculator.base';
 
 export class PullRequestActivityCalculator extends BaseActivityCalculator {
   calculateXp(activity: UserActivity): XpCalculationResponse {
+    const { metadata, metrics } = activity;
     const settings = this.settings[activity.type];
-    if (!settings || !this.isPullRequestActivity(activity.metadata)) {
+    if (!settings || !this.isPullRequestActivity(metadata)) {
       return { totalXp: 0, breakdown: [] };
     }
 
@@ -18,7 +19,7 @@ export class PullRequestActivityCalculator extends BaseActivityCalculator {
     totalXp += baseXp.xp;
 
     // Calculate bonuses based on activity type
-    const bonuses = this.calculateBonuses(activity.type, activity.metadata, settings);
+    const bonuses = this.calculateBonuses(activity.type, metadata, metrics as PullRequestActivityMetrics, settings);
     bonuses.forEach((bonus) => {
       breakdown.push(bonus);
       totalXp += bonus.xp;
@@ -34,6 +35,7 @@ export class PullRequestActivityCalculator extends BaseActivityCalculator {
   private calculateBonuses(
     activityType: ActivityType,
     data: PullRequestActivityData,
+    metrics: PullRequestActivityMetrics,
     settings: any,
   ): XpBreakdownItem[] {
     const bonuses: XpBreakdownItem[] = [];
@@ -43,7 +45,7 @@ export class PullRequestActivityCalculator extends BaseActivityCalculator {
         bonuses.push(...this.calculateCreatedBonuses(data, settings));
         break;
       case ActivityType.PR_UPDATED:
-        bonuses.push(...this.calculateUpdateBonuses(data, settings));
+        bonuses.push(...this.calculateUpdateBonuses(data, metrics, settings));
         break;
       case ActivityType.PR_MERGED:
         bonuses.push(...this.calculateMergeBonuses(data, settings));
@@ -86,14 +88,18 @@ export class PullRequestActivityCalculator extends BaseActivityCalculator {
     return bonuses;
   }
 
-  private calculateUpdateBonuses(data: PullRequestActivityData, settings: any): XpBreakdownItem[] {
+  private calculateUpdateBonuses(
+    data: PullRequestActivityData,
+    metrics: PullRequestActivityMetrics,
+    settings: any,
+  ): XpBreakdownItem[] {
     const bonuses: XpBreakdownItem[] = [];
     const { bonuses: bonusSettings } = settings;
 
-    if (!data.metrics) return bonuses;
+    if (!metrics) return bonuses;
 
     // Multiple files bonus
-    if (bonusSettings?.multipleFiles && data.metrics.changedFiles > bonusSettings.multipleFiles.threshold) {
+    if (bonusSettings?.multipleFiles && metrics.changedFiles > bonusSettings.multipleFiles.threshold) {
       bonuses.push({
         description: bonusSettings.multipleFiles.description,
         xp: bonusSettings.multipleFiles.xp,
@@ -103,7 +109,7 @@ export class PullRequestActivityCalculator extends BaseActivityCalculator {
     // Significant changes bonus
     if (
       bonusSettings?.significantChanges &&
-      data.metrics.additions + data.metrics.deletions > bonusSettings.significantChanges.threshold
+      metrics.additions + metrics.deletions > bonusSettings.significantChanges.threshold
     ) {
       bonuses.push({
         description: bonusSettings.significantChanges.description,
@@ -125,16 +131,16 @@ export class PullRequestActivityCalculator extends BaseActivityCalculator {
         xp: bonusSettings.merged.xp,
       });
 
-    //   // Quick merge bonus
-    //   if (
-    //     bonusSettings?.quickMerge &&
-    //     this.isWithinTimeThreshold(data.createdAt, bonusSettings.quickMerge.timeThreshold)
-    //   ) {
-    //     bonuses.push({
-    //       description: bonusSettings.quickMerge.description,
-    //       xp: bonusSettings.quickMerge.xp,
-    //     });
-    //   }
+      //   // Quick merge bonus
+      //   if (
+      //     bonusSettings?.quickMerge &&
+      //     this.isWithinTimeThreshold(data.createdAt, bonusSettings.quickMerge.timeThreshold)
+      //   ) {
+      //     bonuses.push({
+      //       description: bonusSettings.quickMerge.description,
+      //       xp: bonusSettings.quickMerge.xp,
+      //     });
+      //   }
     }
 
     return bonuses;
