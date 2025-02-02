@@ -1,10 +1,14 @@
-import {
-
-  TimeUtils,
-} from '@codeheroes/common';
+import { TimeUtils } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
-import { ActivityData, ActivityType } from './activity.model';
-import { IssueEventData, PullRequestEventData, PullRequestReviewCommentEventData, PullRequestReviewEventData, PullRequestReviewThreadEventData, PushEventData } from '@codeheroes/providers';
+import { ActivityData, ActivityMetrics, ActivityType } from './activity.model';
+import {
+  IssueEventData,
+  PullRequestEventData,
+  PullRequestReviewCommentEventData,
+  PullRequestReviewEventData,
+  PullRequestReviewThreadEventData,
+  PushEventData,
+} from '@codeheroes/providers';
 
 export class ActivityUtils {
   static mapToActivityType(event: Event): ActivityType {
@@ -84,7 +88,6 @@ export class ActivityUtils {
         return {
           type: 'push',
           branch: details.branch,
-          metrics: { ...details.metrics },
         };
       }
       case 'pull_request': {
@@ -96,10 +99,6 @@ export class ActivityUtils {
           merged: details.merged,
           draft: details.draft,
           action: details.action,
-          metrics: {
-            ...details.metrics,
-            timeInvested: TimeUtils.calculateTimeBetween(details.createdAt, details.updatedAt),
-          },
         };
       }
       case 'issues': {
@@ -138,6 +137,29 @@ export class ActivityUtils {
           prNumber: details.prNumber,
           commentId: details.comment.id,
           inReplyToId: details.comment.inReplyToId,
+        };
+      }
+      default:
+        return undefined;
+    }
+  }
+
+  static extractMetrics(event: Event): ActivityMetrics | undefined {
+    const eventType = event.source.event;
+    const eventData = event.data;
+
+    switch (eventType) {
+      case 'push': {
+        const details = eventData as PushEventData;
+        return {
+          ...details.metrics,
+        };
+      }
+      case 'pull_request': {
+        const details = eventData as PullRequestEventData;
+        return {
+          ...details.metrics,
+          timeInvested: TimeUtils.calculateTimeBetween(details.createdAt, details.updatedAt),
         };
       }
       default:

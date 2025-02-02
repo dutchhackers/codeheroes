@@ -4,7 +4,11 @@ export interface ActivityMetrics {
   [key: string]: number | undefined;
 }
 
-export interface PullRequestActivityMetrics {
+export interface PushActivityMetrics extends ActivityMetrics {
+  commits: number;
+}
+
+export interface PullRequestActivityMetrics extends ActivityMetrics {
   commits: number;
   additions: number;
   deletions: number;
@@ -15,7 +19,6 @@ export interface PullRequestActivityMetrics {
 // Base interfaces
 interface BaseActivityData {
   type: string;
-  metrics?: ActivityMetrics;
 }
 
 // Activity data interfaces
@@ -73,9 +76,9 @@ export interface UserActivity extends BaseDocument {
   provider: ConnectedAccountProvider;
   eventType: string;
   externalEventId: string;
-  externalEventTimestamp: string;
   userFacingDescription?: string; // Optional for time being
-  metadata?: ActivityData;
+  data?: ActivityData;
+  metrics?: ActivityMetrics;
   processingResult?: any; //ActivityProcessingResult; // replaces xp field
 }
 
