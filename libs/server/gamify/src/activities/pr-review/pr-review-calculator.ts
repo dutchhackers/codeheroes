@@ -11,7 +11,7 @@ import { BaseActivityCalculator } from '../base/activity-calculator.base';
 export class PrReviewCalculator extends BaseActivityCalculator {
   calculateXp(activity: UserActivity): XpCalculationResponse {
     const settings = this.settings[activity.type];
-    if (!settings || !this.isReviewRelatedActivity(activity.metadata)) {
+    if (!settings || !this.isReviewRelatedActivity(activity.data)) {
       return { totalXp: 0, breakdown: [] };
     }
 
@@ -24,12 +24,12 @@ export class PrReviewCalculator extends BaseActivityCalculator {
     totalXp += baseXp.xp;
 
     // Calculate bonuses based on activity type
-    //const bonuses = this.calculateBonuses(activity.type, activity.metadata, settings);
+    //const bonuses = this.calculateBonuses(activity.type, activity.data, settings);
     // Quick workaround to fix the error
-    const bonuses = this.isReviewRelatedActivity(activity.metadata)
+    const bonuses = this.isReviewRelatedActivity(activity.data)
       ? this.calculateBonuses(
           activity.type,
-          activity.metadata as ReviewActivityData | ReviewCommentActivityData | ReviewThreadActivityData,
+          activity.data as ReviewActivityData | ReviewCommentActivityData | ReviewThreadActivityData,
           settings,
         )
       : [];

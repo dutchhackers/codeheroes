@@ -5,7 +5,7 @@ import { BaseActivityCalculator } from '../base/activity-calculator.base';
 export class IssueCalculator extends BaseActivityCalculator {
   calculateXp(activity: UserActivity): XpCalculationResponse {
     const settings = this.settings[activity.type];
-    if (!settings || !this.isIssueActivity(activity.metadata)) {
+    if (!settings || !this.isIssueActivity(activity.data)) {
       return { totalXp: 0, breakdown: [] };
     }
 
@@ -18,7 +18,7 @@ export class IssueCalculator extends BaseActivityCalculator {
     totalXp += baseXp.xp;
 
     // Calculate bonuses based on activity type
-    const bonuses = this.calculateBonuses(activity.type, activity.metadata, settings);
+    const bonuses = this.calculateBonuses(activity.type, activity.data, settings);
     bonuses.forEach((bonus) => {
       breakdown.push(bonus);
       totalXp += bonus.xp;

@@ -4,9 +4,9 @@ import { BaseActivityCalculator } from '../base/activity-calculator.base';
 
 export class PullRequestActivityCalculator extends BaseActivityCalculator {
   calculateXp(activity: UserActivity): XpCalculationResponse {
-    const { metadata, metrics } = activity;
+    const { data, metrics } = activity;
     const settings = this.settings[activity.type];
-    if (!settings || !this.isPullRequestActivity(metadata)) {
+    if (!settings || !this.isPullRequestActivity(data)) {
       return { totalXp: 0, breakdown: [] };
     }
 
@@ -19,7 +19,7 @@ export class PullRequestActivityCalculator extends BaseActivityCalculator {
     totalXp += baseXp.xp;
 
     // Calculate bonuses based on activity type
-    const bonuses = this.calculateBonuses(activity.type, metadata, metrics as PullRequestActivityMetrics, settings);
+    const bonuses = this.calculateBonuses(activity.type, data, metrics as PullRequestActivityMetrics, settings);
     bonuses.forEach((bonus) => {
       breakdown.push(bonus);
       totalXp += bonus.xp;

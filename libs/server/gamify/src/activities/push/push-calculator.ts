@@ -9,7 +9,7 @@ import { BaseActivityCalculator } from '../base/activity-calculator.base';
 
 export class PushActivityCalculator extends BaseActivityCalculator {
   calculateXp(activity: UserActivity): XpCalculationResponse {
-    const { metadata, metrics } = activity;
+    const { data, metrics } = activity;
     const settings = this.settings[ActivityType.CODE_PUSH];
     const breakdown = [];
     let totalXp = 0;
@@ -20,7 +20,7 @@ export class PushActivityCalculator extends BaseActivityCalculator {
     totalXp += baseXp.xp;
 
     // Calculate push-specific bonuses
-    if (this.isPushActivity(metadata)) {
+    if (this.isPushActivity(data)) {
       const bonus = this.calculatePushBonus(metrics as PushActivityMetrics, settings);
       if (bonus) {
         breakdown.push(bonus);
