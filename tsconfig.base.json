@@ -20,8 +20,6 @@
       "@codeheroes/database-seeds": ["libs/database-seeds/src/index.ts"],
       "@codeheroes/event": ["libs/server/event/src/index.ts"],
       "@codeheroes/gamify": ["libs/server/gamify/src/index.ts"],
-      "@codeheroes/migration": ["libs/migration/migration/src/index.ts"],
-      "@codeheroes/migration-shared": ["libs/migration/migration-shared/src/index.ts"],
       "@codeheroes/providers": ["libs/server/providers/src/index.ts"]
     }
   },
