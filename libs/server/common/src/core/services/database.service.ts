@@ -1,6 +1,6 @@
-import { DocumentData } from 'firebase-admin/firestore';
-import * as logger from 'firebase-functions/logger';
+import { logger } from '@codeheroes/common';
 import { BaseFirestoreService } from './base.service';
+import { DocumentData } from 'firebase-admin/firestore';
 
 export class DatabaseService extends BaseFirestoreService<DocumentData> {
   protected collection = this.db.collection('users'); // You might want to adjust this collection name
