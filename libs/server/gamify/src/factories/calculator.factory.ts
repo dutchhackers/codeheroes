@@ -1,5 +1,6 @@
 import { ActivityType } from '@codeheroes/activity';
 import { BaseActivityCalculator } from '../activities/base/activity-calculator.base';
+import { DeleteCalculator } from '../activities/delete/delete-calculator';
 import { IssueCalculator } from '../activities/issue/issue-calculator';
 import { PrReviewCalculator } from '../activities/pr-review/pr-review-calculator';
 import { PullRequestActivityCalculator } from '../activities/pull-request/pr-calculator';
@@ -13,6 +14,7 @@ export class CalculatorFactory {
   static initialize() {
     // Register all calculators
     this.calculators.set(ActivityType.CODE_PUSH, PushActivityCalculator);
+    this.calculators.set(ActivityType.BRANCH_DELETED, DeleteCalculator);
     this.calculators.set(ActivityType.PR_CREATED, PullRequestActivityCalculator);
     this.calculators.set(ActivityType.PR_UPDATED, PullRequestActivityCalculator);
     this.calculators.set(ActivityType.PR_MERGED, PullRequestActivityCalculator);

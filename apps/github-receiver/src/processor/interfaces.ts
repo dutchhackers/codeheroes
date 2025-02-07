@@ -1,4 +1,5 @@
 import {
+  DeleteEvent,
   IssueEvent,
   PullRequestEvent,
   PullRequestReviewCommentEvent,
@@ -23,7 +24,8 @@ export interface GitHubWebhookEvent {
     | PullRequestReviewEvent
     | IssueEvent
     | PullRequestReviewCommentEvent
-    | PullRequestReviewThreadEvent;
+    | PullRequestReviewThreadEvent
+    | DeleteEvent;
   headers: Record<string, string | string[] | undefined>;
   provider: string;
 }

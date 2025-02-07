@@ -1,4 +1,5 @@
 export * from './base-event.model';
+export * from './delete-event.model';
 export * from './github-event.model';
 export * from './issue-event.model';
 export * from './pull-request-event.model';

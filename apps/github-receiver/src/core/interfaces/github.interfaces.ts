@@ -265,3 +265,11 @@ export interface PullRequestReviewCommentEvent {
   repository: GitHubRepository;
   sender: GitHubUser;
 }
+
+export interface DeleteEvent {
+  ref: string;
+  ref_type: 'branch' | 'tag';
+  pusher_type: string;
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}
