@@ -45,8 +45,6 @@ export class IssueProcessor extends BaseActivityProcessor {
           currentLevelXp: levelProgress.currentLevelXp,
           xpToNextLevel: levelProgress.xpToNextLevel,
           updatedAt: getCurrentTimeAsISO(),
-          // Update issue-specific stats
-          'stats.issues': this.updateIssueStats(userData, activity),
         });
 
         // Update activity document
@@ -76,34 +74,6 @@ export class IssueProcessor extends BaseActivityProcessor {
         activityType: activity.type,
       });
       throw error;
-    }
-  }
-
-  private updateIssueStats(userData: any, activity: UserActivity): any {
-    const currentStats = userData.stats?.issues || {
-      total: 0,
-      closed: 0,
-      reopened: 0,
-    };
-
-    switch (activity.type) {
-      case ActivityType.ISSUE_CREATED:
-        return {
-          ...currentStats,
-          total: currentStats.total + 1,
-        };
-      case ActivityType.ISSUE_CLOSED:
-        return {
-          ...currentStats,
-          closed: currentStats.closed + 1,
-        };
-      case ActivityType.ISSUE_REOPENED:
-        return {
-          ...currentStats,
-          reopened: currentStats.reopened + 1,
-        };
-      default:
-        return currentStats;
     }
   }
 
