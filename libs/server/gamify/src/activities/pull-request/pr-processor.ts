@@ -87,52 +87,6 @@ export class PullRequestProcessor extends BaseActivityProcessor {
       achievements: [],
     };
 
-    // always return for now
-    if (userData) {
-      return processingResult;
-    }
-
-    // Check for first PR achievement
-    if (!userData.stats?.pullRequests?.total) {
-      processingResult.achievements?.push({
-        id: 'first_pr',
-        name: 'First Pull Request',
-        description: 'Created your first pull request',
-        progress: 100,
-        completed: true,
-        completedAt: getCurrentTimeAsISO(),
-      });
-    }
-
-    // Check for PR merge achievements
-    if (activity.type === ActivityType.PR_MERGED) {
-      const mergedCount = (userData.stats?.pullRequests?.merged || 0) + 1;
-
-      // Achievement for first merged PR
-      if (mergedCount === 1) {
-        processingResult.achievements?.push({
-          id: 'first_merged_pr',
-          name: 'First Merged PR',
-          description: 'Got your first pull request merged',
-          progress: 100,
-          completed: true,
-          completedAt: getCurrentTimeAsISO(),
-        });
-      }
-
-      // Achievement for 10 merged PRs
-      if (mergedCount === 10) {
-        processingResult.achievements?.push({
-          id: 'pr_master',
-          name: 'PR Master',
-          description: 'Got 10 pull requests merged',
-          progress: 100,
-          completed: true,
-          completedAt: getCurrentTimeAsISO(),
-        });
-      }
-    }
-
     return processingResult;
   }
 }
