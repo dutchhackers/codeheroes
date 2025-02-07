@@ -45,14 +45,6 @@ export class PullRequestProcessor extends BaseActivityProcessor {
           currentLevelXp: levelProgress.currentLevelXp,
           xpToNextLevel: levelProgress.xpToNextLevel,
           updatedAt: getCurrentTimeAsISO(),
-          //   // Update PR-specific stats
-          //   'stats.pullRequests': {
-          //     total: (userData.stats?.pullRequests?.total || 0) + 1,
-          //     merged:
-          //       activity.type === ActivityType.PR_MERGED
-          //         ? (userData.stats?.pullRequests?.merged || 0) + 1
-          //         : userData.stats?.pullRequests?.merged || 0,
-          //   },
         });
 
         // Update activity document
