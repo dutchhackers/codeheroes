@@ -7,6 +7,8 @@ import { IssueEventData } from './models/issue-event.model';
 import { PullRequestReviewEventData } from './models/pull-request-review-event.model';
 import { PullRequestReviewThreadEventData } from './models/pull-request-review-thread-event.model';
 import { PullRequestReviewCommentEventData } from './models/pull-request-review-comment-event.model';
+import { CreateEventData } from './models/create-event.model';
+import { DeleteEventData } from './models/delete-event.model';
 import { GitHubEventFormatter } from './formatters/github-event.formatter';
 
 export class GitHubProvider implements IEventProvider<GitHubEventData> {
@@ -28,6 +30,10 @@ export class GitHubProvider implements IEventProvider<GitHubEventData> {
         return { pullRequestReviewThread: event.data as PullRequestReviewThreadEventData };
       case 'pull_request_review_comment':
         return { pullRequestReviewComment: event.data as PullRequestReviewCommentEventData };
+      case 'create':
+        return { create: event.data as CreateEventData };
+      case 'delete':
+        return { delete: event.data as DeleteEventData };
       default:
         throw new Error(`Unsupported event type: ${eventType}`);
     }

@@ -6,7 +6,9 @@ import {
   IssueEventData,
   PullRequestReviewEventData,
   PullRequestReviewThreadEventData,
-  PullRequestReviewCommentEventData
+  PullRequestReviewCommentEventData,
+  CreateEventData,
+  DeleteEventData
 } from '../models';
 
 export class GitHubEventFormatter implements IEventFormatter {
@@ -22,7 +24,9 @@ export class GitHubEventFormatter implements IEventFormatter {
       | IssueEventData
       | PullRequestReviewEventData
       | PullRequestReviewThreadEventData
-      | PullRequestReviewCommentEventData;
+      | PullRequestReviewCommentEventData
+      | CreateEventData
+      | DeleteEventData;
     const repoName = eventData.repository.name;
 
     switch (eventType) {
@@ -38,6 +42,10 @@ export class GitHubEventFormatter implements IEventFormatter {
         return this.formatPullRequestReviewThreadEvent(eventData as PullRequestReviewThreadEventData, repoName);
       case 'pull_request_review_comment':
         return this.formatPullRequestReviewCommentEvent(eventData as PullRequestReviewCommentEventData, repoName);
+      case 'create':
+        return this.formatCreateEvent(eventData as CreateEventData, repoName);
+      case 'delete':
+        return this.formatDeleteEvent(eventData as DeleteEventData, repoName);
       default:
         return 'Performed an action on GitHub';
     }
@@ -68,5 +76,20 @@ export class GitHubEventFormatter implements IEventFormatter {
 
   private formatPullRequestReviewCommentEvent(data: PullRequestReviewCommentEventData, repoName: string): string {
     return `${data.sender.login} ${data.action} a review comment on PR #${data.prNumber} in ${repoName}`;
+  }
+
+  private formatCreateEvent(data: CreateEventData, repoName: string): string {
+    switch (data.refType) {
+      case 'branch':
+        return `Created branch ${data.ref} in ${repoName}`;
+      case 'tag':
+        return `Created tag ${data.ref} in ${repoName}`;
+      case 'repository':
+        return `Created repository ${repoName}`;
+    }
+  }
+
+  private formatDeleteEvent(data: DeleteEventData, repoName: string): string {
+    return `Deleted ${data.refType} ${data.ref} from ${repoName}`;
   }
 }

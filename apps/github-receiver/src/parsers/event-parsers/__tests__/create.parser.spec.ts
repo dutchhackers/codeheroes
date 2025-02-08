@@ -60,6 +60,78 @@ describe('CreateParser', () => {
     });
   });
 
+  it('should parse tag creation event', () => {
+    const payload: CreateEvent = {
+      ref: 'v1.0.0',
+      ref_type: 'tag',
+      master_branch: 'main',
+      description: null,
+      pusher_type: 'user',
+      repository: mockRepository,
+      sender: {
+        id: 789,
+        login: 'user1',
+        avatar_url: 'https://github.com/user1.png',
+        html_url: 'https://github.com/user1',
+        type: 'User' as const,
+      },
+    };
+
+    const result = parser.parse(payload);
+    expect(result).toEqual({
+      ref: 'v1.0.0',
+      refType: 'tag',
+      masterBranch: 'main',
+      pusherType: 'user',
+      repository: {
+        id: '123',
+        name: 'test-repo',
+        owner: 'org',
+        ownerType: 'Organization',
+      },
+      sender: {
+        id: '789',
+        login: 'user1',
+      },
+    });
+  });
+
+  it('should parse repository creation event', () => {
+    const payload: CreateEvent = {
+      ref: null,
+      ref_type: 'repository',
+      master_branch: 'main',
+      description: 'A new repository',
+      pusher_type: 'user',
+      repository: mockRepository,
+      sender: {
+        id: 789,
+        login: 'user1',
+        avatar_url: 'https://github.com/user1.png',
+        html_url: 'https://github.com/user1',
+        type: 'User' as const,
+      },
+    };
+
+    const result = parser.parse(payload);
+    expect(result).toEqual({
+      ref: null,
+      refType: 'repository',
+      masterBranch: 'main',
+      pusherType: 'user',
+      repository: {
+        id: '123',
+        name: 'test-repo',
+        owner: 'org',
+        ownerType: 'Organization',
+      },
+      sender: {
+        id: '789',
+        login: 'user1',
+      },
+    });
+  });
+
   it('should return null for non-branch creation events', () => {
     const payload: CreateEvent = {
       ref: 'v1.0.0',
