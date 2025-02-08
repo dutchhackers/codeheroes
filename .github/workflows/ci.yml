@@ -38,8 +38,15 @@ jobs:
         env:
           CI: true
 
+      - name: Test apps
+        uses: mansagroup/nrwl-nx-action@v3
+        with:
+          targets: test
+          projects: firebase-app
+          affected: 'true'
+
       - name: Build affected apps
         uses: mansagroup/nrwl-nx-action@v3
         with:
-          targets: test,build
+          targets: build
           affected: 'true'

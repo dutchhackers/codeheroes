@@ -28,6 +28,7 @@ describe('PullRequestReviewParser', () => {
       action: 'submitted',
       review: {
         id: 789,
+        node_id: 'PRR_123',
         user: {
           id: 101,
           login: 'reviewer',
@@ -88,6 +89,7 @@ describe('PullRequestReviewParser', () => {
       action: 'dismissed',
       review: {
         id: 789,
+        node_id: 'PRR_123',
         user: {
           id: 101,
           login: 'reviewer',
@@ -96,7 +98,7 @@ describe('PullRequestReviewParser', () => {
           type: 'User',
         },
         body: 'Needs more work',
-        state: 'changes_requested',  // Using a valid state since dismissed is an action, not a state
+        state: 'approved',  // Changed from 'changes_requested' to 'approved' as the original state
         submitted_at: '2023-01-01T14:00:00Z',
         commit_id: 'abc123',
         html_url: 'https://github.com/org/test-repo/pull/123#pullrequestreview-789',
@@ -122,7 +124,7 @@ describe('PullRequestReviewParser', () => {
 
     expect(result).toEqual({
       action: 'dismissed',
-      state: 'changes_requested',
+      state: 'approved',  // Changed to match the review state
       prNumber: 123,
       prTitle: 'Feature: Add new functionality',
       reviewer: {

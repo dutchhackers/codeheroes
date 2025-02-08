@@ -32,7 +32,7 @@ export interface GitHubCommit {
   author: {
     name: string;
     email: string;
-    username?: string;  // Made username optional
+    username?: string; // Made username optional
   };
 }
 
@@ -48,8 +48,8 @@ export interface GitHubRepository {
 
 export interface PushEvent {
   ref: string;
-  before?: string;  // Made optional
-  after?: string;   // Made optional
+  before?: string; // Made optional
+  after?: string; // Made optional
   repository: GitHubRepository;
   pusher: {
     name: string;
@@ -59,10 +59,10 @@ export interface PushEvent {
   created: boolean;
   deleted: boolean;
   forced: boolean;
-  base_ref?: string | null;  // Made optional
-  compare?: string;          // Made optional
+  base_ref?: string | null; // Made optional
+  compare?: string; // Made optional
   commits: GitHubCommit[];
-  head_commit?: GitHubCommit | null;  // Made optional
+  head_commit?: GitHubCommit | null; // Made optional
 }
 
 export interface GitHubHeaders {
@@ -85,7 +85,7 @@ export interface PullRequestEvent {
   number: number;
   pull_request: {
     id: number;
-    number: number;  // Added number field
+    number: number; // Added number field
     title: string;
     state: 'open' | 'closed';
     draft: boolean;
@@ -116,7 +116,7 @@ export interface IssueEvent {
     updated_at: string;
     html_url: string;
     body?: string;
-    user: GitHubUser;  // Added user field
+    user: GitHubUser; // Added user field
     created_at: string;
     closed_at?: string;
   };
@@ -203,10 +203,10 @@ export interface PullRequestReviewEvent {
   action: 'submitted' | 'edited' | 'dismissed';
   review: {
     id: number;
-    node_id: string;  // Added node_id field
+    node_id: string; // Added node_id field
     user: GitHubUser;
     body: string | null;
-    state: 'approved' | 'commented' | 'changes_requested' | 'dismissed';  // Added dismissed state
+    state: 'approved' | 'commented' | 'changes_requested';
     submitted_at: string;
     commit_id: string;
     html_url: string;
@@ -232,11 +232,11 @@ export interface PullRequestReviewThreadEvent {
   thread: {
     id: number;
     node_id: string;
-    comments: number;  // Changed to number type
+    comments: number; // Changed to number type
     resolved: boolean;
     resolution?: {
       user: GitHubUser;
-      commit_id: string;  // Added required commit_id
+      commit_id: string; // Added required commit_id
     };
     line: number;
     start_line?: number;
@@ -269,7 +269,7 @@ export interface PullRequestReviewCommentEvent {
     created_at: string;
     updated_at: string;
     line: number;
-    path: string;  // Added path field
+    path: string; // Added path field
     position: number;
     commit_id: string;
     pull_request_review_id: number;
