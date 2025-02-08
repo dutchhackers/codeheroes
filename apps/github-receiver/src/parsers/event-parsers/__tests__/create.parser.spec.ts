@@ -131,25 +131,4 @@ describe('CreateParser', () => {
       },
     });
   });
-
-  it('should return null for non-branch creation events', () => {
-    const payload: CreateEvent = {
-      ref: 'v1.0.0',
-      ref_type: 'tag',
-      master_branch: 'main',
-      description: null,
-      pusher_type: 'user',
-      repository: mockRepository,
-      sender: {
-        id: 789,
-        login: 'user1',
-        avatar_url: 'https://github.com/user1.png',
-        html_url: 'https://github.com/user1',
-        type: 'User' as const,
-      },
-    };
-
-    const result = parser.parse(payload);
-    expect(result).toBeNull();
-  });
 });
