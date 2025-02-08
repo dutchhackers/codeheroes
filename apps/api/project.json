@@ -3,11 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/api/src",
   "projectType": "application",
-  "tags": [
-    "firebase:function",
-    "firebase:name:api",
-    "firebase:dep:firebase-app"
-  ],
+  "tags": ["firebase:function", "firebase:name:api", "firebase:dep:firebase-app"],
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",
@@ -37,8 +33,10 @@
       }
     },
     "test": {
+      "executor": "@nx/jest:jest",
       "options": {
-        "passWithNoTests": true
+        "passWithNoTests": true,
+        "jestConfig": "apps/api/jest.config.ts"
       }
     },
     "deploy": {

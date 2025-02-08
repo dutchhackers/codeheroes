@@ -41,5 +41,5 @@ jobs:
       - name: Build affected apps
         uses: mansagroup/nrwl-nx-action@v3
         with:
-          targets: build
+          targets: test,build
           affected: 'true'
