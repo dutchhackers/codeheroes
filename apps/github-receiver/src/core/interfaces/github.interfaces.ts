@@ -32,7 +32,7 @@ export interface GitHubCommit {
   author: {
     name: string;
     email: string;
-    username: string;
+    username?: string; // Made username optional
   };
 }
 
@@ -48,8 +48,8 @@ export interface GitHubRepository {
 
 export interface PushEvent {
   ref: string;
-  before: string;
-  after: string;
+  before?: string; // Made optional
+  after?: string; // Made optional
   repository: GitHubRepository;
   pusher: {
     name: string;
@@ -59,10 +59,10 @@ export interface PushEvent {
   created: boolean;
   deleted: boolean;
   forced: boolean;
-  base_ref: string | null;
-  compare: string;
+  base_ref?: string | null; // Made optional
+  compare?: string; // Made optional
   commits: GitHubCommit[];
-  head_commit: GitHubCommit | null;
+  head_commit?: GitHubCommit | null; // Made optional
 }
 
 export interface GitHubHeaders {
@@ -85,6 +85,7 @@ export interface PullRequestEvent {
   number: number;
   pull_request: {
     id: number;
+    number: number; // Added number field
     title: string;
     state: 'open' | 'closed';
     draft: boolean;
@@ -115,6 +116,9 @@ export interface IssueEvent {
     updated_at: string;
     html_url: string;
     body?: string;
+    user: GitHubUser; // Added user field
+    created_at: string;
+    closed_at?: string;
   };
   repository: GitHubRepository;
   sender: GitHubUser;
@@ -199,12 +203,18 @@ export interface PullRequestReviewEvent {
   action: 'submitted' | 'edited' | 'dismissed';
   review: {
     id: number;
+    node_id: string; // Added node_id field
     user: GitHubUser;
     body: string | null;
     state: 'approved' | 'commented' | 'changes_requested';
     submitted_at: string;
     commit_id: string;
     html_url: string;
+    pull_request_url?: string;
+    _links?: {
+      html: { href: string };
+      pull_request: { href: string };
+    };
   };
   pull_request: {
     id: number;
@@ -221,15 +231,22 @@ export interface PullRequestReviewThreadEvent {
   action: 'resolved' | 'unresolved';
   thread: {
     id: number;
-    comments: number;
+    node_id: string;
+    comments: number; // Changed to number type
     resolved: boolean;
-    resolution: {
+    resolution?: {
       user: GitHubUser;
-      commit_id: string;
-    } | null;
+      commit_id: string; // Added required commit_id
+    };
     line: number;
     start_line?: number;
     original_line?: number;
+    side?: string;
+    start_side?: string;
+    original_position?: number;
+    position?: number;
+    diff_hunk?: string;
+    path?: string;
   };
   pull_request: {
     id: number;
@@ -237,6 +254,7 @@ export interface PullRequestReviewThreadEvent {
     title: string;
     state: 'open' | 'closed';
     html_url: string;
+    user?: GitHubUser;
   };
   repository: GitHubRepository;
   sender: GitHubUser;
@@ -251,9 +269,14 @@ export interface PullRequestReviewCommentEvent {
     created_at: string;
     updated_at: string;
     line: number;
+    path: string; // Added path field
+    position: number;
+    commit_id: string;
+    pull_request_review_id: number;
     start_line?: number;
     original_line?: number;
     in_reply_to_id?: number;
+    html_url: string;
   };
   pull_request: {
     id: number;
@@ -264,6 +287,14 @@ export interface PullRequestReviewCommentEvent {
   };
   repository: GitHubRepository;
   sender: GitHubUser;
+}
+
+export interface CreateEvent extends CommonPayload {
+  ref: string;
+  ref_type: 'branch' | 'tag' | 'repository';
+  master_branch: string;
+  description: string | null;
+  pusher_type: string;
 }
 
 export interface DeleteEvent {

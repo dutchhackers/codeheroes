@@ -1,9 +1,9 @@
-import { PullRequestEventData } from '@codeheroes/providers';
+import { GithubPullRequestEventData } from '@codeheroes/providers';
 import { CommonMappedData, PullRequestEvent } from '../../core/interfaces/github.interfaces';
 import { GitHubParser } from './base.parser';
 
-export class PullRequestParser extends GitHubParser<PullRequestEvent, PullRequestEventData> {
-  protected parseSpecific(payload: PullRequestEvent): Omit<PullRequestEventData, keyof CommonMappedData> {
+export class PullRequestParser extends GitHubParser<PullRequestEvent, GithubPullRequestEventData> {
+  protected parseSpecific(payload: PullRequestEvent): Omit<GithubPullRequestEventData, keyof CommonMappedData> {
     const { pull_request } = payload;
 
     return {

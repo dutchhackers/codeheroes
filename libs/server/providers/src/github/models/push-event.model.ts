@@ -1,6 +1,6 @@
 import { GitHubBaseEventData } from './base-event.model';
 
-export interface CommitData {
+export interface GithubCommitData {
   id: string;
   message: string;
   timestamp: string;
@@ -11,13 +11,13 @@ export interface CommitData {
   url: string;
 }
 
-export interface PushEventMetrics {
+export interface GithubPushEventMetrics {
   commits: number;
 }
 
-export interface PushEventData extends GitHubBaseEventData {
+export interface GithubPushEventData extends GitHubBaseEventData {
   branch: string;
-  metrics?: PushEventMetrics;
+  metrics?: GithubPushEventMetrics;
   created: boolean;
   deleted: boolean;
   forced: boolean;
@@ -25,5 +25,5 @@ export interface PushEventData extends GitHubBaseEventData {
     name: string;
     email: string;
   };
-  commits: CommitData[];
+  commits: GithubCommitData[];
 }

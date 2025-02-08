@@ -1,5 +1,5 @@
 import { Event } from '@codeheroes/event';
-import { IssueEventData } from '@codeheroes/providers';
+import { GithubIssueEventData } from '@codeheroes/providers';
 import { BaseActivityHandler } from '../base.handler';
 import { ActivityType, IssueActivityData, ActivityMetrics } from '../../types';
 
@@ -9,7 +9,7 @@ export class IssueCreateHandler extends BaseActivityHandler {
   protected eventActions = ['opened'];
 
   handle(event: Event): IssueActivityData {
-    const details = event.data as IssueEventData;
+    const details = event.data as GithubIssueEventData;
     return {
       type: 'issue',
       issueNumber: details.issueNumber,
@@ -21,13 +21,13 @@ export class IssueCreateHandler extends BaseActivityHandler {
 
   getMetrics(event: Event): ActivityMetrics {
     return {
-      // charactersCount: (event.data as IssueEventData).title.length + 
+      // charactersCount: (event.data as IssueEventData).title.length +
       //                 ((event.data as IssueEventData).body?.length || 0)
     };
   }
 
   generateDescription(event: Event): string {
-    const details = event.data as IssueEventData;
+    const details = event.data as GithubIssueEventData;
     return `Created issue #${details.issueNumber}: ${details.title}`;
   }
 }

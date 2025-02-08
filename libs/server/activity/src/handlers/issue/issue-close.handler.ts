@@ -1,5 +1,5 @@
 import { Event } from '@codeheroes/event';
-import { IssueEventData } from '@codeheroes/providers';
+import { GithubIssueEventData } from '@codeheroes/providers';
 import { BaseActivityHandler } from '../base.handler';
 import { ActivityType, IssueActivityData, ActivityMetrics } from '../../types';
 import { TimeUtils } from '@codeheroes/common';
@@ -10,7 +10,7 @@ export class IssueCloseHandler extends BaseActivityHandler {
   protected eventActions = ['closed'];
 
   handle(event: Event): IssueActivityData {
-    const details = event.data as IssueEventData;
+    const details = event.data as GithubIssueEventData;
     return {
       type: 'issue',
       issueNumber: details.issueNumber,
@@ -21,7 +21,7 @@ export class IssueCloseHandler extends BaseActivityHandler {
   }
 
   getMetrics(event: Event): ActivityMetrics {
-    const details = event.data as IssueEventData;
+    const details = event.data as GithubIssueEventData;
     return {
       //   timeToClose: TimeUtils.calculateTimeBetween(details.createdAt, details.closedAt),
       //   commentCount: details.commentCount || 0,
@@ -29,7 +29,7 @@ export class IssueCloseHandler extends BaseActivityHandler {
   }
 
   generateDescription(event: Event): string {
-    const details = event.data as IssueEventData;
+    const details = event.data as GithubIssueEventData;
     return `Closed issue #${details.issueNumber}${details.stateReason ? ` as ${details.stateReason}` : ''}`;
   }
 }

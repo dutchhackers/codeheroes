@@ -15,16 +15,18 @@ export const GitHubEventConfig = {
   pull_request_review_thread: ['resolved', 'unresolved'],
   pull_request_review_comment: ['created', 'edited', 'deleted'],
   delete: [], // delete events don't need actions
+  create: [], // create events don't need actions
 } as const;
 
-export type SupportedEventType = 
+export type SupportedEventType =
   | 'push'
   | 'pull_request'
   | 'pull_request_review'
   | 'issues'
   | 'pull_request_review_comment'
   | 'pull_request_review_thread'
-  | 'delete';
+  | 'delete'
+  | 'create';
 
 export type SupportedEventAction<T extends SupportedEventType> = (typeof GitHubEventConfig)[T][number];
 

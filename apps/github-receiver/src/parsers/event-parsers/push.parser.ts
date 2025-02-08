@@ -1,9 +1,9 @@
-import { PushEventData } from '@codeheroes/providers';
+import { GithubPushEventData } from '@codeheroes/providers';
 import { CommonMappedData, PushEvent } from '../../core/interfaces/github.interfaces';
 import { GitHubParser } from './base.parser';
 
-export class PushParser extends GitHubParser<PushEvent, PushEventData> {
-  protected parseSpecific(payload: PushEvent): Omit<PushEventData, keyof CommonMappedData> {
+export class PushParser extends GitHubParser<PushEvent, GithubPushEventData> {
+  protected parseSpecific(payload: PushEvent): Omit<GithubPushEventData, keyof CommonMappedData> {
     return {
       branch: payload.ref.replace('refs/heads/', ''),
       created: payload.created,

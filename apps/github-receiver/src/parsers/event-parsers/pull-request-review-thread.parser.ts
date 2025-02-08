@@ -1,14 +1,14 @@
-import { PullRequestReviewThreadEventData } from '@codeheroes/providers';
+import { GithubPullRequestReviewThreadEventData } from '@codeheroes/providers';
 import { CommonMappedData, PullRequestReviewThreadEvent } from '../../core/interfaces/github.interfaces';
 import { GitHubParser } from './base.parser';
 
 export class PullRequestReviewThreadParser extends GitHubParser<
   PullRequestReviewThreadEvent,
-  PullRequestReviewThreadEventData
+  GithubPullRequestReviewThreadEventData
 > {
-  protected parseSpecific(payload: PullRequestReviewThreadEvent): Omit<PullRequestReviewThreadEventData, keyof CommonMappedData> {
+  protected parseSpecific(payload: PullRequestReviewThreadEvent): Omit<GithubPullRequestReviewThreadEventData, keyof CommonMappedData> {
     const { thread, pull_request } = payload;
-    
+
     return {
       action: payload.action,
       prNumber: pull_request.number,

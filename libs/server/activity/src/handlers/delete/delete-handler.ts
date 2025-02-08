@@ -1,5 +1,5 @@
 import { Event } from '@codeheroes/event';
-import { DeleteEventData } from '@codeheroes/providers';
+import { GithubDeleteEventData } from '@codeheroes/providers';
 import { BaseActivityHandler } from '../base.handler';
 import { ActivityType, DeleteActivityData } from '../../types';
 
@@ -9,7 +9,7 @@ export class DeleteHandler extends BaseActivityHandler {
   protected activityType = ActivityType.BRANCH_DELETED;
 
   handle(event: Event): DeleteActivityData {
-    const details = event.data as DeleteEventData;
+    const details = event.data as GithubDeleteEventData;
 
     return {
       type: 'delete',
@@ -23,7 +23,7 @@ export class DeleteHandler extends BaseActivityHandler {
   }
 
   generateDescription(event: Event): string {
-    const details = event.data as DeleteEventData;
+    const details = event.data as GithubDeleteEventData;
     return `Deleted ${details.refType} ${details.ref}`;
   }
 }
