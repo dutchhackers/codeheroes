@@ -1,10 +1,10 @@
 import { Event } from '@codeheroes/event';
-import { PullRequestReviewEventData } from '@codeheroes/providers';
+import { GithubPullRequestReviewEventData } from '@codeheroes/providers';
 import { BaseActivityHandler } from '../base.handler';
-import { 
-  ActivityType, 
-  ReviewActivityData, 
-  ReviewMetrics 
+import {
+  ActivityType,
+  ReviewActivityData,
+  ReviewMetrics
 } from '../../types';
 
 export class ReviewSubmitHandler extends BaseActivityHandler {
@@ -13,7 +13,7 @@ export class ReviewSubmitHandler extends BaseActivityHandler {
   protected eventActions = ['submitted'];
 
   handle(event: Event): ReviewActivityData {
-    const details = event.data as PullRequestReviewEventData;
+    const details = event.data as GithubPullRequestReviewEventData;
     return {
       type: 'review',
       prNumber: details.prNumber,
@@ -23,7 +23,7 @@ export class ReviewSubmitHandler extends BaseActivityHandler {
   }
 
   getMetrics(event: Event): ReviewMetrics {
-    const details = event.data as PullRequestReviewEventData;
+    const details = event.data as GithubPullRequestReviewEventData;
     return {
       // commentCount: details.commentCount || 0,
       // threadCount: details.threadCount || 0,
@@ -33,7 +33,7 @@ export class ReviewSubmitHandler extends BaseActivityHandler {
   }
 
   generateDescription(event: Event): string {
-    const details = event.data as PullRequestReviewEventData;
+    const details = event.data as GithubPullRequestReviewEventData;
     const state = details.state.replace('_', ' ').toLowerCase();
     return `Submitted ${state} review on PR #${details.prNumber}`;
   }

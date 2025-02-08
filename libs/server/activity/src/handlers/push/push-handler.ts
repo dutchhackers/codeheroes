@@ -1,5 +1,5 @@
 import { Event } from '@codeheroes/event';
-import { PushEventData } from '@codeheroes/providers';
+import { GithubPushEventData } from '@codeheroes/providers';
 import { BaseActivityHandler } from '../base.handler';
 import { ActivityType, PushActivityData, CodeMetrics } from '../../types';
 
@@ -9,7 +9,7 @@ export class PushHandler extends BaseActivityHandler {
   protected eventTypes = ['push'];
 
   handle(event: Event): PushActivityData {
-    const details = event.data as PushEventData;
+    const details = event.data as GithubPushEventData;
 
     return {
       type: 'push',
@@ -19,7 +19,7 @@ export class PushHandler extends BaseActivityHandler {
   }
 
   getMetrics(event: Event): CodeMetrics {
-    const details = event.data as PushEventData;
+    const details = event.data as GithubPushEventData;
 
     return {
       commits: details.metrics.commits,
@@ -27,7 +27,7 @@ export class PushHandler extends BaseActivityHandler {
   }
 
   generateDescription(event: Event): string {
-    const details = event.data as PushEventData;
+    const details = event.data as GithubPushEventData;
     const { commits } = details.metrics;
 
     return `Pushed ${this.formatNumber(commits)} ${this.pluralize(commits, 'commit')} ` + `to ${details.branch}`;

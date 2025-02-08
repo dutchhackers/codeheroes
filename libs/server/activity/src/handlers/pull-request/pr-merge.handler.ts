@@ -1,5 +1,5 @@
 import { Event } from '@codeheroes/event';
-import { PullRequestEventData } from '@codeheroes/providers';
+import { GithubPullRequestEventData } from '@codeheroes/providers';
 import { ActivityType, PullRequestActivityData, PullRequestMetrics } from '../../types';
 import { BaseActivityHandler } from '../base.handler';
 
@@ -11,12 +11,12 @@ export class PrMergeHandler extends BaseActivityHandler {
   canHandle(event: Event): boolean {
     if (!super.canHandle(event)) return false;
 
-    const details = event.data as PullRequestEventData;
+    const details = event.data as GithubPullRequestEventData;
     return details.merged === true;
   }
 
   handle(event: Event): PullRequestActivityData {
-    const details = event.data as PullRequestEventData;
+    const details = event.data as GithubPullRequestEventData;
 
     return {
       type: 'pull_request',
@@ -29,7 +29,7 @@ export class PrMergeHandler extends BaseActivityHandler {
   }
 
   getMetrics(event: Event): PullRequestMetrics {
-    const details = event.data as PullRequestEventData;
+    const details = event.data as GithubPullRequestEventData;
 
     return {
       commits: details.metrics.commits,
@@ -44,7 +44,7 @@ export class PrMergeHandler extends BaseActivityHandler {
   }
 
   generateDescription(event: Event): string {
-    const details = event.data as PullRequestEventData;
+    const details = event.data as GithubPullRequestEventData;
     const { commits } = details.metrics;
 
     return (

@@ -1,9 +1,9 @@
-import { CreateEventData } from '@codeheroes/providers';
+import { GithubCreateEventData } from '@codeheroes/providers';
 import { CommonMappedData, CreateEvent } from '../../core/interfaces/github.interfaces';
 import { GitHubParser } from './base.parser';
 
-export class CreateParser extends GitHubParser<CreateEvent, CreateEventData> {
-  protected parseSpecific(payload: CreateEvent): Omit<CreateEventData, keyof CommonMappedData> {
+export class CreateParser extends GitHubParser<CreateEvent, GithubCreateEventData> {
+  protected parseSpecific(payload: CreateEvent): Omit<GithubCreateEventData, keyof CommonMappedData> {
     // Accept branch, tag and repository creation events
     return {
       ref: payload.ref,

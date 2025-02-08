@@ -1,5 +1,5 @@
 import { Event } from '@codeheroes/event';
-import { IssueEventData } from '@codeheroes/providers';
+import { GithubIssueEventData } from '@codeheroes/providers';
 import { BaseActivityHandler } from '../base.handler';
 import { ActivityType, IssueActivityData, ActivityMetrics } from '../../types';
 
@@ -9,7 +9,7 @@ export class IssueUpdateHandler extends BaseActivityHandler {
   protected eventActions = ['edited'];
 
   handle(event: Event): IssueActivityData {
-    const details = event.data as IssueEventData;
+    const details = event.data as GithubIssueEventData;
     return {
       type: 'issue',
       issueNumber: details.issueNumber,
@@ -26,7 +26,7 @@ export class IssueUpdateHandler extends BaseActivityHandler {
   }
 
   generateDescription(event: Event): string {
-    const details = event.data as IssueEventData;
+    const details = event.data as GithubIssueEventData;
     return `Updated issue #${details.issueNumber}`;
   }
 }
