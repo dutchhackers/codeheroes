@@ -2,6 +2,7 @@ import { ErrorType, MESSAGES } from '../core/constants/constants';
 import { GitHubError } from '../core/errors/github-event.error';
 import { GitHubWebhookEvent } from '../processor/interfaces';
 import { GitHubParser } from './event-parsers/base.parser';
+import { CreateParser } from './event-parsers/create.parser';
 import { DeleteEventParser } from './event-parsers/delete.parser';
 import { IssueParser } from './event-parsers/issue.parser';
 import { PullRequestReviewCommentParser } from './event-parsers/pull-request-review-comment.parser';
@@ -27,6 +28,8 @@ export class ParserFactory {
         return new PullRequestReviewCommentParser();
       case 'delete':
         return new DeleteEventParser();
+      case 'create':
+        return new CreateParser();
       default:
         throw new GitHubError(MESSAGES.unsupportedEvent(webhookEvent.eventType), ErrorType.UNSUPPORTED_EVENT);
     }

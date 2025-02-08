@@ -266,6 +266,14 @@ export interface PullRequestReviewCommentEvent {
   sender: GitHubUser;
 }
 
+export interface CreateEvent extends CommonPayload {
+  ref: string;
+  ref_type: 'branch' | 'tag' | 'repository';
+  master_branch: string;
+  description: string | null;
+  pusher_type: string;
+}
+
 export interface DeleteEvent {
   ref: string;
   ref_type: 'branch' | 'tag';
