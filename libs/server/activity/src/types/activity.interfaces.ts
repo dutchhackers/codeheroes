@@ -21,7 +21,6 @@ export interface UserActivity extends BaseDocument {
   userId: string;
   provider: ConnectedAccountProvider;
   eventType: string;
-  externalEventId: string;
   userFacingDescription: string;
   data?: ActivityData;
   metrics?: ActivityMetrics;

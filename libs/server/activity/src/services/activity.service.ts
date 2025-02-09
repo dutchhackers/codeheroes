@@ -49,7 +49,6 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
         userId,
         provider: eventData.provider,
         eventType: eventData.source.event,
-        externalEventId: eventData.source.id,
         data: handler.handle(eventData),
         metrics: handler.getMetrics(eventData),
         userFacingDescription: handler.generateDescription(eventData),
