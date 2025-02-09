@@ -15,6 +15,7 @@ export abstract class BaseActivityCalculator {
       [ActivityType.CODE_PUSH]: 'Shipped new code to the repository',
       [ActivityType.CODE_COVERAGE]: 'Enhanced code quality with better test coverage',
       [ActivityType.BRANCH_DELETED]: 'Maintained repository cleanliness',
+      [ActivityType.TAG_DELETED]: 'Cleaned up repository by removing obsolete tag',
       [ActivityType.PR_CREATED]: 'Initiated code changes through a pull request',
       [ActivityType.PR_UPDATED]: 'Refined pull request with improvements',
       [ActivityType.PR_MERGED]: 'Successfully merged code into the project',
