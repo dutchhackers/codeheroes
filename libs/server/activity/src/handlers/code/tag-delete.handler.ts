@@ -1,7 +1,7 @@
 import { Event } from '@codeheroes/event';
 import { GithubDeleteEventData } from '@codeheroes/providers';
 import { BaseActivityHandler } from '../base/base.handler';
-import { ActivityType, DeleteActivityData } from '../../types';
+import { ActivityType, DeleteTagActivityData } from '../../types';
 
 export class TagDeleteHandler extends BaseActivityHandler {
   protected eventActions?: string[];
@@ -14,12 +14,11 @@ export class TagDeleteHandler extends BaseActivityHandler {
     return details.refType === 'tag';
   }
 
-  handle(event: Event): DeleteActivityData {
+  handle(event: Event): DeleteTagActivityData {
     const details = event.data as GithubDeleteEventData;
     return {
-      type: 'delete',
+      type: 'delete_tag',
       ref: details.ref,
-      refType: details.refType,
     };
   }
 
