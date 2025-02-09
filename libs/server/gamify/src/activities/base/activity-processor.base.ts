@@ -1,7 +1,8 @@
 import { UserActivity } from '@codeheroes/activity';
-import { DatabaseInstance, getCurrentTimeAsISO } from '@codeheroes/common';
+import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { Firestore } from 'firebase-admin/firestore';
 import { ActivityProcessingResult, XpCalculationResponse } from '../../models/gamification.model';
+import { calculateLevelProgress } from '../../core/level.utils';
 
 export abstract class BaseActivityProcessor {
   protected db: Firestore;
@@ -11,14 +12,98 @@ export abstract class BaseActivityProcessor {
   }
 
   /**
-   * Process the activity and update necessary data in the database
+   * Template method that handles the common processing flow
    */
-  abstract processActivity(
+  async processActivity(
     userId: string,
     activityId: string,
     activity: UserActivity,
     xpResult: XpCalculationResponse,
-  ): Promise<void>;
+  ): Promise<void> {
+    const userRef = this.db.collection('users').doc(userId);
+
+    try {
+      await this.db.runTransaction(async (transaction) => {
+        // Get user document
+        const userDoc = await transaction.get(userRef);
+        if (!userDoc.exists) {
+          throw new Error('User document not found!');
+        }
+
+        const userData = userDoc.data()!;
+
+        // Calculate new XP and level
+        const currentXp = userData.xp || 0;
+        const updatedXp = currentXp + xpResult.totalXp;
+        const levelProgress = calculateLevelProgress(updatedXp, userData.achievements || [], userData.tasks || []);
+
+        // Process activity-specific achievements and updates
+        const processingResult = await this.processSpecificActivity(userData, activity, xpResult);
+
+        // Update user document
+        const userUpdates = await this.getUserDocumentUpdates(userData, activity, levelProgress);
+        transaction.update(userRef, {
+          xp: updatedXp,
+          level: levelProgress.currentLevel,
+          currentLevelXp: levelProgress.currentLevelXp,
+          xpToNextLevel: levelProgress.xpToNextLevel,
+          updatedAt: getCurrentTimeAsISO(),
+          ...userUpdates,
+        });
+
+        // Update activity document
+        await this.updateActivityDocument(userRef, activityId, processingResult);
+
+        // Create XP history entry
+        await this.createXpHistoryEntry(
+          userRef,
+          activity,
+          xpResult,
+          updatedXp,
+          levelProgress.currentLevel,
+          levelProgress.currentLevelXp,
+        );
+      });
+
+      logger.info('Successfully processed activity', {
+        userId,
+        activityId,
+        activityType: activity.type,
+      });
+    } catch (error) {
+      logger.error('Failed to process activity', {
+        error,
+        userId,
+        activityId,
+        activityType: activity.type,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Process activity-specific logic and return processing result
+   * Override this in derived classes to add specific processing logic
+   */
+  protected async processSpecificActivity(
+    userData: any,
+    activity: UserActivity,
+    xpResult: XpCalculationResponse,
+  ): Promise<ActivityProcessingResult> {
+    return this.createBaseProcessingResult(xpResult);
+  }
+
+  /**
+   * Get additional user document updates specific to the activity type
+   * Override this in derived classes to add specific user document updates
+   */
+  protected async getUserDocumentUpdates(
+    userData: any,
+    activity: UserActivity,
+    levelProgress: { currentLevel: number; currentLevelXp: number; xpToNextLevel: number },
+  ): Promise<Record<string, any>> {
+    return {};
+  }
 
   /**
    * Create the base processing result object
@@ -38,7 +123,7 @@ export abstract class BaseActivityProcessor {
   /**
    * Update activity document with processing results
    */
-  protected async updateActivityDocument(
+  private async updateActivityDocument(
     userRef: FirebaseFirestore.DocumentReference,
     activityId: string,
     processingResult: ActivityProcessingResult,
@@ -53,7 +138,7 @@ export abstract class BaseActivityProcessor {
   /**
    * Create XP history entry
    */
-  protected async createXpHistoryEntry(
+  private async createXpHistoryEntry(
     userRef: FirebaseFirestore.DocumentReference,
     activity: UserActivity,
     xpResult: XpCalculationResponse,
