@@ -17,7 +17,7 @@ export class ActivityHandlerFactory {
   private static handlers: ActivityHandler[] = [
     // Code handlers
     new PushHandler(),
-    new DeleteHandler(), // Add this line
+    new DeleteHandler(),
 
     // Pull request handlers
     new PrCreateHandler(),
