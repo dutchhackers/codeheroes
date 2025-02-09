@@ -18,19 +18,7 @@ export class PrUpdateHandler extends BaseActivityHandler {
       merged: false,
       draft: details.draft,
       action: 'updated',
-    };
-  }
-
-  getMetrics(event: Event): PullRequestMetrics {
-    const details = event.data as GithubPullRequestEventData;
-
-    return {
-      commits: details.metrics.commits,
-      // additions: details.metrics.additions,
-      // deletions: details.metrics.deletions,
-      // changedFiles: details.metrics.changedFiles,
-      // reviewCount: details.metrics.reviewCount || 0,
-      // commentCount: details.metrics.commentCount || 0,
+      metrics: { ...details.metrics },
     };
   }
 

@@ -22,10 +22,6 @@ export class TagCreateHandler extends BaseActivityHandler {
     };
   }
 
-  getMetrics(event: Event) {
-    return {}; // No metrics for create events
-  }
-
   generateDescription(event: Event): string {
     const details = event.data as GithubCreateEventData;
     return `Created tag ${details.ref}`;

@@ -20,13 +20,6 @@ export class IssueCloseHandler extends BaseActivityHandler {
     };
   }
 
-  getMetrics(event: Event): ActivityMetrics {
-    const details = event.data as GithubIssueEventData;
-    return {
-      //   timeToClose: TimeUtils.calculateTimeBetween(details.createdAt, details.closedAt),
-      //   commentCount: details.commentCount || 0,
-    };
-  }
 
   generateDescription(event: Event): string {
     const details = event.data as GithubIssueEventData;

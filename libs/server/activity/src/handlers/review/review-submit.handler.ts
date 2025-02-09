@@ -22,16 +22,6 @@ export class ReviewSubmitHandler extends BaseActivityHandler {
     };
   }
 
-  getMetrics(event: Event): ReviewMetrics {
-    const details = event.data as GithubPullRequestReviewEventData;
-    return {
-      // commentCount: details.commentCount || 0,
-      // threadCount: details.threadCount || 0,
-      // timeToComplete: TimeUtils.calculateTimeBetween(details.startedAt, details.submittedAt),
-      // linesReviewed: details.linesReviewed || 0
-    };
-  }
-
   generateDescription(event: Event): string {
     const details = event.data as GithubPullRequestReviewEventData;
     const state = details.state.replace('_', ' ').toLowerCase();

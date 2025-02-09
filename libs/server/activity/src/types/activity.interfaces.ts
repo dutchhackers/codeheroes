@@ -6,7 +6,6 @@ import { ActivityMetrics } from './metrics.types';
 export interface ActivityHandler {
   canHandle(event: Event): boolean;
   handle(event: Event): ActivityData;
-  getMetrics(event: Event): ActivityMetrics;
   generateDescription(event: Event): string;
   getActivityType(): ActivityType;
 }

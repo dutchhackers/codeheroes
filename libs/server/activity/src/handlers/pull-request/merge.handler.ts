@@ -25,21 +25,7 @@ export class PrMergeHandler extends BaseActivityHandler {
       merged: true,
       draft: false,
       action: 'merged',
-    };
-  }
-
-  getMetrics(event: Event): PullRequestMetrics {
-    const details = event.data as GithubPullRequestEventData;
-
-    return {
-      commits: details.metrics.commits,
-      // additions: details.metrics.additions,
-      // deletions: details.metrics.deletions,
-      // changedFiles: details.metrics.changedFiles,
-      // timeToMerge: TimeUtils.calculateTimeBetween(details.createdAt, details.mergedAt),
-      // timeToFirstReview: details.metrics.timeToFirstReview,
-      // reviewCount: details.metrics.reviewCount || 0,
-      // commentCount: details.metrics.commentCount || 0,
+      metrics: { ...details.metrics },
     };
   }
 

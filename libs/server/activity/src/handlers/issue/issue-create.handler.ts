@@ -19,13 +19,6 @@ export class IssueCreateHandler extends BaseActivityHandler {
     };
   }
 
-  getMetrics(event: Event): ActivityMetrics {
-    return {
-      // charactersCount: (event.data as IssueEventData).title.length +
-      //                 ((event.data as IssueEventData).body?.length || 0)
-    };
-  }
-
   generateDescription(event: Event): string {
     const details = event.data as GithubIssueEventData;
     return `Created issue #${details.issueNumber}: ${details.title}`;

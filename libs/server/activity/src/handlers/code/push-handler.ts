@@ -15,14 +15,7 @@ export class PushHandler extends BaseActivityHandler {
       type: 'push',
       branch: details.branch,
       commitCount: details.metrics.commits,
-    };
-  }
-
-  getMetrics(event: Event): CodeMetrics {
-    const details = event.data as GithubPushEventData;
-
-    return {
-      commits: details.metrics.commits,
+      metrics: { ...details.metrics },
     };
   }
 

@@ -18,17 +18,7 @@ export class PrCreateHandler extends BaseActivityHandler {
       merged: false,
       draft: details.draft,
       action: details.action,
-    };
-  }
-
-  getMetrics(event: Event): PullRequestMetrics {
-    const details = event.data as GithubPullRequestEventData;
-
-    return {
-      commits: details.metrics.commits,
-      additions: details.metrics.additions,
-      deletions: details.metrics.deletions,
-      changedFiles: details.metrics.changedFiles,
+      metrics: { ...details.metrics },
     };
   }
 

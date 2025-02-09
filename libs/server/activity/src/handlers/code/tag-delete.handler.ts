@@ -22,10 +22,6 @@ export class TagDeleteHandler extends BaseActivityHandler {
     };
   }
 
-  getMetrics(event: Event) {
-    return {}; // No metrics for delete events
-  }
-
   generateDescription(event: Event): string {
     const details = event.data as GithubDeleteEventData;
     return `Deleted tag ${details.ref}`;

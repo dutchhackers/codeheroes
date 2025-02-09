@@ -19,15 +19,6 @@ export class ReviewThreadHandler extends BaseActivityHandler {
     };
   }
 
-  getMetrics(event: Event): ActivityMetrics {
-    return {};
-    // const details = event.data as PullRequestReviewThreadEventData;
-    // return {
-    //   commentsInThread: details.commentCount || 0,
-    //   timeToResolve: details.resolved ? TimeUtils.calculateTimeBetween(details.createdAt, details.resolvedAt) : 0,
-    // };
-  }
-
   generateDescription(event: Event): string {
     const details = event.data as GithubPullRequestReviewThreadEventData;
     const action = details.resolved ? 'Resolved' : 'Unresolved';

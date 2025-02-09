@@ -19,12 +19,6 @@ export class IssueUpdateHandler extends BaseActivityHandler {
     };
   }
 
-  getMetrics(event: Event): ActivityMetrics {
-    return {
-      updateCount: 1  // Incremental update count
-    };
-  }
-
   generateDescription(event: Event): string {
     const details = event.data as GithubIssueEventData;
     return `Updated issue #${details.issueNumber}`;
