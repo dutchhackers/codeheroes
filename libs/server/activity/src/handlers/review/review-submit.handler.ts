@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestReviewEventData } from '@codeheroes/providers';
-import { BaseActivityHandler } from '../base.handler';
+import { BaseActivityHandler } from '../base/base.handler';
 import {
   ActivityType,
   ReviewActivityData,

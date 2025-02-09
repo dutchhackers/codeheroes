@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
 import { GithubPushEventData } from '@codeheroes/providers';
-import { BaseActivityHandler } from '../base.handler';
+import { BaseActivityHandler } from '../base/base.handler';
 import { ActivityType, PushActivityData, CodeMetrics } from '../../types';
 
 export class PushHandler extends BaseActivityHandler {

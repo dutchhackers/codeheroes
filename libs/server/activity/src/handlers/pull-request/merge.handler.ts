@@ -1,7 +1,7 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestEventData } from '@codeheroes/providers';
 import { ActivityType, PullRequestActivityData, PullRequestMetrics } from '../../types';
-import { BaseActivityHandler } from '../base.handler';
+import { BaseActivityHandler } from '../base/base.handler';
 
 export class PrMergeHandler extends BaseActivityHandler {
   protected activityType = ActivityType.PR_MERGED;

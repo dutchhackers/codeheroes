@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestEventData } from '@codeheroes/providers';
-import { BaseActivityHandler } from '../base.handler';
+import { BaseActivityHandler } from '../base/base.handler';
 import { ActivityType, PullRequestActivityData, PullRequestMetrics } from '../../types';
 
 export class PrUpdateHandler extends BaseActivityHandler {

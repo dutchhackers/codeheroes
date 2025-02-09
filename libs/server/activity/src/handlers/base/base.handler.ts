@@ -1,5 +1,5 @@
 import { Event } from '@codeheroes/event';
-import { ActivityHandler, ActivityData, ActivityMetrics, ActivityType } from '../types';
+import { ActivityHandler, ActivityData, ActivityMetrics, ActivityType } from '../../types';
 
 export abstract class BaseActivityHandler implements ActivityHandler {
   protected abstract activityType: ActivityType;
