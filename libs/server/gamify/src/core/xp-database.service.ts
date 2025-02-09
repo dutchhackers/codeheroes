@@ -17,7 +17,6 @@ export class XpDatabaseService {
     try {
       const processor = ProcessorFactory.getProcessor(activity.type);
       await processor.processActivity(userId, activityId, activity, xpResult);
-      logger.info('Successfully processed activity', { userId, activityId, activityType: activity.type });
     } catch (error) {
       logger.error('Failed to process activity', { error, userId, activityId, activityType: activity.type });
       throw error;
