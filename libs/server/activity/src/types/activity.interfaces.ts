@@ -13,6 +13,7 @@ export interface ActivityHandler {
 
 export interface BaseActivityData {
   type: string;
+  metrics?: ActivityMetrics;
 }
 
 export interface UserActivity extends BaseDocument {
@@ -23,7 +24,6 @@ export interface UserActivity extends BaseDocument {
   eventType: string;
   userFacingDescription: string;
   data?: ActivityData;
-  metrics?: ActivityMetrics;
   processingResult?: ActivityProcessingResult;
 }
 
