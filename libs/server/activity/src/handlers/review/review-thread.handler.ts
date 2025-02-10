@@ -8,7 +8,7 @@ export class ReviewThreadHandler extends BaseActivityHandler {
   protected eventTypes = ['pull_request_review_thread'];
   protected eventActions = ['resolved', 'unresolved'];
 
-  handle(event: Event): ReviewThreadActivityData {
+  handleActivity(event: Event): ReviewThreadActivityData {
     const details = event.data as GithubPullRequestReviewThreadEventData;
     return {
       type: 'review_thread',
@@ -20,9 +20,7 @@ export class ReviewThreadHandler extends BaseActivityHandler {
 
   generateDescription(event: Event): string {
     const details = event.data as GithubPullRequestReviewThreadEventData;
-    const metrics = this.calculateMetrics(event);
     const action = details.resolved ? 'Resolved' : 'Unresolved';
-
     return `${action} review thread on PR #${details.prNumber}`;
   }
 }

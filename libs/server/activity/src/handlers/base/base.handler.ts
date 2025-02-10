@@ -20,7 +20,21 @@ export abstract class BaseActivityHandler implements ActivityHandler {
     return matchesEventType && matchesAction;
   }
 
-  abstract handle(event: Event): ActivityData;
+  handle(event: Event): ActivityData {
+    const activityData = this.handleActivity(event);
+    const metrics = this.calculateMetrics(event);
+
+    if (metrics) {
+      return {
+        ...activityData,
+        metrics,
+      };
+    }
+
+    return activityData;
+  }
+
+  abstract handleActivity(event: Event): ActivityData;
 
   abstract generateDescription(event: Event): string;
 

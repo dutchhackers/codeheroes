@@ -8,14 +8,12 @@ export class PushHandler extends BaseActivityHandler {
   protected activityType = ActivityType.CODE_PUSH;
   protected eventTypes = ['push'];
 
-  handle(event: Event): PushActivityData {
+  handleActivity(event: Event): PushActivityData {
     const details = event.data as GithubPushEventData;
-
     return {
       type: 'push',
       branch: details.branch,
       commitCount: details.metrics.commits,
-      metrics: this.calculateMetrics(event),
     };
   }
 

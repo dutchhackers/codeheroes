@@ -8,7 +8,7 @@ export class ReviewSubmitHandler extends BaseActivityHandler {
   protected eventTypes = ['pull_request_review'];
   protected eventActions = ['submitted'];
 
-  handle(event: Event): ReviewActivityData {
+  handleActivity(event: Event): ReviewActivityData {
     const details = event.data as GithubPullRequestReviewEventData;
     return {
       type: 'review',
@@ -21,8 +21,6 @@ export class ReviewSubmitHandler extends BaseActivityHandler {
   generateDescription(event: Event): string {
     const details = event.data as GithubPullRequestReviewEventData;
     const state = details.state.replace('_', ' ').toLowerCase();
-    const metrics = this.calculateMetrics(event);
-
     return `Submitted ${state} review on PR #${details.prNumber}`;
   }
 }

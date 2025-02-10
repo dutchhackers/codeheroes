@@ -8,9 +8,8 @@ export class PrUpdateHandler extends BaseActivityHandler {
   protected eventTypes = ['pull_request'];
   protected eventActions = ['synchronize'];
 
-  handle(event: Event): PullRequestActivityData {
+  handleActivity(event: Event): PullRequestActivityData {
     const details = event.data as GithubPullRequestEventData;
-
     return {
       type: 'pull_request',
       prNumber: details.prNumber,
@@ -18,7 +17,6 @@ export class PrUpdateHandler extends BaseActivityHandler {
       merged: false,
       draft: details.draft,
       action: 'updated',
-      metrics: this.calculateMetrics(event),
     };
   }
 

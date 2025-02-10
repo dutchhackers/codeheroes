@@ -14,9 +14,8 @@ export class PrMergeHandler extends BaseActivityHandler {
     return details.merged === true;
   }
 
-  handle(event: Event): PullRequestActivityData {
+  handleActivity(event: Event): PullRequestActivityData {
     const details = event.data as GithubPullRequestEventData;
-
     return {
       type: 'pull_request',
       prNumber: details.prNumber,
@@ -24,7 +23,6 @@ export class PrMergeHandler extends BaseActivityHandler {
       merged: true,
       draft: false,
       action: 'merged',
-      metrics: this.calculateMetrics(event),
     };
   }
 

@@ -14,7 +14,7 @@ export class TagDeleteHandler extends BaseActivityHandler {
     return details.refType === 'tag';
   }
 
-  handle(event: Event): DeleteTagActivityData {
+  handleActivity(event: Event): DeleteTagActivityData {
     const details = event.data as GithubDeleteEventData;
     return {
       type: 'delete_tag',

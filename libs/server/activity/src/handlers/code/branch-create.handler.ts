@@ -14,7 +14,7 @@ export class BranchCreateHandler extends BaseActivityHandler {
     return details.refType === 'branch';
   }
 
-  handle(event: Event): CreateBranchActivityData {
+  handleActivity(event: Event): CreateBranchActivityData {
     const details = event.data as GithubCreateEventData;
     return {
       type: 'create_branch',

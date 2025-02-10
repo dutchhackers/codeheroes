@@ -8,9 +8,8 @@ export class PrCreateHandler extends BaseActivityHandler {
   protected eventTypes = ['pull_request'];
   protected eventActions = ['opened', 'ready_for_review'];
 
-  handle(event: Event): PullRequestActivityData {
+  handleActivity(event: Event): PullRequestActivityData {
     const details = event.data as GithubPullRequestEventData;
-
     return {
       type: 'pull_request',
       prNumber: details.prNumber,

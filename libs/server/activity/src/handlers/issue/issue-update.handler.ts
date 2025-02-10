@@ -8,7 +8,7 @@ export class IssueUpdateHandler extends BaseActivityHandler {
   protected eventTypes = ['issues'];
   protected eventActions = ['edited'];
 
-  handle(event: Event): IssueActivityData {
+  handleActivity(event: Event): IssueActivityData {
     const details = event.data as GithubIssueEventData;
     return {
       type: 'issue',
