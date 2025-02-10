@@ -10,6 +10,7 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
 - [firebase-app](apps/firebase-app) - Main Firebase application
 - [game-engine](apps/game-engine) - Game engine Firebase function
 - [github-receiver](apps/github-receiver) - GitHub webhooks receiver Firebase function
+- [web](apps/web) - Web application
 
 ### Libraries
 
