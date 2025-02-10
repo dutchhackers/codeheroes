@@ -1,7 +1,7 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestEventData } from '@codeheroes/providers';
 import { ActivityType, PullRequestActivityData, PullRequestMetrics } from '../../types';
-import { BaseActivityHandler } from '../base.handler';
+import { BaseActivityHandler } from '../base/base.handler';
 
 export class PrCreateHandler extends BaseActivityHandler {
   protected activityType = ActivityType.PR_CREATED;
@@ -18,17 +18,7 @@ export class PrCreateHandler extends BaseActivityHandler {
       merged: false,
       draft: details.draft,
       action: details.action,
-    };
-  }
-
-  getMetrics(event: Event): PullRequestMetrics {
-    const details = event.data as GithubPullRequestEventData;
-
-    return {
-      commits: details.metrics.commits,
-      additions: details.metrics.additions,
-      deletions: details.metrics.deletions,
-      changedFiles: details.metrics.changedFiles,
+      metrics: { ...details.metrics },
     };
   }
 

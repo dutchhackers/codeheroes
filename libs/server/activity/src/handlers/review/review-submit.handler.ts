@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestReviewEventData } from '@codeheroes/providers';
-import { BaseActivityHandler } from '../base.handler';
+import { BaseActivityHandler } from '../base/base.handler';
 import {
   ActivityType,
   ReviewActivityData,
@@ -19,16 +19,6 @@ export class ReviewSubmitHandler extends BaseActivityHandler {
       prNumber: details.prNumber,
       state: details.state,
       submittedAt: details.submittedAt
-    };
-  }
-
-  getMetrics(event: Event): ReviewMetrics {
-    const details = event.data as GithubPullRequestReviewEventData;
-    return {
-      // commentCount: details.commentCount || 0,
-      // threadCount: details.threadCount || 0,
-      // timeToComplete: TimeUtils.calculateTimeBetween(details.startedAt, details.submittedAt),
-      // linesReviewed: details.linesReviewed || 0
     };
   }
 

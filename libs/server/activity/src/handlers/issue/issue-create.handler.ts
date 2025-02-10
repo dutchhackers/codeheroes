@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
 import { GithubIssueEventData } from '@codeheroes/providers';
-import { BaseActivityHandler } from '../base.handler';
+import { BaseActivityHandler } from '../base/base.handler';
 import { ActivityType, IssueActivityData, ActivityMetrics } from '../../types';
 
 export class IssueCreateHandler extends BaseActivityHandler {
@@ -16,13 +16,6 @@ export class IssueCreateHandler extends BaseActivityHandler {
       title: details.title,
       state: details.state,
       stateReason: details.stateReason
-    };
-  }
-
-  getMetrics(event: Event): ActivityMetrics {
-    return {
-      // charactersCount: (event.data as IssueEventData).title.length +
-      //                 ((event.data as IssueEventData).body?.length || 0)
     };
   }
 

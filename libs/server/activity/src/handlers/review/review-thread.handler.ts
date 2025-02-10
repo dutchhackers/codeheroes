@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestReviewThreadEventData } from '@codeheroes/providers';
-import { BaseActivityHandler } from '../base.handler';
+import { BaseActivityHandler } from '../base/base.handler';
 import { ActivityType, ReviewThreadActivityData, ActivityMetrics } from '../../types';
 import { TimeUtils } from '../../utils/time.utils';
 
@@ -17,15 +17,6 @@ export class ReviewThreadHandler extends BaseActivityHandler {
       threadId: details.threadId,
       resolved: details.resolved,
     };
-  }
-
-  getMetrics(event: Event): ActivityMetrics {
-    return {};
-    // const details = event.data as PullRequestReviewThreadEventData;
-    // return {
-    //   commentsInThread: details.commentCount || 0,
-    //   timeToResolve: details.resolved ? TimeUtils.calculateTimeBetween(details.createdAt, details.resolvedAt) : 0,
-    // };
   }
 
   generateDescription(event: Event): string {

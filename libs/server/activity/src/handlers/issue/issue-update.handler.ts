@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
 import { GithubIssueEventData } from '@codeheroes/providers';
-import { BaseActivityHandler } from '../base.handler';
+import { BaseActivityHandler } from '../base/base.handler';
 import { ActivityType, IssueActivityData, ActivityMetrics } from '../../types';
 
 export class IssueUpdateHandler extends BaseActivityHandler {
@@ -16,12 +16,6 @@ export class IssueUpdateHandler extends BaseActivityHandler {
       title: details.title,
       state: details.state,
       stateReason: details.stateReason
-    };
-  }
-
-  getMetrics(event: Event): ActivityMetrics {
-    return {
-      updateCount: 1  // Incremental update count
     };
   }
 

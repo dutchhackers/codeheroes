@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
 import { GithubIssueEventData } from '@codeheroes/providers';
-import { BaseActivityHandler } from '../base.handler';
+import { BaseActivityHandler } from '../base/base.handler';
 import { ActivityType, IssueActivityData, ActivityMetrics } from '../../types';
 import { TimeUtils } from '@codeheroes/common';
 
@@ -20,13 +20,6 @@ export class IssueCloseHandler extends BaseActivityHandler {
     };
   }
 
-  getMetrics(event: Event): ActivityMetrics {
-    const details = event.data as GithubIssueEventData;
-    return {
-      //   timeToClose: TimeUtils.calculateTimeBetween(details.createdAt, details.closedAt),
-      //   commentCount: details.commentCount || 0,
-    };
-  }
 
   generateDescription(event: Event): string {
     const details = event.data as GithubIssueEventData;
