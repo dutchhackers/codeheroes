@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestEventData } from '@codeheroes/providers';
-import { ActivityType, PullRequestActivityData, PullRequestMetrics } from '../../types';
+import { ActivityType, PullRequestActivityData, PullRequestActivityMetrics } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
 
 export class PrMergeHandler extends BaseActivityHandler {
@@ -10,7 +10,6 @@ export class PrMergeHandler extends BaseActivityHandler {
 
   canHandle(event: Event): boolean {
     if (!super.canHandle(event)) return false;
-
     const details = event.data as GithubPullRequestEventData;
     return details.merged === true;
   }
@@ -25,17 +24,26 @@ export class PrMergeHandler extends BaseActivityHandler {
       merged: true,
       draft: false,
       action: 'merged',
-      metrics: { ...details.metrics },
+      metrics: this.calculateMetrics(event),
+    };
+  }
+
+  protected calculateMetrics(event: Event): PullRequestActivityMetrics {
+    const details = event.data as GithubPullRequestEventData;
+    return {
+      commits: details.metrics.commits,
+      additions: details.metrics.additions,
+      deletions: details.metrics.deletions,
+      changedFiles: details.metrics.changedFiles,
     };
   }
 
   generateDescription(event: Event): string {
     const details = event.data as GithubPullRequestEventData;
-    const { commits } = details.metrics;
+    const metrics = this.calculateMetrics(event);
 
-    return (
-      `Merged pull request #${details.prNumber}: ${details.title} ` +
-      `(${this.formatNumber(commits)} ${this.pluralize(commits, 'commit')}, `
-    );
+    return `Merged pull request #${details.prNumber}: ${details.title} ` +
+           `(${this.formatNumber(metrics.commits)} ${this.pluralize(metrics.commits, 'commit')}, ` +
+           `${metrics.changedFiles} files changed)`;
   }
 }

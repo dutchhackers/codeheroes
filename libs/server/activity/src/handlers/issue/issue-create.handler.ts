@@ -1,7 +1,7 @@
 import { Event } from '@codeheroes/event';
 import { GithubIssueEventData } from '@codeheroes/providers';
+import { ActivityType, IssueActivityData } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
-import { ActivityType, IssueActivityData, ActivityMetrics } from '../../types';
 
 export class IssueCreateHandler extends BaseActivityHandler {
   protected activityType = ActivityType.ISSUE_CREATED;
@@ -15,7 +15,7 @@ export class IssueCreateHandler extends BaseActivityHandler {
       issueNumber: details.issueNumber,
       title: details.title,
       state: details.state,
-      stateReason: details.stateReason
+      stateReason: details.stateReason,
     };
   }
 

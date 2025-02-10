@@ -1,7 +1,7 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestEventData } from '@codeheroes/providers';
+import { ActivityType, PullRequestActivityData, PullRequestActivityMetrics } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
-import { ActivityType, PullRequestActivityData, PullRequestMetrics } from '../../types';
 
 export class PrUpdateHandler extends BaseActivityHandler {
   protected activityType = ActivityType.PR_UPDATED;
@@ -18,7 +18,17 @@ export class PrUpdateHandler extends BaseActivityHandler {
       merged: false,
       draft: details.draft,
       action: 'updated',
-      metrics: { ...details.metrics },
+      metrics: this.calculateMetrics(event),
+    };
+  }
+
+  protected calculateMetrics(event: Event): PullRequestActivityMetrics {
+    const details = event.data as GithubPullRequestEventData;
+    return {
+      commits: details.metrics.commits,
+      additions: details.metrics.additions,
+      deletions: details.metrics.deletions,
+      changedFiles: details.metrics.changedFiles,
     };
   }
 

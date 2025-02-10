@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestEventData } from '@codeheroes/providers';
-import { ActivityType, PullRequestActivityData, PullRequestMetrics } from '../../types';
+import { ActivityType, PullRequestActivityData, PullRequestActivityMetrics } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
 
 export class PrCreateHandler extends BaseActivityHandler {
@@ -18,18 +18,25 @@ export class PrCreateHandler extends BaseActivityHandler {
       merged: false,
       draft: details.draft,
       action: details.action,
-      metrics: { ...details.metrics },
+    };
+  }
+
+  protected calculateMetrics(event: Event): PullRequestActivityMetrics {
+    const details = event.data as GithubPullRequestEventData;
+    return {
+      commits: details.metrics.commits,
+      additions: details.metrics.additions,
+      deletions: details.metrics.deletions,
+      changedFiles: details.metrics.changedFiles,
     };
   }
 
   generateDescription(event: Event): string {
     const details = event.data as GithubPullRequestEventData;
-    const { changedFiles } = details.metrics;
+    const metrics = this.calculateMetrics(event);
 
     const status = details.draft ? 'draft ' : '';
-    return (
-      `Created ${status}pull request #${details.prNumber}: ${details.title} ` +
-      `(${this.formatNumber(changedFiles)} ${this.pluralize(changedFiles, 'file')} changed)`
-    );
+    return `Created ${status}pull request #${details.prNumber}: ${details.title} ` +
+           `(${this.formatNumber(metrics.changedFiles)} ${this.pluralize(metrics.changedFiles, 'file')} changed)`;
   }
 }

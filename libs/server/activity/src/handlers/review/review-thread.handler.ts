@@ -1,8 +1,7 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestReviewThreadEventData } from '@codeheroes/providers';
+import { ActivityType, ReviewThreadActivityData } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
-import { ActivityType, ReviewThreadActivityData, ActivityMetrics } from '../../types';
-import { TimeUtils } from '../../utils/time.utils';
 
 export class ReviewThreadHandler extends BaseActivityHandler {
   protected activityType = ActivityType.PR_REVIEW_THREAD_RESOLVED;
@@ -21,7 +20,9 @@ export class ReviewThreadHandler extends BaseActivityHandler {
 
   generateDescription(event: Event): string {
     const details = event.data as GithubPullRequestReviewThreadEventData;
+    const metrics = this.calculateMetrics(event);
     const action = details.resolved ? 'Resolved' : 'Unresolved';
+
     return `${action} review thread on PR #${details.prNumber}`;
   }
 }
