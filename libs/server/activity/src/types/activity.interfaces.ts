@@ -6,13 +6,13 @@ import { ActivityMetrics } from './metrics.types';
 export interface ActivityHandler {
   canHandle(event: Event): boolean;
   handle(event: Event): ActivityData;
-  getMetrics(event: Event): ActivityMetrics;
   generateDescription(event: Event): string;
   getActivityType(): ActivityType;
 }
 
 export interface BaseActivityData {
   type: string;
+  metrics?: ActivityMetrics;
 }
 
 export interface UserActivity extends BaseDocument {
@@ -21,10 +21,8 @@ export interface UserActivity extends BaseDocument {
   userId: string;
   provider: ConnectedAccountProvider;
   eventType: string;
-  externalEventId: string;
   userFacingDescription: string;
   data?: ActivityData;
-  metrics?: ActivityMetrics;
   processingResult?: ActivityProcessingResult;
 }
 
@@ -89,10 +87,24 @@ export interface DeploymentActivityData extends BaseActivityData {
   status: 'pending' | 'success' | 'failure';
 }
 
-export interface DeleteActivityData extends BaseActivityData {
-  type: 'delete';
+export interface CreateBranchActivityData extends BaseActivityData {
+  type: 'create_branch';
   ref: string;
-  refType: 'branch' | 'tag';
+}
+
+export interface CreateTagActivityData extends BaseActivityData {
+  type: 'create_tag';
+  ref: string;
+}
+
+export interface DeleteBranchActivityData extends BaseActivityData {
+  type: 'delete_branch';
+  ref: string;
+}
+
+export interface DeleteTagActivityData extends BaseActivityData {
+  type: 'delete_tag';
+  ref: string;
 }
 
 export type ActivityData =
@@ -103,4 +115,7 @@ export type ActivityData =
   | ReviewThreadActivityData
   | ReviewCommentActivityData
   | DeploymentActivityData
-  | DeleteActivityData;
+  | CreateBranchActivityData
+  | CreateTagActivityData
+  | DeleteBranchActivityData
+  | DeleteTagActivityData;

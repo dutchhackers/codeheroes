@@ -36,6 +36,15 @@ export class EventProcessor {
       const parser = ParserFactory.createParser(this.webhookEvent);
       const eventData = parser.parse(this.webhookEvent.payload);
 
+      // If parser returns null, skip processing this event
+      if (eventData === null) {
+        logger.info(`Skipping event ${this.webhookEvent.eventId} as per parser rules`);
+        return {
+          success: true,
+          message: 'Event skipped as per parser rules',
+        };
+      }
+
       // Create and store the event
       const createEventInput = await this.generateCreateEventInput();
       await this.eventService.createEvent(createEventInput, eventData);

@@ -1,7 +1,7 @@
 import { Event } from '@codeheroes/event';
-import { PullRequestEventData } from '@codeheroes/providers';
+import { GithubPullRequestEventData } from '@codeheroes/providers';
 import { ActivityType, PullRequestActivityData, PullRequestMetrics } from '../../types';
-import { BaseActivityHandler } from '../base.handler';
+import { BaseActivityHandler } from '../base/base.handler';
 
 export class PrCreateHandler extends BaseActivityHandler {
   protected activityType = ActivityType.PR_CREATED;
@@ -9,7 +9,7 @@ export class PrCreateHandler extends BaseActivityHandler {
   protected eventActions = ['opened', 'ready_for_review'];
 
   handle(event: Event): PullRequestActivityData {
-    const details = event.data as PullRequestEventData;
+    const details = event.data as GithubPullRequestEventData;
 
     return {
       type: 'pull_request',
@@ -18,22 +18,12 @@ export class PrCreateHandler extends BaseActivityHandler {
       merged: false,
       draft: details.draft,
       action: details.action,
-    };
-  }
-
-  getMetrics(event: Event): PullRequestMetrics {
-    const details = event.data as PullRequestEventData;
-
-    return {
-      commits: details.metrics.commits,
-      additions: details.metrics.additions,
-      deletions: details.metrics.deletions,
-      changedFiles: details.metrics.changedFiles,
+      metrics: { ...details.metrics },
     };
   }
 
   generateDescription(event: Event): string {
-    const details = event.data as PullRequestEventData;
+    const details = event.data as GithubPullRequestEventData;
     const { changedFiles } = details.metrics;
 
     const status = details.draft ? 'draft ' : '';

@@ -1,14 +1,14 @@
-import { PullRequestReviewCommentEventData } from '@codeheroes/providers';
+import { GithubPullRequestReviewCommentEventData } from '@codeheroes/providers';
 import { CommonMappedData, PullRequestReviewCommentEvent } from '../../core/interfaces/github.interfaces';
 import { GitHubParser } from './base.parser';
 
 export class PullRequestReviewCommentParser extends GitHubParser<
   PullRequestReviewCommentEvent,
-  PullRequestReviewCommentEventData
+  GithubPullRequestReviewCommentEventData
 > {
-  protected parseSpecific(payload: PullRequestReviewCommentEvent): Omit<PullRequestReviewCommentEventData, keyof CommonMappedData> {
+  protected parseSpecific(payload: PullRequestReviewCommentEvent): Omit<GithubPullRequestReviewCommentEventData, keyof CommonMappedData> {
     const { comment, pull_request } = payload;
-    
+
     return {
       action: payload.action,
       prNumber: pull_request.number,

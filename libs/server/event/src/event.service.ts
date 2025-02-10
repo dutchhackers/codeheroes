@@ -18,7 +18,7 @@ export class EventService extends BaseFirestoreService<Event> {
     if (!eventInputData.source?.id || !eventInputData.provider) {
       throw new Error('Required event fields missing');
     }
-    
+
     return this.create({
       ...eventInputData,
       data: eventData,
@@ -26,7 +26,7 @@ export class EventService extends BaseFirestoreService<Event> {
   }
 
   async findByEventId(eventId: string): Promise<Event | null> {
-    const snapshot = await this.collection.where('externalEventId', '==', eventId).limit(1).get();
+    const snapshot = await this.collection.where('source.id', '==', eventId).limit(1).get();
 
     if (snapshot.empty) {
       return null;

@@ -1,5 +1,5 @@
 import { Event } from '@codeheroes/event';
-import { ActivityHandler, ActivityData, ActivityMetrics, ActivityType } from '../types';
+import { ActivityData, ActivityHandler, ActivityType } from '../../types';
 
 export abstract class BaseActivityHandler implements ActivityHandler {
   protected abstract activityType: ActivityType;
@@ -21,7 +21,7 @@ export abstract class BaseActivityHandler implements ActivityHandler {
   }
 
   abstract handle(event: Event): ActivityData;
-  abstract getMetrics(event: Event): ActivityMetrics;
+
   abstract generateDescription(event: Event): string;
 
   protected formatNumber(num: number): string {

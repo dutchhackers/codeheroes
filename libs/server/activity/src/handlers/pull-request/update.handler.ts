@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
-import { PullRequestEventData } from '@codeheroes/providers';
-import { BaseActivityHandler } from '../base.handler';
+import { GithubPullRequestEventData } from '@codeheroes/providers';
+import { BaseActivityHandler } from '../base/base.handler';
 import { ActivityType, PullRequestActivityData, PullRequestMetrics } from '../../types';
 
 export class PrUpdateHandler extends BaseActivityHandler {
@@ -9,7 +9,7 @@ export class PrUpdateHandler extends BaseActivityHandler {
   protected eventActions = ['synchronize'];
 
   handle(event: Event): PullRequestActivityData {
-    const details = event.data as PullRequestEventData;
+    const details = event.data as GithubPullRequestEventData;
 
     return {
       type: 'pull_request',
@@ -18,24 +18,12 @@ export class PrUpdateHandler extends BaseActivityHandler {
       merged: false,
       draft: details.draft,
       action: 'updated',
-    };
-  }
-
-  getMetrics(event: Event): PullRequestMetrics {
-    const details = event.data as PullRequestEventData;
-
-    return {
-      commits: details.metrics.commits,
-      // additions: details.metrics.additions,
-      // deletions: details.metrics.deletions,
-      // changedFiles: details.metrics.changedFiles,
-      // reviewCount: details.metrics.reviewCount || 0,
-      // commentCount: details.metrics.commentCount || 0,
+      metrics: { ...details.metrics },
     };
   }
 
   generateDescription(event: Event): string {
-    const details = event.data as PullRequestEventData;
+    const details = event.data as GithubPullRequestEventData;
     const { commits, changedFiles } = details.metrics;
 
     return (

@@ -1,4 +1,5 @@
 export * from './event-parsers/base.parser';
+export * from './event-parsers/create.parser';
 export * from './event-parsers/delete.parser';
 export * from './event-parsers/issue.parser';
 export * from './event-parsers/pull-request-review-comment.parser';

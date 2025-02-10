@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
-import { PullRequestReviewThreadEventData } from '@codeheroes/providers';
-import { BaseActivityHandler } from '../base.handler';
+import { GithubPullRequestReviewThreadEventData } from '@codeheroes/providers';
+import { BaseActivityHandler } from '../base/base.handler';
 import { ActivityType, ReviewThreadActivityData, ActivityMetrics } from '../../types';
 import { TimeUtils } from '../../utils/time.utils';
 
@@ -10,7 +10,7 @@ export class ReviewThreadHandler extends BaseActivityHandler {
   protected eventActions = ['resolved', 'unresolved'];
 
   handle(event: Event): ReviewThreadActivityData {
-    const details = event.data as PullRequestReviewThreadEventData;
+    const details = event.data as GithubPullRequestReviewThreadEventData;
     return {
       type: 'review_thread',
       prNumber: details.prNumber,
@@ -19,17 +19,8 @@ export class ReviewThreadHandler extends BaseActivityHandler {
     };
   }
 
-  getMetrics(event: Event): ActivityMetrics {
-    return {};
-    // const details = event.data as PullRequestReviewThreadEventData;
-    // return {
-    //   commentsInThread: details.commentCount || 0,
-    //   timeToResolve: details.resolved ? TimeUtils.calculateTimeBetween(details.createdAt, details.resolvedAt) : 0,
-    // };
-  }
-
   generateDescription(event: Event): string {
-    const details = event.data as PullRequestReviewThreadEventData;
+    const details = event.data as GithubPullRequestReviewThreadEventData;
     const action = details.resolved ? 'Resolved' : 'Unresolved';
     return `${action} review thread on PR #${details.prNumber}`;
   }

@@ -1,4 +1,4 @@
-import { CommitData } from '@codeheroes/providers';
+import { GithubCommitData } from '@codeheroes/providers';
 import {
   CommonMappedData,
   CommonPayload,
@@ -38,7 +38,7 @@ export abstract class GitHubParser<T extends CommonPayload, R extends CommonMapp
     };
   }
 
-  protected mapCommits(commits: GitHubCommit[]): CommitData[] {
+  protected mapCommits(commits: GitHubCommit[]): GithubCommitData[] {
     return commits.map((commit) => ({
       id: commit.id,
       message: commit.message,

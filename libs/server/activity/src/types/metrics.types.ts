@@ -8,28 +8,14 @@ export interface PushActivityMetrics extends ActivityMetrics {
 
 export interface PullRequestActivityMetrics extends ActivityMetrics {
   commits: number;
-  // additions: number;
-  // deletions: number;
-  // changedFiles: number;
-  // timeInvested: number;
 }
 
 export interface CodeMetrics extends ActivityMetrics {
   commits: number;
-  // additions: number;
-  // deletions: number;
-  // changedFiles: number;
 }
 
 export interface PullRequestMetrics extends ActivityMetrics {
   commits: number;
-  // additions: number;
-  // deletions: number;
-  // changedFiles: number;
-  // timeToMerge?: number;
-  // timeToFirstReview?: number;
-  // reviewCount: number;
-  // commentCount: number;
 }
 
 export interface ReviewMetrics extends ActivityMetrics {

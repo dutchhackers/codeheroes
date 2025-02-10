@@ -1,6 +1,6 @@
 import { GitHubBaseEventData } from './base-event.model';
 
-export interface PullRequestReviewCommentEventData extends GitHubBaseEventData {
+export interface GithubPullRequestReviewCommentEventData extends GitHubBaseEventData {
   repository: {
     id: string;
     name: string;

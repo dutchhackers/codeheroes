@@ -1,13 +1,13 @@
 import { GitHubBaseEventData, Sender } from './base-event.model';
 
-export interface PullRequestMetrics {
+export interface GithubPullRequestMetrics {
   commits: number;
   additions: number;
   deletions: number;
   changedFiles: number;
 }
 
-export interface PullRequestEventData extends GitHubBaseEventData {
+export interface GithubPullRequestEventData extends GitHubBaseEventData {
   action: 'opened' | 'closed' | 'reopened' | 'synchronize' | 'edited' | string;
   prNumber: number;
   title: string;
@@ -18,5 +18,5 @@ export interface PullRequestEventData extends GitHubBaseEventData {
   updatedAt: string;
   mergedAt?: string;
   mergedBy?: Sender;
-  metrics?: PullRequestMetrics;
+  metrics?: GithubPullRequestMetrics;
 }
