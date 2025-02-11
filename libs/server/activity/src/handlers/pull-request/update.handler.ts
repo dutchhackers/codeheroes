@@ -3,7 +3,7 @@ import { GithubPullRequestEventData } from '@codeheroes/providers';
 import { ActivityType, PullRequestActivityData, PullRequestActivityMetrics } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
 
-export class PrUpdateHandler extends BaseActivityHandler {
+export class PrUpdateHandler extends BaseActivityHandler<PullRequestActivityMetrics> {
   protected activityType = ActivityType.PR_UPDATED;
   protected eventTypes = ['pull_request'];
   protected eventActions = ['synchronize'];

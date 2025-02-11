@@ -3,7 +3,7 @@ import { GithubPushEventData } from '@codeheroes/providers';
 import { BaseActivityHandler } from '../base/base.handler';
 import { ActivityType, PushActivityData, PushActivityMetrics } from '../../types';
 
-export class PushHandler extends BaseActivityHandler {
+export class PushHandler extends BaseActivityHandler<PushActivityMetrics> {
   protected eventActions?: string[];
   protected activityType = ActivityType.CODE_PUSH;
   protected eventTypes = ['push'];

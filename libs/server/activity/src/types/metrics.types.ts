@@ -1,15 +1,10 @@
-// Base metrics interface
-export interface ActivityMetrics {
-  [key: string]: number | undefined;
-}
-
 // Code activity metrics
-export interface PushActivityMetrics extends ActivityMetrics {
+export interface PushActivityMetrics {
   commits: number;
 }
 
 // Pull request metrics
-export interface PullRequestActivityMetrics extends ActivityMetrics {
+export interface PullRequestActivityMetrics {
   commits: number;
   additions: number;
   deletions: number;
@@ -17,7 +12,7 @@ export interface PullRequestActivityMetrics extends ActivityMetrics {
 }
 
 // Review metrics
-export interface ReviewActivityMetrics extends ActivityMetrics {
+export interface ReviewActivityMetrics {
   commentCount?: number;
   threadCount?: number;
   timeToComplete?: number;
@@ -25,14 +20,22 @@ export interface ReviewActivityMetrics extends ActivityMetrics {
 }
 
 // Thread metrics
-export interface ReviewThreadActivityMetrics extends ActivityMetrics {
+export interface ReviewThreadActivityMetrics {
   commentCount: number;
   timeToResolve?: number;
 }
 
 // Issue metrics
-export interface IssueActivityMetrics extends ActivityMetrics {
+export interface IssueActivityMetrics {
   commentCount?: number;
   timeToClose?: number;
   timeToFirstResponse?: number;
 }
+
+export type ActivityMetrics =
+  | PushActivityMetrics
+  | PullRequestActivityMetrics
+  | ReviewActivityMetrics
+  | ReviewThreadActivityMetrics
+  | IssueActivityMetrics
+  | undefined;

@@ -1,7 +1,8 @@
 import { Event } from '@codeheroes/event';
-import { ActivityData, ActivityHandler, ActivityType, ActivityMetrics } from '../../types';
+import { ActivityData, ActivityHandler, ActivityType } from '../../types';
+import { ActivityMetrics } from '../../types/metrics.types';
 
-export abstract class BaseActivityHandler implements ActivityHandler {
+export abstract class BaseActivityHandler<T extends ActivityMetrics | undefined = undefined> implements ActivityHandler {
   protected abstract activityType: ActivityType;
   protected abstract eventTypes: string[];
   protected abstract eventActions?: string[];
@@ -28,7 +29,7 @@ export abstract class BaseActivityHandler implements ActivityHandler {
       return {
         ...activityData,
         metrics,
-      };
+      } as ActivityData;
     }
 
     return activityData;
@@ -38,8 +39,8 @@ export abstract class BaseActivityHandler implements ActivityHandler {
 
   abstract generateDescription(event: Event): string;
 
-  protected calculateMetrics(event: Event): ActivityMetrics | undefined {
-    return undefined;
+  protected calculateMetrics(event: Event): T {
+    return undefined as T;
   }
 
   protected formatNumber(num: number): string {
