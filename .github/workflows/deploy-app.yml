@@ -1,0 +1,40 @@
+name: deploy-to-test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    environment:
+      name: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4.0.0
+        with:
+          node-version: 18
+
+      - name: Install node modules
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Build artifact
+        run: npx nx run web:build
+
+      # - name: Prepare deploy
+      #   run: |
+      #     cp -f apps/web/server/.firebaserc ./
+      #     cp -f apps/web/server/firebase.json ./
+
+      - name: Deploy Hosting to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          channelId: live
