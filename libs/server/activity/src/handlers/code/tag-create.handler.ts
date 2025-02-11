@@ -14,7 +14,7 @@ export class TagCreateHandler extends BaseActivityHandler {
     return details.refType === 'tag';
   }
 
-  handle(event: Event): CreateTagActivityData {
+  handleActivity(event: Event): CreateTagActivityData {
     const details = event.data as GithubCreateEventData;
     return {
       type: 'create_tag',

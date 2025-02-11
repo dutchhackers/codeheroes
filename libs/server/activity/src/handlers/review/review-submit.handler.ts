@@ -1,24 +1,20 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestReviewEventData } from '@codeheroes/providers';
+import { ActivityType, ReviewActivityData } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
-import {
-  ActivityType,
-  ReviewActivityData,
-  ReviewMetrics
-} from '../../types';
 
 export class ReviewSubmitHandler extends BaseActivityHandler {
   protected activityType = ActivityType.PR_REVIEW_SUBMITTED;
   protected eventTypes = ['pull_request_review'];
   protected eventActions = ['submitted'];
 
-  handle(event: Event): ReviewActivityData {
+  handleActivity(event: Event): ReviewActivityData {
     const details = event.data as GithubPullRequestReviewEventData;
     return {
       type: 'review',
       prNumber: details.prNumber,
       state: details.state,
-      submittedAt: details.submittedAt
+      submittedAt: details.submittedAt,
     };
   }
 

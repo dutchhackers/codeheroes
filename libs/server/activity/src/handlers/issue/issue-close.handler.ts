@@ -1,15 +1,14 @@
 import { Event } from '@codeheroes/event';
 import { GithubIssueEventData } from '@codeheroes/providers';
+import { ActivityType, IssueActivityData } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
-import { ActivityType, IssueActivityData, ActivityMetrics } from '../../types';
-import { TimeUtils } from '@codeheroes/common';
 
 export class IssueCloseHandler extends BaseActivityHandler {
   protected activityType = ActivityType.ISSUE_CLOSED;
   protected eventTypes = ['issues'];
   protected eventActions = ['closed'];
 
-  handle(event: Event): IssueActivityData {
+  handleActivity(event: Event): IssueActivityData {
     const details = event.data as GithubIssueEventData;
     return {
       type: 'issue',
@@ -19,7 +18,6 @@ export class IssueCloseHandler extends BaseActivityHandler {
       stateReason: details.stateReason,
     };
   }
-
 
   generateDescription(event: Event): string {
     const details = event.data as GithubIssueEventData;

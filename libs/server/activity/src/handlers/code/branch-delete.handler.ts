@@ -14,7 +14,7 @@ export class BranchDeleteHandler extends BaseActivityHandler {
     return details.refType === 'branch';
   }
 
-  handle(event: Event): DeleteBranchActivityData {
+  handleActivity(event: Event): DeleteBranchActivityData {
     const details = event.data as GithubDeleteEventData;
     return {
       type: 'delete_branch',

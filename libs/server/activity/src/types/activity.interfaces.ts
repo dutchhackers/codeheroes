@@ -1,7 +1,13 @@
 import { BaseDocument, ConnectedAccountProvider } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { ActivityType } from './activity.types';
-import { ActivityMetrics } from './metrics.types';
+import {
+  IssueActivityMetrics,
+  PullRequestActivityMetrics,
+  PushActivityMetrics,
+  ReviewActivityMetrics,
+  ReviewThreadActivityMetrics
+} from './metrics.types';
 
 export interface ActivityHandler {
   canHandle(event: Event): boolean;
@@ -10,9 +16,9 @@ export interface ActivityHandler {
   getActivityType(): ActivityType;
 }
 
-export interface BaseActivityData {
+export interface BaseActivityData<T = undefined> {
   type: string;
-  metrics?: ActivityMetrics;
+  metrics?: T;
 }
 
 export interface UserActivity extends BaseDocument {
@@ -37,7 +43,7 @@ export interface ActivityProcessingResult {
 }
 
 // Activity Data Types
-export interface IssueActivityData extends BaseActivityData {
+export interface IssueActivityData extends BaseActivityData<IssueActivityMetrics> {
   type: 'issue';
   issueNumber: number;
   title: string;
@@ -45,7 +51,7 @@ export interface IssueActivityData extends BaseActivityData {
   stateReason?: string | null;
 }
 
-export interface PullRequestActivityData extends BaseActivityData {
+export interface PullRequestActivityData extends BaseActivityData<PullRequestActivityMetrics> {
   type: 'pull_request';
   prNumber: number;
   title: string;
@@ -54,20 +60,20 @@ export interface PullRequestActivityData extends BaseActivityData {
   action: string;
 }
 
-export interface PushActivityData extends BaseActivityData {
+export interface PushActivityData extends BaseActivityData<PushActivityMetrics> {
   type: 'push';
   branch: string;
   commitCount: number;
 }
 
-export interface ReviewActivityData extends BaseActivityData {
+export interface ReviewActivityData extends BaseActivityData<ReviewActivityMetrics> {
   type: 'review';
   prNumber: number;
   state: 'approved' | 'changes_requested' | 'commented' | 'dismissed';
   submittedAt: string;
 }
 
-export interface ReviewThreadActivityData extends BaseActivityData {
+export interface ReviewThreadActivityData extends BaseActivityData<ReviewThreadActivityMetrics> {
   type: 'review_thread';
   prNumber: number;
   threadId: number;
