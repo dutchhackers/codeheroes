@@ -7,7 +7,7 @@ const firebasercConfig = firebasercTemplate.replace('${FIREBASE_PROJECT_ID}', pr
 fs.writeFileSync('.firebaserc', firebasercConfig);
 
 // Generate environment.prod.ts file
-const envTemplate = fs.readFileSync('apps/web/src/environments/environment.prod.ts.template', 'utf8');
+const envTemplate = fs.readFileSync('apps/web/src/environments/environment.ts.template', 'utf8');
 const envConfig = envTemplate
   .replace('${FIREBASE_API_KEY}', process.env.FIREBASE_API_KEY)
   .replace('${FIREBASE_AUTH_DOMAIN}', process.env.FIREBASE_AUTH_DOMAIN)
