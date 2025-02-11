@@ -38,6 +38,9 @@ jobs:
         env:
           CI: true
 
+      - name: Setup Firebase
+        run: npm run setup
+
       - name: Test apps
         uses: mansagroup/nrwl-nx-action@v3
         with:
