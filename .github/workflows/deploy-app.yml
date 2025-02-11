@@ -16,12 +16,15 @@ jobs:
 
       - uses: actions/setup-node@v4.0.0
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install node modules
         run: npm ci
         env:
           CI: true
+
+      - name: Setup Firebase
+        run: npm run setup
 
       - name: Build artifact
         run: npx nx run web:build
