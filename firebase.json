@@ -7,7 +7,7 @@
     "indexes": "apps/firebase-app/firestore.indexes.json"
   },
   "hosting": {
-    "public": "apps/firebase-app/public",
+    "public": "dist/apps/web",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
