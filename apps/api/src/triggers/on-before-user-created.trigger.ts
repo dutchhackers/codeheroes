@@ -3,7 +3,7 @@ import { HttpsError } from 'firebase-functions/v2/https';
 import { DEFAULT_REGION, UserService } from '@codeheroes/common';
 import { logger } from '@codeheroes/common';
 
-const ALLOWED_DOMAIN = '@domain.com';
+const ALLOWED_DOMAINS = ['@domain.com', '@example.com'];
 
 export const onBeforeUserCreated = beforeUserCreated(
   {
@@ -27,8 +27,10 @@ export const onBeforeUserCreated = beforeUserCreated(
         throw new HttpsError('failed-precondition', message);
       }
 
-      if (!user.email.endsWith(ALLOWED_DOMAIN)) {
-        const message = `Only ${ALLOWED_DOMAIN} email addresses are allowed`;
+      const isAllowedDomain = ALLOWED_DOMAINS.some((domain) => user.email?.endsWith(domain));
+      if (!isAllowedDomain) {
+        const domainsText = ALLOWED_DOMAINS.length === 1 ? 'domain is' : 'domains are';
+        const message = `Email domain not allowed. Allowed ${domainsText}: ${ALLOWED_DOMAINS.join(', ')}`;
         logger.error(message);
         throw new HttpsError('permission-denied', message);
       }
@@ -38,6 +40,11 @@ export const onBeforeUserCreated = beforeUserCreated(
       // Check if user already exists with this email
       const existingUser = await userService.findUserByEmail(user.email);
       if (existingUser) {
+        logger.info('Found existing user by email:', {
+          email: user.email,
+          existingUserId: existingUser.id,
+          newUid: user.uid,
+        });
         // If user exists, just update the UID
         await userService.updateUser(existingUser.id, {
           uid: user.uid,
