@@ -1,7 +1,4 @@
 {
-  "database": {
-    "rules": "apps/firebase-app/database.rules.json"
-  },
   "firestore": {
     "rules": "apps/firebase-app/firestore.rules",
     "indexes": "apps/firebase-app/firestore.indexes.json"

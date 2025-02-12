@@ -5,7 +5,7 @@ import { logger } from '@codeheroes/common';
 
 const ALLOWED_DOMAIN = '@domain.com';
 
-export const onNewUserCreation = beforeUserCreated(
+export const onBeforeUserCreated = beforeUserCreated(
   {
     region: DEFAULT_REGION,
   },
