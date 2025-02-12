@@ -3,7 +3,7 @@ import { HttpsError } from 'firebase-functions/v2/https';
 import { DEFAULT_REGION, UserService } from '@codeheroes/common';
 import { logger } from '@codeheroes/common';
 
-const ALLOWED_DOMAIN = '@domain.com';
+const ALLOWED_DOMAIN = '@framna.com';
 
 export const onBeforeUserCreated = beforeUserCreated(
   {

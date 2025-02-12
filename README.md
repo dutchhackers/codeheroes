@@ -15,21 +15,27 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
 ### Libraries
 
 #### Shared Libraries (Cross-platform)
+
 > Libraries that can be used in both server and client applications
+
 - [@shared/github-interfaces](libs/shared/github-interfaces) - GitHub interface definitions
 
 #### Server Libraries (Backend Only)
+
 - [@codeheroes/activity](libs/server/activity) - Activity tracking and processing
 - [@codeheroes/common](libs/server/common) - Core utilities and shared functions
 - [@codeheroes/event](libs/server/event) - Event handling and processing
 - [@codeheroes/gamify](libs/server/gamify) - Gamification logic and rules
 
 #### Legacy Libraries (Deprecated)
+
 > The following libraries are deprecated and will be removed in future versions:
+
 - [@codeheroes/migration](libs/migration/migration) - Legacy Core library
 - [@codeheroes/migration-shared](libs/migration/migration-shared) - Legacy core models library
 
 > Note: Database seeds library is maintained for development purposes:
+
 - [@codeheroes/database-seeds](libs/database-seeds) - Database seeding tools
 
 ## Prerequisites
@@ -41,27 +47,40 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
 ## Getting Started
 
 1. Install dependencies:
+
    ```sh
    npm install
    ```
 
 2. Configure Firebase project:
-   - Create a `.env` file in the root directory
-   - Set your Firebase project ID:
+
+   - Create a `.env` file in the root directory with the following variables:
      ```sh
      FIREBASE_PROJECT_ID=your-firebase-project-id
+     FIREBASE_API_KEY=your-firebase-api-key
+     FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+     FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+     FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+     FIREBASE_APP_ID=your-app-id
      ```
-   - Run the setup script:
+   - These values can be found in your Firebase Console under Project Settings > General
+   - Run the setup script to generate environment files:
      ```sh
      npm run setup
      ```
+     This will:
+   - Generate `.firebaserc` file with your project ID
+   - Create environment files for the web application:
+     - `apps/web/src/environments/environment.local.ts` (development)
+     - `apps/web/src/environments/environment.prod.ts` (production)
 
 3. Start development environment:
+
    - To start the Firebase emulator suite with the firebase-app:
      ```sh
      nx serve firebase-app
      ```
-   This will:
+     This will:
    - Start the Firebase emulators (Functions, Firestore, Auth, etc.)
    - Watch for code changes and rebuild automatically
    - Import/export emulator data from `.emulators` directory
