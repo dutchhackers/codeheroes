@@ -1,0 +1,53 @@
+@let loginError = errorMessage();
+
+<div class="container h-full mx-auto login-container pt-10 text-center">
+  <div class="h-full flex flex-col">
+    @if (darkModeEnabled()) {
+      <ng-container
+        [ngTemplateOutlet]="videoTemplate"
+        [ngTemplateOutletContext]="{ source: 'videos/login-video-dark.mp4' }"
+      ></ng-container>
+    } @else {
+      <ng-container
+        [ngTemplateOutlet]="videoTemplate"
+        [ngTemplateOutletContext]="{ source: 'videos/login-video.mp4' }"
+      ></ng-container>
+    }
+
+    <h1 class="title">
+      <span class="inline-block ease-in-out">C</span>
+      <span class="inline-block ease-in-out">o</span>
+      <span class="inline-block ease-in-out">d</span>
+      <span class="inline-block ease-in-out">e</span>
+      <span class="inline-block ease-in-out">h</span>
+      <span class="inline-block ease-in-out">e</span>
+      <span class="inline-block ease-in-out">r</span>
+      <span class="inline-block ease-in-out">o</span>
+      <span class="inline-block ease-in-out">e</span>
+      <span class="inline-block ease-in-out">s</span>
+    </h1>
+
+    <div class="mt-auto mx-auto flex flex-col w-fit justify-center login-button-container">
+      @if (loginError) {
+        <app-notification type="error" class="mb-4">
+          {{ loginError }}
+        </app-notification>
+      }
+
+      <button
+        class="flex items-center object-center justify-center opacity-0 mb-8"
+        [disabled]="isProcessing()"
+        (click)="signIn()"
+      >
+        {{ isProcessing() ? 'Signing in...' : 'Sign in with Google' }}
+        <img src="icons/google.svg" alt="Google" class="inline-block w-4 ml-2" />
+      </button>
+    </div>
+  </div>
+</div>
+
+<ng-template #videoTemplate let-source="source">
+  <video #video muted class="block w-full mx-auto mb-8" oncanplay="this.muted = true;" (canplay)="canPlayVideo()">
+    <source [src]="source" type="video/mp4" />
+  </video>
+</ng-template>

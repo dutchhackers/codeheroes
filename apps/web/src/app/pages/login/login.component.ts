@@ -1,33 +1,24 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { Auth, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
+import { asyncScheduler } from 'rxjs';
+import { darkModeEnabled } from '../../core/utils';
+import { NgTemplateOutlet } from '@angular/common';
+import { NotificationComponent } from '../../components';
 
 @Component({
-  template: `
-    <div class="w-96 mx-auto my-8 p-4 border-2 border-slate-300 rounded-lg">
-      <div class="flex items-center mb-4">
-        <img src="images/logo.svg" alt="Codeheroes logo" class="w-6 mr-3 -mt-2" />
-        <h1>Login</h1>
-      </div>
-
-      <button [disabled]="isProcessing()" (click)="signIn()">
-        {{ isProcessing() ? 'Signing in...' : 'Sign in with Google' }}
-      </button>
-      @if (errorMessage()) {
-        <p class="error-message">{{ errorMessage() }}</p>
-      }
-    </div>
-  `,
-  styles: `
-    .error-message {
-      color: #dc3545;
-      margin-top: 0.5rem;
-    }
-  `,
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
+  imports: [NgTemplateOutlet, NotificationComponent],
 })
 export class LoginComponent {
+  protected videoElement = viewChild<ElementRef<HTMLVideoElement>>('video');
+
   readonly #auth = inject(Auth);
+
   protected readonly errorMessage = signal<string>('');
   protected readonly isProcessing = signal(false);
+
+  protected darkModeEnabled = darkModeEnabled;
 
   async signIn(): Promise<boolean> {
     this.errorMessage.set('');
@@ -43,6 +34,20 @@ export class LoginComponent {
     } finally {
       this.isProcessing.set(false);
     }
+  }
+
+  public canPlayVideo() {
+    const element = this.videoElement()?.nativeElement;
+    if (!element) {
+      return;
+    }
+
+    const duration = element.duration - 0.5;
+    element.play();
+
+    asyncScheduler.schedule(() => {
+      element.classList.add('finished');
+    }, duration * 1000);
   }
 
   async #signInFirebase(): Promise<string | undefined> {
