@@ -5,12 +5,12 @@
     @if (darkModeEnabled()) {
       <ng-container
         [ngTemplateOutlet]="videoTemplate"
-        [ngTemplateOutletContext]="{ source: 'videos/login-video-dark.mov' }"
+        [ngTemplateOutletContext]="{ source: 'videos/login-video-dark.mp4' }"
       ></ng-container>
     } @else {
       <ng-container
         [ngTemplateOutlet]="videoTemplate"
-        [ngTemplateOutletContext]="{ source: 'videos/login-video.mov' }"
+        [ngTemplateOutletContext]="{ source: 'videos/login-video.mp4' }"
       ></ng-container>
     }
 
