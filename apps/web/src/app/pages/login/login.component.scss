@@ -1,0 +1,51 @@
+.login-container {
+  width: 56vmin;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  @media screen and (max-width: 768px) {
+    width: 67vmin;
+  }
+
+  video {
+    background-color: transparent;
+    clip-path: inset(0 1px 2px 1px);
+    transition: width 0.75s ease;
+
+    &.finished {
+      width: 50%;
+    }
+  }
+
+  .title {
+    span {
+      opacity: 0;
+      transform: translateY(15px);
+      transition:
+        opacity 0.25s ease,
+        transform 0.35s ease;
+
+      @for $i from 1 through 10 {
+        &:nth-child(#{$i}) {
+          transition-delay: 0.1s * $i;
+        }
+      }
+    }
+  }
+
+  .login-button-container button {
+    transition: opacity 0.5s 1s ease;
+  }
+
+  video.finished {
+    & ~ .title span {
+      opacity: 1;
+      transform: translateY(0px);
+    }
+
+    & ~ .login-button-container button {
+      opacity: 1;
+    }
+  }
+}
