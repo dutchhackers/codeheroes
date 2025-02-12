@@ -3,11 +3,12 @@ import { Auth, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
 import { asyncScheduler } from 'rxjs';
 import { darkModeEnabled } from '../../core/utils';
 import { NgTemplateOutlet } from '@angular/common';
+import { NotificationComponent } from '../../components';
 
 @Component({
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, NotificationComponent],
 })
 export class LoginComponent {
   protected videoElement = viewChild<ElementRef<HTMLVideoElement>>('video');

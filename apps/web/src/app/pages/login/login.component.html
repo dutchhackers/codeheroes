@@ -1,3 +1,5 @@
+@let loginError = errorMessage();
+
 <div class="container h-full mx-auto login-container relative pt-10 text-center">
   <div class="h-full flex flex-col">
     @if (darkModeEnabled()) {
@@ -26,10 +28,10 @@
     </h1>
 
     <div class="mt-auto mx-auto flex flex-col w-fit justify-center login-button-container">
-      @if (errorMessage()) {
-        <div class="bg-red-200 text-sm font-semibold text-red-800 rounded-md mb-4 p-4 dark:bg-red-950 dark:text-white">
-          {{ errorMessage() }}
-        </div>
+      @if (loginError) {
+        <app-notification type="error" class="mb-4">
+          {{ loginError }}
+        </app-notification>
       }
 
       <button
