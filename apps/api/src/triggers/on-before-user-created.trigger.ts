@@ -1,9 +1,7 @@
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
 import { HttpsError } from 'firebase-functions/v2/https';
-import { DEFAULT_REGION, UserService } from '@codeheroes/common';
+import { DEFAULT_REGION, UserService, SettingsService } from '@codeheroes/common';
 import { logger } from '@codeheroes/common';
-
-const ALLOWED_DOMAIN = '@domain.com';
 
 export const onBeforeUserCreated = beforeUserCreated(
   {
@@ -27,10 +25,19 @@ export const onBeforeUserCreated = beforeUserCreated(
         throw new HttpsError('failed-precondition', message);
       }
 
-      if (!user.email.endsWith(ALLOWED_DOMAIN)) {
-        const message = `Only ${ALLOWED_DOMAIN} email addresses are allowed`;
-        logger.error(message);
-        throw new HttpsError('permission-denied', message);
+      // Check allowed domains from settings
+      const settingsService = new SettingsService();
+      const allowedDomains = await settingsService.getAllowedDomains();
+
+      // If there are allowed domains configured, enforce the restriction
+      if (allowedDomains.length > 0) {
+        const isAllowedDomain = allowedDomains.some((domain) => user.email?.endsWith(domain));
+        if (!isAllowedDomain) {
+          const domainsText = allowedDomains.length === 1 ? 'domain is' : 'domains are';
+          const message = `Email domain not allowed. Allowed ${domainsText}: ${allowedDomains.join(', ')}`;
+          logger.error(message);
+          throw new HttpsError('permission-denied', message);
+        }
       }
 
       const userService = new UserService();
@@ -38,6 +45,11 @@ export const onBeforeUserCreated = beforeUserCreated(
       // Check if user already exists with this email
       const existingUser = await userService.findUserByEmail(user.email);
       if (existingUser) {
+        logger.info('Found existing user by email:', {
+          email: user.email,
+          existingUserId: existingUser.id,
+          newUid: user.uid,
+        });
         // If user exists, just update the UID
         await userService.updateUser(existingUser.id, {
           uid: user.uid,

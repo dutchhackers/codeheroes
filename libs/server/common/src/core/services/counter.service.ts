@@ -21,7 +21,7 @@ export class CounterService extends BaseFirestoreService<CounterData> {
    * const userId = await getNextUserId(); // returns "10000000"
    * const nextUserId = await getNextUserId(); // returns "10000001"
    */
-  async getNextUserId(startAt = 10000000): Promise<string> {
+  async getNextUserId(startAt = 20000000): Promise<string> {
     return this.db.runTransaction(async (transaction) => {
       const doc = await transaction.get(this.counterRef);
       const currentId = doc.exists ? doc.data()?.nextUserId || startAt : startAt;
