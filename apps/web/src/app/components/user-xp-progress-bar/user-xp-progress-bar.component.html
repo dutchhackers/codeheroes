@@ -1,0 +1,24 @@
+@let user = this.user();
+
+@if (user) {
+  <div class="relative">
+    <div class="flex flex-row border-b border-primary bg-primary">
+      <div class="text-lg font-semibold w-12 h-12 bg-white flex justify-center items-center dark:bg-slate-800">
+        {{ user.level }}
+      </div>
+      <app-progress-bar
+        class="grow"
+        size="extra-large"
+        [percentage]="percentage()"
+        [rounded]="false"
+      ></app-progress-bar>
+      <div class="text-lg font-semibold w-12 h-12 bg-white flex justify-center items-center dark:bg-slate-800">
+        {{ user.level + 1 }}
+      </div>
+    </div>
+
+    <span class="absolute top-1/2 left-1/2 -translate-1/2 text-sm font-semibold leading-4 dark:text-black">
+      {{ user.xp }} / {{ user.xpToNextLevel }}
+    </span>
+  </div>
+}

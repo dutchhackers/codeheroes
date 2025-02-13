@@ -1,0 +1,32 @@
+@let activity = this.activity();
+
+<!-- Rounded card with box-shadow -->
+<div class="card rounded-lg shadow-sm p-4">
+  <div class="flex flex-row justify-between">
+    <div class="bg-orange-600 p-2 rounded-md inline-block text-xs text-white font-semibold uppercase">
+      {{ mapActivityType(activity.type) }}
+    </div>
+
+    <div class="bg-gray-600 inline-block rounded-md text-xs text-white font-semibold p-2">
+      +{{ activity.processingResult.xp.awarded }}XP
+    </div>
+  </div>
+
+  <!-- Card header -->
+  <div class="card-header">
+    <!-- Title -->
+    <h5 class="card-title">{{ activity.id }}</h5>
+    <!-- Subtitle -->
+    <h6 class="card-subtitle text-muted">{{ activity.createdAt | date: 'medium' }}</h6>
+  </div>
+  <!-- Card body -->
+  <div class="card-body">
+    <!-- Description -->
+    <p class="card-text italic text-slate-400">{{ activity.userFacingDescription }}</p>
+  </div>
+  <!-- Card footer -->
+  <div class="card-footer">
+    <!-- Button to view activity details -->
+    <!-- <a [routerLink]="['/activities', activity.id]" class="btn btn-primary">View details</a> -->
+  </div>
+</div>

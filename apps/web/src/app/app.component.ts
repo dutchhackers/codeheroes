@@ -1,13 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
 import { Router, RouterModule } from '@angular/router';
-import { ROUTES } from './core/const';
+import { ROUTES } from './core/constants';
 
 @Component({
-  imports: [RouterModule],
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
+  imports: [RouterModule],
 })
 export class AppComponent {
   #auth = inject(Auth);
@@ -20,7 +20,7 @@ export class AppComponent {
         return;
       }
 
-      this.#router.navigate([ROUTES.DASHBOARD]);
+      this.#router.navigate([ROUTES.PROFILE]);
     });
   }
 }

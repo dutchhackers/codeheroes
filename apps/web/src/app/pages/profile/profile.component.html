@@ -1,0 +1,33 @@
+@let user = this.user();
+
+<app-page>
+  <div class="flex flex-row justify-between items-start">
+    <!-- User details -->
+    <div class="flex items-center">
+      <app-avatar size="large" [user]="user"></app-avatar>
+
+      <div class="flex flex-col ml-6">
+        <h1>{{ user?.displayName }}</h1>
+
+        <div class="flex flex-row items-center">
+          Level:
+          <app-level-badge class="ml-1" size="small" [level]="user?.level || 0"></app-level-badge>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activites -->
+    <div class="w-1/2">
+      <h2 class="mb-4">Latest activities</h2>
+
+      @for (dayActivities of latestActivites() | keyvalue; track $index) {
+        <h3 class="text-lg font-semibold" [class.mt-8]="$first === false">
+          {{ dayActivities.key | date: 'mediumDate' }}
+        </h3>
+        @for (activity of dayActivities.value; track activity) {
+          <app-activity-card [class.mb-4]="$last === false" [activity]="activity"></app-activity-card>
+        }
+      }
+    </div>
+  </div>
+</app-page>
