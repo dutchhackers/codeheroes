@@ -1,10 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
-import { collection, collectionData, Firestore, orderBy, query, where } from '@angular/fire/firestore';
+import { collection, collectionData, Firestore, orderBy, query, where, limit } from '@angular/fire/firestore';
 import type { Observable } from 'rxjs';
 import { map, of } from 'rxjs';
 import type { IActivity, IUser } from '../interfaces';
-import { limitToLast } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -30,10 +29,11 @@ export class UserService {
     return collectionData<IUser | null>(queryResult).pipe(map((users) => users[0] || null));
   }
 
-  public getUserActivities(user: IUser, limit = 100): Observable<IActivity[]> {
+  public getUserActivities(user: IUser, maxActivities = 100): Observable<IActivity[]> {
     const queryResult = query(
       this.#collection(`/users/${user.id}/activities`),
-      limitToLast(limit),
+      where('type', '!=', 'PR_UPDATED'),
+      limit(maxActivities),
       orderBy('createdAt', 'desc'),
     );
     return collectionData<IActivity>(

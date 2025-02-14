@@ -1,22 +1,23 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { UserService } from '../../core/services';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivityCardComponent, AvatarComponent, LevelBadgeComponent, PageComponent } from '../../components';
+import { ActivitiesListComponent, AvatarComponent, LevelBadgeComponent, PageComponent } from '../../components';
 import { take, tap } from 'rxjs';
 import { groupActivitesPerDay } from '../../core/utils';
-import type { DayActivities } from '../../core/types';
-import { DatePipe, KeyValuePipe } from '@angular/common';
+import type { IDayActivity } from '../../core/interfaces';
 
 @Component({
   templateUrl: './profile.component.html',
-  imports: [AvatarComponent, LevelBadgeComponent, PageComponent, ActivityCardComponent, KeyValuePipe, DatePipe],
+  imports: [AvatarComponent, LevelBadgeComponent, PageComponent, ActivitiesListComponent],
 })
 export class ProfileComponent {
   #userService = inject(UserService);
 
   protected user = toSignal(this.#userService.getMe(), { initialValue: null });
 
-  protected latestActivites = signal<DayActivities>({});
+  protected numberOfActivities = 10;
+
+  protected latestActivites = signal<IDayActivity[]>([]);
 
   constructor() {
     effect(() => {
@@ -26,7 +27,7 @@ export class ProfileComponent {
       }
 
       this.#userService
-        .getUserActivities(user, 20)
+        .getUserActivities(user, this.numberOfActivities)
         .pipe(
           take(1),
           tap((activities) => this.latestActivites.set(groupActivitesPerDay(activities))),

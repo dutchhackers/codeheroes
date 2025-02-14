@@ -1,3 +1,4 @@
+export * from './activities-list/activities-list.component';
 export * from './activity-card/activity-card.component';
 export * from './avatar/avatar.component';
 export * from './level-badge/level-badge.component';

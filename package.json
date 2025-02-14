@@ -19,6 +19,7 @@
     "@angular/router": "~19.1.0",
     "@angular/service-worker": "^19.0.0",
     "@tailwindcss/postcss": "^4.0.6",
+    "angular-svg-icon": "^19.1.1",
     "axios": "^1.6.0",
     "class-transformer": "^0.5.1",
     "firebase": "^11.2.0",

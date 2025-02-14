@@ -7,7 +7,7 @@ import { InViewDirective } from '../../core/directives';
   template: `<div
     appInView
     (inView)="animate()"
-    class="overflow-hidden bg-gray-300 relative"
+    class="overflow-hidden bg-gray-300 dark:bg-gray-400 relative"
     [class.h-4]="size() === 'medium'"
     [class.h-8]="size() === 'large'"
     [class.h-12]="size() === 'extra-large'"

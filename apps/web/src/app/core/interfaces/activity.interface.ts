@@ -1,4 +1,4 @@
-import type { ActivityType, EventType } from '../types';
+import type { ActivityDataType, ActivityType, EventType } from '../types';
 
 export interface IActivity {
   id: string;
@@ -52,7 +52,7 @@ export interface IMetrics {
 
 export interface IActivityData {
   prNumber?: number;
-  type: 'pull_request' | 'push' | 'review' | 'review_thread';
+  type: ActivityDataType;
   title?: string;
   merged?: boolean;
   action?: string;
@@ -61,4 +61,8 @@ export interface IActivityData {
   commitCount?: number;
   state?: 'approved' | 'commented';
   submittedAt?: string;
+  ref?: string;
+  metrics?: {
+    commits?: number;
+  };
 }

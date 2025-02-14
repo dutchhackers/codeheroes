@@ -1,7 +1,7 @@
 @let user = this.user();
 
 <app-page>
-  <div class="flex flex-row justify-between items-start">
+  <div class="flex flex-col lg:flex-row justify-between items-start">
     <!-- User details -->
     <div class="flex items-center">
       <app-avatar size="large" [user]="user"></app-avatar>
@@ -17,17 +17,10 @@
     </div>
 
     <!-- Activites -->
-    <div class="w-1/2">
-      <h2 class="mb-4">Latest activities</h2>
+    <div class="w-full mt-12 lg:mt-0 lg:w-1/2">
+      <h2 class="mb-4">Latest {{ numberOfActivities }} activities</h2>
 
-      @for (dayActivities of latestActivites() | keyvalue; track $index) {
-        <h3 class="text-lg font-semibold" [class.mt-8]="$first === false">
-          {{ dayActivities.key | date: 'mediumDate' }}
-        </h3>
-        @for (activity of dayActivities.value; track activity) {
-          <app-activity-card [class.mb-4]="$last === false" [activity]="activity"></app-activity-card>
-        }
-      }
+      <app-activities-list [activities]="latestActivites()"></app-activities-list>
     </div>
   </div>
 </app-page>
