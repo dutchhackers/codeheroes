@@ -33,7 +33,7 @@ export class UserService {
   public getUserActivities(user: IUser, maxActivities = 100): Observable<IActivity[]> {
     const queryResult = query(
       this.#collection(`/users/${user.id}/activities`),
-      where('type', '!=', 'PR_UPDATED'),
+      where('processingResult.xp.awarded', '>', 0),
       limit(maxActivities),
       orderBy('createdAt', 'desc'),
     );
