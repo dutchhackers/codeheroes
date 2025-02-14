@@ -1,7 +1,41 @@
-@use './styles/defaults';
 @use './styles/tailwind';
+
+:root {
+  --primary: #00bc7d;
+}
+
+@layer base {
+  h1 {
+    @apply text-2xl sm:text-3xl uppercase tracking-normal font-extrabold;
+  }
+
+  h2 {
+    @apply text-xl sm:text-2xl  uppercase tracking-normal;
+  }
+
+  h3 {
+    @apply text-lg uppercase tracking-normal;
+  }
+
+  button {
+    @apply px-4 py-2 text-sm font-semibold border-2 uppercase rounded-md cursor-pointer hover:bg-slate-200 disabled:cursor-not-allowed;
+  }
+}
 
 html,
 body {
   height: 100%;
+}
+
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.border-primary {
+  border-color: var(--primary);
+}
+
+svg-icon svg {
+  max-width: 100%;
+  max-height: 100%;
 }

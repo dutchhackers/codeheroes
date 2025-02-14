@@ -1,0 +1,35 @@
+@let activity = this.activity();
+@let animate = this.animateIn();
+
+@if (animate) {
+  <span appInView (inView)="$event && card.classList.add('!opacity-100', '!scale-100')"></span>
+}
+<div
+  #card
+  class="rounded-lg shadow-sm p-4 bg-slate-100 dark:bg-slate-900 transition-all"
+  [class.opacity-0]="animate"
+  [class.scale-75]="animate"
+>
+  <div class="flex flex-row justify-between">
+    <div
+      class="p-2 rounded-md inline-block text-xs text-white font-semibold uppercase {{ activityColor[activity.type] }}"
+    >
+      {{ mapActivityType(activity.type) }}
+    </div>
+
+    <div class="bg-gray-600 inline-block rounded-md text-xs text-white font-semibold p-2">
+      +{{ activity.processingResult.xp.awarded }}XP
+    </div>
+  </div>
+
+  <div class="flex flex-row items-center text-slate-500 text-sm my-2">
+    <svg-icon
+      src="icons/clock.svg"
+      class="inline-block w-4 h-4 mr-1 text-slate-500"
+      [svgStyle]="{ stroke: 'currentColor' }"
+    ></svg-icon>
+    {{ activity.createdAt | date: 'HH:mm' }}
+  </div>
+
+  <p class="italic text-slate-400">{{ activity.userFacingDescription }}</p>
+</div>

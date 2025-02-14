@@ -1,8 +1,8 @@
 {
   "name": "Codeheroes",
   "short_name": "Codeheroes",
-  "theme_color": "#d400cd",
-  "background_color": "#d400cd",
+  "theme_color": "#00bc7d",
+  "background_color": "#ccc",
   "display": "standalone",
   "display-overrides": ["standalone"],
   "scope": "./",

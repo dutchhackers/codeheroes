@@ -1,12 +1,17 @@
-import { ApplicationConfig, inject, isDevMode, provideZoneChangeDetection } from '@angular/core';
-import { provideServiceWorker } from '@angular/service-worker';
+import { provideHttpClient } from '@angular/common/http';
+import type { ApplicationConfig } from '@angular/core';
+import { inject, isDevMode, provideZoneChangeDetection } from '@angular/core';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { provideRouter, Router, withInMemoryScrolling, withViewTransitions } from '@angular/router';
-import { appRoutes } from './app.routes';
-import { environment } from '../environments/environment';
 import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
 import { connectFirestoreEmulator, getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { provideFunctions, getFunctions, connectFunctionsEmulator } from '@angular/fire/functions';
+import { provideRouter, Router, withInMemoryScrolling, withViewTransitions } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
+import { provideAngularSvgIcon } from 'angular-svg-icon';
+
+import { environment } from '../environments/environment';
+
+import { appRoutes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -60,5 +65,7 @@ export const appConfig: ApplicationConfig = {
       }
       return functions;
     }),
+    provideAngularSvgIcon(),
+    provideHttpClient(),
   ],
 };
