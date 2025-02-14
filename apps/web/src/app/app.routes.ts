@@ -1,5 +1,6 @@
 import { AuthGuard, redirectLoggedInTo, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 import type { Routes } from '@angular/router';
+
 import { ROUTES } from './core/constants';
 import { MainLayoutComponent } from './layout/main-layout.component';
 

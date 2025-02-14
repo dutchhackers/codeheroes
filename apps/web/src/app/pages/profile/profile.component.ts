@@ -1,10 +1,11 @@
 import { Component, effect, inject, signal } from '@angular/core';
-import { UserService } from '../../core/services';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivitiesListComponent, AvatarComponent, LevelBadgeComponent, PageComponent } from '../../components';
 import { take, tap } from 'rxjs';
-import { groupActivitesPerDay } from '../../core/utils';
+
+import { ActivitiesListComponent, AvatarComponent, LevelBadgeComponent, PageComponent } from '../../components';
 import type { IDayActivity } from '../../core/interfaces';
+import { UserService } from '../../core/services';
+import { groupActivitesPerDay } from '../../core/utils';
 
 @Component({
   templateUrl: './profile.component.html',

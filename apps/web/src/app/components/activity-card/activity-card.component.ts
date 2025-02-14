@@ -1,9 +1,11 @@
-import { Component, input } from '@angular/core';
-import type { IActivity } from '../../core/interfaces';
 import { DatePipe } from '@angular/common';
+import { Component, input } from '@angular/core';
+import { SvgIconComponent } from 'angular-svg-icon';
+
+import { InViewDirective } from '../../core/directives';
+import type { IActivity } from '../../core/interfaces';
 import { mapActivityType } from '../../core/mappings';
 import type { ActivityType } from '../../core/types';
-import { SvgIconComponent } from 'angular-svg-icon';
 
 @Component({
   selector: 'app-activity-card',
@@ -13,7 +15,7 @@ import { SvgIconComponent } from 'angular-svg-icon';
       display: block;
     }
   `,
-  imports: [DatePipe, SvgIconComponent],
+  imports: [DatePipe, SvgIconComponent, InViewDirective],
 })
 export class ActivityCardComponent {
   protected mapActivityType = mapActivityType;
@@ -30,4 +32,6 @@ export class ActivityCardComponent {
   };
 
   public activity = input.required<IActivity>();
+
+  public animateIn = input(false);
 }

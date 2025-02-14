@@ -1,6 +1,7 @@
-import { Component, computed, input } from '@angular/core';
-import type { IUser } from '../../core/interfaces';
 import { NgClass } from '@angular/common';
+import { Component, computed, input } from '@angular/core';
+
+import type { IUser } from '../../core/interfaces';
 
 @Component({
   selector: 'app-avatar',

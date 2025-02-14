@@ -15,7 +15,22 @@ module.exports = tseslint.config(
       eslinPluginPrettierRecommended,
     ],
     processor: angular.processInlineTemplates,
+    plugins: {
+      'simple-import-sort': require('eslint-plugin-simple-import-sort'),
+      import: require('eslint-plugin-import'),
+    },
     rules: {
+      'simple-import-sort/exports': 'error',
+      'import/order': [
+        'error',
+        {
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: false,
+          },
+          'newlines-between': 'always',
+        },
+      ],
       '@angular-eslint/directive-selector': [
         'error',
         {

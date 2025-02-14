@@ -1,7 +1,8 @@
-import { Component, input } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { ActivityCardComponent } from '../activity-card/activity-card.component';
+import { Component, input } from '@angular/core';
+
 import type { IDayActivity } from '../../core/interfaces';
+import { ActivityCardComponent } from '../activity-card/activity-card.component';
 
 @Component({
   selector: 'app-activities-list',
@@ -11,7 +12,7 @@ import type { IDayActivity } from '../../core/interfaces';
         {{ dayActivity.date | date: 'mediumDate' }}
       </h3>
       @for (activity of dayActivity.activities; track activity) {
-        <app-activity-card [class.mb-4]="$last === false" [activity]="activity"></app-activity-card>
+        <app-activity-card [class.mb-4]="$last === false" [animateIn]="true" [activity]="activity"></app-activity-card>
       }
     }
   `,

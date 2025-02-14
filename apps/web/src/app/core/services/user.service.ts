@@ -3,6 +3,7 @@ import { Auth } from '@angular/fire/auth';
 import { collection, collectionData, Firestore, orderBy, query, where, limit } from '@angular/fire/firestore';
 import type { Observable } from 'rxjs';
 import { map, of } from 'rxjs';
+
 import type { IActivity, IUser } from '../interfaces';
 
 @Injectable({

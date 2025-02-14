@@ -1,5 +1,6 @@
 import type { ElementRef } from '@angular/core';
 import { Component, input, viewChild } from '@angular/core';
+
 import { InViewDirective } from '../../core/directives';
 
 @Component({

@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
 import { Router, RouterModule } from '@angular/router';
+
 import { ROUTES } from './core/constants';
 
 @Component({

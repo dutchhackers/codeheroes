@@ -22,6 +22,8 @@
     "angular-svg-icon": "^19.1.1",
     "axios": "^1.6.0",
     "class-transformer": "^0.5.1",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "firebase": "^11.2.0",
     "firebase-admin": "^13.0.2",
     "firebase-functions": "^6.3.1",

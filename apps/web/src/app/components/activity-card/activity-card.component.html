@@ -1,7 +1,15 @@
 @let activity = this.activity();
+@let animate = this.animateIn();
 
-<!-- Rounded card with box-shadow -->
-<div class="rounded-lg shadow-sm p-4 bg-slate-100 dark:bg-slate-900">
+@if (animate) {
+  <span appInView (inView)="$event && card.classList.add('!opacity-100', '!scale-100')"></span>
+}
+<div
+  #card
+  class="rounded-lg shadow-sm p-4 bg-slate-100 dark:bg-slate-900 transition-all"
+  [class.opacity-0]="animate"
+  [class.scale-75]="animate"
+>
   <div class="flex flex-row justify-between">
     <div
       class="p-2 rounded-md inline-block text-xs text-white font-semibold uppercase {{ activityColor[activity.type] }}"

@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { UserService } from '../core/services';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { RouterOutlet } from '@angular/router';
+
 import { UserXpProgressBarComponent } from '../components';
+import { UserService } from '../core/services';
 
 @Component({
   template: `<app-user-xp-progress-bar [user]="user()"></app-user-xp-progress-bar> <router-outlet></router-outlet>`,

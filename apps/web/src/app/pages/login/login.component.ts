@@ -1,9 +1,11 @@
-import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import type { ElementRef } from '@angular/core';
+import { Component, inject, signal, viewChild } from '@angular/core';
 import { Auth, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
 import { asyncScheduler } from 'rxjs';
-import { darkModeEnabled } from '../../core/utils';
-import { NgTemplateOutlet } from '@angular/common';
+
 import { NotificationComponent } from '../../components';
+import { darkModeEnabled } from '../../core/utils';
 
 @Component({
   templateUrl: './login.component.html',
