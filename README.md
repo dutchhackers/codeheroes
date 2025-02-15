@@ -7,6 +7,7 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
 ### Applications
 
 - [api](apps/api) - Firebase Functions API
+- [auth-service](apps/auth-service) - Authentication service for user management
 - [firebase-app](apps/firebase-app) - Main Firebase application
 - [game-engine](apps/game-engine) - Game engine Firebase function
 - [github-receiver](apps/github-receiver) - GitHub webhooks receiver Firebase function
@@ -26,6 +27,7 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
 - [@codeheroes/common](libs/server/common) - Core utilities and shared functions
 - [@codeheroes/event](libs/server/event) - Event handling and processing
 - [@codeheroes/gamify](libs/server/gamify) - Gamification logic and rules
+- [@codeheroes/providers](libs/server/providers) - Shared service providers
 
 #### Legacy Libraries (Deprecated)
 
