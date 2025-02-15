@@ -8,9 +8,6 @@ setGlobalOptions({ region: DEFAULT_REGION });
 // import { connectFirestore } from '@codeheroes/common';
 // connectFirestore();
 
-export * from './triggers/on-before-user-created.trigger';
-export * from './triggers/on-before-user-sign-in.trigger';
-
 import { defaultApi } from './app';
 
 /**
