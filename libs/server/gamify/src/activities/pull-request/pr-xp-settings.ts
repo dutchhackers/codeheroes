@@ -1,39 +1,45 @@
 export const PR_XP_SETTINGS = {
   created: {
-    base: 50,
+    base: 200,
     bonuses: {
       readyForReview: {
-        xp: 15,
+        xp: 100,
         description: 'Bonus for marking PR as ready for review',
       },
     },
   },
   updated: {
-    base: 15,
+    base: 50,
     bonuses: {
       multipleFiles: {
         threshold: 5,
-        xp: 20,
+        xp: 100,
         description: 'Bonus for updating multiple files',
       },
       significantChanges: {
         threshold: 100,
-        xp: 25,
+        xp: 150,
         description: 'Bonus for significant code changes',
       },
       quickUpdate: {
         timeThreshold: '1h',
-        xp: 10,
+        xp: 50,
         description: 'Bonus for quick PR iteration',
       },
     },
   },
   merged: {
-    base: 75,
+    base: 500,
     bonuses: {
-      merged: {
-        xp: 50,
-        description: 'Bonus for merging pull request',
+      largeImpact: {
+        threshold: 500, // lines changed
+        xp: 250,
+        description: 'Bonus for large-scale changes',
+      },
+      quickMerge: {
+        timeThreshold: '24h',
+        xp: 150,
+        description: 'Bonus for efficient PR completion',
       },
     },
   },

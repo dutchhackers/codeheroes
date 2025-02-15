@@ -1,14 +1,14 @@
 import { XpSettings } from '../../models/gamification.model';
 
 export const TAG_XP_SETTINGS: XpSettings = {
-  base: 10,
+  base: 75,
   bonuses: {
     creation: {
-      xp: 15,
+      xp: 100,
       description: 'Bonus for creating a new tag for release',
     },
     deletion: {
-      xp: 10,
+      xp: 50,
       description: 'Bonus for cleaning up old tags',
     },
   },
