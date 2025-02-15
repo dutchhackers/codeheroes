@@ -24,6 +24,12 @@
       "ignore": ["*.local"]
     },
     {
+      "codebase": "auth-service",
+      "source": "dist/apps/auth-service",
+      "runtime": "nodejs20",
+      "ignore": ["*.local"]
+    },
+    {
       "codebase": "game-engine",
       "source": "dist/apps/game-engine",
       "runtime": "nodejs20",
