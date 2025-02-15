@@ -32,7 +32,7 @@ export const PR_XP_SETTINGS = {
     base: 500,
     bonuses: {
       largeImpact: {
-        threshold: 500, // lines changed
+        threshold: 500,
         xp: 250,
         description: 'Bonus for large-scale changes',
       },
