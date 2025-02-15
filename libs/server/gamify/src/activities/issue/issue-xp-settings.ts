@@ -3,50 +3,50 @@ import { XpSettings } from '../../models/gamification.model';
 
 export const ISSUE_XP_SETTINGS: Record<string, XpSettings> = {
   [ActivityType.ISSUE_CREATED]: {
-    base: 30,
+    base: 150,
     bonuses: {
       detailedDescription: {
-        threshold: 200, // character count
-        xp: 15,
+        threshold: 200,
+        xp: 100,
         description: 'Bonus for detailed issue description',
       },
       withLabels: {
         threshold: 2,
-        xp: 10,
+        xp: 50,
         description: 'Bonus for proper issue labeling',
       },
     },
   },
   [ActivityType.ISSUE_CLOSED]: {
-    base: 40,
+    base: 250,
     bonuses: {
       completed: {
-        xp: 20,
+        xp: 100,
         description: 'Bonus for completing issue',
       },
       quickResolution: {
         timeThreshold: '24h',
-        xp: 15,
+        xp: 100,
         description: 'Bonus for quick issue resolution',
       },
     },
   },
   [ActivityType.ISSUE_UPDATED]: {
-    base: 10,
+    base: 50,
     bonuses: {
       significantUpdate: {
-        threshold: 100, // character count
-        xp: 10,
+        threshold: 100,
+        xp: 50,
         description: 'Bonus for significant update',
       },
     },
   },
   [ActivityType.ISSUE_REOPENED]: {
-    base: 5,
+    base: 50,
     bonuses: {
       withReason: {
-        threshold: 50, // character count
-        xp: 10,
+        threshold: 50,
+        xp: 50,
         description: 'Bonus for explaining reopen reason',
       },
     },

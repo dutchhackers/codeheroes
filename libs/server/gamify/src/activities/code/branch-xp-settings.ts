@@ -1,14 +1,14 @@
 import { XpSettings } from '../../models/gamification.model';
 
 export const BRANCH_XP_SETTINGS: XpSettings = {
-  base: 15,
+  base: 50,
   bonuses: {
     creation: {
-      xp: 20,
+      xp: 50,
       description: 'Bonus for creating a new development branch',
     },
     deletion: {
-      xp: 15,
+      xp: 50,
       description: 'Bonus for cleaning up merged branches',
     },
   },
