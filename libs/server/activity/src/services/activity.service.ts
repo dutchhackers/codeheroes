@@ -3,15 +3,20 @@ import { Event } from '@codeheroes/event';
 import { CollectionReference } from 'firebase-admin/firestore';
 import { ActivityHandlerFactory } from '../factory/activity.factory';
 import { activityConverter, ActivityQuery, CreateActivityInput } from '../types';
+import { XpCalculatorService, XpDatabaseService } from '@codeheroes/gamify';
 
 export class ActivityService extends BaseFirestoreService<UserActivity> {
   protected collection: CollectionReference<UserActivity>;
   private databaseService: DatabaseService;
+  private xpCalculator: XpCalculatorService;
+  private xpDatabaseService: XpDatabaseService;
 
   constructor() {
     super();
     this.databaseService = new DatabaseService();
     this.collection = this.getUserActivitiesCollection('temporary');
+    this.xpCalculator = new XpCalculatorService();
+    this.xpDatabaseService = new XpDatabaseService();
   }
 
   private getUserActivitiesCollection(userId: string): CollectionReference<UserActivity> {
@@ -53,6 +58,28 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
       };
 
       const activity = await this.createUserActivity(userId, activityInput);
+
+      // Calculate XP for the activity
+      const xpResult = this.xpCalculator.calculateXp(activity);
+
+      logger.info('XP calculation completed', {
+        activityId: activity.id,
+        activityType: activity.type,
+        userId: activity.userId,
+        totalXp: xpResult.totalXp,
+        breakdown: xpResult.breakdown,
+      });
+
+      // Process and store results using the database service
+      await this.xpDatabaseService.updateUserXp(userId, activity.id, xpResult, activity);
+
+      logger.info('Activity processed successfully', {
+        activityId: activity.id,
+        activityType: activity.type,
+        userId: activity.userId,
+        description: activity.userFacingDescription,
+      });
+
       return activity;
     } catch (error) {
       logger.error('Failed to handle new event', { eventId, error });
@@ -73,7 +100,6 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
       } as UserActivity;
 
       await docRef.set(activity);
-      // await this.metricsService.processActivity(activity);
 
       logger.info('Created new user activity', { userId, activityId: docRef.id });
       return activity;
