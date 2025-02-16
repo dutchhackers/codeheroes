@@ -1,5 +1,5 @@
 {
-  "name": "@codeheroes/types",
+  "name": "@codeheroes/shared/types",
   "version": "0.0.1",
   "private": true,
   "type": "commonjs",

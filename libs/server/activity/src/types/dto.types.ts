@@ -1,4 +1,4 @@
-import { ActivityCategory, ActivityType } from '@codeheroes/types';
+import { ActivityCategory, ActivityType } from '@codeheroes/shared/types';
 import { UserActivity } from './activity.interfaces';
 
 export type CreateActivityInput = Omit<UserActivity, 'id' | 'createdAt' | 'updatedAt'>;

@@ -1,4 +1,4 @@
-import { ActivityType } from '@codeheroes/types';
+import { ActivityType } from '@codeheroes/shared/types';
 import { BaseActivityCalculator } from '../activities/base/activity-calculator.base';
 import { BranchActivityCalculator } from '../activities/code/branch-calculator';
 import { TagActivityCalculator } from '../activities/code/tag-calculator';

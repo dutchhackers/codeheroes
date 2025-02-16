@@ -1,4 +1,4 @@
-import { ActivityType } from '@codeheroes/types';
+import { ActivityType } from '@codeheroes/shared/types';
 import { UserActivity } from '@codeheroes/activity';
 import { getCurrentTimeAsISO } from '@codeheroes/common';
 import { XpCalculationResponse } from '../../models/gamification.model';

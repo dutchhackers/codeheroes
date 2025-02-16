@@ -1,4 +1,4 @@
-import { ActivityType } from '@codeheroes/types';
+import { ActivityType } from '@codeheroes/shared/types';
 import { BaseActivityProcessor } from '../activities/base/activity-processor.base';
 import { BranchActivityProcessor } from '../activities/code/branch-processor';
 import { TagActivityProcessor } from '../activities/code/tag-processor';

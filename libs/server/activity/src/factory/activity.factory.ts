@@ -1,5 +1,5 @@
 import { Event } from '@codeheroes/event';
-import { ActivityType, ActivityCategory } from '@codeheroes/types';
+import { ActivityType, ActivityCategory } from '@codeheroes/shared/types';
 import {
   BranchCreateHandler,
   BranchDeleteHandler,

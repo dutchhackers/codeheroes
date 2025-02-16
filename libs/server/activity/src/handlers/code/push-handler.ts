@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
 import { GithubPushEventData } from '@codeheroes/providers';
-import { ActivityType } from '@codeheroes/types';
+import { ActivityType } from '@codeheroes/shared/types';
 import { PushActivityData, PushActivityMetrics } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
 

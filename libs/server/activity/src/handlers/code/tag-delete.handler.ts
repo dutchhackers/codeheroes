@@ -1,6 +1,6 @@
 import { Event } from '@codeheroes/event';
 import { GithubDeleteEventData } from '@codeheroes/providers';
-import { ActivityType } from '@codeheroes/types';
+import { ActivityType } from '@codeheroes/shared/types';
 import { DeleteTagActivityData } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
 

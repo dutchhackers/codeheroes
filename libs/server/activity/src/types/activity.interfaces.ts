@@ -1,6 +1,6 @@
 import { BaseDocument, ConnectedAccountProvider } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
-import { ActivityType } from '@codeheroes/types';
+import { ActivityType } from '@codeheroes/shared/types';
 import {
   IssueActivityMetrics,
   PullRequestActivityMetrics,

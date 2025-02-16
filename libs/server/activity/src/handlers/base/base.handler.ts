@@ -1,5 +1,5 @@
 import { Event } from '@codeheroes/event';
-import { ActivityType } from '@codeheroes/types';
+import { ActivityType } from '@codeheroes/shared/types';
 import { ActivityData, ActivityHandler } from '../../types';
 import { ActivityMetrics } from '../../types/metrics.types';
 
