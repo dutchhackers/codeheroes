@@ -19,7 +19,7 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
     return this.db.collection('users').doc(userId).collection('activities').withConverter(activityConverter);
   }
 
-  async handleNewEvent(eventId: string, eventData: Event): Promise<void> {
+  async handleNewEvent(eventId: string, eventData: Event): Promise<UserActivity | null> {
     try {
       const userId = await this.databaseService.lookupUserId({
         sender: (eventData.data as any)?.sender,
@@ -31,7 +31,7 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
           eventId,
           eventType: eventData.source.event,
         });
-        return;
+        return null;
       }
 
       const handler = ActivityHandlerFactory.getHandler(eventData);
@@ -40,7 +40,7 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
           eventId,
           eventType: eventData.source.event,
         });
-        return;
+        return null;
       }
 
       const activityInput: CreateActivityInput = {
@@ -53,14 +53,15 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
         userFacingDescription: handler.generateDescription(eventData),
       };
 
-      await this.createUserActivity(userId, activityInput);
+      const activity = await this.createUserActivity(userId, activityInput);
+      return activity;
     } catch (error) {
       logger.error('Failed to handle new event', { eventId, error });
       throw error;
     }
   }
 
-  private async createUserActivity(userId: string, activityInput: CreateActivityInput): Promise<void> {
+  private async createUserActivity(userId: string, activityInput: CreateActivityInput): Promise<UserActivity> {
     try {
       const collection = this.getUserActivitiesCollection(userId);
       const docRef = collection.doc();
@@ -76,6 +77,7 @@ export class ActivityService extends BaseFirestoreService<UserActivity> {
       // await this.metricsService.processActivity(activity);
 
       logger.info('Created new user activity', { userId, activityId: docRef.id });
+      return activity;
     } catch (error) {
       logger.error('Failed to create user activity', { userId, error });
       throw error;
