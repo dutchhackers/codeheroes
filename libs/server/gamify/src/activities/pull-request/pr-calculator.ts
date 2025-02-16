@@ -1,4 +1,4 @@
-import { PullRequestActivityData, PullRequestActivityMetrics, UserActivity } from '@codeheroes/activity';
+import { PullRequestActivityData, PullRequestActivityMetrics, UserActivity } from '@codeheroes/common';
 import { ActivityType } from '@codeheroes/shared/types';
 
 import { XpBreakdownItem, XpCalculationResponse } from '../../models/gamification.model';

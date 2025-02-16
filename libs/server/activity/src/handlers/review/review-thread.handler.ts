@@ -1,7 +1,7 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestReviewThreadEventData } from '@codeheroes/providers';
 import { ActivityType } from '@codeheroes/shared/types';
-import { ReviewThreadActivityData } from '../../types';
+import { ReviewThreadActivityData } from '@codeheroes/common';
 import { BaseActivityHandler } from '../base/base.handler';
 
 export class ReviewThreadHandler extends BaseActivityHandler {

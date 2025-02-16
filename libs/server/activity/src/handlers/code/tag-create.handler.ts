@@ -1,7 +1,7 @@
+import { CreateTagActivityData } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { GithubCreateEventData } from '@codeheroes/providers';
 import { ActivityType } from '@codeheroes/shared/types';
-import { CreateTagActivityData } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
 
 export class TagCreateHandler extends BaseActivityHandler {

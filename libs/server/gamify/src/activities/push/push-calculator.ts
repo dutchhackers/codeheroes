@@ -1,4 +1,4 @@
-import { PushActivityData, PushActivityMetrics, UserActivity } from '@codeheroes/activity';
+import { PushActivityData, PushActivityMetrics, UserActivity } from '@codeheroes/common';
 import { ActivityType } from '@codeheroes/shared/types';
 import { XpCalculationResponse } from '../../models/gamification.model';
 import { BaseActivityCalculator } from '../base/activity-calculator.base';

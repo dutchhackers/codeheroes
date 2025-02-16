@@ -1,8 +1,7 @@
-import { UserActivity } from '@codeheroes/activity';
-import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
+import { DatabaseInstance, getCurrentTimeAsISO, logger, UserActivity } from '@codeheroes/common';
 import { Firestore } from 'firebase-admin/firestore';
-import { ActivityProcessingResult, XpCalculationResponse } from '../../models/gamification.model';
 import { calculateLevelProgress } from '../../core/level.utils';
+import { ActivityProcessingResult, XpCalculationResponse } from '../../models/gamification.model';
 
 export abstract class BaseActivityProcessor {
   protected db: Firestore;

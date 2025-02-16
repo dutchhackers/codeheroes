@@ -1,4 +1,5 @@
-import { ActivityService, UserActivity } from '@codeheroes/activity';
+import { ActivityService } from '@codeheroes/activity';
+import { UserActivity } from '@codeheroes/common';
 import { logger } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { CalculatorFactory, ProcessorFactory, XpCalculatorService, XpDatabaseService } from '@codeheroes/gamify';

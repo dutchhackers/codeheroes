@@ -1,7 +1,7 @@
+import { DeleteBranchActivityData } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { GithubDeleteEventData } from '@codeheroes/providers';
 import { ActivityType } from '@codeheroes/shared/types';
-import { DeleteBranchActivityData } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
 
 export class BranchDeleteHandler extends BaseActivityHandler {

@@ -1,9 +1,8 @@
-import { BaseFirestoreService, DatabaseService, logger } from '@codeheroes/common';
+import { BaseFirestoreService, DatabaseService, logger, UserActivity } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { CollectionReference } from 'firebase-admin/firestore';
-import { activityConverter } from '../types';
-import { CreateActivityInput, ActivityQuery, UserActivity } from '../types';
 import { ActivityHandlerFactory } from '../factory/activity.factory';
+import { activityConverter, ActivityQuery, CreateActivityInput } from '../types';
 
 export class ActivityService extends BaseFirestoreService<UserActivity> {
   protected collection: CollectionReference<UserActivity>;

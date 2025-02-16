@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { UserActivity } from './activity.types';
+import { UserActivity } from '@codeheroes/common';
 
 export const activityConverter: admin.firestore.FirestoreDataConverter<UserActivity> = {
   toFirestore: (user: UserActivity): admin.firestore.DocumentData => {
@@ -47,7 +47,7 @@ export const activityConverter: admin.firestore.FirestoreDataConverter<UserActiv
     snapshot: admin.firestore.QueryDocumentSnapshot
   ): UserActivity => {
     const data = snapshot.data();
-    
+
     // Ensure all required fields are present
     if (!data) {
       throw new Error(`Document data is undefined for id: ${snapshot.id}`);
