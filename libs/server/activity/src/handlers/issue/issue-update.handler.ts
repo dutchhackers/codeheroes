@@ -1,6 +1,7 @@
 import { Event } from '@codeheroes/event';
 import { GithubIssueEventData } from '@codeheroes/providers';
-import { ActivityType, IssueActivityData } from '../../types';
+import { ActivityType } from '@codeheroes/types';
+import { IssueActivityData } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
 
 export class IssueUpdateHandler extends BaseActivityHandler {

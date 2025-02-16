@@ -1,12 +1,12 @@
 import { BaseDocument, ConnectedAccountProvider } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
-import { ActivityType } from './activity.types';
+import { ActivityType } from '@codeheroes/types';
 import {
   IssueActivityMetrics,
   PullRequestActivityMetrics,
   PushActivityMetrics,
   ReviewActivityMetrics,
-  ReviewThreadActivityMetrics
+  ReviewThreadActivityMetrics,
 } from './metrics.types';
 
 export interface ActivityHandler {

@@ -1,4 +1,5 @@
-import { ActivityType, UserActivity } from '@codeheroes/activity';
+import { UserActivity } from '@codeheroes/activity';
+import { ActivityType } from '@codeheroes/types';
 import { XpCalculationResponse } from '../../models/gamification.model';
 import { BaseActivityCalculator } from '../base/activity-calculator.base';
 
@@ -14,9 +15,8 @@ export class TagActivityCalculator extends BaseActivityCalculator {
     totalXp += baseXp.xp;
 
     // Add activity-specific bonus
-    const bonusConfig = activity.type === ActivityType.TAG_CREATED ?
-      settings.bonuses?.creation :
-      settings.bonuses?.deletion;
+    const bonusConfig =
+      activity.type === ActivityType.TAG_CREATED ? settings.bonuses?.creation : settings.bonuses?.deletion;
 
     if (bonusConfig) {
       breakdown.push({

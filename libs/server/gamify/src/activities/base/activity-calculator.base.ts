@@ -1,4 +1,5 @@
-import { ActivityType, UserActivity } from '@codeheroes/activity';
+import { UserActivity } from '@codeheroes/activity';
+import { ActivityType } from '@codeheroes/types';
 import { GameXpSettings, XpBreakdownItem, XpCalculationResponse } from '../../models/gamification.model';
 
 export abstract class BaseActivityCalculator {
@@ -33,11 +34,12 @@ export abstract class BaseActivityCalculator {
       [ActivityType.PR_REVIEW_THREAD_UNRESOLVED]: 'Initiated important code discussion',
       [ActivityType.PR_REVIEW_COMMENT_CREATED]: 'Provided valuable code feedback',
       [ActivityType.PR_REVIEW_COMMENT_UPDATED]: 'Clarified review comments',
-      [ActivityType.DEPLOYMENT]: 'Deployed code to production'
+      [ActivityType.DEPLOYMENT]: 'Deployed code to production',
     };
 
     return {
-      description: descriptions[activityType] || `Contributing through ${activityType.toLowerCase().replace(/_/g, ' ')}`,
+      description:
+        descriptions[activityType] || `Contributing through ${activityType.toLowerCase().replace(/_/g, ' ')}`,
       xp: baseXp,
     };
   }

@@ -1,4 +1,5 @@
 import { Event } from '@codeheroes/event';
+import { ActivityType, ActivityCategory } from '@codeheroes/types';
 import {
   BranchCreateHandler,
   BranchDeleteHandler,
@@ -14,7 +15,7 @@ import {
   TagCreateHandler,
   TagDeleteHandler,
 } from '../handlers';
-import { ActivityCategory, ActivityHandler, ActivityType } from '../types';
+import { ActivityHandler } from '../types';
 
 export class ActivityHandlerFactory {
   private static handlers: ActivityHandler[] = [

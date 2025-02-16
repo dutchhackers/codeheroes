@@ -1,10 +1,10 @@
 import {
-  ActivityType,
   ReviewActivityData,
   ReviewCommentActivityData,
   ReviewThreadActivityData,
   UserActivity,
 } from '@codeheroes/activity';
+import { ActivityType } from '@codeheroes/types';
 import { XpBreakdownItem, XpCalculationResponse } from '../../models/gamification.model';
 import { BaseActivityCalculator } from '../base/activity-calculator.base';
 

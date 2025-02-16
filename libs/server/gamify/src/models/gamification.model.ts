@@ -1,5 +1,5 @@
-import { ActivityType } from '@codeheroes/activity';
 import { BaseDocument } from '@codeheroes/common';
+import { ActivityType } from '@codeheroes/types';
 import { BRANCH_XP_SETTINGS } from '../activities/code/branch-xp-settings';
 import { TAG_XP_SETTINGS } from '../activities/code/tag-xp-settings';
 import { ISSUE_XP_SETTINGS } from '../activities/issue/issue-xp-settings';

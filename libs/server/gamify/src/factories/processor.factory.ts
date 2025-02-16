@@ -1,11 +1,11 @@
-import { ActivityType } from '@codeheroes/activity';
+import { ActivityType } from '@codeheroes/types';
 import { BaseActivityProcessor } from '../activities/base/activity-processor.base';
+import { BranchActivityProcessor } from '../activities/code/branch-processor';
+import { TagActivityProcessor } from '../activities/code/tag-processor';
 import { IssueProcessor } from '../activities/issue/issue-processor';
 import { PrReviewProcessor } from '../activities/pr-review/pr-review-processor';
 import { PullRequestProcessor } from '../activities/pull-request/pr-processor';
 import { PushActivityProcessor } from '../activities/push/push-processor';
-import { BranchActivityProcessor } from '../activities/code/branch-processor';
-import { TagActivityProcessor } from '../activities/code/tag-processor';
 
 export class ProcessorFactory {
   // Map to store processor classes for each activity type

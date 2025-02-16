@@ -1,6 +1,7 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestEventData } from '@codeheroes/providers';
-import { ActivityType, PullRequestActivityData, PullRequestActivityMetrics } from '../../types';
+import { ActivityType } from '@codeheroes/types';
+import { PullRequestActivityData, PullRequestActivityMetrics } from '../../types';
 import { BaseActivityHandler } from '../base/base.handler';
 
 export class PrCreateHandler extends BaseActivityHandler<PullRequestActivityMetrics> {
@@ -35,7 +36,9 @@ export class PrCreateHandler extends BaseActivityHandler<PullRequestActivityMetr
     const metrics = this.calculateMetrics(event);
 
     const status = details.draft ? 'draft ' : '';
-    return `Created ${status}pull request #${details.prNumber}: ${details.title} ` +
-           `(${this.formatNumber(metrics.changedFiles)} ${this.pluralize(metrics.changedFiles, 'file')} changed)`;
+    return (
+      `Created ${status}pull request #${details.prNumber}: ${details.title} ` +
+      `(${this.formatNumber(metrics.changedFiles)} ${this.pluralize(metrics.changedFiles, 'file')} changed)`
+    );
   }
 }

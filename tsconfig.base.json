@@ -20,7 +20,8 @@
       "@codeheroes/database-seeds": ["libs/database-seeds/src/index.ts"],
       "@codeheroes/event": ["libs/server/event/src/index.ts"],
       "@codeheroes/gamify": ["libs/server/gamify/src/index.ts"],
-      "@codeheroes/providers": ["libs/server/providers/src/index.ts"]
+      "@codeheroes/providers": ["libs/server/providers/src/index.ts"],
+      "@codeheroes/types": ["libs/shared/types/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
