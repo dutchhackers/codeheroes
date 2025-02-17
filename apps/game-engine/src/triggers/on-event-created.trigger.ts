@@ -5,7 +5,7 @@ import { Event } from '@codeheroes/event';
 import { CalculatorFactory, ProcessorFactory } from '@codeheroes/gamify';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { GameProgressionService } from '../core/game-progression.service';
-import { GameActionType } from '@codeheroes/shared/types';
+import { ActivityType, GameActionType } from '@codeheroes/shared/types';
 
 // Initialize factories once at the top level
 CalculatorFactory.initialize();
@@ -61,8 +61,16 @@ export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async
 });
 
 function getActionType(activity: UserActivity): GameActionType {
+  // Category: Code
+  if (activity.type === ActivityType.CODE_PUSH) {
+    return 'code_push';
+  }
+  // Category: Pull Request
   if (activity.type === 'PR_CREATED') {
     return 'pull_request_create';
+  }
+  if (activity.type === 'PR_MERGED') {
+    return 'pull_request_merge';
   }
 
   return;

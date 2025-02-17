@@ -19,6 +19,18 @@ interface ActionResult {
   rewards?: Record<string, any>;
 }
 
+enum Collections {
+  Users = 'users',
+  User_UserBadges = 'badges',
+  UserStats = 'userStats',
+}
+
+enum StreakType {
+  CodePush = 'code_pushes',
+  PullRequestMerge = 'pr_merges',
+  PullRequestOpen = 'pr_opens',
+}
+
 export class GameProgressionService {
   private db: FirebaseFirestore.Firestore;
   // private notificationService: NotificationService;
@@ -32,6 +44,8 @@ export class GameProgressionService {
   async processGameAction(action: GameAction): Promise<ActionResult> {
     try {
       switch (action.actionType) {
+        case 'code_push':
+          return await this.handleCodePush(action);
         case 'pull_request_create':
           return await this.handlePullRequestCreate(action);
         default:
@@ -51,7 +65,7 @@ export class GameProgressionService {
     logger.log('Handling pull request merge', { userId, metadata });
 
     return await this.db.runTransaction(async (transaction) => {
-      const userStatsRef = this.db.collection('userStats').doc(userId);
+      const userStatsRef = this.db.collection(Collections.UserStats).doc(userId);
       let userStats = await transaction.get(userStatsRef);
 
       if (!userStats.exists) {
@@ -62,13 +76,23 @@ export class GameProgressionService {
 
       // Calculate streak
       // Dev Note: streaks is counted by day
-      const { newStreak, bonusXP } = await this.calculateStreak(transaction, userStatsRef, stats, 'merges');
+      const { newStreak, bonusXP } = await this.calculateStreak(
+        transaction,
+        userStatsRef,
+        stats,
+        StreakType.PullRequestMerge,
+      );
 
       // Process additional catch bonuses
       const prBonuses = this.calculatePullRequestCreateBonuses(metadata);
 
       // Update daily stats
-      await this.updateDailyStats(transaction, userId, 'merges', baseXP + bonusXP + prBonuses.totalBonus);
+      await this.updateDailyStats(
+        transaction,
+        userId,
+        StreakType.PullRequestMerge,
+        baseXP + bonusXP + prBonuses.totalBonus,
+      );
 
       // Record activity
       await this.recordActivity(transaction, userId, 'pull_request_create', baseXP + bonusXP + prBonuses.totalBonus, {
@@ -81,7 +105,6 @@ export class GameProgressionService {
       // Check for achievements/badges
       const badgeResults = await this.processBadges(transaction, userId, {
         actionType: 'pull_request_create',
-        // pokemonId: metadata.pokemonId,
         totalMerges: stats.totalMerges + 1,
         currentStreak: newStreak,
       });
@@ -93,6 +116,56 @@ export class GameProgressionService {
         streakBonus: bonusXP,
         badgesEarned: badgeResults.earnedBadges.map((b) => b.id),
         rewards: prBonuses.breakdown,
+      };
+    });
+  }
+
+  // Handle Code push action
+  private async handleCodePush(action: GameAction): Promise<ActionResult> {
+    const { actionType, userId, metadata } = action;
+    const baseXP = 120;
+
+    logger.log('Handling code push', { userId, metadata });
+
+    return await this.db.runTransaction(async (transaction) => {
+      const userStatsRef = this.db.collection(Collections.UserStats).doc(userId);
+      let userStats = await transaction.get(userStatsRef);
+
+      if (!userStats.exists) {
+        throw new Error('User stats not found');
+      }
+
+      const stats = userStats.data()!;
+
+      // Calculate streak
+      await this.calculateStreak(transaction, userStatsRef, stats, StreakType.CodePush);
+      const { newStreak, bonusXP } = await this.calculateStreak(transaction, userStatsRef, stats, StreakType.CodePush);
+
+      // Process additional bonuses
+      const pushBonuses = { totalBonus: 0, breakdown: {} };
+
+      // Update daily stats
+      await this.updateDailyStats(transaction, userId, StreakType.CodePush, baseXP + bonusXP + pushBonuses.totalBonus);
+
+      // Record activity
+      await this.recordActivity(transaction, userId, actionType, baseXP + bonusXP + pushBonuses.totalBonus, {
+        ...metadata,
+        streakDay: newStreak,
+        bonusXP,
+      });
+
+      // Check for achievements/badges
+      const badgeResults = await this.processBadges(transaction, userId, {
+        actionType,
+      });
+
+      // Return results
+      return {
+        xpGained: baseXP + bonusXP + pushBonuses.totalBonus + badgeResults.totalBadgeXP,
+        newStreak,
+        streakBonus: bonusXP,
+        badgesEarned: badgeResults.earnedBadges.map((b) => b.id),
+        rewards: pushBonuses.breakdown,
       };
     });
   }
@@ -290,7 +363,11 @@ export class GameProgressionService {
     badgeId: string,
     xpReward: number,
   ) {
-    const badgeRef = this.db.collection('users').doc(userId).collection('badges').doc(badgeId);
+    const badgeRef = this.db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.User_UserBadges)
+      .doc(badgeId);
 
     const badge = await transaction.get(badgeRef);
 
