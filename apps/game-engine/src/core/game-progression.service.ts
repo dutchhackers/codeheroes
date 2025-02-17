@@ -142,7 +142,7 @@ export class GameProgressionService {
       const { newStreak, bonusXP } = await this.calculateStreak(transaction, userStatsRef, stats, StreakType.CodePush);
 
       // Process additional bonuses
-      const pushBonuses = { totalBonus: 0, breakdown: {} };
+      const pushBonuses = this.calculateCodePushBonuses(metadata);
 
       // Update daily stats
       await this.updateDailyStats(transaction, userId, StreakType.CodePush, baseXP + bonusXP + pushBonuses.totalBonus);
@@ -325,6 +325,27 @@ export class GameProgressionService {
       bonuses.significantChanges = 200;
       logger.log('Applied significant changes bonus', { bonus: bonuses.significantChanges });
     }
+    const result = {
+      totalBonus: Object.values(bonuses).reduce((a, b) => a + b, 0),
+      breakdown: bonuses,
+    };
+
+    logger.log('Pull request bonus calculation complete', result);
+    return result;
+  }
+
+  private calculateCodePushBonuses(metadata: Record<string, any>) {
+    logger.log('Calculating code push bonuses', { metadata });
+
+    const bonuses = {
+      multipleCommits: 0,
+    };
+
+    if (metadata.commits > 1) {
+      bonuses.multipleCommits = 250;
+      logger.log('Applied multiple commits bonus', { bonus: bonuses.multipleCommits });
+    }
+
     const result = {
       totalBonus: Object.values(bonuses).reduce((a, b) => a + b, 0),
       breakdown: bonuses,
