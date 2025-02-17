@@ -48,6 +48,8 @@ export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async
     return;
   }
 
+  // Initialize user if they don't exist
+  // This should be a temporary thing
   const userService = new UserService();
   await userService.initializeNewUser(activity.userId, activity.userId.toString());
 
