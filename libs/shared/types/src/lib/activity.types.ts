@@ -1,3 +1,5 @@
+export type GameActionType = 'pull_request_create';
+
 export enum ActivityCategory {
   CODE = 'CODE',
   PULL_REQUEST = 'PULL_REQUEST',

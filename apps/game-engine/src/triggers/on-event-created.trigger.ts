@@ -5,6 +5,7 @@ import { Event } from '@codeheroes/event';
 import { CalculatorFactory, ProcessorFactory } from '@codeheroes/gamify';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { GameProgressionService } from '../core/game-progression.service';
+import { GameActionType } from '@codeheroes/shared/types';
 
 // Initialize factories once at the top level
 CalculatorFactory.initialize();
@@ -49,7 +50,7 @@ export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async
 
   const gameService = new GameProgressionService();
   await gameService.processGameAction({
-    userId: '1000002',
+    userId: activity.userId,
     actionType: activityActionType,
     metadata: activity.data?.metrics
       ? {
@@ -59,7 +60,7 @@ export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async
   });
 });
 
-function getActionType(activity: UserActivity): string {
+function getActionType(activity: UserActivity): GameActionType {
   if (activity.type === 'PR_CREATED') {
     return 'pull_request_create';
   }

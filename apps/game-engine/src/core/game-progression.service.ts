@@ -1,13 +1,13 @@
-// src/services/GameProgressionService.ts
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 // import { NotificationService } from './NotificationService';
 import { DatabaseInstance, logger } from '@codeheroes/common';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { GameActionType } from '@codeheroes/shared/types';
 
 interface GameAction {
   userId: string;
-  actionType: 'pull_request_create' | 'pokestop_spin' | 'pokemon_catch' | 'battle_win' | string; // Dev Note: string to be removed later
+  actionType: GameActionType;
   metadata: Record<string, any>;
 }
 
@@ -34,12 +34,6 @@ export class GameProgressionService {
       switch (action.actionType) {
         case 'pull_request_create':
           return await this.handlePullRequestCreate(action);
-        case 'pokestop_spin':
-          return await this.handlePokestopSpin(action);
-        case 'pokemon_catch':
-          return await this.handlePokemonCatch(action);
-        // case 'battle_win':
-        //   return await this.handleBattleWin(action);
         default:
           throw new Error(`Unknown action type: ${action.actionType}`);
       }
@@ -99,105 +93,6 @@ export class GameProgressionService {
         streakBonus: bonusXP,
         badgesEarned: badgeResults.earnedBadges.map((b) => b.id),
         rewards: prBonuses.breakdown,
-      };
-    });
-  }
-
-  // Handle Pokestop spin action
-  private async handlePokestopSpin(action: GameAction): Promise<ActionResult> {
-    const { userId, metadata } = action;
-    const baseXP = 50;
-
-    return await this.db.runTransaction(async (transaction) => {
-      // Get user stats
-      const userStatsRef = this.db.collection('user_stats').doc(userId);
-      const userStats = await transaction.get(userStatsRef);
-
-      if (!userStats.exists) {
-        throw new Error('User stats not found');
-      }
-
-      const stats = userStats.data()!;
-
-      // Calculate streak bonus
-      const { newStreak, bonusXP } = await this.calculateStreak(transaction, userStatsRef, stats, 'pokestops');
-
-      // Update daily stats
-      await this.updateDailyStats(transaction, userId, 'pokestops', baseXP + bonusXP);
-
-      // Record activity
-      await this.recordActivity(transaction, userId, 'pokestop_spin', baseXP + bonusXP, {
-        ...metadata,
-        streakDay: newStreak,
-        bonusXP,
-      });
-
-      // Check for achievements/badges
-      const badgeResults = await this.processBadges(transaction, userId, {
-        actionType: 'pokestop_spin',
-        totalSpins: stats.totalSpins + 1,
-        currentStreak: newStreak,
-      });
-
-      // Return results
-      return {
-        xpGained: baseXP + bonusXP + badgeResults.totalBadgeXP,
-        newStreak,
-        streakBonus: bonusXP,
-        badgesEarned: badgeResults.earnedBadges.map((b) => b.id),
-      };
-    });
-  }
-
-  // Handle Pokemon catch action
-  private async handlePokemonCatch(action: GameAction): Promise<ActionResult> {
-    const { userId, metadata } = action;
-    const baseXP = 100;
-
-    logger.log('Handling pokemon catch', { userId, metadata });
-
-    return await this.db.runTransaction(async (transaction) => {
-      const userStatsRef = this.db.collection('user_stats').doc(userId);
-      let userStats = await transaction.get(userStatsRef);
-
-      if (!userStats.exists) {
-        throw new Error('User stats not found');
-      }
-
-      const stats = userStats.data()!;
-
-      // Calculate streak
-      const { newStreak, bonusXP } = await this.calculateStreak(transaction, userStatsRef, stats, 'catches');
-
-      // Process additional catch bonuses
-      const catchBonuses = this.calculateCatchBonuses(metadata);
-
-      // Update daily stats
-      await this.updateDailyStats(transaction, userId, 'catches', baseXP + bonusXP + catchBonuses.totalBonus);
-
-      // Record activity
-      await this.recordActivity(transaction, userId, 'pokemon_catch', baseXP + bonusXP + catchBonuses.totalBonus, {
-        ...metadata,
-        streakDay: newStreak,
-        bonusXP,
-        catchBonuses: catchBonuses.breakdown,
-      });
-
-      // Check for achievements/badges
-      const badgeResults = await this.processBadges(transaction, userId, {
-        actionType: 'pokemon_catch',
-        pokemonId: metadata.pokemonId,
-        totalCatches: stats.totalCatches + 1,
-        currentStreak: newStreak,
-      });
-
-      // Return results
-      return {
-        xpGained: baseXP + bonusXP + catchBonuses.totalBonus + badgeResults.totalBadgeXP,
-        newStreak,
-        streakBonus: bonusXP,
-        badgesEarned: badgeResults.earnedBadges.map((b) => b.id),
-        rewards: catchBonuses.breakdown,
       };
     });
   }
