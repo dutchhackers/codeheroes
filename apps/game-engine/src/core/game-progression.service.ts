@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 // import { NotificationService } from './NotificationService';
-import { DatabaseInstance, logger } from '@codeheroes/common';
+import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { GameActionType } from '@codeheroes/shared/types';
 
@@ -22,6 +22,7 @@ interface ActionResult {
 enum Collections {
   Users = 'users',
   User_UserBadges = 'badges',
+  User_UserDailyStats = 'dailyStats',
   UserStats = 'userStats',
 }
 
@@ -260,7 +261,11 @@ export class GameProgressionService {
     xp: number,
   ) {
     const today = new Date().toISOString().split('T')[0];
-    const dailyStatsRef = this.db.collection('users').doc(userId).collection('dailyStats').doc(today);
+    const dailyStatsRef = this.db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.User_UserDailyStats)
+      .doc(today);
 
     logger.log('Updating daily stats', {
       userId,
@@ -305,6 +310,8 @@ export class GameProgressionService {
       actionType,
       xpGained,
       metadata,
+      createdAt: getCurrentTimeAsISO(),
+      updatedAd: getCurrentTimeAsISO(),
     });
   }
 
