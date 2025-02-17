@@ -1,5 +1,5 @@
 import { ActivityService } from '@codeheroes/activity';
-import { UserActivity } from '@codeheroes/common';
+import { UserActivity, UserService } from '@codeheroes/common';
 import { logger } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { CalculatorFactory, ProcessorFactory } from '@codeheroes/gamify';
@@ -47,6 +47,9 @@ export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async
     logger.warn('No action type found for activity', { activity });
     return;
   }
+
+  const userService = new UserService();
+  await userService.initializeNewUser(activity.userId, activity.userId.toString());
 
   const gameService = new GameProgressionService();
   await gameService.processGameAction({

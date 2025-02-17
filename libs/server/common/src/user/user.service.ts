@@ -87,4 +87,46 @@ export class UserService extends BaseFirestoreService<User> {
 
     return snapshot.docs[0].data();
   }
+
+  // Helper: Get initial user stats
+  async initializeNewUser(userId: string, username: string) {
+    const userStatsRef = this.db.collection('userStats').doc(userId);
+
+    try {
+      // Check if stats already exist
+      const existingStats = await userStatsRef.get();
+
+      if (!existingStats.exists) {
+        // Create initial stats
+        // await userStatsRef.set(this.getInitialUserStats(userId, username));
+        await userStatsRef.set({
+          userId,
+          username,
+          level: 1,
+        });
+
+        // // Create first daily stats
+        // const today = new Date().toISOString().split('T')[0];
+        // await this.db
+        //   .collection('users')
+        //   .doc(userId)
+        //   .collection('daily_stats')
+        //   .doc(today)
+        //   .set({
+        //     date: today,
+        //     totalXP: 0,
+        //     activities: {
+        //       pr_merges: 0,
+        //     }
+        //   });
+
+        console.log(`Initialized stats for new user: ${userId}`);
+        return true;
+      }
+
+      return false; // Stats already existed
+    } catch (error) {
+      console.error('Error initializing user stats:', error);
+    }
+  }
 }
