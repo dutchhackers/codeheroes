@@ -4,6 +4,7 @@ import { logger } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { CalculatorFactory, ProcessorFactory } from '@codeheroes/gamify';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { GameProgressionService } from '../core/game-progression.service';
 
 // Initialize factories once at the top level
 CalculatorFactory.initialize();
@@ -37,5 +38,31 @@ export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async
     return;
   }
 
-  await processEventActivity(event.params.eventId, eventData);
+  const activity = await processEventActivity(event.params.eventId, eventData);
+  logger.log('Activity created', { activity });
+
+  const activityActionType = getActionType(activity);
+  if (!activityActionType) {
+    logger.warn('No action type found for activity', { activity });
+    return;
+  }
+
+  const gameService = new GameProgressionService();
+  await gameService.processGameAction({
+    userId: '1000002',
+    actionType: activityActionType,
+    metadata: activity.data?.metrics
+      ? {
+          ...(activity.data.metrics || {}),
+        }
+      : {},
+  });
 });
+
+function getActionType(activity: UserActivity): string {
+  if (activity.type === 'PR_CREATED') {
+    return 'pull_request_create';
+  }
+
+  return;
+}
