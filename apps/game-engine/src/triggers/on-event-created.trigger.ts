@@ -42,6 +42,11 @@ export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async
   const activity = await processEventActivity(event.params.eventId, eventData);
   logger.log('Activity created', { activity });
 
+  if (!activity) {
+    logger.warn('No activity found for event', { eventId: event.params.eventId });
+    return;
+  }
+
   const activityActionType = getActionType(activity);
   if (!activityActionType) {
     logger.warn('No action type found for activity', { activity });

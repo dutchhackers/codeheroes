@@ -29,7 +29,7 @@ enum Collections {
 enum StreakType {
   CodePush = 'code_pushes',
   PullRequestMerge = 'pr_merges',
-  PullRequestOpen = 'pr_opens',
+  PullRequestCreate = 'pr_creations',
 }
 
 export class GameProgressionService {
@@ -60,10 +60,10 @@ export class GameProgressionService {
 
   // Handle Pull request create action
   private async handlePullRequestCreate(action: GameAction): Promise<ActionResult> {
-    const { userId, metadata } = action;
+    const { actionType, userId, metadata } = action;
     const baseXP = 100;
 
-    logger.log('Handling pull request merge', { userId, metadata });
+    logger.log('Handling pull request created', { userId, metadata });
 
     return await this.db.runTransaction(async (transaction) => {
       const userStatsRef = this.db.collection(Collections.UserStats).doc(userId);
@@ -81,7 +81,7 @@ export class GameProgressionService {
         transaction,
         userStatsRef,
         stats,
-        StreakType.PullRequestMerge,
+        StreakType.PullRequestCreate,
       );
 
       // Process additional catch bonuses
@@ -91,12 +91,12 @@ export class GameProgressionService {
       await this.updateDailyStats(
         transaction,
         userId,
-        StreakType.PullRequestMerge,
+        StreakType.PullRequestCreate,
         baseXP + bonusXP + prBonuses.totalBonus,
       );
 
       // Record activity
-      await this.recordActivity(transaction, userId, 'pull_request_create', baseXP + bonusXP + prBonuses.totalBonus, {
+      await this.recordActivity(transaction, userId, actionType, baseXP + bonusXP + prBonuses.totalBonus, {
         ...metadata,
         streakDay: newStreak,
         bonusXP,
@@ -105,7 +105,7 @@ export class GameProgressionService {
 
       // Check for achievements/badges
       const badgeResults = await this.processBadges(transaction, userId, {
-        actionType: 'pull_request_create',
+        actionType,
         totalMerges: stats.totalMerges + 1,
         currentStreak: newStreak,
       });
