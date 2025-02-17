@@ -225,7 +225,7 @@ export class GameProgressionService {
     xpGained: number,
     metadata: Record<string, any>,
   ) {
-    const activityRef = this.db.collection('users').doc(userId).collection('activities2').doc();
+    const activityRef = this.db.collection('users').doc(userId).collection('userActivities').doc();
 
     transaction.set(activityRef, {
       timestamp: Timestamp.now(),
@@ -233,26 +233,6 @@ export class GameProgressionService {
       xpGained,
       metadata,
     });
-  }
-
-  // Helper: Calculate catch bonuses
-  private calculateCatchBonuses(metadata: Record<string, any>) {
-    const bonuses = {
-      firstThrow: 0,
-      excellentThrow: 0,
-      curveBall: 0,
-      rarity: 0,
-    };
-
-    if (metadata.firstThrow) bonuses.firstThrow = 50;
-    if (metadata.throwQuality === 'excellent') bonuses.excellentThrow = 100;
-    if (metadata.curveBall) bonuses.curveBall = 20;
-    if (metadata.rarity === 'legendary') bonuses.rarity = 500;
-
-    return {
-      totalBonus: Object.values(bonuses).reduce((a, b) => a + b, 0),
-      breakdown: bonuses,
-    };
   }
 
   // Helper: Calculate Pull request create bonuses
@@ -293,34 +273,7 @@ export class GameProgressionService {
     let totalBadgeXP = 0;
 
     // Check various badge conditions
-    if (context.actionType === 'pokemon_catch') {
-      logger.log('Checking pokemon catch badges', {
-        currentStreak: context.currentStreak,
-        totalCatches: context.totalCatches,
-      });
-
-      // Catch streak badge
-      if (context.currentStreak === 7) {
-        logger.log('Checking 7-day streak badge');
-        const badge = await this.awardBadge(transaction, userId, 'catch_streak_7', 5000);
-        if (badge) {
-          earnedBadges.push(badge);
-          totalBadgeXP += 5000;
-          logger.log('Awarded 7-day streak badge', { badge });
-        }
-      }
-
-      // Total catches badge
-      if (context.totalCatches === 100) {
-        logger.log('Checking 100 catches badge');
-        const badge = await this.awardBadge(transaction, userId, 'catches_100', 10000);
-        if (badge) {
-          earnedBadges.push(badge);
-          totalBadgeXP += 10000;
-          logger.log('Awarded 100 catches badge', { badge });
-        }
-      }
-    }
+    // Ref: see the original code on GitHub Discussions
 
     logger.log('Badge processing complete', {
       earnedBadges,
