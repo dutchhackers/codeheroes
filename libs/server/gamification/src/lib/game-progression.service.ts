@@ -1,9 +1,8 @@
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
 import { DatabaseInstance, logger } from '@codeheroes/common';
 import { Firestore } from 'firebase-admin/firestore';
-import { GameAction, ActionResult } from './types';
+import * as functions from 'firebase-functions';
 import { ActionHandlerFactory } from './factory/action-handler.factory';
+import { ActionResult, GameAction } from './types';
 
 export class GameProgressionService {
   private db: Firestore;
@@ -19,6 +18,7 @@ export class GameProgressionService {
       return await handler.handle(action);
     } catch (error) {
       logger.error(`Error processing game action: ${action.actionType}`, error);
+      // TODO: replace with custom error
       throw new functions.https.HttpsError('internal', 'Failed to process game action');
     }
   }

@@ -4,8 +4,8 @@ import { logger } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { CalculatorFactory, ProcessorFactory } from '@codeheroes/gamify';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
-import { GameProgressionService } from '../core/game-progression.service';
 import { ActivityType, GameActionType } from '@codeheroes/shared/types';
+import { GameProgressionService } from '@codeheroes/gamification';
 
 // Initialize factories once at the top level
 CalculatorFactory.initialize();
