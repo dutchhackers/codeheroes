@@ -24,6 +24,7 @@ export interface ActionResult {
 
 export enum StreakType {
   CodePush = 'code_pushes',
-  PullRequestMerge = 'pr_merges',
   PullRequestCreate = 'pr_creations',
+  PullRequestClose = 'pr_closes',
+  PullRequestMerge = 'pr_merges',
 }

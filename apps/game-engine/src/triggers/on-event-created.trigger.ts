@@ -47,41 +47,42 @@ export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async
     return;
   }
 
-  const activityActionType = getActionType(activity);
-  if (!activityActionType) {
-    logger.warn('No action type found for activity', { activity });
+  // await gameService.processGameAction({
+  //   userId: activity.userId,
+  //   actionType: activityActionType,
+  //   metadata: activity.data?.metrics
+  //     ? {
+  //         ...(activity.data.metrics || {}),
+  //       }
+  //     : {},
+  // });
+});
+
+export const onEventCreated = onDocumentCreated('events/{eventId}', async (event) => {
+  logger.info('New event document created', {
+    eventId: event.params.eventId,
+  });
+
+  const eventData = event.data?.data() as Event;
+  if (!eventData) {
+    logger.error('No event data found');
     return;
+  }
+
+  const gameService = new GameProgressionService();
+  const userService = new UserService();
+
+  const gameAction = await gameService.handleNewEvent(eventData);
+  if (!gameAction) {
+    logger.warn('No game action found for event', { eventId: event.params.eventId });
+    return;
+  } else {
+    logger.log('Game action created', { gameAction });
   }
 
   // Initialize user if they don't exist
   // This should be a temporary thing
-  const userService = new UserService();
-  await userService.initializeNewUser(activity.userId, activity.userId.toString());
+  await userService.initializeNewUser(gameAction.userId, gameAction.userId.toString());
 
-  const gameService = new GameProgressionService();
-  await gameService.processGameAction({
-    userId: activity.userId,
-    actionType: activityActionType,
-    metadata: activity.data?.metrics
-      ? {
-          ...(activity.data.metrics || {}),
-        }
-      : {},
-  });
+  await gameService.processGameAction(gameAction);
 });
-
-function getActionType(activity: UserActivity): GameActionType {
-  // Category: Code
-  if (activity.type === ActivityType.CODE_PUSH) {
-    return 'code_push';
-  }
-  // Category: Pull Request
-  if (activity.type === 'PR_CREATED') {
-    return 'pull_request_create';
-  }
-  if (activity.type === 'PR_MERGED') {
-    return 'pull_request_merge';
-  }
-
-  return;
-}
