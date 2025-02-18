@@ -3,6 +3,7 @@ import { Firestore } from 'firebase-admin/firestore';
 import { BaseActionHandler } from '../handlers/base-action.handler';
 import { CodePushHandler } from '../handlers/code-push.handler';
 import { PullRequestCreateHandler } from '../handlers/pull-request-create.handler';
+import { PullRequestMergeHandler } from '../handlers/pull-request-merge.handler';
 
 export class ActionHandlerFactory {
   private static handlers = new Map<GameActionType, BaseActionHandler>();
@@ -10,7 +11,8 @@ export class ActionHandlerFactory {
   static initialize(db: Firestore) {
     this.handlers
       .set('code_push', new CodePushHandler(db))
-      .set('pull_request_create', new PullRequestCreateHandler(db));
+      .set('pull_request_create', new PullRequestCreateHandler(db))
+      .set('pull_request_merge', new PullRequestMergeHandler(db));
   }
 
   static getHandler(actionType: GameActionType): BaseActionHandler {

@@ -1,9 +1,10 @@
 import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
+import { GameActionType } from '@codeheroes/shared/types';
 import { FieldValue, Firestore, Timestamp } from 'firebase-admin/firestore';
 import { ActionResult, Collections, GameAction, StreakType } from '../types';
 
 export abstract class BaseActionHandler {
-  protected abstract actionType: string;
+  protected abstract actionType: GameActionType;
   protected abstract streakType: StreakType;
 
   constructor(protected db: Firestore) {}
@@ -24,14 +25,9 @@ export abstract class BaseActionHandler {
       }
 
       const stats = userStats.data()!;
-      
+
       // Calculate streak bonus
-      const { newStreak, bonusXP } = await this.calculateStreak(
-        transaction,
-        userStatsRef,
-        stats,
-        this.streakType
-      );
+      const { newStreak, bonusXP } = await this.calculateStreak(transaction, userStatsRef, stats, this.streakType);
 
       // Calculate action-specific bonuses
       const actionBonuses = this.calculateBonuses(metadata);

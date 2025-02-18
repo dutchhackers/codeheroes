@@ -1,9 +1,9 @@
-import { logger } from '@codeheroes/common';
-import { ActionResult, GameAction, StreakType, Collections } from '../types';
+import { GameActionType } from '@codeheroes/shared/types';
+import { StreakType } from '../types';
 import { BaseActionHandler } from './base-action.handler';
 
 export class CodePushHandler extends BaseActionHandler {
-  protected actionType = 'code_push';
+  protected actionType: GameActionType = 'code_push';
   protected streakType = StreakType.CodePush;
 
   protected calculateBaseXp(): number {

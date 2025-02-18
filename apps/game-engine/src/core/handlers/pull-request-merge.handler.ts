@@ -2,12 +2,12 @@ import { GameActionType } from '@codeheroes/shared/types';
 import { StreakType } from '../types';
 import { BaseActionHandler } from './base-action.handler';
 
-export class PullRequestCreateHandler extends BaseActionHandler {
-  protected actionType: GameActionType = 'pull_request_create';
-  protected streakType = StreakType.PullRequestCreate;
+export class PullRequestMergeHandler extends BaseActionHandler {
+  protected actionType: GameActionType = 'pull_request_merge';
+  protected streakType = StreakType.PullRequestMerge;
 
   protected calculateBaseXp(): number {
-    return 100; // PR create base XP
+    return 100; // PR merge base XP
   }
 
   protected calculateBonuses(metadata: Record<string, any>) {
