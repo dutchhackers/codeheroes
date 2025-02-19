@@ -18,7 +18,7 @@
   }
 
   button {
-    @apply px-4 py-2 text-sm font-semibold border-2 uppercase rounded-md cursor-pointer hover:bg-slate-200 disabled:cursor-not-allowed;
+    @apply px-4 py-2 text-sm font-semibold border-2 uppercase rounded-md cursor-pointer disabled:opacity-50 disabled:bg-slate-50 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:text-slate-800 dark:disabled:text-slate-500;
   }
 }
 
