@@ -1,3 +1,5 @@
+import { LEVEL_CONFIGURATION } from './level-configuration';
+
 export const LEVEL_THRESHOLDS = {
   BASE_XP: 100,
   MULTIPLIER: 1.5,
@@ -10,11 +12,11 @@ export function calculateXpForLevel(level: number): number {
 }
 
 export function getLevelFromXp(totalXp: number): number {
-  let level = 1;
-  while (level < LEVEL_THRESHOLDS.MAX_LEVEL && calculateXpForLevel(level + 1) <= totalXp) {
-    level++;
-  }
-  return level;
+  const level = LEVEL_CONFIGURATION.findIndex(
+    (config, index, array) =>
+      totalXp >= config.xpRequired && (index === array.length - 1 || totalXp < array[index + 1].xpRequired),
+  );
+  return level === -1 ? 1 : LEVEL_CONFIGURATION[level].level;
 }
 
 export function getXpProgress(totalXp: number): {
@@ -22,13 +24,32 @@ export function getXpProgress(totalXp: number): {
   currentLevelXp: number;
   xpToNextLevel: number;
 } {
-  const currentLevel = getLevelFromXp(totalXp);
-  const currentLevelBaseXp = calculateXpForLevel(currentLevel);
-  const nextLevelXp = calculateXpForLevel(currentLevel + 1);
+  const currentLevelConfig = LEVEL_CONFIGURATION.find(
+    (config, index, array) =>
+      totalXp >= config.xpRequired && (index === array.length - 1 || totalXp < array[index + 1].xpRequired),
+  );
+
+  if (!currentLevelConfig) {
+    return {
+      currentLevel: 1,
+      currentLevelXp: 0,
+      xpToNextLevel: LEVEL_CONFIGURATION[1].xpRequired,
+    };
+  }
+
+  const nextLevelConfig = LEVEL_CONFIGURATION.find((config) => config.level === currentLevelConfig.level + 1);
 
   return {
-    currentLevel,
-    currentLevelXp: totalXp - currentLevelBaseXp,
-    xpToNextLevel: nextLevelXp - currentLevelBaseXp,
+    currentLevel: currentLevelConfig.level,
+    currentLevelXp: totalXp - currentLevelConfig.xpRequired,
+    xpToNextLevel: nextLevelConfig ? nextLevelConfig.xpRequired - currentLevelConfig.xpRequired : 0,
   };
+}
+
+export function getLevelRequirements(level: number) {
+  return LEVEL_CONFIGURATION.find((config) => config.level === level);
+}
+
+export function getNextLevelRequirements(level: number) {
+  return LEVEL_CONFIGURATION.find((config) => config.level === level + 1);
 }
