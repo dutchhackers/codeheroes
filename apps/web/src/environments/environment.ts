@@ -7,5 +7,6 @@ export const environment = {
     storageBucket: '',
     messagingSenderId: '',
     appId: '',
+    vapidKey: '',
   },
 };

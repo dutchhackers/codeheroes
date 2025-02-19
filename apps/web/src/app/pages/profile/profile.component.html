@@ -13,6 +13,25 @@
           Level:
           <app-level-badge class="ml-1" size="small" [level]="user?.level || 0"></app-level-badge>
         </div>
+
+        @if (isPushNotificationSupported()) {
+          @if (isNotificationsAllowed() === false) {
+            <button
+              class="flex flex-row w-fit items-center mt-2"
+              [disabled]="isNotificationsAllowed()"
+              (click)="allowNotifications()"
+            >
+              <svg-icon src="icons/notification.svg" class="inline-block w-4 h-4 mr-1 text-inherit"></svg-icon>
+
+              Allow push notifications
+            </button>
+          }
+        }
+
+        <button class="flex flex-row w-fit items-center mt-2" (click)="logout()">
+          <svg-icon src="icons/power.svg" class="inline-block w-4 h-4 mr-1 text-inherit"></svg-icon>
+          Logout
+        </button>
       </div>
     </div>
 
