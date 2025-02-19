@@ -1,10 +1,3 @@
-import { BaseDocument } from "../core/models/common.model";
+import { UserDto } from '@codeheroes/shared/types';
 
-export interface User extends BaseDocument {
-  email: string;
-  displayName: string;
-  photoUrl: string;
-  lastLogin: string;
-  active: boolean;
-  uid?: string;
-}
+export type User = UserDto;
