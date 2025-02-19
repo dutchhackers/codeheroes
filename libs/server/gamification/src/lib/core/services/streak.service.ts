@@ -51,7 +51,7 @@ export class StreakService {
       logger.log('Calculated streak bonus', { newStreak, bonusXP });
     }
 
-    // Update streak data
+    // Update streak data in userStats collection
     transaction.update(userStatsRef, {
       [`streaks.${streakType}.current`]: newStreak,
       [`streaks.${streakType}.best`]: Math.max(newStreak, streakData.best),

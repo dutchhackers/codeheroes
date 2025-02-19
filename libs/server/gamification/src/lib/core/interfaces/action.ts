@@ -12,4 +12,10 @@ export interface ActionResult {
   streakBonus?: number;
   badgesEarned?: string[];
   rewards?: Record<string, any>;
+  level?: number;
+  currentLevelProgress?: {
+    level: number;
+    currentLevelXp: number;
+    xpToNextLevel: number;
+  };
 }

@@ -16,6 +16,7 @@ export class PullRequestMergeHandler extends BaseActionHandler {
       multipleFiles: metadata.changedFiles > 3 ? XP_SETTINGS.PULL_REQUEST.MERGE.BONUSES.MULTIPLE_FILES : 0,
       significantChanges:
         metadata.additions + metadata.deletions > 100 ? XP_SETTINGS.PULL_REQUEST.MERGE.BONUSES.SIGNIFICANT_CHANGES : 0,
+      qualityBonus: metadata.approvals > 1 ? metadata.approvals * 50 : 0,
     };
 
     return {

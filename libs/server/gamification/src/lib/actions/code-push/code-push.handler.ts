@@ -21,10 +21,4 @@ export class CodePushHandler extends BaseActionHandler {
       breakdown: bonuses,
     };
   }
-
-  protected getAdditionalBadgeContext(stats: FirebaseFirestore.DocumentData): Record<string, any> {
-    return {
-      totalPushes: stats.totalPushes + 1,
-    };
-  }
 }

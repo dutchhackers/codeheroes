@@ -39,23 +39,13 @@ export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async
     return;
   }
 
-  const activity = await processEventActivity(event.params.eventId, eventData);
-  logger.log('Activity created', { activity });
+  // const activity = await processEventActivity(event.params.eventId, eventData);
+  // logger.log('Activity created', { activity });
 
-  if (!activity) {
-    logger.warn('No activity found for event', { eventId: event.params.eventId });
-    return;
-  }
-
-  // await gameService.processGameAction({
-  //   userId: activity.userId,
-  //   actionType: activityActionType,
-  //   metadata: activity.data?.metrics
-  //     ? {
-  //         ...(activity.data.metrics || {}),
-  //       }
-  //     : {},
-  // });
+  // if (!activity) {
+  //   logger.warn('No activity found for event', { eventId: event.params.eventId });
+  //   return;
+  // }
 });
 
 export const onEventCreated = onDocumentCreated('events/{eventId}', async (event) => {
