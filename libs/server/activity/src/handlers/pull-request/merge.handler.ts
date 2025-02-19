@@ -1,6 +1,7 @@
 import { Event } from '@codeheroes/event';
 import { GithubPullRequestEventData } from '@codeheroes/providers';
-import { ActivityType, PullRequestActivityData, PullRequestActivityMetrics } from '../../types';
+import { ActivityType } from '@codeheroes/shared/types';
+import { PullRequestActivityData, PullRequestActivityMetrics } from '@codeheroes/common';
 import { BaseActivityHandler } from '../base/base.handler';
 
 export class PrMergeHandler extends BaseActivityHandler<PullRequestActivityMetrics> {
@@ -40,8 +41,10 @@ export class PrMergeHandler extends BaseActivityHandler<PullRequestActivityMetri
     const details = event.data as GithubPullRequestEventData;
     const metrics = this.calculateMetrics(event);
 
-    return `Merged pull request #${details.prNumber}: ${details.title} ` +
-           `(${this.formatNumber(metrics.commits)} ${this.pluralize(metrics.commits, 'commit')}, ` +
-           `${metrics.changedFiles} files changed)`;
+    return (
+      `Merged pull request #${details.prNumber}: ${details.title} ` +
+      `(${this.formatNumber(metrics.commits)} ${this.pluralize(metrics.commits, 'commit')}, ` +
+      `${metrics.changedFiles} files changed)`
+    );
   }
 }

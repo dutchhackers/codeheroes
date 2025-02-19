@@ -1,0 +1,20 @@
+{
+  "name": "gamification",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/server/gamification/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/server/gamification",
+        "tsConfig": "libs/server/gamification/tsconfig.lib.json",
+        "packageJson": "libs/server/gamification/package.json",
+        "main": "libs/server/gamification/src/index.ts",
+        "assets": ["libs/server/gamification/*.md"]
+      }
+    }
+  }
+}

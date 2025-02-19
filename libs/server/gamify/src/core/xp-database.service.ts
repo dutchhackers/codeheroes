@@ -1,4 +1,4 @@
-import { UserActivity } from '@codeheroes/activity';
+import { UserActivity } from '@codeheroes/common';
 import { logger } from '@codeheroes/common';
 import { ProcessorFactory } from '../factories/processor.factory';
 import { XpCalculationResponse } from '../models/gamification.model';

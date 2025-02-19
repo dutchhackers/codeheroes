@@ -1,5 +1,4 @@
-import { UserActivity } from '@codeheroes/activity';
-import { getCurrentTimeAsISO } from '@codeheroes/common';
+import { UserActivity } from '@codeheroes/common';
 import { XpCalculationResponse } from '../../models/gamification.model';
 import { BaseActivityProcessor } from '../base/activity-processor.base';
 

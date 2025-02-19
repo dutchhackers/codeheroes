@@ -1,7 +1,8 @@
+import { DeleteTagActivityData } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { GithubDeleteEventData } from '@codeheroes/providers';
+import { ActivityType } from '@codeheroes/shared/types';
 import { BaseActivityHandler } from '../base/base.handler';
-import { ActivityType, DeleteTagActivityData } from '../../types';
 
 export class TagDeleteHandler extends BaseActivityHandler {
   protected eventActions?: string[];

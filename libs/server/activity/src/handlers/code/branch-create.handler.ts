@@ -1,7 +1,8 @@
+import { CreateBranchActivityData } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { GithubCreateEventData } from '@codeheroes/providers';
+import { ActivityType } from '@codeheroes/shared/types';
 import { BaseActivityHandler } from '../base/base.handler';
-import { ActivityType, CreateBranchActivityData } from '../../types';
 
 export class BranchCreateHandler extends BaseActivityHandler {
   protected eventActions?: string[];

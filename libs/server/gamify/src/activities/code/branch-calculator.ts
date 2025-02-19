@@ -1,4 +1,5 @@
-import { ActivityType, UserActivity } from '@codeheroes/activity';
+import { UserActivity } from '@codeheroes/common';
+import { ActivityType } from '@codeheroes/shared/types';
 import { XpCalculationResponse } from '../../models/gamification.model';
 import { BaseActivityCalculator } from '../base/activity-calculator.base';
 
@@ -14,9 +15,8 @@ export class BranchActivityCalculator extends BaseActivityCalculator {
     totalXp += baseXp.xp;
 
     // Add activity-specific bonus
-    const bonusConfig = activity.type === ActivityType.BRANCH_CREATED ?
-      settings.bonuses?.creation :
-      settings.bonuses?.deletion;
+    const bonusConfig =
+      activity.type === ActivityType.BRANCH_CREATED ? settings.bonuses?.creation : settings.bonuses?.deletion;
 
     if (bonusConfig) {
       breakdown.push({

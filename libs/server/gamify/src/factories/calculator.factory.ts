@@ -1,11 +1,11 @@
-import { ActivityType } from '@codeheroes/activity';
+import { ActivityType } from '@codeheroes/shared/types';
 import { BaseActivityCalculator } from '../activities/base/activity-calculator.base';
+import { BranchActivityCalculator } from '../activities/code/branch-calculator';
+import { TagActivityCalculator } from '../activities/code/tag-calculator';
 import { IssueCalculator } from '../activities/issue/issue-calculator';
 import { PrReviewCalculator } from '../activities/pr-review/pr-review-calculator';
 import { PullRequestActivityCalculator } from '../activities/pull-request/pr-calculator';
 import { PushActivityCalculator } from '../activities/push/push-calculator';
-import { BranchActivityCalculator } from '../activities/code/branch-calculator';
-import { TagActivityCalculator } from '../activities/code/tag-calculator';
 import { GameXpSettings } from '../models/gamification.model';
 
 export class CalculatorFactory {

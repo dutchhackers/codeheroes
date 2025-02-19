@@ -1,6 +1,7 @@
+import { IssueActivityData } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { GithubIssueEventData } from '@codeheroes/providers';
-import { ActivityType, IssueActivityData } from '../../types';
+import { ActivityType } from '@codeheroes/shared/types';
 import { BaseActivityHandler } from '../base/base.handler';
 
 export class IssueCreateHandler extends BaseActivityHandler {

@@ -1,8 +1,11 @@
+import { ActivityData, ActivityMetrics } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
-import { ActivityData, ActivityHandler, ActivityType } from '../../types';
-import { ActivityMetrics } from '../../types/metrics.types';
+import { ActivityType } from '@codeheroes/shared/types';
+import { ActivityHandler } from '../../types';
 
-export abstract class BaseActivityHandler<T extends ActivityMetrics | undefined = undefined> implements ActivityHandler {
+export abstract class BaseActivityHandler<T extends ActivityMetrics | undefined = undefined>
+  implements ActivityHandler
+{
   protected abstract activityType: ActivityType;
   protected abstract eventTypes: string[];
   protected abstract eventActions?: string[];

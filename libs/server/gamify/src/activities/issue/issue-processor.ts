@@ -1,5 +1,5 @@
-import { ActivityType, UserActivity } from '@codeheroes/activity';
-import { getCurrentTimeAsISO } from '@codeheroes/common';
+import { getCurrentTimeAsISO, UserActivity } from '@codeheroes/common';
+import { ActivityType } from '@codeheroes/shared/types';
 import { XpCalculationResponse } from '../../models/gamification.model';
 import { BaseActivityProcessor } from '../base/activity-processor.base';
 
@@ -8,10 +8,7 @@ export class IssueProcessor extends BaseActivityProcessor {
     return await this.processIssueAchievements(userData, activity);
   }
 
-  protected async getUserDocumentUpdates(
-    userData: any,
-    activity: UserActivity,
-  ): Promise<Record<string, any>> {
+  protected async getUserDocumentUpdates(userData: any, activity: UserActivity): Promise<Record<string, any>> {
     const stats = userData.stats?.issues || { total: 0, closed: 0 };
 
     if (activity.type === ActivityType.ISSUE_CREATED) {
@@ -32,23 +29,27 @@ export class IssueProcessor extends BaseActivityProcessor {
     const stats = userData.stats?.issues || { total: 0, closed: 0 };
 
     if (activity.type === ActivityType.ISSUE_CREATED && stats.total === 0) {
-      processingResult.achievements = [{
-        id: 'first_issue',
-        name: 'Issue Reporter',
-        description: 'Created your first issue',
-        progress: 100,
-        completed: true,
-        completedAt: getCurrentTimeAsISO(),
-      }];
+      processingResult.achievements = [
+        {
+          id: 'first_issue',
+          name: 'Issue Reporter',
+          description: 'Created your first issue',
+          progress: 100,
+          completed: true,
+          completedAt: getCurrentTimeAsISO(),
+        },
+      ];
     } else if (activity.type === ActivityType.ISSUE_CLOSED && stats.closed === 9) {
-      processingResult.achievements = [{
-        id: 'issue_master',
-        name: 'Issue Master',
-        description: 'Closed 10 issues',
-        progress: 100,
-        completed: true,
-        completedAt: getCurrentTimeAsISO(),
-      }];
+      processingResult.achievements = [
+        {
+          id: 'issue_master',
+          name: 'Issue Master',
+          description: 'Closed 10 issues',
+          progress: 100,
+          completed: true,
+          completedAt: getCurrentTimeAsISO(),
+        },
+      ];
     }
 
     return processingResult;
