@@ -26,22 +26,22 @@ export function isPushNotificationSupported() {
   let supported = true;
 
   if (isIOS() && !window.matchMedia('(display-mode: standalone)').matches) {
-    console.warn('De PWA is niet geïnstalleerd op het startscherm.');
+    // PWA not installed
     supported = false;
   }
 
   if (!('serviceWorker' in navigator)) {
-    console.warn('Service Workers worden niet ondersteund op dit apparaat.');
+    // Service workers are not supported
     supported = false;
   }
 
   if (!('PushManager' in window)) {
-    console.warn('Push API wordt niet ondersteund op dit apparaat.');
+    // Push API is not supported
     supported = false;
   }
 
   if (!('Notification' in window)) {
-    console.warn('Notification API wordt niet ondersteund op dit apparaat.');
+    // Notification API is not supported
     supported = false;
   }
 

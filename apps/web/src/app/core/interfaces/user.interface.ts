@@ -12,7 +12,6 @@ export interface IUser {
   updatedAt: string;
   xp: number;
   xpToNextLevel: number;
-  pushNotificationToken?: string;
 }
 
 export interface IUserStats {

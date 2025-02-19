@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
 import {
   collection,
@@ -12,7 +12,7 @@ import {
   updateDoc,
 } from '@angular/fire/firestore';
 import type { Observable } from 'rxjs';
-import { map, of, tap } from 'rxjs';
+import { map, of } from 'rxjs';
 
 import type { IActivity, IUser } from '../interfaces';
 
@@ -24,13 +24,11 @@ export class UserService {
   readonly #firestore = inject(Firestore);
   readonly #path = 'users';
 
-  readonly user = signal<IUser | null>(null);
-
   public getMe(): Observable<IUser | null> {
     if (!this.#authenticatedUser) {
       return of(null);
     }
-    return this.getUser(this.#authenticatedUser.uid).pipe(tap((user) => this.user.set(user)));
+    return this.getUser(this.#authenticatedUser.uid);
   }
 
   public getUser(uid: string): Observable<IUser | null> {
