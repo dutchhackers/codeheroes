@@ -2,18 +2,18 @@ import { DatabaseInstance, logger } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { Firestore } from 'firebase-admin/firestore';
 import * as functions from 'firebase-functions';
-import { EventHandler } from './event-handler';
-import { ActionHandlerFactory } from './factory/action-handler.factory';
-import { ActionResult, GameAction } from './types';
+import { ActionHandlerFactory } from './factories/action-handler.factory';
+import { EventService } from './events/event.service';
+import { ActionResult, GameAction } from './core/interfaces/action';
 
 export class GameProgressionService {
   private db: Firestore;
-  private eventHandler: EventHandler;
+  private eventService: EventService;
 
   constructor() {
     this.db = DatabaseInstance.getInstance();
     ActionHandlerFactory.initialize(this.db);
-    this.eventHandler = new EventHandler();
+    this.eventService = new EventService();
   }
 
   async processGameAction(action: GameAction): Promise<ActionResult> {
@@ -28,7 +28,7 @@ export class GameProgressionService {
 
   async handleNewEvent(event: Event): Promise<GameAction | null> {
     try {
-      return await this.eventHandler.handleNewEvent(event);
+      return await this.eventService.handleNewEvent(event);
     } catch (error) {
       logger.error('Error handling event:', error);
       return null;
