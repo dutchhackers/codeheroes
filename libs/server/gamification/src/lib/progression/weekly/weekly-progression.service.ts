@@ -22,18 +22,23 @@ export class WeeklyProgressionService {
       .collection(Collections.UserStats_DailyStats)
       .doc(weekId);
 
-    transaction.set(
-      weeklyRef,
-      {
-        userId,
-        weekId,
-        xp: FieldValue.increment(update.xpGained),
-        level: update.newLevel,
-        activityTypes: FieldValue.arrayUnion(update.activityType),
-        lastUpdated: FieldValue.serverTimestamp(),
-      },
-      { merge: true },
-    );
+    const updateData: Record<string, any> = {
+      userId,
+      weekId,
+      xp: FieldValue.increment(update.xpGained),
+      level: update.newLevel,
+      activityTypes: FieldValue.arrayUnion(update.activityType),
+      lastUpdated: FieldValue.serverTimestamp(),
+    };
+
+    // Add counter for activity type if provided
+    if (update.activityType) {
+      updateData.activities = {
+        [update.activityType]: FieldValue.increment(1),
+      };
+    }
+
+    transaction.set(weeklyRef, updateData, { merge: true });
   }
 
   private getCurrentWeekId(): string {

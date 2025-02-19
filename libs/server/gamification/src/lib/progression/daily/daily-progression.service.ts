@@ -22,16 +22,26 @@ export class DailyProgressionService {
       .collection(Collections.UserStats_DailyStats)
       .doc(today);
 
-    transaction.set(
-      dailyRef,
-      {
-        userId,
-        xp: FieldValue.increment(update.xpGained),
-        level: update.newLevel,
-        activityTypes: FieldValue.arrayUnion(update.activityType),
-        lastUpdated: FieldValue.serverTimestamp(),
-      },
-      { merge: true },
-    );
+    const updateData: Record<string, any> = {
+      userId,
+      xp: FieldValue.increment(update.xpGained),
+      level: update.newLevel,
+      activityTypes: FieldValue.arrayUnion(update.activityType),
+      lastUpdated: FieldValue.serverTimestamp(),
+    };
+
+    // Add or update counter for activity type if provided
+    if (update.activityType) {
+      const doc = await transaction.get(dailyRef);
+      const currentData = doc.data() || {};
+      const currentActivities = currentData.activities || {};
+      
+      updateData.activities = {
+        ...currentActivities,
+        [update.activityType]: FieldValue.increment(1)
+      };
+    }
+
+    transaction.set(dailyRef, updateData, { merge: true });
   }
 }
