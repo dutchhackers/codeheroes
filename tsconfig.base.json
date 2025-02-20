@@ -15,7 +15,6 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@codeheroes/activity": ["libs/server/activity/src/index.ts"],
       "@codeheroes/common": ["libs/server/common/src/index.ts"],
       "@codeheroes/database-seeds": ["libs/database-seeds/src/index.ts"],
       "@codeheroes/event": ["libs/server/event/src/index.ts"],
