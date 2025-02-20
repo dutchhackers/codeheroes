@@ -1,12 +1,7 @@
 import { logger, UserService } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { GameProgressionService } from '@codeheroes/gamification';
-import { CalculatorFactory, ProcessorFactory } from '@codeheroes/gamify';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
-
-// Initialize factories once at the top level
-CalculatorFactory.initialize();
-ProcessorFactory.initialize();
 
 export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async (event) => {
   // deprecated
