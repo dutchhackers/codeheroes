@@ -1,6 +1,16 @@
 import { inject, Injectable } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
-import { collection, collectionData, Firestore, orderBy, query, where, limit } from '@angular/fire/firestore';
+import {
+  collection,
+  collectionData,
+  Firestore,
+  orderBy,
+  query,
+  where,
+  limit,
+  doc,
+  updateDoc,
+} from '@angular/fire/firestore';
 import type { Observable } from 'rxjs';
 import { map, of } from 'rxjs';
 
@@ -37,12 +47,21 @@ export class UserService {
       limit(maxActivities),
       orderBy('createdAt', 'desc'),
     );
+
     return collectionData<IActivity>(
       queryResult.withConverter({
         fromFirestore: (snap) => snap.data() as IActivity,
         toFirestore: (data) => data,
       }),
     );
+  }
+
+  public async updateUser(docId: number, data: Partial<IUser>): Promise<void> {
+    try {
+      await updateDoc(doc(this.#firestore, `${this.#path}/${docId}`), data);
+    } catch {
+      throw new Error('Failed to update user data');
+    }
   }
 
   readonly #collection = (path: string = this.#path) => collection(this.#firestore, path);

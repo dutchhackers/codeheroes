@@ -12,7 +12,7 @@ import type { IUser } from '../../core/interfaces';
         [alt]="user.displayName"
         class="rounded-full border border-slate-200"
         [ngClass]="{
-          'h-24 w-24 ': size() === 'large',
+          'w-24 ': size() === 'large',
           'h-16 w-16': size() === 'medium',
           'h-10 w-10': size() === 'medium',
         }"
