@@ -4,22 +4,21 @@ export * from './lib/core/interfaces/progression';
 export * from './lib/core/interfaces/streak';
 export * from './lib/core/interfaces/activity';
 
-// Core services and types
-export * from './lib/core/services/progression-event.service';
-export * from './lib/core/services/progression.service';
-export * from './lib/core/services/badge.service';
-export * from './lib/core/services/activity-tracker.service';
-export * from './lib/core/services/reward.service';
-export * from './lib/core/services/progression-event-handler.service';
-export * from './lib/core/services/activity-event-handler.service';
-export * from './lib/core/state-machine/progression-state-machine';
+// Unified Services
+export * from './lib/core/events/unified-event-handler.service';
+export * from './lib/core/events/event-types';
+export * from './lib/core/progression/progression.service';
+export * from './lib/core/activity/activity.service';
 
-// Factories
-export * from './lib/factories/action-handler.factory';
+// Supporting Services
+export * from './lib/core/services/badge.service';
+export * from './lib/core/services/level.service';
+export * from './lib/core/services/reward.service';
 
 // Constants
 export * from './lib/constants/xp-settings';
 export * from './lib/constants/level-thresholds';
+export * from './lib/constants/level-configuration';
 
-// Main service
-export * from './lib/core/services/game-progression.service';
+// Factory
+export * from './lib/factories/action-handler.factory';

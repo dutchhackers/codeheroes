@@ -1,4 +1,4 @@
-import { ProgressionEventHandlerService } from '@codeheroes/gamification';
+import { UnifiedEventHandlerService, ProgressionEventType } from '@codeheroes/gamification';
 import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 import { logger } from '@codeheroes/common';
 
@@ -8,28 +8,28 @@ export const onLevelUp = onMessagePublished('progression-events', async (event) 
     data: event.data.message.json,
   });
 
-  const eventHandler = new ProgressionEventHandlerService();
+  const eventHandler = new UnifiedEventHandlerService();
   const progressionEvent = event.data.message.json;
-  if (progressionEvent.type !== 'progression.level.up') {
+  if (progressionEvent.type !== ProgressionEventType.LEVEL_UP) {
     logger.info('Skipping non-level-up event');
     return;
   }
 
   logger.info('Processing level up event', { userId: progressionEvent.userId });
-  await eventHandler.handleLevelUp(progressionEvent);
+  await eventHandler.handleEvent(progressionEvent);
   logger.info('Level up event processed successfully');
 });
 
 export const onStreakUpdated = onMessagePublished('progression-events', async (event) => {
-  const eventHandler = new ProgressionEventHandlerService();
+  const eventHandler = new UnifiedEventHandlerService();
   const progressionEvent = event.data.message.json;
-  if (progressionEvent.type !== 'progression.streak.updated') return;
-  await eventHandler.handleStreakUpdate(progressionEvent);
+  if (progressionEvent.type !== ProgressionEventType.STREAK_UPDATED) return;
+  await eventHandler.handleEvent(progressionEvent);
 });
 
 export const onBadgeEarned = onMessagePublished('progression-events', async (event) => {
-  const eventHandler = new ProgressionEventHandlerService();
+  const eventHandler = new UnifiedEventHandlerService();
   const progressionEvent = event.data.message.json;
-  if (progressionEvent.type !== 'progression.badge.earned') return;
-  await eventHandler.handleBadgeEarned(progressionEvent);
+  if (progressionEvent.type !== ProgressionEventType.BADGE_EARNED) return;
+  await eventHandler.handleEvent(progressionEvent);
 });

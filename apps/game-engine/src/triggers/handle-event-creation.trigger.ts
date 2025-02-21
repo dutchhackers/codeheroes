@@ -1,6 +1,6 @@
 import { logger, UserService } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
-import { GameProgressionService } from '@codeheroes/gamification';
+import { ActivityService, ProgressionService } from '@codeheroes/gamification';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 
 export const handleEventCreation = onDocumentCreated('events/{eventId}', async (event) => {
@@ -14,10 +14,11 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
     return;
   }
 
-  const gameService = new GameProgressionService();
+  const activityService = new ActivityService();
+  const progressionService = new ProgressionService();
   const userService = new UserService();
 
-  const gameAction = await gameService.handleNewEvent(eventData);
+  const gameAction = await activityService.handleNewEvent(eventData);
   if (!gameAction) {
     logger.warn('No game action found for event', { eventId: event.params.eventId });
     return;
@@ -29,5 +30,5 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
   // This should be a temporary thing
   await userService.initializeNewUser(gameAction.userId, gameAction.userId.toString());
 
-  await gameService.processGameAction(gameAction);
+  await progressionService.processGameAction(gameAction);
 });

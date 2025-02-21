@@ -7,7 +7,7 @@ import { ProgressionState } from '../interfaces/progression';
 import { StreakType } from '../interfaces/streak';
 import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
-import { ProgressionEventService } from '../services/progression-event.service';
+import { ProgressionEventService } from '../events/event-types';
 
 interface ProgressionStateMachine {
   handleXpGain(xp: number, activity?: Activity): Promise<void>;

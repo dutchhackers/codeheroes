@@ -2,7 +2,8 @@ import { DatabaseInstance } from '@codeheroes/common';
 import { Collections } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { ProgressionState } from '../interfaces/progression';
-import { ProgressionEventService } from './progression-event.service';
+import { UnifiedEventHandlerService } from '../events/unified-event-handler.service';
+import { ProgressionEventType } from '../events/event-types';
 
 export interface Badge {
   id: string;
@@ -20,11 +21,11 @@ interface BadgeAwardResult {
 
 export class BadgeService {
   private db: Firestore;
-  private progressionEvents: ProgressionEventService;
+  private eventHandler: UnifiedEventHandlerService;
 
-  constructor() {
+  constructor(eventHandler?: UnifiedEventHandlerService) {
     this.db = DatabaseInstance.getInstance();
-    this.progressionEvents = new ProgressionEventService();
+    this.eventHandler = eventHandler || new UnifiedEventHandlerService();
   }
 
   async processBadges(
@@ -66,7 +67,12 @@ export class BadgeService {
       totalBadgeXP += badge.xpReward;
 
       // Emit badge earned event with current progression state
-      await this.progressionEvents.emitBadgeEarned(userId, badge.id, userStats);
+      await this.eventHandler.handleEvent({
+        userId,
+        timestamp: new Date().toISOString(),
+        type: ProgressionEventType.BADGE_EARNED,
+        data: { badgeId: badge.id, state: userStats },
+      });
     }
 
     return { earnedBadges, totalBadgeXP };

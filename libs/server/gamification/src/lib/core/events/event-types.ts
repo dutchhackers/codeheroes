@@ -1,7 +1,6 @@
-import { PubSub } from '@google-cloud/pubsub';
-import { DatabaseInstance, logger } from '@codeheroes/common';
 import { Activity } from '../interfaces/activity';
 import { ProgressionState } from '../interfaces/progression';
+import { PubSub } from '@google-cloud/pubsub';
 
 export enum ProgressionEventType {
   XP_GAINED = 'progression.xp.gained',
@@ -19,7 +18,7 @@ export interface ProgressionEvent {
     activity?: Activity;
     state?: Partial<ProgressionState>;
     previousState?: Partial<ProgressionState>;
-    badgeId?: string; // Added to support badge events
+    badgeId?: string;
   };
 }
 
@@ -29,67 +28,6 @@ export class ProgressionEventService {
 
   constructor() {
     this.pubsub = new PubSub();
-    logger.info('ProgressionEventService initialized');
-  }
-
-  private async ensureTopicExists() {
-    try {
-      logger.info(`Checking if topic ${this.topicName} exists...`);
-      const [topics] = await this.pubsub.getTopics();
-      const topicExists = topics.some((topic) => topic.name.endsWith(this.topicName));
-
-      if (!topicExists) {
-        logger.info(`Creating new topic: ${this.topicName}`);
-        await this.pubsub.createTopic(this.topicName);
-        logger.info(`Topic ${this.topicName} created successfully`);
-      } else {
-        logger.info(`Topic ${this.topicName} already exists`);
-      }
-    } catch (error) {
-      logger.error('Error ensuring topic exists:', {
-        error,
-        topicName: this.topicName,
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-      throw error;
-    }
-  }
-
-  async emit(event: ProgressionEvent) {
-    try {
-      logger.info('Preparing to emit event', {
-        type: event.type,
-        userId: event.userId,
-        timestamp: event.timestamp,
-      });
-
-      await this.ensureTopicExists();
-      const messageData = Buffer.from(JSON.stringify(event));
-
-      logger.debug('Publishing message to PubSub', {
-        topic: this.topicName,
-        eventType: event.type,
-        dataSize: messageData.length,
-      });
-
-      const messageId = await this.pubsub.topic(this.topicName).publish(messageData);
-
-      logger.info('Successfully published event', {
-        type: event.type,
-        userId: event.userId,
-        messageId,
-      });
-    } catch (error) {
-      logger.error('Error emitting event:', {
-        error,
-        eventType: event.type,
-        userId: event.userId,
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-      throw error;
-    }
   }
 
   async emitXpGained(userId: string, activity: Activity, state: ProgressionState, previousState: ProgressionState) {
@@ -135,5 +73,17 @@ export class ProgressionEventService {
       type: ProgressionEventType.ACTIVITY_RECORDED,
       data: { activity },
     });
+  }
+
+  private async emit(event: ProgressionEvent): Promise<void> {
+    const topic = this.pubsub.topic(this.topicName);
+    const data = Buffer.from(JSON.stringify(event));
+
+    try {
+      await topic.publish(data);
+    } catch (error) {
+      console.error('Error publishing progression event:', error);
+      throw error;
+    }
   }
 }

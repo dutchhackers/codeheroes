@@ -3,7 +3,7 @@ import { Collections, GameActionType } from '@codeheroes/shared/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { ActionResult, GameAction } from '../../core/interfaces/action';
 import { StreakType } from '../../core/interfaces/streak';
-import { ProgressionService } from '../../core/services/progression.service';
+import { ProgressionService } from '../../core/progression/progression.service';
 
 export abstract class BaseActionHandler {
   protected abstract actionType: GameActionType;
@@ -74,18 +74,50 @@ export abstract class BaseActionHandler {
   };
 
   private async recordActivity(userId: string, xpGained: number, metadata: Record<string, any>) {
-    const activityRef = this.db
-      .collection(Collections.UserStats)
-      .doc(userId)
-      .collection(Collections.UserStats_Activities)
-      .doc();
+    const userStatsRef = this.db.collection(Collections.UserStats).doc(userId);
+    const activityRef = userStatsRef.collection(Collections.UserStats_Activities).doc();
+    const now = getCurrentTimeAsISO();
 
-    await activityRef.set({
-      timestamp: FieldValue.serverTimestamp(),
-      actionType: this.actionType,
-      xpGained,
-      metadata,
-      createdAt: getCurrentTimeAsISO(),
+    await this.db.runTransaction(async (transaction) => {
+      // Check if user stats exist
+      const statsDoc = await transaction.get(userStatsRef);
+
+      const activity = {
+        timestamp: now,
+        actionType: this.actionType,
+        xpGained,
+        metadata,
+        createdAt: now,
+      };
+
+      // Create user stats if they don't exist
+      if (!statsDoc.exists) {
+        transaction.set(userStatsRef, {
+          userId,
+          xp: 0,
+          level: 1,
+          activityStats: {
+            total: 0,
+            byType: {},
+          },
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+
+      // Record the activity
+      transaction.set(activityRef, activity);
+
+      // Update activity stats
+      transaction.update(userStatsRef, {
+        [`activityStats.total`]: FieldValue.increment(1),
+        [`activityStats.byType.${this.actionType}`]: FieldValue.increment(1),
+        [`activityStats.lastActivity`]: {
+          type: this.actionType,
+          timestamp: now,
+        },
+        updatedAt: now,
+      });
     });
   }
 }

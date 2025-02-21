@@ -3,7 +3,7 @@ import { NotificationService } from '@codeheroes/notifications';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { RewardType } from '../interfaces/level';
 import { BadgeService } from './badge.service';
-import { ProgressionEventService } from './progression-event.service';
+import { ProgressionEventService } from '../events/event-types';
 
 export interface Reward {
   id: string;
@@ -28,10 +28,10 @@ export class RewardService {
   private badgeService: BadgeService;
   private eventService: ProgressionEventService;
 
-  constructor() {
+  constructor(badgeService?: BadgeService) {
     this.db = DatabaseInstance.getInstance();
     this.notificationService = new NotificationService();
-    this.badgeService = new BadgeService();
+    this.badgeService = badgeService || new BadgeService();
     this.eventService = new ProgressionEventService();
   }
 

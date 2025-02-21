@@ -2,10 +2,13 @@ import { DatabaseInstance, logger } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
 import { Collections } from '@codeheroes/shared/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { BadgeService } from './badge.service';
-import { ProgressionEvent } from './progression-event.service';
+import { Activity } from '../interfaces/activity';
+import { ProgressionState } from '../interfaces/progression';
+import { StreakType } from '../interfaces/streak';
+import { BadgeService } from '../services/badge.service';
+import { ProgressionEvent, ProgressionEventType } from './event-types';
 
-export class ProgressionEventHandlerService {
+export class UnifiedEventHandlerService {
   private db: Firestore;
   private notificationService: NotificationService;
   private badgeService: BadgeService;
@@ -13,21 +16,39 @@ export class ProgressionEventHandlerService {
   constructor() {
     this.db = DatabaseInstance.getInstance();
     this.notificationService = new NotificationService();
-    this.badgeService = new BadgeService();
+    // Pass this instance to BadgeService to prevent circular instantiation
+    this.badgeService = new BadgeService(this);
   }
 
-  async handleLevelUp(event: ProgressionEvent): Promise<void> {
-    logger.info('Starting handleLevelUp', { userId: event.userId });
+  async handleEvent(event: ProgressionEvent): Promise<void> {
+    logger.info('Handling progression event', { type: event.type, userId: event.userId });
+
+    switch (event.type) {
+      case ProgressionEventType.LEVEL_UP:
+        await this.handleLevelUp(event);
+        break;
+      case ProgressionEventType.STREAK_UPDATED:
+        await this.handleStreakUpdate(event);
+        break;
+      case ProgressionEventType.BADGE_EARNED:
+        await this.handleBadgeEarned(event);
+        break;
+      case ProgressionEventType.ACTIVITY_RECORDED:
+        await this.handleActivityRecorded(event);
+        break;
+      case ProgressionEventType.XP_GAINED:
+        await this.handleXpGained(event);
+        break;
+    }
+  }
+
+  private async handleLevelUp(event: ProgressionEvent): Promise<void> {
     const { userId, data } = event;
     const newLevel = data.state?.level;
-    if (!newLevel) {
-      logger.warn('No level data in event', { userId, data });
-      return;
-    }
+    if (!newLevel) return;
 
-    logger.info('Processing level up', { userId, newLevel });
     await this.db.runTransaction(async (transaction) => {
-      // Record level up achievement
+      // Record achievement
       await this.recordAchievement(transaction, userId, {
         id: `level_${newLevel}`,
         name: `Level ${newLevel}`,
@@ -35,7 +56,7 @@ export class ProgressionEventHandlerService {
         timestamp: event.timestamp,
       });
 
-      // Check for level-based achievements
+      // Level-based achievements
       if (newLevel === 5) {
         await this.recordAchievement(transaction, userId, {
           id: 'intermediate_hero',
@@ -59,17 +80,15 @@ export class ProgressionEventHandlerService {
         metadata: { level: newLevel },
       });
     });
-    logger.info('Level up processed successfully', { userId, newLevel });
   }
 
-  async handleStreakUpdate(event: ProgressionEvent): Promise<void> {
+  private async handleStreakUpdate(event: ProgressionEvent): Promise<void> {
     const { userId, data } = event;
     const streaks = data.state?.streaks;
     if (!streaks) return;
 
     await this.db.runTransaction(async (transaction) => {
       for (const [streakType, days] of Object.entries(streaks)) {
-        // Record streak achievements
         if (days === 7) {
           await this.recordAchievement(transaction, userId, {
             id: `weekly_streak_${streakType}`,
@@ -86,7 +105,6 @@ export class ProgressionEventHandlerService {
           });
         }
 
-        // Create notification for significant streaks
         if (days === 7 || days === 30) {
           await this.notificationService.createNotification(userId, {
             type: 'STREAK_MILESTONE',
@@ -99,13 +117,12 @@ export class ProgressionEventHandlerService {
     });
   }
 
-  async handleBadgeEarned(event: ProgressionEvent): Promise<void> {
+  private async handleBadgeEarned(event: ProgressionEvent): Promise<void> {
     const { userId, data } = event;
     const badgeId = data.badgeId;
     if (!badgeId) return;
 
     await this.db.runTransaction(async (transaction) => {
-      // Get user's current badges
       const userBadges = await transaction.get(
         this.db.collection(Collections.Users).doc(userId).collection(Collections.User_UserBadges),
       );
@@ -119,7 +136,6 @@ export class ProgressionEventHandlerService {
         metadata: { badgeId },
       });
 
-      // Check for badge collection achievements
       if (badgeCount === 5) {
         await this.recordAchievement(transaction, userId, {
           id: 'badge_collector',
@@ -138,8 +154,47 @@ export class ProgressionEventHandlerService {
     });
   }
 
+  private async handleActivityRecorded(event: ProgressionEvent): Promise<void> {
+    const { userId, data } = event;
+    const activity = data.activity;
+    if (!activity) return;
+
+    try {
+      const stats = await this.getActivityStats(userId, activity.type);
+
+      // First-time achievements
+      if (stats.total === 1) {
+        await this.recordAchievement(null, userId, {
+          id: `first_${activity.type}`,
+          name: `First ${activity.type.replace(/_/g, ' ')}`,
+          description: `Completed your first ${activity.type.replace(/_/g, ' ')}`,
+          timestamp: event.timestamp,
+        });
+      }
+
+      // Milestone achievements
+      const milestones = [10, 50, 100, 500];
+      const nextMilestone = milestones.find((m) => stats.total === m);
+      if (nextMilestone) {
+        await this.recordAchievement(null, userId, {
+          id: `${activity.type}_milestone_${nextMilestone}`,
+          name: `${activity.type.replace(/_/g, ' ')} Master ${nextMilestone}`,
+          description: `Completed ${nextMilestone} ${activity.type.replace(/_/g, ' ')}s`,
+          timestamp: event.timestamp,
+        });
+      }
+    } catch (error) {
+      logger.error('Error processing activity recorded event:', error);
+      throw error;
+    }
+  }
+
+  private async handleXpGained(event: ProgressionEvent): Promise<void> {
+    // Handle XP gained events if needed
+  }
+
   private async recordAchievement(
-    transaction: FirebaseFirestore.Transaction,
+    transaction: FirebaseFirestore.Transaction | null,
     userId: string,
     achievement: {
       id: string;
@@ -151,10 +206,28 @@ export class ProgressionEventHandlerService {
     const userRef = this.db.collection(Collections.Users).doc(userId);
     const achievementRef = userRef.collection(Collections.Achievements).doc(achievement.id);
 
-    transaction.set(achievementRef, achievement);
-    transaction.update(userRef, {
+    const updateData = {
+      ...achievement,
       'stats.achievements.total': FieldValue.increment(1),
       'stats.achievements.lastEarned': achievement.timestamp,
-    });
+    };
+
+    if (transaction) {
+      transaction.set(achievementRef, achievement);
+      transaction.update(userRef, updateData);
+    } else {
+      await this.db.runTransaction(async (t) => {
+        t.set(achievementRef, achievement);
+        t.update(userRef, updateData);
+      });
+    }
+  }
+
+  private async getActivityStats(userId: string, activityType: string): Promise<{ total: number }> {
+    const statsDoc = await this.db.collection(Collections.UserStats).doc(userId).get();
+    const stats = statsDoc.data()?.activityStats || {};
+    return {
+      total: stats.byType?.[activityType] || 0,
+    };
   }
 }
