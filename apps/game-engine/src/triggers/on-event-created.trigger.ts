@@ -3,11 +3,7 @@ import { Event } from '@codeheroes/event';
 import { GameProgressionService } from '@codeheroes/gamification';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 
-export const onEventCreatedTrigger = onDocumentCreated('events/{eventId}', async (event) => {
-  // deprecated
-});
-
-export const onEventCreated = onDocumentCreated('events/{eventId}', async (event) => {
+export const handleEventCreation = onDocumentCreated('events/{eventId}', async (event) => {
   logger.info('New event document created', {
     eventId: event.params.eventId,
   });
