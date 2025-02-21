@@ -7,6 +7,7 @@ export interface ProgressionState {
   currentLevelXp: number;
   xpToNextLevel: number;
   streaks: Record<StreakType, number>;
+  achievements?: string[];
   lastActivityDate?: string;
 }
 
@@ -16,6 +17,15 @@ export interface ProgressionUpdate {
   achievements?: string[];
   streakUpdates?: Record<StreakType, number>;
   activityType?: string;
+}
+
+export interface LevelProgress {
+  currentLevel: number;
+  totalXp: number;
+  currentLevelXp: number;
+  xpForCurrentLevel: number;
+  xpToNextLevel: number;
+  progressPercentage: number;
 }
 
 export interface LeaderboardEntry {

@@ -1,10 +1,10 @@
-import { DatabaseInstance, logger } from '@codeheroes/common';
+import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { Firestore } from 'firebase-admin/firestore';
-import { DailyProgressionService } from './daily/daily-progression.service';
-import { WeeklyProgressionService } from './weekly/weekly-progression.service';
-import { ProgressionState, ProgressionUpdate } from '../core/interfaces/progression';
 import { getXpProgress } from '../constants/level-thresholds';
 import { Collections } from '../core/constants/collections';
+import { ProgressionState, ProgressionUpdate } from '../core/interfaces/progression';
+import { DailyProgressionService } from './daily/daily-progression.service';
+import { WeeklyProgressionService } from './weekly/weekly-progression.service';
 
 export class ProgressionService {
   public readonly dailyService: DailyProgressionService;
@@ -22,6 +22,8 @@ export class ProgressionService {
 
     return await this.db.runTransaction(async (transaction) => {
       const userStatsDoc = await transaction.get(userStatsRef);
+      const now = getCurrentTimeAsISO();
+
       if (!userStatsDoc.exists) {
         // Initialize user stats if they don't exist
         transaction.set(userStatsRef, {
@@ -30,6 +32,8 @@ export class ProgressionService {
           level: 1,
           streaks: {},
           lastActivityDate: null,
+          createdAt: now,
+          updatedAt: now,
         });
       }
 
@@ -68,7 +72,7 @@ export class ProgressionService {
           acc[key] = value;
           return acc;
         },
-        {} as Record<string, any>,
+        { updatedAt: now } as Record<string, any>,
       );
 
       transaction.update(userStatsRef, updateData);

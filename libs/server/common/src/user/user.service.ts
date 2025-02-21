@@ -1,8 +1,7 @@
 import { CollectionReference } from 'firebase-admin/firestore';
+import { getCurrentTimeAsISO, logger } from '../core/firebase';
 import { PaginatedResponse, PaginationParams } from '../core/interfaces/pagination.interface';
-import { BaseFirestoreService } from '../core/services';
-import { CounterService } from '../core/services';
-import { getCurrentTimeAsISO } from '../core/firebase';
+import { BaseFirestoreService, CounterService } from '../core/services';
 import { userConverter } from './user.converter';
 import { CreateUserInput, UpdateUserInput } from './user.dto';
 import { User } from './user.model';
@@ -97,36 +96,27 @@ export class UserService extends BaseFirestoreService<User> {
       const existingStats = await userStatsRef.get();
 
       if (!existingStats.exists) {
+        const now = getCurrentTimeAsISO();
         // Create initial stats
-        // await userStatsRef.set(this.getInitialUserStats(userId, username));
         await userStatsRef.set({
           userId,
           username,
           level: 1,
+          xp: 0,
+          streaks: {},
+          lastActivityDate: null,
+          createdAt: now,
+          updatedAt: now,
         });
 
-        // // Create first daily stats
-        // const today = new Date().toISOString().split('T')[0];
-        // await this.db
-        //   .collection('users')
-        //   .doc(userId)
-        //   .collection('daily_stats')
-        //   .doc(today)
-        //   .set({
-        //     date: today,
-        //     totalXP: 0,
-        //     activities: {
-        //       pr_merges: 0,
-        //     }
-        //   });
-
-        console.log(`Initialized stats for new user: ${userId}`);
+        logger.info(`Initialized stats for new user: ${userId}`);
         return true;
       }
 
       return false; // Stats already existed
     } catch (error) {
-      console.error('Error initializing user stats:', error);
+      logger.error('Error initializing user stats:', error);
+      throw error;
     }
   }
 }
