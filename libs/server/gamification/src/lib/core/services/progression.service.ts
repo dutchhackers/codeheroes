@@ -1,0 +1,138 @@
+import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
+import { Firestore } from 'firebase-admin/firestore';
+import { getXpProgress } from '../../constants/level-thresholds';
+import { Collections } from '../constants/collections';
+import { ProgressionState, ProgressionUpdate } from '../interfaces/progression';
+import { DailyProgressionService } from '../../progression/daily/daily-progression.service';
+import { WeeklyProgressionService } from '../../progression/weekly/weekly-progression.service';
+import { ProgressionEventService } from './progression-event.service';
+import { StreakType } from '../interfaces/streak';
+import { Activity } from '../interfaces/activity';
+
+export class ProgressionService {
+  public readonly dailyService: DailyProgressionService;
+  public readonly weeklyService: WeeklyProgressionService;
+  private db: Firestore;
+  private progressionEvents: ProgressionEventService;
+
+  constructor() {
+    this.db = DatabaseInstance.getInstance();
+    this.dailyService = new DailyProgressionService();
+    this.weeklyService = new WeeklyProgressionService();
+    this.progressionEvents = new ProgressionEventService();
+  }
+
+  async updateProgression(userId: string, update: ProgressionUpdate, activity?: Activity): Promise<ProgressionState> {
+    const userStatsRef = this.db.collection(Collections.UserStats).doc(userId);
+
+    return await this.db.runTransaction(async (transaction) => {
+      const userDoc = await transaction.get(userStatsRef);
+      const now = getCurrentTimeAsISO();
+
+      const initialState: ProgressionState = {
+        userId,
+        xp: 0,
+        level: 1,
+        currentLevelXp: 0,
+        xpToNextLevel: 1000,
+        streaks: {
+          [StreakType.CodePush]: 0,
+          [StreakType.PullRequestCreate]: 0,
+          [StreakType.PullRequestClose]: 0,
+          [StreakType.PullRequestMerge]: 0,
+        },
+        achievements: [],
+        lastActivityDate: null,
+      };
+
+      // Initialize user stats if they don't exist
+      if (!userDoc.exists) {
+        transaction.set(userStatsRef, {
+          ...initialState,
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+
+      const previousState: ProgressionState = userDoc.exists ? (userDoc.data() as ProgressionState) : initialState;
+      const newTotalXp = previousState.xp + update.xpGained;
+
+      // Calculate new level progress
+      const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(newTotalXp);
+
+      // Update daily and weekly progress
+      await this.dailyService.updateDailyProgress(transaction, userId, update);
+      await this.weeklyService.updateWeeklyProgress(transaction, userId, update);
+
+      // Prepare new state
+      const newState: ProgressionState = {
+        userId,
+        xp: newTotalXp,
+        level: currentLevel,
+        currentLevelXp,
+        xpToNextLevel,
+        streaks: {
+          ...previousState.streaks,
+          ...update.streakUpdates,
+        },
+        achievements: [...(previousState.achievements || []), ...(update.achievements || [])],
+        lastActivityDate: now.split('T')[0],
+      };
+
+      // Emit progression events
+      if (activity) {
+        await this.progressionEvents.emitXpGained(userId, activity, newState, previousState);
+      }
+
+      if (currentLevel > previousState.level) {
+        await this.progressionEvents.emitLevelUp(userId, newState, previousState);
+      }
+
+      if (update.streakUpdates) {
+        await this.progressionEvents.emitStreakUpdated(userId, newState, previousState);
+      }
+
+      logger.info('Updating user progression', {
+        userId,
+        xpGained: update.xpGained,
+        newLevel: currentLevel,
+        previousLevel: previousState.level,
+      });
+
+      // Update user stats in Firestore
+      const updateData = {
+        ...newState,
+        updatedAt: now,
+      };
+
+      transaction.update(userStatsRef, updateData);
+      return newState;
+    });
+  }
+
+  async getProgressionState(userId: string): Promise<ProgressionState | null> {
+    const userStatsDoc = await this.db.collection(Collections.UserStats).doc(userId).get();
+    if (!userStatsDoc.exists) {
+      return null;
+    }
+
+    const userStats = userStatsDoc.data()!;
+    const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(userStats.xp || 0);
+
+    return {
+      userId,
+      xp: userStats.xp || 0,
+      level: currentLevel,
+      currentLevelXp,
+      xpToNextLevel,
+      streaks: userStats.streaks || {
+        [StreakType.CodePush]: 0,
+        [StreakType.PullRequestCreate]: 0,
+        [StreakType.PullRequestClose]: 0,
+        [StreakType.PullRequestMerge]: 0,
+      },
+      achievements: userStats.achievements || [],
+      lastActivityDate: userStats.lastActivityDate,
+    };
+  }
+}

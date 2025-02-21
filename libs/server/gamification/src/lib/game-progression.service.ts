@@ -5,7 +5,7 @@ import * as functions from 'firebase-functions';
 import { ActionHandlerFactory } from './factories/action-handler.factory';
 import { EventService } from './events/event.service';
 import { ActionResult, GameAction } from './core/interfaces/action';
-import { ProgressionService } from './progression/progression.service';
+import { ProgressionService } from './core/services/progression.service';
 import { LeaderboardService } from './leaderboard/leaderboard.service';
 
 export class GameProgressionService {

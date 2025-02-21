@@ -2,7 +2,7 @@ import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { GameActionType } from '@codeheroes/shared/types';
 import { Firestore, FieldValue } from 'firebase-admin/firestore';
 import { ActionResult, GameAction } from '../../core/interfaces/action';
-import { ProgressionService } from '../../progression/progression.service';
+import { ProgressionService } from '../../core/services/progression.service';
 import { StreakType } from '../../core/interfaces/streak';
 import { Collections } from '../../core/constants/collections';
 
