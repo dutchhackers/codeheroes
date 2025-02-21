@@ -1,10 +1,9 @@
 import { DatabaseInstance } from '@codeheroes/common';
+import { NotificationService } from '@codeheroes/notifications';
 import { Firestore } from 'firebase-admin/firestore';
-import { ProgressionEventType, ProgressionEvent } from './progression-event.service';
-import { NotificationService } from './notification.service';
-import { BadgeService } from './badge.service';
-import { ProgressionState } from '../interfaces/progression';
 import { StreakType } from '../interfaces/streak';
+import { BadgeService } from './badge.service';
+import { ProgressionEvent, ProgressionEventType } from './progression-event.service';
 
 export class ProgressionListenerService {
   private db: Firestore;

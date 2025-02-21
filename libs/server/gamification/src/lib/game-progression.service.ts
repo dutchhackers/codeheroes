@@ -1,5 +1,6 @@
 import { DatabaseInstance, logger } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
+import { NotificationService } from '@codeheroes/notifications';
 import { GameActionType } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { ActionResult, GameAction } from './core/interfaces/action';
@@ -7,7 +8,6 @@ import { RewardType } from './core/interfaces/level';
 import { StreakType } from './core/interfaces/streak';
 import { BadgeService } from './core/services/badge.service';
 import { LevelService } from './core/services/level.service';
-import { NotificationService } from './core/services/notification.service';
 import { ProgressionEventService } from './core/services/progression-event.service';
 import { ProgressionService } from './core/services/progression.service';
 import { RewardService } from './core/services/reward.service';

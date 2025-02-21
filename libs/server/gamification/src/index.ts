@@ -7,7 +7,6 @@ export * from './lib/core/interfaces/activity';
 // Core services and types
 export * from './lib/core/services/progression-event.service';
 export * from './lib/core/services/progression.service';
-export * from './lib/core/services/notification.service';
 export * from './lib/core/services/badge.service';
 export * from './lib/core/services/activity-tracker.service';
 export * from './lib/core/services/reward.service';

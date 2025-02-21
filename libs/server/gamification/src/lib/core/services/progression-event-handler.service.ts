@@ -1,7 +1,7 @@
 import { DatabaseInstance } from '@codeheroes/common';
 import { Firestore, FieldValue } from 'firebase-admin/firestore';
 import { Collections } from '../constants/collections';
-import { NotificationService } from './notification.service';
+import { NotificationService } from '@codeheroes/notifications';
 import { BadgeService } from './badge.service';
 import { ProgressionEvent } from './progression-event.service';
 import { logger } from '@codeheroes/common';

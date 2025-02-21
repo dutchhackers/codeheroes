@@ -1,17 +1,7 @@
 import { DatabaseInstance } from '@codeheroes/common';
 import { Firestore } from 'firebase-admin/firestore';
-
-export interface Notification {
-  id: string;
-  userId: string;
-  type: string;
-  title: string;
-  message: string;
-  metadata?: Record<string, any>;
-  read: boolean;
-  createdAt: string;
-  readAt?: string;
-}
+import { Notification } from '../interfaces/notification.interface';
+import { Collections } from '../constants/collections';
 
 export class NotificationService {
   private db: Firestore;
@@ -29,7 +19,11 @@ export class NotificationService {
       metadata?: Record<string, any>;
     },
   ): Promise<Notification> {
-    const notificationRef = this.db.collection('users').doc(userId).collection('notifications').doc();
+    const notificationRef = this.db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.Notifications)
+      .doc();
 
     const newNotification: Notification = {
       id: notificationRef.id,
@@ -45,9 +39,9 @@ export class NotificationService {
 
   async getUnreadNotifications(userId: string): Promise<Notification[]> {
     const snapshot = await this.db
-      .collection('users')
+      .collection(Collections.Users)
       .doc(userId)
-      .collection('notifications')
+      .collection(Collections.Notifications)
       .where('read', '==', false)
       .orderBy('createdAt', 'desc')
       .get();
@@ -57,10 +51,10 @@ export class NotificationService {
 
   async markAsRead(userId: string, notificationIds: string[]): Promise<void> {
     const batch = this.db.batch();
-    const userRef = this.db.collection('users').doc(userId);
+    const userRef = this.db.collection(Collections.Users).doc(userId);
 
     for (const notificationId of notificationIds) {
-      const notificationRef = userRef.collection('notifications').doc(notificationId);
+      const notificationRef = userRef.collection(Collections.Notifications).doc(notificationId);
       batch.update(notificationRef, {
         read: true,
         readAt: new Date().toISOString(),
@@ -72,9 +66,9 @@ export class NotificationService {
 
   async getNotificationHistory(userId: string, limit = 50): Promise<Notification[]> {
     const snapshot = await this.db
-      .collection('users')
+      .collection(Collections.Users)
       .doc(userId)
-      .collection('notifications')
+      .collection(Collections.Notifications)
       .orderBy('createdAt', 'desc')
       .limit(limit)
       .get();

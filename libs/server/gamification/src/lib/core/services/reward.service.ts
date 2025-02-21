@@ -1,9 +1,9 @@
 import { DatabaseInstance } from '@codeheroes/common';
-import { Firestore, FieldValue } from 'firebase-admin/firestore';
-import { NotificationService } from './notification.service';
+import { NotificationService } from '@codeheroes/notifications';
+import { FieldValue, Firestore } from 'firebase-admin/firestore';
+import { RewardType } from '../interfaces/level';
 import { BadgeService } from './badge.service';
 import { ProgressionEventService } from './progression-event.service';
-import { RewardType } from '../interfaces/level';
 
 export interface Reward {
   id: string;

@@ -1,13 +1,13 @@
 import { DatabaseInstance } from '@codeheroes/common';
+import { NotificationService } from '@codeheroes/notifications';
 import { Firestore } from 'firebase-admin/firestore';
-import { ProgressionState } from '../interfaces/progression';
-import { ProgressionEventService } from '../services/progression-event.service';
-import { BadgeService } from '../services/badge.service';
-import { NotificationService } from '../services/notification.service';
 import { Activity } from '../interfaces/activity';
-import { StreakType } from '../interfaces/streak';
-import { LevelService } from '../services/level.service';
 import { RewardType } from '../interfaces/level';
+import { ProgressionState } from '../interfaces/progression';
+import { StreakType } from '../interfaces/streak';
+import { BadgeService } from '../services/badge.service';
+import { LevelService } from '../services/level.service';
+import { ProgressionEventService } from '../services/progression-event.service';
 
 interface ProgressionStateMachine {
   handleXpGain(xp: number, activity?: Activity): Promise<void>;
