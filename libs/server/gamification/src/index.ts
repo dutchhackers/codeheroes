@@ -22,4 +22,4 @@ export * from './lib/constants/xp-settings';
 export * from './lib/constants/level-thresholds';
 
 // Main service
-export * from './lib/game-progression.service';
+export * from './lib/core/services/game-progression.service';
