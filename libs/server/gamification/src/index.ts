@@ -11,6 +11,8 @@ export * from './lib/core/services/notification.service';
 export * from './lib/core/services/badge.service';
 export * from './lib/core/services/activity-tracker.service';
 export * from './lib/core/services/reward.service';
+export * from './lib/core/services/progression-event-handler.service';
+export * from './lib/core/services/activity-event-handler.service';
 export * from './lib/core/state-machine/progression-state-machine';
 
 // Constants
