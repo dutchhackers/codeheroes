@@ -1,14 +1,9 @@
 import { LEVEL_CONFIGURATION } from './level-configuration';
-
-export const LEVEL_THRESHOLDS = {
-  BASE_XP: 100,
-  MULTIPLIER: 1.5,
-  MAX_LEVEL: 100,
-};
+import { LevelRequirementItem } from '../core/interfaces/level';
 
 export function calculateXpForLevel(level: number): number {
-  if (level <= 1) return 0;
-  return Math.floor(LEVEL_THRESHOLDS.BASE_XP * Math.pow(LEVEL_THRESHOLDS.MULTIPLIER, level - 1));
+  const config = LEVEL_CONFIGURATION.find((c) => c.level === level);
+  return config?.xpRequired ?? 0;
 }
 
 export function getLevelFromXp(totalXp: number): number {
@@ -16,7 +11,7 @@ export function getLevelFromXp(totalXp: number): number {
     (config, index, array) =>
       totalXp >= config.xpRequired && (index === array.length - 1 || totalXp < array[index + 1].xpRequired),
   );
-  return level === -1 ? 1 : LEVEL_CONFIGURATION[level].level;
+  return level === -1 ? 0 : LEVEL_CONFIGURATION[level].level;
 }
 
 export function getXpProgress(totalXp: number): {
@@ -31,7 +26,7 @@ export function getXpProgress(totalXp: number): {
 
   if (!currentLevelConfig) {
     return {
-      currentLevel: 1,
+      currentLevel: 0,
       currentLevelXp: 0,
       xpToNextLevel: LEVEL_CONFIGURATION[1].xpRequired,
     };
@@ -42,7 +37,7 @@ export function getXpProgress(totalXp: number): {
   return {
     currentLevel: currentLevelConfig.level,
     currentLevelXp: totalXp - currentLevelConfig.xpRequired,
-    xpToNextLevel: nextLevelConfig ? nextLevelConfig.xpRequired - currentLevelConfig.xpRequired : 0,
+    xpToNextLevel: nextLevelConfig ? nextLevelConfig.xpRequired - totalXp : 0,
   };
 }
 
