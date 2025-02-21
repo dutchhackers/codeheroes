@@ -1,10 +1,9 @@
 import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
-import { GameActionType } from '@codeheroes/shared/types';
-import { Firestore, FieldValue } from 'firebase-admin/firestore';
+import { Collections, GameActionType } from '@codeheroes/shared/types';
+import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { ActionResult, GameAction } from '../../core/interfaces/action';
-import { ProgressionService } from '../../core/services/progression.service';
 import { StreakType } from '../../core/interfaces/streak';
-import { Collections } from '../../core/constants/collections';
+import { ProgressionService } from '../../core/services/progression.service';
 
 export abstract class BaseActionHandler {
   protected abstract actionType: GameActionType;

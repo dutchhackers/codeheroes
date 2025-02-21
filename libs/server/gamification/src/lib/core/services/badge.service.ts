@@ -1,8 +1,8 @@
 import { DatabaseInstance } from '@codeheroes/common';
+import { Collections } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
-import { ProgressionEventService } from './progression-event.service';
-import { Collections } from '../constants/collections';
 import { ProgressionState } from '../interfaces/progression';
+import { ProgressionEventService } from './progression-event.service';
 
 export interface Badge {
   id: string;

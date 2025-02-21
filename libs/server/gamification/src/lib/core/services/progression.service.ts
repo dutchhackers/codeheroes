@@ -1,11 +1,11 @@
 import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
+import { Collections } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../constants/level-thresholds';
-import { Collections } from '../constants/collections';
-import { ProgressionState, ProgressionUpdate } from '../interfaces/progression';
-import { ProgressionEventService } from './progression-event.service';
-import { StreakType } from '../interfaces/streak';
 import { Activity } from '../interfaces/activity';
+import { ProgressionState, ProgressionUpdate } from '../interfaces/progression';
+import { StreakType } from '../interfaces/streak';
+import { ProgressionEventService } from './progression-event.service';
 
 export class ProgressionService {
   private db: Firestore;

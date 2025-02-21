@@ -18,7 +18,6 @@ export * from './lib/core/state-machine/progression-state-machine';
 export * from './lib/factories/action-handler.factory';
 
 // Constants
-export * from './lib/core/constants/collections';
 export * from './lib/constants/xp-settings';
 export * from './lib/constants/level-thresholds';
 

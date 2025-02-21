@@ -1,10 +1,9 @@
-import { DatabaseInstance } from '@codeheroes/common';
-import { Firestore, FieldValue } from 'firebase-admin/firestore';
-import { Collections } from '../constants/collections';
+import { DatabaseInstance, logger } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
+import { Collections } from '@codeheroes/shared/types';
+import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { BadgeService } from './badge.service';
 import { ProgressionEvent } from './progression-event.service';
-import { logger } from '@codeheroes/common';
 
 export class ProgressionEventHandlerService {
   private db: Firestore;

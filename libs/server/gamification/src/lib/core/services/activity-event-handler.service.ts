@@ -1,6 +1,6 @@
 import { DatabaseInstance, logger } from '@codeheroes/common';
-import { Firestore, FieldValue } from 'firebase-admin/firestore';
-import { Collections } from '../constants/collections';
+import { Collections } from '@codeheroes/shared/types';
+import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { ProgressionEvent } from './progression-event.service';
 
 export class ActivityEventHandlerService {
