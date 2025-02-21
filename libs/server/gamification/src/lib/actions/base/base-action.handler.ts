@@ -17,17 +17,23 @@ export abstract class BaseActionHandler {
 
   async handle(action: GameAction): Promise<ActionResult> {
     const { userId, metadata } = action;
-    logger.info(`Handling ${this.actionType}`, { userId, metadata });
+    logger.info(`Starting action handler for ${this.actionType}`, { userId, metadata });
 
     // Calculate XP and bonuses
     const baseXP = this.calculateBaseXp();
-    logger.info(`Base XP for ${this.actionType}: ${baseXP}`);
     const bonuses = this.calculateBonuses(metadata);
-    logger.info(`Bonuses for ${this.actionType}: ${JSON.stringify(bonuses)}`);
     const totalXP = baseXP + bonuses.totalBonus;
-    logger.info(`Total XP for ${this.actionType}: ${totalXP}`);
+
+    logger.info('XP calculation details', {
+      actionType: this.actionType,
+      userId,
+      baseXP,
+      bonuses: bonuses.breakdown,
+      totalXP,
+    });
 
     // Process the action with progression
+    logger.info('Updating progression with calculated XP', { userId, totalXP });
     const progressionUpdate = await this.progressionService.updateProgression(userId, {
       xpGained: totalXP,
       activityType: this.actionType,
@@ -44,6 +50,13 @@ export abstract class BaseActionHandler {
       ...metadata,
       level: progressionUpdate.level,
       bonuses: bonuses.breakdown,
+    });
+
+    logger.info('Action handling completed', {
+      userId,
+      actionType: this.actionType,
+      xpGained: totalXP,
+      newLevel: progressionUpdate.level,
     });
 
     return {

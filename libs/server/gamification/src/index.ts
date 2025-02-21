@@ -15,6 +15,9 @@ export * from './lib/core/services/progression-event-handler.service';
 export * from './lib/core/services/activity-event-handler.service';
 export * from './lib/core/state-machine/progression-state-machine';
 
+// Factories
+export * from './lib/factories/action-handler.factory';
+
 // Constants
 export * from './lib/core/constants/collections';
 export * from './lib/constants/xp-settings';

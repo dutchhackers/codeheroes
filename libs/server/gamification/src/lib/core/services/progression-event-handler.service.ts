@@ -4,6 +4,7 @@ import { Collections } from '../constants/collections';
 import { NotificationService } from './notification.service';
 import { BadgeService } from './badge.service';
 import { ProgressionEvent } from './progression-event.service';
+import { logger } from '@codeheroes/common';
 
 export class ProgressionEventHandlerService {
   private db: Firestore;
@@ -17,10 +18,15 @@ export class ProgressionEventHandlerService {
   }
 
   async handleLevelUp(event: ProgressionEvent): Promise<void> {
+    logger.info('Starting handleLevelUp', { userId: event.userId });
     const { userId, data } = event;
     const newLevel = data.state?.level;
-    if (!newLevel) return;
+    if (!newLevel) {
+      logger.warn('No level data in event', { userId, data });
+      return;
+    }
 
+    logger.info('Processing level up', { userId, newLevel });
     await this.db.runTransaction(async (transaction) => {
       // Record level up achievement
       await this.recordAchievement(transaction, userId, {
@@ -54,6 +60,7 @@ export class ProgressionEventHandlerService {
         metadata: { level: newLevel },
       });
     });
+    logger.info('Level up processed successfully', { userId, newLevel });
   }
 
   async handleStreakUpdate(event: ProgressionEvent): Promise<void> {

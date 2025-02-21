@@ -17,6 +17,7 @@ export class ProgressionService {
   }
 
   async updateProgression(userId: string, update: ProgressionUpdate, activity?: Activity): Promise<ProgressionState> {
+    logger.info('Starting progression update', { userId, xpGained: update.xpGained });
     const userStatsRef = this.db.collection(Collections.UserStats).doc(userId);
 
     return await this.db.runTransaction(async (transaction) => {
@@ -39,8 +40,11 @@ export class ProgressionService {
         lastActivityDate: null,
       };
 
+      logger.info('Current user stats document', { exists: userDoc.exists, data: userDoc.data() });
+
       // Initialize user stats if they don't exist
       if (!userDoc.exists) {
+        logger.info('Initializing new user stats', { userId });
         transaction.set(userStatsRef, {
           ...initialState,
           createdAt: now,
@@ -50,6 +54,12 @@ export class ProgressionService {
 
       const previousState: ProgressionState = userDoc.exists ? (userDoc.data() as ProgressionState) : initialState;
       const newTotalXp = previousState.xp + update.xpGained;
+
+      logger.info('Calculating new XP', {
+        previousXp: previousState.xp,
+        gained: update.xpGained,
+        newTotal: newTotalXp,
+      });
 
       // Calculate new level progress
       const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(newTotalXp);
@@ -90,6 +100,8 @@ export class ProgressionService {
         xpGained: update.xpGained,
         newLevel: currentLevel,
         previousLevel: previousState.level,
+        collection: Collections.UserStats,
+        docPath: userStatsRef.path,
       });
 
       // Update user stats in Firestore
@@ -99,6 +111,7 @@ export class ProgressionService {
       };
 
       transaction.update(userStatsRef, updateData);
+      logger.info('User stats update completed');
       return newState;
     });
   }

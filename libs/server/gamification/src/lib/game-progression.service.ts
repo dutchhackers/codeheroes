@@ -30,7 +30,7 @@ export class GameProgressionService {
   }
 
   async processGameAction(action: GameAction): Promise<ActionResult> {
-    const handler = ActionHandlerFactory.getHandler(action.actionType);
+    const handler = ActionHandlerFactory.getHandler(action);
     const result = await handler.handle(action);
 
     // Get user's current state
@@ -92,13 +92,6 @@ export class GameProgressionService {
       logger.error('Error handling event:', error);
       return null;
     }
-  }
-
-  private getCurrentWeekId(): string {
-    const now = new Date();
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    const week = Math.floor(((now.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7);
-    return `${now.getFullYear()}-W${week.toString().padStart(2, '0')}`;
   }
 
   private getStreakTypeFromAction(actionType: GameActionType): StreakType {
