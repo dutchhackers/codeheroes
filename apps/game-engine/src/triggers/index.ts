@@ -1,1 +1,1 @@
-export * from './on-event-created.trigger';
+export * from './handle-event-creation.trigger';
