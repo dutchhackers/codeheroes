@@ -14,13 +14,11 @@ import { RewardService } from './core/services/reward.service';
 import { GameProgressionStateMachine } from './core/state-machine/progression-state-machine';
 import { EventService } from './events/event.service';
 import { ActionHandlerFactory } from './factories/action-handler.factory';
-import { LeaderboardService } from './leaderboard/leaderboard.service';
 
 export class GameProgressionService {
   private db: Firestore;
   private eventService: EventService;
   private progressionService: ProgressionService;
-  private leaderboardService: LeaderboardService;
   private stateMachine: GameProgressionStateMachine;
   private rewardService: RewardService;
 
@@ -28,7 +26,6 @@ export class GameProgressionService {
     this.db = DatabaseInstance.getInstance();
     this.eventService = new EventService();
     this.progressionService = new ProgressionService();
-    this.leaderboardService = new LeaderboardService();
     this.rewardService = new RewardService();
   }
 
@@ -95,16 +92,6 @@ export class GameProgressionService {
       logger.error('Error handling event:', error);
       return null;
     }
-  }
-
-  async getDailyLeaderboard(date?: string): Promise<Array<{ userId: string; xp: number; level: number }>> {
-    const today = date || new Date().toISOString().split('T')[0];
-    return this.leaderboardService.getDailyLeaderboard(today);
-  }
-
-  async getWeeklyLeaderboard(weekId?: string): Promise<Array<{ userId: string; xp: number; level: number }>> {
-    const currentWeekId = weekId || this.getCurrentWeekId();
-    return this.leaderboardService.getWeeklyLeaderboard(currentWeekId);
   }
 
   private getCurrentWeekId(): string {

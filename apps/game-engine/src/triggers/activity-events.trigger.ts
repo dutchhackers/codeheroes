@@ -3,13 +3,14 @@ import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { Collections, ProgressionEvent, ProgressionEventType } from '@codeheroes/gamification';
 
-const db: Firestore = DatabaseInstance.getInstance();
-
 export const onActivityRecorded = onMessagePublished('progression-events', async (event) => {
+  const db: Firestore = DatabaseInstance.getInstance();
+
   const progressionEvent = event.data.message.json as ProgressionEvent;
   if (progressionEvent.type !== ProgressionEventType.ACTIVITY_RECORDED) return;
 
-  const { userId, activity } = progressionEvent;
+  const { userId, data } = progressionEvent;
+  const activity = data.activity;
   if (!activity) return;
 
   try {
@@ -56,6 +57,8 @@ export const onActivityRecorded = onMessagePublished('progression-events', async
 });
 
 async function getActivityStats(userId: string, activityType: string): Promise<{ total: number }> {
+  const db: Firestore = DatabaseInstance.getInstance();
+
   const statsDoc = await db.collection(Collections.UserStats).doc(userId).get();
 
   const stats = statsDoc.data()?.activityStats || {};
@@ -65,6 +68,7 @@ async function getActivityStats(userId: string, activityType: string): Promise<{
 }
 
 async function getConsecutiveActivityDays(userId: string, activityType: string): Promise<number> {
+  const db = DatabaseInstance.getInstance();
   const today = new Date().toISOString().split('T')[0];
   const activityDocs = await db
     .collection(Collections.UserStats)
@@ -104,6 +108,7 @@ async function recordAchievement(
     timestamp: string;
   },
 ): Promise<void> {
+  const db = DatabaseInstance.getInstance();
   const userRef = db.collection(Collections.UserStats).doc(userId);
   const achievementRef = userRef.collection('achievements').doc(achievement.id);
 
@@ -117,6 +122,7 @@ async function recordAchievement(
 }
 
 async function updateUserXP(userId: string, amount: number, reason: string): Promise<void> {
+  const db = DatabaseInstance.getInstance();
   const userRef = db.collection(Collections.UserStats).doc(userId);
   await userRef.update({
     xp: FieldValue.increment(amount),

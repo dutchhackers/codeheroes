@@ -1,12 +1,11 @@
-import { onMessagePublished } from 'firebase-functions/v2/pubsub';
-import { FieldValue } from 'firebase-admin/firestore';
-import { logger } from '@codeheroes/common';
 import { DatabaseInstance } from '@codeheroes/common';
-import { Collections } from '../constants/collections';
-
-const db = DatabaseInstance.getInstance();
+import { Collections } from '@codeheroes/gamification';
+import { FieldValue } from 'firebase-admin/firestore';
+import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 
 export const onLevelUp = onMessagePublished('progression-events', async (event) => {
+  const db = DatabaseInstance.getInstance();
+
   const progressionEvent = event.data.message.json;
   if (progressionEvent.type !== 'progression.level.up') return;
 
@@ -51,6 +50,7 @@ export const onLevelUp = onMessagePublished('progression-events', async (event) 
 });
 
 export const onStreakUpdated = onMessagePublished('progression-events', async (event) => {
+  const db = DatabaseInstance.getInstance();
   const progressionEvent = event.data.message.json;
   if (progressionEvent.type !== 'progression.streak.updated') return;
 
@@ -91,6 +91,8 @@ export const onStreakUpdated = onMessagePublished('progression-events', async (e
 });
 
 export const onBadgeEarned = onMessagePublished('progression-events', async (event) => {
+  const db = DatabaseInstance.getInstance();
+
   const progressionEvent = event.data.message.json;
   if (progressionEvent.type !== 'progression.badge.earned') return;
 
@@ -143,8 +145,9 @@ async function recordAchievement(
     timestamp: string;
   },
 ) {
+  const db = DatabaseInstance.getInstance();
   const userRef = db.collection(Collections.Users).doc(userId);
-  const achievementRef = userRef.collection('achievements').doc(achievement.id);
+  const achievementRef = userRef.collection(Collections.Achievements).doc(achievement.id);
 
   transaction.set(achievementRef, achievement);
   transaction.update(userRef, {
@@ -164,8 +167,10 @@ async function createNotification(
     metadata?: Record<string, any>;
   },
 ) {
+  const db = DatabaseInstance.getInstance();
+
   const userRef = db.collection(Collections.Users).doc(userId);
-  const notificationRef = userRef.collection('notifications').doc();
+  const notificationRef = userRef.collection(Collections.Notifications).doc();
 
   transaction.set(notificationRef, {
     id: notificationRef.id,

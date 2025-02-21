@@ -27,10 +27,3 @@ export interface LevelProgress {
   xpToNextLevel: number;
   progressPercentage: number;
 }
-
-export interface LeaderboardEntry {
-  userId: string;
-  xp: number;
-  level: number;
-  rank?: number;
-}

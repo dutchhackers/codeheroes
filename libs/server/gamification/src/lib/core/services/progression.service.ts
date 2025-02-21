@@ -3,22 +3,16 @@ import { Firestore } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../constants/level-thresholds';
 import { Collections } from '../constants/collections';
 import { ProgressionState, ProgressionUpdate } from '../interfaces/progression';
-import { DailyProgressionService } from '../../progression/daily/daily-progression.service';
-import { WeeklyProgressionService } from '../../progression/weekly/weekly-progression.service';
 import { ProgressionEventService } from './progression-event.service';
 import { StreakType } from '../interfaces/streak';
 import { Activity } from '../interfaces/activity';
 
 export class ProgressionService {
-  public readonly dailyService: DailyProgressionService;
-  public readonly weeklyService: WeeklyProgressionService;
   private db: Firestore;
   private progressionEvents: ProgressionEventService;
 
   constructor() {
     this.db = DatabaseInstance.getInstance();
-    this.dailyService = new DailyProgressionService();
-    this.weeklyService = new WeeklyProgressionService();
     this.progressionEvents = new ProgressionEventService();
   }
 
@@ -61,8 +55,7 @@ export class ProgressionService {
       const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(newTotalXp);
 
       // Update daily and weekly progress
-      await this.dailyService.updateDailyProgress(transaction, userId, update);
-      await this.weeklyService.updateWeeklyProgress(transaction, userId, update);
+      // TODO: Implement daily and weekly stats (later)
 
       // Prepare new state
       const newState: ProgressionState = {
