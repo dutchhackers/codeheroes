@@ -1,8 +1,10 @@
 import { DatabaseInstance, logger } from '@codeheroes/common';
-import { Event } from '@codeheroes/event';
 import { NotificationService } from '@codeheroes/notifications';
 import { Collections, GameActionType } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
+import { getXpProgress } from '../../constants/level-thresholds';
+import { ActionHandlerFactory } from '../../factories/action-handler.factory';
+import { ProgressionEventService } from '../events/event-types';
 import { ActionResult, GameAction } from '../interfaces/action';
 import { Activity } from '../interfaces/activity';
 import { ProgressionState, ProgressionUpdate } from '../interfaces/progression';
@@ -10,9 +12,6 @@ import { StreakType } from '../interfaces/streak';
 import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
 import { RewardService } from '../services/reward.service';
-import { ActionHandlerFactory } from '../../factories/action-handler.factory';
-import { ProgressionEventService } from '../events/event-types';
-import { getXpProgress } from '../../constants/level-thresholds';
 
 export class ProgressionService {
   private db: Firestore;

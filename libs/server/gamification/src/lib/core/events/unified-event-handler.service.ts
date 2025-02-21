@@ -2,9 +2,6 @@ import { DatabaseInstance, logger } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
 import { Collections } from '@codeheroes/shared/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { Activity } from '../interfaces/activity';
-import { ProgressionState } from '../interfaces/progression';
-import { StreakType } from '../interfaces/streak';
 import { BadgeService } from '../services/badge.service';
 import { ProgressionEvent, ProgressionEventType } from './event-types';
 
