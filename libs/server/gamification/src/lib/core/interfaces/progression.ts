@@ -1,4 +1,4 @@
-import { ActivityStats } from './activity';
+import { ActivityCounters } from './activity';
 
 export interface ProgressionState {
   userId: string;
@@ -8,7 +8,8 @@ export interface ProgressionState {
   xpToNextLevel: number;
   achievements?: string[];
   lastActivityDate?: string;
-  activityStats?: ActivityStats;
+  counters: ActivityCounters;
+  countersLastUpdated: string;
 }
 
 export interface ProgressionUpdate {

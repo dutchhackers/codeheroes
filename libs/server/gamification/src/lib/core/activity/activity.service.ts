@@ -1,6 +1,6 @@
 import { DatabaseInstance } from '@codeheroes/common';
 import { Firestore } from 'firebase-admin/firestore';
-import { Activity, ActivityStats } from '../interfaces/activity';
+import { Activity, ActivityStats, ActivityCounters } from '../interfaces/activity';
 import { Event } from '@codeheroes/event';
 import { GameAction } from '../interfaces/action';
 import { UnifiedEventHandlerService } from '../events/unified-event-handler.service';
@@ -19,6 +19,26 @@ export class ActivityService {
     this.githubHandler = new GithubEventHandler();
   }
 
+  private getInitialCounters(): ActivityCounters {
+    return {
+      pullRequests: {
+        created: 0,
+        merged: 0,
+        closed: 0,
+        total: 0,
+      },
+      codePushes: 0,
+      codeReviews: 0,
+    };
+  }
+
+  private getInitialStats(): ActivityStats {
+    return {
+      counters: this.getInitialCounters(),
+      countersLastUpdated: new Date().toISOString(),
+    };
+  }
+
   async trackActivity(activity: Activity): Promise<void> {
     const userRef = this.db.collection(Collections.Users).doc(activity.userId);
     const statsRef = userRef.collection(Collections.Stats).doc('current');
@@ -26,32 +46,28 @@ export class ActivityService {
 
     await this.db.runTransaction(async (transaction) => {
       const statsDoc = await transaction.get(statsRef);
-      const currentStats = (statsDoc.exists ? statsDoc.data()?.activityStats : {}) as ActivityStats;
+      const currentStats = (statsDoc.exists ? statsDoc.data() : null) as ActivityStats | null;
 
-      // Update activity stats
-      const newStats: ActivityStats = {
-        total: (currentStats?.total || 0) + 1,
-        byType: {
-          ...currentStats?.byType,
-          [activity.type]: ((currentStats?.byType || {})[activity.type] || 0) + 1,
-        },
-        lastActivity: {
-          type: activity.type,
-          timestamp: activity.timestamp,
-        },
+      // Initialize stats if they don't exist
+      const newStats = currentStats || this.getInitialStats();
+
+      // Update last activity
+      newStats.lastActivity = {
+        type: activity.type,
+        timestamp: activity.timestamp,
       };
 
       // Create or update user stats document
       if (!statsDoc.exists) {
         transaction.set(statsRef, {
           userId: activity.userId,
-          activityStats: newStats,
+          ...newStats,
           createdAt: activity.timestamp,
           updatedAt: activity.timestamp,
         });
       } else {
         transaction.update(statsRef, {
-          activityStats: newStats,
+          lastActivity: newStats.lastActivity,
           updatedAt: activity.timestamp,
         });
       }
@@ -91,10 +107,18 @@ export class ActivityService {
       .doc('current')
       .get();
 
-    return (statsDoc.data()?.activityStats || {
-      total: 0,
-      byType: {},
-    }) as ActivityStats;
+    const stats = (statsDoc.data() as ActivityStats) || this.getInitialStats();
+
+    // Ensure counters exist
+    if (!stats.counters) {
+      stats.counters = this.getInitialCounters();
+      stats.countersLastUpdated = new Date().toISOString();
+
+      // Update the document with initialized counters
+      await statsDoc.ref.set(stats, { merge: true });
+    }
+
+    return stats;
   }
 
   async getRecentActivities(userId: string, limit = 10): Promise<Activity[]> {

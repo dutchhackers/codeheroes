@@ -4,6 +4,7 @@ import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { ActionResult, GameAction } from '../../core/interfaces/action';
 import { ProgressionService } from '../../core/progression/progression.service';
 import { ActivityService } from '../../core/activity/activity.service';
+import { ActivityCounters } from '../../core/interfaces/activity';
 
 export abstract class BaseActionHandler {
   protected abstract actionType: GameActionType;
@@ -15,9 +16,65 @@ export abstract class BaseActionHandler {
     this.activityService = new ActivityService();
   }
 
+  protected getCounterUpdates(): Record<string, any> {
+    const updates: Record<string, any> = {
+      countersLastUpdated: getCurrentTimeAsISO(),
+    };
+
+    switch (this.actionType) {
+      case 'code_push':
+        updates['counters.codePushes'] = FieldValue.increment(1);
+        break;
+      case 'pull_request_create':
+        updates['counters.pullRequests.created'] = FieldValue.increment(1);
+        updates['counters.pullRequests.total'] = FieldValue.increment(1);
+        break;
+      case 'pull_request_merge':
+        updates['counters.pullRequests.merged'] = FieldValue.increment(1);
+        updates['counters.pullRequests.total'] = FieldValue.increment(1);
+        break;
+      case 'pull_request_close':
+        updates['counters.pullRequests.closed'] = FieldValue.increment(1);
+        updates['counters.pullRequests.total'] = FieldValue.increment(1);
+        break;
+    }
+
+    return updates;
+  }
+
+  protected async initializeCountersIfNeeded(userRef: FirebaseFirestore.DocumentReference) {
+    const statsRef = userRef.collection(Collections.Stats).doc('current');
+    const statsDoc = await statsRef.get();
+
+    if (!statsDoc.exists || !statsDoc.data()?.counters) {
+      const initialCounters: ActivityCounters = {
+        pullRequests: {
+          created: 0,
+          merged: 0,
+          closed: 0,
+          total: 0,
+        },
+        codePushes: 0,
+        codeReviews: 0,
+      };
+
+      await statsRef.set(
+        {
+          counters: initialCounters,
+          countersLastUpdated: getCurrentTimeAsISO(),
+        },
+        { merge: true },
+      );
+    }
+  }
+
   async handle(action: GameAction): Promise<ActionResult> {
     const { userId, metadata } = action;
     logger.info(`Starting action handler for ${this.actionType}`, { userId, metadata });
+
+    // Initialize counters if needed
+    const userRef = this.db.collection(Collections.Users).doc(userId);
+    await this.initializeCountersIfNeeded(userRef);
 
     // Calculate XP and bonuses
     const baseXP = this.calculateBaseXp();
@@ -39,29 +96,43 @@ export abstract class BaseActionHandler {
       activityType: this.actionType,
     });
 
-    // Record activity using ActivityService
+    // Get counter updates
+    const counterUpdates = this.getCounterUpdates();
+
+    // Record activity and update counters using ActivityService
     const now = getCurrentTimeAsISO();
-    await this.activityService.trackActivity({
-      id: this.generateActivityId(),
-      userId,
-      type: this.actionType,
-      metadata: {
-        ...metadata,
-        level: progressionUpdate.level,
-        bonuses: bonuses.breakdown,
-      },
-      xp: {
-        earned: totalXP,
-        breakdown: [
-          { type: 'base', amount: baseXP, description: 'Base XP' },
-          ...Object.entries(bonuses.breakdown).map(([type, amount]) => ({
-            type,
-            amount,
-            description: `${type} bonus`,
-          })),
-        ],
-      },
-      timestamp: now,
+    const activityRef = userRef.collection(Collections.Activities).doc();
+
+    // Update both activity and counters in a transaction
+    await this.db.runTransaction(async (transaction) => {
+      const statsRef = userRef.collection(Collections.Stats).doc('current');
+
+      // Update counters
+      transaction.update(statsRef, counterUpdates);
+
+      // Record activity
+      transaction.set(activityRef, {
+        id: activityRef.id,
+        userId,
+        type: this.actionType,
+        metadata: {
+          ...metadata,
+          level: progressionUpdate.level,
+          bonuses: bonuses.breakdown,
+        },
+        xp: {
+          earned: totalXP,
+          breakdown: [
+            { type: 'base', amount: baseXP, description: 'Base XP' },
+            ...Object.entries(bonuses.breakdown).map(([type, amount]) => ({
+              type,
+              amount,
+              description: `${type} bonus`,
+            })),
+          ],
+        },
+        timestamp: now,
+      });
     });
 
     logger.info('Action handling completed', {
@@ -82,8 +153,4 @@ export abstract class BaseActionHandler {
     totalBonus: number;
     breakdown: Record<string, number>;
   };
-
-  private generateActivityId(): string {
-    return Math.random().toString(36).substr(2, 9);
-  }
 }

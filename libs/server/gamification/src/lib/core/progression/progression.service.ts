@@ -11,6 +11,7 @@ import { ProgressionState, ProgressionUpdate } from '../interfaces/progression';
 import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
 import { RewardService } from '../services/reward.service';
+import { ActivityService } from '../activity/activity.service';
 
 export class ProgressionService {
   private db: Firestore;
@@ -19,6 +20,7 @@ export class ProgressionService {
   private badgeService: BadgeService;
   private rewardService: RewardService;
   private notificationService: NotificationService;
+  private activityService: ActivityService;
 
   constructor(badgeService?: BadgeService) {
     this.db = DatabaseInstance.getInstance();
@@ -27,6 +29,7 @@ export class ProgressionService {
     this.badgeService = badgeService || new BadgeService();
     this.rewardService = new RewardService(this.badgeService);
     this.notificationService = new NotificationService();
+    this.activityService = new ActivityService();
   }
 
   async processGameAction(action: GameAction): Promise<ActionResult> {
@@ -79,15 +82,7 @@ export class ProgressionService {
       const userDoc = await transaction.get(statsRef);
       const now = new Date().toISOString();
 
-      const initialActivityStats: ActivityStats = {
-        total: 0,
-        byType: {
-          code_push: 0,
-          pull_request_create: 0,
-          pull_request_merge: 0,
-          pull_request_close: 0,
-        },
-      };
+      const initialStats = await this.activityService.getActivityStats(userId);
 
       const initialState: ProgressionState = {
         userId,
@@ -97,7 +92,8 @@ export class ProgressionService {
         xpToNextLevel: 1000,
         achievements: [],
         lastActivityDate: null,
-        activityStats: initialActivityStats,
+        counters: initialStats.counters,
+        countersLastUpdated: initialStats.countersLastUpdated,
       };
 
       // If user stats don't exist, create them
@@ -122,28 +118,13 @@ export class ProgressionService {
         xpToNextLevel,
         achievements: [...(previousState.achievements || []), ...(update.achievements || [])],
         lastActivityDate: now.split('T')[0],
-        activityStats: previousState.activityStats || initialActivityStats,
+        counters: previousState.counters || initialState.counters,
+        countersLastUpdated: previousState.countersLastUpdated || now,
       };
 
       // Emit progression events
       if (activity) {
         await this.eventService.emitXpGained(userId, activity, newState, previousState);
-
-        // Record activity
-        const activityRef = userRef.collection(Collections.Activities).doc(activity.id);
-        transaction.set(activityRef, {
-          ...activity,
-          createdAt: now,
-        });
-
-        // Update activity stats
-        newState.activityStats = {
-          total: (previousState.activityStats?.total || 0) + 1,
-          byType: {
-            ...previousState.activityStats?.byType,
-            [activity.type]: ((previousState.activityStats?.byType || {})[activity.type] || 0) + 1,
-          },
-        };
       }
 
       if (currentLevel > previousState.level) {
@@ -177,15 +158,8 @@ export class ProgressionService {
     const userStats = statsDoc.data()!;
     const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(userStats.xp || 0);
 
-    const initialActivityStats: ActivityStats = {
-      total: 0,
-      byType: {
-        code_push: 0,
-        pull_request_create: 0,
-        pull_request_merge: 0,
-        pull_request_close: 0,
-      },
-    };
+    // Get initial stats with counters
+    const initialStats = await this.activityService.getActivityStats(userId);
 
     return {
       userId,
@@ -195,7 +169,8 @@ export class ProgressionService {
       xpToNextLevel,
       achievements: userStats.achievements || [],
       lastActivityDate: userStats.lastActivityDate,
-      activityStats: userStats.activityStats || initialActivityStats,
+      counters: userStats.counters || initialStats.counters,
+      countersLastUpdated: userStats.countersLastUpdated || initialStats.countersLastUpdated,
     };
   }
 
@@ -207,7 +182,7 @@ export class ProgressionService {
   }
 
   private isActivityMilestone(action: GameAction, state: ProgressionState): boolean {
-    const activityCount = state.activityStats?.byType?.[action.actionType] || 0;
+    const activityCount = state.counters?.[action.actionType] || 0;
     const milestones = [10, 50, 100, 500];
     return milestones.includes(activityCount);
   }
