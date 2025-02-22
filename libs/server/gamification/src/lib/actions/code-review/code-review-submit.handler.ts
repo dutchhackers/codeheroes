@@ -2,7 +2,7 @@ import { GameActionType } from '@codeheroes/shared/types';
 import { BaseActionHandler } from '../base/base-action.handler';
 import { XP_SETTINGS } from '../../constants/xp-settings';
 
-export class PullRequestReviewHandler extends BaseActionHandler {
+export class CodeReviewSubmitHandler extends BaseActionHandler {
   protected actionType: GameActionType = 'code_review_submit';
 
   protected calculateBaseXp(): number {
