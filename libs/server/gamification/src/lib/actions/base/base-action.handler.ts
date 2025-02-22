@@ -37,6 +37,9 @@ export abstract class BaseActionHandler {
         updates['counters.pullRequests.closed'] = FieldValue.increment(1);
         updates['counters.pullRequests.total'] = FieldValue.increment(1);
         break;
+      case 'code_review_submit':
+        updates['counters.codeReviews'] = FieldValue.increment(1);
+        break;
     }
 
     return updates;

@@ -28,4 +28,12 @@ export const XP_SETTINGS = {
       },
     },
   },
+  CODE_REVIEW: {
+    BASE: 80,
+    BONUSES: {
+      DETAILED_REVIEW: 100, // For reviews with substantial comments
+      MULTIPLE_FILES: 50, // For reviewing changes across multiple files
+      THOROUGH_REVIEW: 150, // For reviews that include suggestions and code samples
+    },
+  },
 };

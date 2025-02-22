@@ -1,4 +1,4 @@
-import { logger, UserService } from '@codeheroes/common';
+import { logger } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
 import { ActivityService, ProgressionService } from '@codeheroes/gamification';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
@@ -16,7 +16,7 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
 
   const activityService = new ActivityService();
   const progressionService = new ProgressionService();
-  const userService = new UserService();
+  // const userService = new UserService();
 
   const gameAction = await activityService.handleNewEvent(eventData);
   if (!gameAction) {
