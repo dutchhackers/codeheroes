@@ -29,7 +29,7 @@ export class BadgeService {
 
   async processBadges(userId: string, context: BadgeContext): Promise<Badge[]> {
     const userRef = this.db.collection(Collections.Users).doc(userId);
-    const badgesRef = userRef.collection(Collections.User_UserBadges);
+    const badgesRef = userRef.collection(Collections.User_Badges);
     const badgeSnapshot = await badgesRef.get();
     const existingBadges = new Set(badgeSnapshot.docs.map((doc) => doc.id));
     const earnedBadges: Badge[] = [];

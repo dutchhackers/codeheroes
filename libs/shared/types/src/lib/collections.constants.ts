@@ -1,10 +1,9 @@
 export enum Collections {
   Users = 'users',
-  User_UserBadges = 'badges',
-  UserStats = 'userStats',
-  UserStats_Badges = 'badges',
-  UserStats_DailyStats = 'dailyStats',
-  UserStats_Activities = 'activities',
+  User_Stats = 'stats',
+  User_Activities = 'activities',
+  User_Badges = 'badges',
+  User_DailyStats = 'dailyStats',
+  User_Achievements = 'achievements',
   Notifications = 'notifications',
-  Achievements = 'achievements',
 }

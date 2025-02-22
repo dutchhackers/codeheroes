@@ -82,9 +82,8 @@ export class UnifiedEventHandlerService {
     if (!badgeId) return;
 
     await this.db.runTransaction(async (transaction) => {
-      const userBadges = await transaction.get(
-        this.db.collection(Collections.Users).doc(userId).collection(Collections.User_UserBadges),
-      );
+      const userRef = this.db.collection(Collections.Users).doc(userId);
+      const userBadges = await transaction.get(userRef.collection(Collections.User_Badges));
 
       const badgeCount = userBadges.size;
 
@@ -163,7 +162,7 @@ export class UnifiedEventHandlerService {
     },
   ): Promise<void> {
     const userRef = this.db.collection(Collections.Users).doc(userId);
-    const achievementRef = userRef.collection(Collections.Achievements).doc(achievement.id);
+    const achievementRef = userRef.collection(Collections.User_Achievements).doc(achievement.id);
 
     const updateData = {
       ...achievement,
@@ -183,7 +182,8 @@ export class UnifiedEventHandlerService {
   }
 
   private async getActivityStats(userId: string, activityType: string): Promise<{ total: number }> {
-    const statsDoc = await this.db.collection(Collections.UserStats).doc(userId).get();
+    const userRef = this.db.collection(Collections.Users).doc(userId);
+    const statsDoc = await userRef.collection(Collections.User_Stats).doc('current').get();
     const stats = statsDoc.data()?.activityStats || {};
     return {
       total: stats.byType?.[activityType] || 0,

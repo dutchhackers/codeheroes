@@ -100,10 +100,11 @@ export class ProgressionService {
 
   async updateProgression(userId: string, update: ProgressionUpdate, activity?: Activity): Promise<ProgressionState> {
     logger.info('Starting progression update', { userId, xpGained: update.xpGained });
-    const userStatsRef = this.db.collection(Collections.UserStats).doc(userId);
+    const userRef = this.db.collection(Collections.Users).doc(userId);
+    const statsRef = userRef.collection(Collections.User_Stats).doc('current');
 
     return await this.db.runTransaction(async (transaction) => {
-      const userDoc = await transaction.get(userStatsRef);
+      const userDoc = await transaction.get(statsRef);
       const now = new Date().toISOString();
 
       const initialActivityStats: ActivityStats = {
@@ -129,7 +130,7 @@ export class ProgressionService {
 
       // If user stats don't exist, create them
       if (!userDoc.exists) {
-        transaction.set(userStatsRef, {
+        transaction.set(statsRef, {
           ...initialState,
           createdAt: now,
           updatedAt: now,
@@ -168,9 +169,9 @@ export class ProgressionService {
 
       // Update or create the user stats document
       if (userDoc.exists) {
-        transaction.update(userStatsRef, updateData);
+        transaction.update(statsRef, updateData);
       } else {
-        transaction.set(userStatsRef, {
+        transaction.set(statsRef, {
           ...updateData,
           createdAt: now,
         });
@@ -178,8 +179,8 @@ export class ProgressionService {
 
       // Update activity stats if there's an activity
       if (activity) {
-        const activityStatsRef = userStatsRef.collection(Collections.UserStats_Activities).doc();
-        transaction.set(activityStatsRef, {
+        const activityRef = userRef.collection(Collections.User_Activities).doc();
+        transaction.set(activityRef, {
           ...activity,
           createdAt: now,
         });
@@ -190,12 +191,18 @@ export class ProgressionService {
   }
 
   async getProgressionState(userId: string): Promise<ProgressionState | null> {
-    const userStatsDoc = await this.db.collection(Collections.UserStats).doc(userId).get();
-    if (!userStatsDoc.exists) {
+    const statsDoc = await this.db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.User_Stats)
+      .doc('current')
+      .get();
+
+    if (!statsDoc.exists) {
       return null;
     }
 
-    const userStats = userStatsDoc.data()!;
+    const userStats = statsDoc.data()!;
     const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(userStats.xp || 0);
 
     const initialActivityStats: ActivityStats = {

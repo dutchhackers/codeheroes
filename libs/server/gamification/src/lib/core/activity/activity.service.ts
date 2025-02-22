@@ -21,11 +21,11 @@ export class ActivityService {
 
   async trackActivity(activity: Activity): Promise<void> {
     const userRef = this.db.collection(Collections.Users).doc(activity.userId);
-    const userStatsRef = this.db.collection(Collections.UserStats).doc(activity.userId);
-    const activityRef = userStatsRef.collection(Collections.UserStats_Activities).doc(activity.id);
+    const statsRef = userRef.collection(Collections.User_Stats).doc('current');
+    const activityRef = userRef.collection(Collections.User_Activities).doc(activity.id);
 
     await this.db.runTransaction(async (transaction) => {
-      const statsDoc = await transaction.get(userStatsRef);
+      const statsDoc = await transaction.get(statsRef);
       const currentStats = (statsDoc.exists ? statsDoc.data()?.activityStats : {}) as ActivityStats;
 
       // Update activity stats
@@ -43,14 +43,14 @@ export class ActivityService {
 
       // Create or update user stats document
       if (!statsDoc.exists) {
-        transaction.set(userStatsRef, {
+        transaction.set(statsRef, {
           userId: activity.userId,
           activityStats: newStats,
           createdAt: activity.timestamp,
           updatedAt: activity.timestamp,
         });
       } else {
-        transaction.update(userStatsRef, {
+        transaction.update(statsRef, {
           activityStats: newStats,
           updatedAt: activity.timestamp,
         });
@@ -84,7 +84,13 @@ export class ActivityService {
   }
 
   async getActivityStats(userId: string): Promise<ActivityStats> {
-    const statsDoc = await this.db.collection('users').doc(userId).get();
+    const statsDoc = await this.db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.User_Stats)
+      .doc('current')
+      .get();
+
     return (statsDoc.data()?.activityStats || {
       total: 0,
       byType: {},
@@ -93,9 +99,9 @@ export class ActivityService {
 
   async getRecentActivities(userId: string, limit = 10): Promise<Activity[]> {
     const snapshot = await this.db
-      .collection('users')
+      .collection(Collections.Users)
       .doc(userId)
-      .collection('activities')
+      .collection(Collections.User_Activities)
       .orderBy('timestamp', 'desc')
       .limit(limit)
       .get();

@@ -63,13 +63,14 @@ export abstract class BaseActionHandler {
   };
 
   private async recordActivity(userId: string, xpGained: number, metadata: Record<string, any>) {
-    const userStatsRef = this.db.collection(Collections.UserStats).doc(userId);
-    const activityRef = userStatsRef.collection(Collections.UserStats_Activities).doc();
+    const userRef = this.db.collection(Collections.Users).doc(userId);
+    const statsRef = userRef.collection(Collections.User_Stats).doc('current');
+    const activityRef = userRef.collection(Collections.User_Activities).doc();
     const now = getCurrentTimeAsISO();
 
     await this.db.runTransaction(async (transaction) => {
       // Check if user stats exist
-      const statsDoc = await transaction.get(userStatsRef);
+      const statsDoc = await transaction.get(statsRef);
 
       const activity = {
         timestamp: now,
@@ -81,7 +82,7 @@ export abstract class BaseActionHandler {
 
       // Create user stats if they don't exist
       if (!statsDoc.exists) {
-        transaction.set(userStatsRef, {
+        transaction.set(statsRef, {
           userId,
           xp: 0,
           level: 1,
@@ -98,7 +99,7 @@ export abstract class BaseActionHandler {
       transaction.set(activityRef, activity);
 
       // Update activity stats
-      transaction.update(userStatsRef, {
+      transaction.update(statsRef, {
         [`activityStats.total`]: FieldValue.increment(1),
         [`activityStats.byType.${this.actionType}`]: FieldValue.increment(1),
         [`activityStats.lastActivity`]: {

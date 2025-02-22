@@ -1,5 +1,6 @@
 import { DatabaseInstance } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
+import { Collections } from '@codeheroes/shared/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { RewardType } from '../interfaces/level';
 import { BadgeService } from './badge.service';
@@ -36,7 +37,8 @@ export class RewardService {
   }
 
   async grantReward(userId: string, reward: Reward): Promise<void> {
-    const rewardRef = this.db.collection('users').doc(userId).collection('rewards').doc(reward.id);
+    const userRef = this.db.collection(Collections.Users).doc(userId);
+    const rewardRef = userRef.collection('rewards').doc(reward.id);
 
     await this.db.runTransaction(async (transaction) => {
       const doc = await transaction.get(rewardRef);
@@ -70,7 +72,8 @@ export class RewardService {
           break;
         case 'POINTS':
           if (reward.amount) {
-            transaction.update(this.db.collection('userStats').doc(userId), {
+            const statsRef = userRef.collection(Collections.User_Stats).doc('current');
+            transaction.update(statsRef, {
               xp: FieldValue.increment(reward.amount),
             });
           }
