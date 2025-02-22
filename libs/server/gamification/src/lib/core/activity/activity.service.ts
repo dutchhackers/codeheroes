@@ -54,7 +54,7 @@ export class ActivityService {
       // Update last activity
       newStats.lastActivity = {
         type: activity.type,
-        timestamp: activity.timestamp,
+        timestamp: activity.updatedAt,
       };
 
       // Create or update user stats document
@@ -62,13 +62,13 @@ export class ActivityService {
         transaction.set(statsRef, {
           userId: activity.userId,
           ...newStats,
-          createdAt: activity.timestamp,
-          updatedAt: activity.timestamp,
+          createdAt: activity.createdAt,
+          updatedAt: activity.updatedAt,
         });
       } else {
         transaction.update(statsRef, {
           lastActivity: newStats.lastActivity,
-          updatedAt: activity.timestamp,
+          updatedAt: activity.updatedAt,
         });
       }
 
@@ -79,7 +79,7 @@ export class ActivityService {
     // Send event to unified handler
     await this.eventHandler.handleEvent({
       userId: activity.userId,
-      timestamp: activity.timestamp,
+      timestamp: activity.updatedAt,
       type: ProgressionEventType.ACTIVITY_RECORDED,
       data: { activity },
     });

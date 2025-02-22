@@ -13,7 +13,8 @@ export interface Activity {
       description: string;
     }>;
   };
-  timestamp: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ActivityCounters {

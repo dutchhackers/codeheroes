@@ -1,4 +1,4 @@
-import { DatabaseInstance, logger } from '@codeheroes/common';
+import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
 import { Collections, GameActionType } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
@@ -58,7 +58,8 @@ export class ProgressionService {
           earned: result.xpGained,
           breakdown: [{ type: 'base', amount: result.xpGained, description: 'Base XP' }],
         },
-        timestamp: new Date().toISOString(),
+        createdAt: getCurrentTimeAsISO(),
+        updatedAt: getCurrentTimeAsISO(),
       },
     );
 

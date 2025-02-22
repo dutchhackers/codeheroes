@@ -131,7 +131,8 @@ export abstract class BaseActionHandler {
             })),
           ],
         },
-        timestamp: now,
+        createdAt: now,
+        updatedAt: now,
       });
     });
 
