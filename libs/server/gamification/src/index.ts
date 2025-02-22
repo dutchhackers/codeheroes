@@ -2,6 +2,7 @@
 export * from './lib/core/interfaces/action';
 export * from './lib/core/interfaces/progression';
 export * from './lib/core/interfaces/activity';
+export * from './lib/core/interfaces/level';
 
 // Unified Services
 export * from './lib/core/events/unified-event-handler.service';
