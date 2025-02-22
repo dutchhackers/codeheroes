@@ -38,7 +38,7 @@ export class RewardService {
 
   async grantReward(userId: string, reward: Reward): Promise<void> {
     const userRef = this.db.collection(Collections.Users).doc(userId);
-    const rewardRef = userRef.collection('rewards').doc(reward.id);
+    const rewardRef = userRef.collection(Collections.Rewards).doc(reward.id);
 
     await this.db.runTransaction(async (transaction) => {
       const doc = await transaction.get(rewardRef);
@@ -62,6 +62,12 @@ export class RewardService {
         metadata: { rewardId: reward.id, rewardType: reward.type },
       });
 
+      // Update user stats to reflect new reward
+      transaction.update(userRef.collection(Collections.Stats).doc('current'), {
+        'stats.rewards.total': FieldValue.increment(1),
+        'stats.rewards.lastEarned': rewardData.earnedAt,
+      });
+
       // Handle specific reward types
       switch (reward.type) {
         case 'BADGE':
@@ -72,8 +78,7 @@ export class RewardService {
           break;
         case 'POINTS':
           if (reward.amount) {
-            const statsRef = userRef.collection(Collections.User_Stats).doc('current');
-            transaction.update(statsRef, {
+            transaction.update(userRef.collection(Collections.Stats).doc('current'), {
               xp: FieldValue.increment(reward.amount),
             });
           }
@@ -83,8 +88,8 @@ export class RewardService {
   }
 
   async claimReward(userId: string, rewardId: string): Promise<boolean> {
-    const rewardRef = this.db.collection('users').doc(userId).collection('rewards').doc(rewardId);
-
+    const userRef = this.db.collection(Collections.Users).doc(userId);
+    const rewardRef = userRef.collection(Collections.Rewards).doc(rewardId);
     let success = false;
 
     await this.db.runTransaction(async (transaction) => {
@@ -99,8 +104,16 @@ export class RewardService {
         claimedAt: new Date().toISOString(),
       };
 
-      transaction.update(rewardRef, { claimed: true, claimedAt: claim.claimedAt });
-      transaction.set(this.db.collection('rewardClaims').doc(), claim);
+      transaction.update(rewardRef, {
+        claimed: true,
+        claimedAt: claim.claimedAt,
+      });
+
+      // Update user stats
+      transaction.update(userRef.collection(Collections.Stats).doc('current'), {
+        'stats.rewards.claimed': FieldValue.increment(1),
+        'stats.rewards.lastClaimed': claim.claimedAt,
+      });
 
       success = true;
       return true;
@@ -111,7 +124,7 @@ export class RewardService {
         type: 'REWARD_CLAIMED',
         title: 'Reward Claimed!',
         message: "You've successfully claimed your reward",
-        metadata: { rewardId: rewardId },
+        metadata: { rewardId },
       });
     }
 
@@ -120,9 +133,9 @@ export class RewardService {
 
   async getUnclaimedRewards(userId: string): Promise<Reward[]> {
     const snapshot = await this.db
-      .collection('users')
+      .collection(Collections.Users)
       .doc(userId)
-      .collection('rewards')
+      .collection(Collections.Rewards)
       .where('claimed', '==', false)
       .get();
 
@@ -137,9 +150,9 @@ export class RewardService {
 
   async getRewardHistory(userId: string, limit = 50): Promise<Reward[]> {
     const snapshot = await this.db
-      .collection('users')
+      .collection(Collections.Users)
       .doc(userId)
-      .collection('rewards')
+      .collection(Collections.Rewards)
       .orderBy('earnedAt', 'desc')
       .limit(limit)
       .get();

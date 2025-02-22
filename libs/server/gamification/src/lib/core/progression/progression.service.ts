@@ -70,38 +70,10 @@ export class ProgressionService {
     };
   }
 
-  private shouldCheckForMilestoneRewards(action: GameAction, state: ProgressionState): boolean {
-    return (
-      state.level > (state as any).previousLevel || // Level up occurred
-      this.isActivityMilestone(action, state)
-    );
-  }
-
-  private isActivityMilestone(action: GameAction, state: ProgressionState): boolean {
-    const activityCount = state.activityStats?.byType?.[action.actionType] || 0;
-    const milestones = [10, 50, 100, 500];
-    return milestones.includes(activityCount);
-  }
-
-  private async processMilestoneRewards(userId: string, state: ProgressionState): Promise<void> {
-    const levelConfig = this.levelService.getNextLevelRequirements(state.level - 1);
-
-    if (levelConfig.rewards) {
-      for (const reward of levelConfig.rewards) {
-        await this.rewardService.grantReward(userId, {
-          id: this.generateId(),
-          type: reward.type,
-          name: reward.name,
-          amount: reward.amount,
-        });
-      }
-    }
-  }
-
   async updateProgression(userId: string, update: ProgressionUpdate, activity?: Activity): Promise<ProgressionState> {
     logger.info('Starting progression update', { userId, xpGained: update.xpGained });
     const userRef = this.db.collection(Collections.Users).doc(userId);
-    const statsRef = userRef.collection(Collections.User_Stats).doc('current');
+    const statsRef = userRef.collection(Collections.Stats).doc('current');
 
     return await this.db.runTransaction(async (transaction) => {
       const userDoc = await transaction.get(statsRef);
@@ -156,6 +128,22 @@ export class ProgressionService {
       // Emit progression events
       if (activity) {
         await this.eventService.emitXpGained(userId, activity, newState, previousState);
+
+        // Record activity
+        const activityRef = userRef.collection(Collections.Activities).doc(activity.id);
+        transaction.set(activityRef, {
+          ...activity,
+          createdAt: now,
+        });
+
+        // Update activity stats
+        newState.activityStats = {
+          total: (previousState.activityStats?.total || 0) + 1,
+          byType: {
+            ...previousState.activityStats?.byType,
+            [activity.type]: ((previousState.activityStats?.byType || {})[activity.type] || 0) + 1,
+          },
+        };
       }
 
       if (currentLevel > previousState.level) {
@@ -168,23 +156,7 @@ export class ProgressionService {
       };
 
       // Update or create the user stats document
-      if (userDoc.exists) {
-        transaction.update(statsRef, updateData);
-      } else {
-        transaction.set(statsRef, {
-          ...updateData,
-          createdAt: now,
-        });
-      }
-
-      // Update activity stats if there's an activity
-      if (activity) {
-        const activityRef = userRef.collection(Collections.User_Activities).doc();
-        transaction.set(activityRef, {
-          ...activity,
-          createdAt: now,
-        });
-      }
+      transaction.set(statsRef, updateData);
 
       return newState;
     });
@@ -194,7 +166,7 @@ export class ProgressionService {
     const statsDoc = await this.db
       .collection(Collections.Users)
       .doc(userId)
-      .collection(Collections.User_Stats)
+      .collection(Collections.Stats)
       .doc('current')
       .get();
 
@@ -225,6 +197,34 @@ export class ProgressionService {
       lastActivityDate: userStats.lastActivityDate,
       activityStats: userStats.activityStats || initialActivityStats,
     };
+  }
+
+  private shouldCheckForMilestoneRewards(action: GameAction, state: ProgressionState): boolean {
+    return (
+      state.level > (state as any).previousLevel || // Level up occurred
+      this.isActivityMilestone(action, state)
+    );
+  }
+
+  private isActivityMilestone(action: GameAction, state: ProgressionState): boolean {
+    const activityCount = state.activityStats?.byType?.[action.actionType] || 0;
+    const milestones = [10, 50, 100, 500];
+    return milestones.includes(activityCount);
+  }
+
+  private async processMilestoneRewards(userId: string, state: ProgressionState): Promise<void> {
+    const levelConfig = this.levelService.getNextLevelRequirements(state.level - 1);
+
+    if (levelConfig.rewards) {
+      for (const reward of levelConfig.rewards) {
+        await this.rewardService.grantReward(userId, {
+          id: this.generateId(),
+          type: reward.type,
+          name: reward.name,
+          amount: reward.amount,
+        });
+      }
+    }
   }
 
   private generateId(): string {

@@ -21,8 +21,8 @@ export class ActivityService {
 
   async trackActivity(activity: Activity): Promise<void> {
     const userRef = this.db.collection(Collections.Users).doc(activity.userId);
-    const statsRef = userRef.collection(Collections.User_Stats).doc('current');
-    const activityRef = userRef.collection(Collections.User_Activities).doc(activity.id);
+    const statsRef = userRef.collection(Collections.Stats).doc('current');
+    const activityRef = userRef.collection(Collections.Activities).doc(activity.id);
 
     await this.db.runTransaction(async (transaction) => {
       const statsDoc = await transaction.get(statsRef);
@@ -87,7 +87,7 @@ export class ActivityService {
     const statsDoc = await this.db
       .collection(Collections.Users)
       .doc(userId)
-      .collection(Collections.User_Stats)
+      .collection(Collections.Stats)
       .doc('current')
       .get();
 
@@ -101,7 +101,7 @@ export class ActivityService {
     const snapshot = await this.db
       .collection(Collections.Users)
       .doc(userId)
-      .collection(Collections.User_Activities)
+      .collection(Collections.Activities)
       .orderBy('timestamp', 'desc')
       .limit(limit)
       .get();

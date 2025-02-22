@@ -42,8 +42,11 @@ export class UnifiedEventHandlerService {
     if (!newLevel) return;
 
     await this.db.runTransaction(async (transaction) => {
+      const userRef = this.db.collection(Collections.Users).doc(userId);
+      const achievementRef = userRef.collection(Collections.Achievements);
+
       // Record achievement
-      await this.recordAchievement(transaction, userId, {
+      await this.recordAchievement(transaction, achievementRef, {
         id: `level_${newLevel}`,
         name: `Level ${newLevel}`,
         description: `Reached level ${newLevel}`,
@@ -52,14 +55,14 @@ export class UnifiedEventHandlerService {
 
       // Level-based achievements
       if (newLevel === 5) {
-        await this.recordAchievement(transaction, userId, {
+        await this.recordAchievement(transaction, achievementRef, {
           id: 'intermediate_hero',
           name: 'Intermediate Hero',
           description: 'Reached level 5',
           timestamp: event.timestamp,
         });
       } else if (newLevel === 10) {
-        await this.recordAchievement(transaction, userId, {
+        await this.recordAchievement(transaction, achievementRef, {
           id: 'advanced_hero',
           name: 'Advanced Hero',
           description: 'Reached level 10',
@@ -83,9 +86,10 @@ export class UnifiedEventHandlerService {
 
     await this.db.runTransaction(async (transaction) => {
       const userRef = this.db.collection(Collections.Users).doc(userId);
-      const userBadges = await transaction.get(userRef.collection(Collections.User_Badges));
+      const userBadges = await transaction.get(userRef.collection(Collections.Badges));
 
       const badgeCount = userBadges.size;
+      const achievementRef = userRef.collection(Collections.Achievements);
 
       await this.notificationService.createNotification(userId, {
         type: 'BADGE_EARNED',
@@ -95,14 +99,14 @@ export class UnifiedEventHandlerService {
       });
 
       if (badgeCount === 5) {
-        await this.recordAchievement(transaction, userId, {
+        await this.recordAchievement(transaction, achievementRef, {
           id: 'badge_collector',
           name: 'Badge Collector',
           description: 'Earned 5 different badges',
           timestamp: event.timestamp,
         });
       } else if (badgeCount === 10) {
-        await this.recordAchievement(transaction, userId, {
+        await this.recordAchievement(transaction, achievementRef, {
           id: 'badge_master',
           name: 'Badge Master',
           description: 'Earned 10 different badges',
@@ -119,10 +123,12 @@ export class UnifiedEventHandlerService {
 
     try {
       const stats = await this.getActivityStats(userId, activity.type);
+      const userRef = this.db.collection(Collections.Users).doc(userId);
+      const achievementRef = userRef.collection(Collections.Achievements);
 
       // First-time achievements
       if (stats.total === 1) {
-        await this.recordAchievement(null, userId, {
+        await this.recordAchievement(null, achievementRef, {
           id: `first_${activity.type}`,
           name: `First ${activity.type.replace(/_/g, ' ')}`,
           description: `Completed your first ${activity.type.replace(/_/g, ' ')}`,
@@ -134,7 +140,7 @@ export class UnifiedEventHandlerService {
       const milestones = [10, 50, 100, 500];
       const nextMilestone = milestones.find((m) => stats.total === m);
       if (nextMilestone) {
-        await this.recordAchievement(null, userId, {
+        await this.recordAchievement(null, achievementRef, {
           id: `${activity.type}_milestone_${nextMilestone}`,
           name: `${activity.type.replace(/_/g, ' ')} Master ${nextMilestone}`,
           description: `Completed ${nextMilestone} ${activity.type.replace(/_/g, ' ')}s`,
@@ -153,7 +159,7 @@ export class UnifiedEventHandlerService {
 
   private async recordAchievement(
     transaction: FirebaseFirestore.Transaction | null,
-    userId: string,
+    achievementRef: FirebaseFirestore.CollectionReference,
     achievement: {
       id: string;
       name: string;
@@ -161,29 +167,18 @@ export class UnifiedEventHandlerService {
       timestamp: string;
     },
   ): Promise<void> {
-    const userRef = this.db.collection(Collections.Users).doc(userId);
-    const achievementRef = userRef.collection(Collections.User_Achievements).doc(achievement.id);
-
-    const updateData = {
-      ...achievement,
-      'stats.achievements.total': FieldValue.increment(1),
-      'stats.achievements.lastEarned': achievement.timestamp,
-    };
+    const docRef = achievementRef.doc(achievement.id);
 
     if (transaction) {
-      transaction.set(achievementRef, achievement);
-      transaction.update(userRef, updateData);
+      transaction.set(docRef, achievement);
     } else {
-      await this.db.runTransaction(async (t) => {
-        t.set(achievementRef, achievement);
-        t.update(userRef, updateData);
-      });
+      await docRef.set(achievement);
     }
   }
 
   private async getActivityStats(userId: string, activityType: string): Promise<{ total: number }> {
     const userRef = this.db.collection(Collections.Users).doc(userId);
-    const statsDoc = await userRef.collection(Collections.User_Stats).doc('current').get();
+    const statsDoc = await userRef.collection(Collections.Stats).doc('current').get();
     const stats = statsDoc.data()?.activityStats || {};
     return {
       total: stats.byType?.[activityType] || 0,

@@ -1,6 +1,6 @@
 import { DatabaseInstance } from '@codeheroes/common';
 import { Collections } from '@codeheroes/shared/types';
-import { Firestore } from 'firebase-admin/firestore';
+import { Firestore, FieldValue } from 'firebase-admin/firestore';
 import { UnifiedEventHandlerService } from '../../core/events/unified-event-handler.service';
 import { Activity } from '../interfaces/activity';
 
@@ -29,7 +29,7 @@ export class BadgeService {
 
   async processBadges(userId: string, context: BadgeContext): Promise<Badge[]> {
     const userRef = this.db.collection(Collections.Users).doc(userId);
-    const badgesRef = userRef.collection(Collections.User_Badges);
+    const badgesRef = userRef.collection(Collections.Badges);
     const badgeSnapshot = await badgesRef.get();
     const existingBadges = new Set(badgeSnapshot.docs.map((doc) => doc.id));
     const earnedBadges: Badge[] = [];
@@ -44,9 +44,30 @@ export class BadgeService {
         ...badge,
         earnedAt: new Date().toISOString(),
       });
+
+      // Update user stats to reflect new badge
+      await userRef
+        .collection(Collections.Stats)
+        .doc('current')
+        .update({
+          'stats.badges.total': FieldValue.increment(1),
+          'stats.badges.lastEarned': badge.earnedAt,
+        });
     }
 
     return earnedBadges;
+  }
+
+  async getUserBadges(userId: string): Promise<Badge[]> {
+    const snapshot = await this.db.collection(Collections.Users).doc(userId).collection(Collections.Badges).get();
+
+    return snapshot.docs.map(
+      (doc) =>
+        ({
+          ...doc.data(),
+          id: doc.id,
+        }) as Badge,
+    );
   }
 
   private async checkActivityBadges(

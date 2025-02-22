@@ -3,13 +3,16 @@ import { Collections, GameActionType } from '@codeheroes/shared/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { ActionResult, GameAction } from '../../core/interfaces/action';
 import { ProgressionService } from '../../core/progression/progression.service';
+import { ActivityService } from '../../core/activity/activity.service';
 
 export abstract class BaseActionHandler {
   protected abstract actionType: GameActionType;
   private progressionService: ProgressionService;
+  private activityService: ActivityService;
 
   constructor(protected db: Firestore) {
     this.progressionService = new ProgressionService();
+    this.activityService = new ActivityService();
   }
 
   async handle(action: GameAction): Promise<ActionResult> {
@@ -36,11 +39,29 @@ export abstract class BaseActionHandler {
       activityType: this.actionType,
     });
 
-    // Record activity
-    await this.recordActivity(userId, totalXP, {
-      ...metadata,
-      level: progressionUpdate.level,
-      bonuses: bonuses.breakdown,
+    // Record activity using ActivityService
+    const now = getCurrentTimeAsISO();
+    await this.activityService.trackActivity({
+      id: this.generateActivityId(),
+      userId,
+      type: this.actionType,
+      metadata: {
+        ...metadata,
+        level: progressionUpdate.level,
+        bonuses: bonuses.breakdown,
+      },
+      xp: {
+        earned: totalXP,
+        breakdown: [
+          { type: 'base', amount: baseXP, description: 'Base XP' },
+          ...Object.entries(bonuses.breakdown).map(([type, amount]) => ({
+            type,
+            amount,
+            description: `${type} bonus`,
+          })),
+        ],
+      },
+      timestamp: now,
     });
 
     logger.info('Action handling completed', {
@@ -62,52 +83,7 @@ export abstract class BaseActionHandler {
     breakdown: Record<string, number>;
   };
 
-  private async recordActivity(userId: string, xpGained: number, metadata: Record<string, any>) {
-    const userRef = this.db.collection(Collections.Users).doc(userId);
-    const statsRef = userRef.collection(Collections.User_Stats).doc('current');
-    const activityRef = userRef.collection(Collections.User_Activities).doc();
-    const now = getCurrentTimeAsISO();
-
-    await this.db.runTransaction(async (transaction) => {
-      // Check if user stats exist
-      const statsDoc = await transaction.get(statsRef);
-
-      const activity = {
-        timestamp: now,
-        actionType: this.actionType,
-        xpGained,
-        metadata,
-        createdAt: now,
-      };
-
-      // Create user stats if they don't exist
-      if (!statsDoc.exists) {
-        transaction.set(statsRef, {
-          userId,
-          xp: 0,
-          level: 1,
-          activityStats: {
-            total: 0,
-            byType: {},
-          },
-          createdAt: now,
-          updatedAt: now,
-        });
-      }
-
-      // Record the activity
-      transaction.set(activityRef, activity);
-
-      // Update activity stats
-      transaction.update(statsRef, {
-        [`activityStats.total`]: FieldValue.increment(1),
-        [`activityStats.byType.${this.actionType}`]: FieldValue.increment(1),
-        [`activityStats.lastActivity`]: {
-          type: this.actionType,
-          timestamp: now,
-        },
-        updatedAt: now,
-      });
-    });
+  private generateActivityId(): string {
+    return Math.random().toString(36).substr(2, 9);
   }
 }
