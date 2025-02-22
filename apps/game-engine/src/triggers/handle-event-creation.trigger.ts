@@ -26,9 +26,9 @@ export const handleEventCreation = onDocumentCreated('events/{eventId}', async (
     logger.log('Game action created', { gameAction });
   }
 
-  // Initialize user if they don't exist
-  // This should be a temporary thing
-  await userService.initializeNewUser(gameAction.userId, gameAction.userId.toString());
+  // // Initialize user if they don't exist
+  // // This should be a temporary thing
+  // await userService.initializeNewUser(gameAction.userId, gameAction.userId.toString());
 
   await progressionService.processGameAction(gameAction);
 });

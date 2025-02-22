@@ -24,9 +24,6 @@ export class UnifiedEventHandlerService {
       case ProgressionEventType.LEVEL_UP:
         await this.handleLevelUp(event);
         break;
-      case ProgressionEventType.STREAK_UPDATED:
-        await this.handleStreakUpdate(event);
-        break;
       case ProgressionEventType.BADGE_EARNED:
         await this.handleBadgeEarned(event);
         break;
@@ -76,41 +73,6 @@ export class UnifiedEventHandlerService {
         message: `Congratulations! You've reached level ${newLevel}!`,
         metadata: { level: newLevel },
       });
-    });
-  }
-
-  private async handleStreakUpdate(event: ProgressionEvent): Promise<void> {
-    const { userId, data } = event;
-    const streaks = data.state?.streaks;
-    if (!streaks) return;
-
-    await this.db.runTransaction(async (transaction) => {
-      for (const [streakType, days] of Object.entries(streaks)) {
-        if (days === 7) {
-          await this.recordAchievement(transaction, userId, {
-            id: `weekly_streak_${streakType}`,
-            name: 'Weekly Warrior',
-            description: `Maintained a 7-day streak in ${streakType}`,
-            timestamp: event.timestamp,
-          });
-        } else if (days === 30) {
-          await this.recordAchievement(transaction, userId, {
-            id: `monthly_streak_${streakType}`,
-            name: 'Monthly Master',
-            description: `Maintained a 30-day streak in ${streakType}`,
-            timestamp: event.timestamp,
-          });
-        }
-
-        if (days === 7 || days === 30) {
-          await this.notificationService.createNotification(userId, {
-            type: 'STREAK_MILESTONE',
-            title: 'Streak Achievement!',
-            message: `Amazing! You've maintained your ${streakType} streak for ${days} days!`,
-            metadata: { streakType, days },
-          });
-        }
-      }
     });
   }
 

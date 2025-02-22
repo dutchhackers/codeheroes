@@ -20,13 +20,6 @@ export const onLevelUp = onMessagePublished('progression-events', async (event) 
   logger.info('Level up event processed successfully');
 });
 
-export const onStreakUpdated = onMessagePublished('progression-events', async (event) => {
-  const eventHandler = new UnifiedEventHandlerService();
-  const progressionEvent = event.data.message.json;
-  if (progressionEvent.type !== ProgressionEventType.STREAK_UPDATED) return;
-  await eventHandler.handleEvent(progressionEvent);
-});
-
 export const onBadgeEarned = onMessagePublished('progression-events', async (event) => {
   const eventHandler = new UnifiedEventHandlerService();
   const progressionEvent = event.data.message.json;

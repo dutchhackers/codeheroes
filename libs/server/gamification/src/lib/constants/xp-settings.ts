@@ -28,10 +28,4 @@ export const XP_SETTINGS = {
       },
     },
   },
-  STREAK: {
-    DAY_1: 500,
-    DAY_3: 1000,
-    DAY_5: 2000,
-    DAY_7: 3000,
-  },
 };

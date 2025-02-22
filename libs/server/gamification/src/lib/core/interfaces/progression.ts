@@ -1,4 +1,4 @@
-import { StreakType } from './streak';
+import { ActivityStats } from './activity';
 
 export interface ProgressionState {
   userId: string;
@@ -6,16 +6,15 @@ export interface ProgressionState {
   level: number;
   currentLevelXp: number;
   xpToNextLevel: number;
-  streaks: Record<StreakType, number>;
   achievements?: string[];
   lastActivityDate?: string;
+  activityStats?: ActivityStats;
 }
 
 export interface ProgressionUpdate {
   xpGained: number;
   newLevel?: number;
   achievements?: string[];
-  streakUpdates?: Record<StreakType, number>;
   activityType?: string;
 }
 

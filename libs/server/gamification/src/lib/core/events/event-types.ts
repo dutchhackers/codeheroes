@@ -5,7 +5,6 @@ import { PubSub } from '@google-cloud/pubsub';
 export enum ProgressionEventType {
   XP_GAINED = 'progression.xp.gained',
   LEVEL_UP = 'progression.level.up',
-  STREAK_UPDATED = 'progression.streak.updated',
   BADGE_EARNED = 'progression.badge.earned',
   ACTIVITY_RECORDED = 'progression.activity.recorded',
 }
@@ -44,15 +43,6 @@ export class ProgressionEventService {
       userId,
       timestamp: new Date().toISOString(),
       type: ProgressionEventType.LEVEL_UP,
-      data: { state, previousState },
-    });
-  }
-
-  async emitStreakUpdated(userId: string, state: ProgressionState, previousState: ProgressionState) {
-    await this.emit({
-      userId,
-      timestamp: new Date().toISOString(),
-      type: ProgressionEventType.STREAK_UPDATED,
       data: { state, previousState },
     });
   }

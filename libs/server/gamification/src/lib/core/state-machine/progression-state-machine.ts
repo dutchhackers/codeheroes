@@ -4,7 +4,6 @@ import { Firestore } from 'firebase-admin/firestore';
 import { Activity } from '../interfaces/activity';
 import { RewardType } from '../interfaces/level';
 import { ProgressionState } from '../interfaces/progression';
-import { StreakType } from '../interfaces/streak';
 import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
 import { ProgressionEventService } from '../events/event-types';
@@ -12,7 +11,6 @@ import { ProgressionEventService } from '../events/event-types';
 interface ProgressionStateMachine {
   handleXpGain(xp: number, activity?: Activity): Promise<void>;
   handleLevelUp(): Promise<void>;
-  handleStreakUpdate(streakType: StreakType, days: number): Promise<void>;
   getState(): ProgressionState;
 }
 
@@ -89,34 +87,6 @@ export class GameProgressionStateMachine implements ProgressionStateMachine {
     await this.saveState();
   }
 
-  async handleStreakUpdate(streakType: StreakType, days: number): Promise<void> {
-    const oldState = { ...this.state };
-    if (!this.state.streaks) {
-      this.state.streaks = {} as Record<StreakType, number>;
-    }
-    this.state.streaks[streakType] = days;
-
-    // Process streak rewards based on milestones
-    if (days === 7) {
-      await this.handleXpGain(3000); // Weekly streak bonus
-      await this.badgeService.processBadges(this.state.userId, {
-        actionType: 'streak_milestone',
-        currentStreak: days,
-      });
-    } else if (days === 30) {
-      await this.handleXpGain(10000); // Monthly streak bonus
-      await this.badgeService.processBadges(this.state.userId, {
-        actionType: 'streak_milestone',
-        currentStreak: days,
-      });
-    }
-
-    // Emit streak update event
-    await this.eventService.emitStreakUpdated(this.state.userId, this.state, oldState);
-
-    await this.saveState();
-  }
-
   private async processRewards(rewards: Array<{ type: RewardType; id: string; name: string; amount?: number }>) {
     for (const reward of rewards) {
       switch (reward.type) {
@@ -151,7 +121,6 @@ export class GameProgressionStateMachine implements ProgressionStateMachine {
       level: this.state.level,
       currentLevelXp: this.state.currentLevelXp,
       xpToNextLevel: this.state.xpToNextLevel,
-      streaks: this.state.streaks,
       achievements: this.state.achievements,
       lastActivityDate: this.state.lastActivityDate,
     };

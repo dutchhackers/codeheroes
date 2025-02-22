@@ -1,7 +1,6 @@
 // Core interfaces
 export * from './lib/core/interfaces/action';
 export * from './lib/core/interfaces/progression';
-export * from './lib/core/interfaces/streak';
 export * from './lib/core/interfaces/activity';
 
 // Unified Services
@@ -20,5 +19,5 @@ export * from './lib/constants/xp-settings';
 export * from './lib/constants/level-thresholds';
 export * from './lib/constants/level-configuration';
 
-// Factory
+// Factories
 export * from './lib/factories/action-handler.factory';

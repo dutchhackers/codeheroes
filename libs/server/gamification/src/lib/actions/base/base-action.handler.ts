@@ -2,12 +2,10 @@ import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { Collections, GameActionType } from '@codeheroes/shared/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { ActionResult, GameAction } from '../../core/interfaces/action';
-import { StreakType } from '../../core/interfaces/streak';
 import { ProgressionService } from '../../core/progression/progression.service';
 
 export abstract class BaseActionHandler {
   protected abstract actionType: GameActionType;
-  protected abstract streakType: StreakType;
   private progressionService: ProgressionService;
 
   constructor(protected db: Firestore) {
@@ -36,12 +34,6 @@ export abstract class BaseActionHandler {
     const progressionUpdate = await this.progressionService.updateProgression(userId, {
       xpGained: totalXP,
       activityType: this.actionType,
-      streakUpdates: {
-        code_pushes: this.streakType === 'code_pushes' ? metadata.streakDay || 1 : 0,
-        pr_creations: this.streakType === 'pr_creations' ? metadata.streakDay || 1 : 0,
-        pr_closes: this.streakType === 'pr_closes' ? metadata.streakDay || 1 : 0,
-        pr_merges: this.streakType === 'pr_merges' ? metadata.streakDay || 1 : 0,
-      },
     });
 
     // Record activity
@@ -60,9 +52,6 @@ export abstract class BaseActionHandler {
 
     return {
       xpGained: totalXP,
-      newStreak: metadata.streakDay,
-      streakBonus: bonuses.breakdown.streakBonus || 0,
-      rewards: bonuses.breakdown,
       level: progressionUpdate.level,
     };
   }

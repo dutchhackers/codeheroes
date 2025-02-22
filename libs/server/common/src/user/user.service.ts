@@ -86,37 +86,4 @@ export class UserService extends BaseFirestoreService<User> {
 
     return snapshot.docs[0].data();
   }
-
-  // Helper: Get initial user stats
-  async initializeNewUser(userId: string, username: string) {
-    const userStatsRef = this.db.collection('userStats').doc(userId);
-
-    try {
-      // Check if stats already exist
-      const existingStats = await userStatsRef.get();
-
-      if (!existingStats.exists) {
-        const now = getCurrentTimeAsISO();
-        // Create initial stats
-        await userStatsRef.set({
-          userId,
-          username,
-          level: 1,
-          xp: 0,
-          streaks: {},
-          lastActivityDate: null,
-          createdAt: now,
-          updatedAt: now,
-        });
-
-        logger.info(`Initialized stats for new user: ${userId}`);
-        return true;
-      }
-
-      return false; // Stats already existed
-    } catch (error) {
-      logger.error('Error initializing user stats:', error);
-      throw error;
-    }
-  }
 }

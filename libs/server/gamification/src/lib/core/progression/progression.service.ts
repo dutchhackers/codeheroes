@@ -6,9 +6,8 @@ import { getXpProgress } from '../../constants/level-thresholds';
 import { ActionHandlerFactory } from '../../factories/action-handler.factory';
 import { ProgressionEventService } from '../events/event-types';
 import { ActionResult, GameAction } from '../interfaces/action';
-import { Activity } from '../interfaces/activity';
+import { Activity, ActivityStats } from '../interfaces/activity';
 import { ProgressionState, ProgressionUpdate } from '../interfaces/progression';
-import { StreakType } from '../interfaces/streak';
 import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
 import { RewardService } from '../services/reward.service';
@@ -40,20 +39,12 @@ export class ProgressionService {
       throw new Error('User state not found');
     }
 
-    // Process XP gain
-    await this.updateProgression(
+    // Process XP gain and progression
+    const updatedState = await this.updateProgression(
       action.userId,
       {
         xpGained: result.xpGained,
         activityType: action.actionType,
-        streakUpdates: result.newStreak
-          ? {
-              [StreakType.CodePush]: action.actionType === 'code_push' ? result.newStreak : 0,
-              [StreakType.PullRequestCreate]: action.actionType === 'pull_request_create' ? result.newStreak : 0,
-              [StreakType.PullRequestClose]: action.actionType === 'pull_request_close' ? result.newStreak : 0,
-              [StreakType.PullRequestMerge]: action.actionType === 'pull_request_merge' ? result.newStreak : 0,
-            }
-          : undefined,
       },
       {
         id: this.generateId(),
@@ -68,24 +59,43 @@ export class ProgressionService {
       },
     );
 
-    // Process rewards if any
-    if (result.rewards) {
-      for (const [rewardType, rewardValue] of Object.entries(result.rewards)) {
-        await this.rewardService.grantReward(action.userId, {
+    // Check for milestone achievements and special rewards
+    if (this.shouldCheckForMilestoneRewards(action, updatedState)) {
+      await this.processMilestoneRewards(action.userId, updatedState);
+    }
+
+    return {
+      ...result,
+      currentLevelProgress: updatedState,
+    };
+  }
+
+  private shouldCheckForMilestoneRewards(action: GameAction, state: ProgressionState): boolean {
+    return (
+      state.level > (state as any).previousLevel || // Level up occurred
+      this.isActivityMilestone(action, state)
+    );
+  }
+
+  private isActivityMilestone(action: GameAction, state: ProgressionState): boolean {
+    const activityCount = state.activityStats?.byType?.[action.actionType] || 0;
+    const milestones = [10, 50, 100, 500];
+    return milestones.includes(activityCount);
+  }
+
+  private async processMilestoneRewards(userId: string, state: ProgressionState): Promise<void> {
+    const levelConfig = this.levelService.getNextLevelRequirements(state.level - 1);
+
+    if (levelConfig.rewards) {
+      for (const reward of levelConfig.rewards) {
+        await this.rewardService.grantReward(userId, {
           id: this.generateId(),
-          type: rewardType as any,
-          name: `${action.actionType} reward`,
-          amount: typeof rewardValue === 'number' ? rewardValue : undefined,
-          metadata: typeof rewardValue === 'object' ? rewardValue : undefined,
+          type: reward.type,
+          name: reward.name,
+          amount: reward.amount,
         });
       }
     }
-
-    const updatedState = await this.getProgressionState(action.userId);
-    return {
-      ...result,
-      currentLevelProgress: updatedState || undefined,
-    };
   }
 
   async updateProgression(userId: string, update: ProgressionUpdate, activity?: Activity): Promise<ProgressionState> {
@@ -96,20 +106,25 @@ export class ProgressionService {
       const userDoc = await transaction.get(userStatsRef);
       const now = new Date().toISOString();
 
+      const initialActivityStats: ActivityStats = {
+        total: 0,
+        byType: {
+          code_push: 0,
+          pull_request_create: 0,
+          pull_request_merge: 0,
+          pull_request_close: 0,
+        },
+      };
+
       const initialState: ProgressionState = {
         userId,
         xp: 0,
         level: 1,
         currentLevelXp: 0,
         xpToNextLevel: 1000,
-        streaks: {
-          [StreakType.CodePush]: 0,
-          [StreakType.PullRequestCreate]: 0,
-          [StreakType.PullRequestClose]: 0,
-          [StreakType.PullRequestMerge]: 0,
-        },
         achievements: [],
         lastActivityDate: null,
+        activityStats: initialActivityStats,
       };
 
       // If user stats don't exist, create them
@@ -132,12 +147,9 @@ export class ProgressionService {
         level: currentLevel,
         currentLevelXp,
         xpToNextLevel,
-        streaks: {
-          ...previousState.streaks,
-          ...update.streakUpdates,
-        },
         achievements: [...(previousState.achievements || []), ...(update.achievements || [])],
         lastActivityDate: now.split('T')[0],
+        activityStats: previousState.activityStats || initialActivityStats,
       };
 
       // Emit progression events
@@ -147,10 +159,6 @@ export class ProgressionService {
 
       if (currentLevel > previousState.level) {
         await this.eventService.emitLevelUp(userId, newState, previousState);
-      }
-
-      if (update.streakUpdates) {
-        await this.eventService.emitStreakUpdated(userId, newState, previousState);
       }
 
       const updateData = {
@@ -190,36 +198,26 @@ export class ProgressionService {
     const userStats = userStatsDoc.data()!;
     const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(userStats.xp || 0);
 
+    const initialActivityStats: ActivityStats = {
+      total: 0,
+      byType: {
+        code_push: 0,
+        pull_request_create: 0,
+        pull_request_merge: 0,
+        pull_request_close: 0,
+      },
+    };
+
     return {
       userId,
       xp: userStats.xp || 0,
       level: currentLevel,
       currentLevelXp,
       xpToNextLevel,
-      streaks: userStats.streaks || {
-        [StreakType.CodePush]: 0,
-        [StreakType.PullRequestCreate]: 0,
-        [StreakType.PullRequestClose]: 0,
-        [StreakType.PullRequestMerge]: 0,
-      },
       achievements: userStats.achievements || [],
       lastActivityDate: userStats.lastActivityDate,
+      activityStats: userStats.activityStats || initialActivityStats,
     };
-  }
-
-  private getStreakTypeFromAction(actionType: GameActionType): StreakType {
-    switch (actionType) {
-      case 'code_push':
-        return StreakType.CodePush;
-      case 'pull_request_create':
-        return StreakType.PullRequestCreate;
-      case 'pull_request_close':
-        return StreakType.PullRequestClose;
-      case 'pull_request_merge':
-        return StreakType.PullRequestMerge;
-      default:
-        throw new Error(`Unknown action type: ${actionType}`);
-    }
   }
 
   private generateId(): string {

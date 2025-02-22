@@ -1,22 +1,21 @@
 import { DatabaseInstance } from '@codeheroes/common';
 import { Collections } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
-import { ProgressionState } from '../interfaces/progression';
-import { UnifiedEventHandlerService } from '../events/unified-event-handler.service';
-import { ProgressionEventType } from '../events/event-types';
+import { UnifiedEventHandlerService } from '../../core/events/unified-event-handler.service';
+import { Activity } from '../interfaces/activity';
 
 export interface Badge {
   id: string;
   name: string;
-  description: string;
-  category: string;
-  xpReward: number;
-  achievedAt?: string;
+  description?: string;
+  earnedAt?: string;
+  xp?: number;
 }
 
-interface BadgeAwardResult {
-  earnedBadges: Badge[];
-  totalBadgeXP: number;
+interface BadgeContext {
+  totalActions: number;
+  actionType: string;
+  metadata?: Record<string, any>;
 }
 
 export class BadgeService {
@@ -28,111 +27,52 @@ export class BadgeService {
     this.eventHandler = eventHandler || new UnifiedEventHandlerService();
   }
 
-  async processBadges(
-    userId: string,
-    context: {
-      actionType: string;
-      currentStreak?: number;
-      totalActions?: number;
-    },
-  ): Promise<BadgeAwardResult> {
-    const userRef = this.db.collection('users').doc(userId);
-    const badgesRef = userRef.collection('badges');
-    const existingBadges = new Set((await badgesRef.listDocuments()).map((doc) => doc.id));
+  async processBadges(userId: string, context: BadgeContext): Promise<Badge[]> {
+    const userRef = this.db.collection(Collections.Users).doc(userId);
+    const badgesRef = userRef.collection(Collections.User_UserBadges);
+    const badgeSnapshot = await badgesRef.get();
+    const existingBadges = new Set(badgeSnapshot.docs.map((doc) => doc.id));
     const earnedBadges: Badge[] = [];
-    let totalBadgeXP = 0;
 
-    // Check streak-based badges
-    if (context.currentStreak) {
-      const streakBadges = await this.checkStreakBadges(context.currentStreak, existingBadges);
-      earnedBadges.push(...streakBadges);
-    }
+    // Check activity-based badges
+    const activityBadges = await this.checkActivityBadges(context.actionType, context.totalActions, existingBadges);
+    earnedBadges.push(...activityBadges);
 
-    // Check action-based badges
-    if (context.totalActions) {
-      const actionBadges = await this.checkActionBadges(context.actionType, context.totalActions, existingBadges);
-      earnedBadges.push(...actionBadges);
-    }
-
-    // Get current user stats for progression state
-    const userStatsDoc = await this.db.collection(Collections.UserStats).doc(userId).get();
-    const userStats = userStatsDoc.data() as ProgressionState;
-
-    // Award new badges
+    // Save earned badges
     for (const badge of earnedBadges) {
       await badgesRef.doc(badge.id).set({
         ...badge,
-        achievedAt: new Date().toISOString(),
-      });
-      totalBadgeXP += badge.xpReward;
-
-      // Emit badge earned event with current progression state
-      await this.eventHandler.handleEvent({
-        userId,
-        timestamp: new Date().toISOString(),
-        type: ProgressionEventType.BADGE_EARNED,
-        data: { badgeId: badge.id, state: userStats },
+        earnedAt: new Date().toISOString(),
       });
     }
 
-    return { earnedBadges, totalBadgeXP };
+    return earnedBadges;
   }
 
-  private async checkStreakBadges(currentStreak: number, existingBadges: Set<string>): Promise<Badge[]> {
-    const streakBadges: Badge[] = [];
-
-    const streakMilestones = [
-      { id: 'three_day_streak', name: '3-Day Streak', threshold: 3, xp: 1000 },
-      { id: 'weekly_streak', name: 'Weekly Warrior', threshold: 7, xp: 3000 },
-      { id: 'monthly_streak', name: 'Monthly Master', threshold: 30, xp: 10000 },
-    ];
-
-    for (const milestone of streakMilestones) {
-      if (currentStreak >= milestone.threshold && !existingBadges.has(milestone.id)) {
-        streakBadges.push({
-          id: milestone.id,
-          name: milestone.name,
-          description: `Maintained a ${milestone.threshold}-day activity streak`,
-          category: 'streak',
-          xpReward: milestone.xp,
-        });
-      }
-    }
-
-    return streakBadges;
-  }
-
-  private async checkActionBadges(
+  private async checkActivityBadges(
     actionType: string,
     totalActions: number,
     existingBadges: Set<string>,
   ): Promise<Badge[]> {
-    const actionBadges: Badge[] = [];
-
-    const actionMilestones = [
-      { id: `${actionType}_starter`, name: 'Getting Started', threshold: 1, xp: 500 },
-      { id: `${actionType}_regular`, name: 'Regular Contributor', threshold: 10, xp: 2000 },
-      { id: `${actionType}_expert`, name: 'Expert Contributor', threshold: 50, xp: 5000 },
+    const activityBadges: Badge[] = [];
+    const milestones = [
+      { id: 'first_action', name: 'First Steps', threshold: 1, xp: 100 },
+      { id: 'ten_actions', name: 'Getting Started', threshold: 10, xp: 500 },
+      { id: 'fifty_actions', name: 'Regular Contributor', threshold: 50, xp: 2000 },
+      { id: 'hundred_actions', name: 'Dedicated Developer', threshold: 100, xp: 5000 },
     ];
 
-    for (const milestone of actionMilestones) {
+    for (const milestone of milestones) {
       if (totalActions >= milestone.threshold && !existingBadges.has(milestone.id)) {
-        actionBadges.push({
+        activityBadges.push({
           id: milestone.id,
           name: milestone.name,
-          description: `Completed ${milestone.threshold} ${actionType} actions`,
-          category: 'activity',
-          xpReward: milestone.xp,
+          description: `Complete ${milestone.threshold} ${actionType} actions`,
+          xp: milestone.xp,
         });
       }
     }
 
-    return actionBadges;
-  }
-
-  async getEarnedBadges(userId: string): Promise<Badge[]> {
-    const badgesSnapshot = await this.db.collection('users').doc(userId).collection('badges').get();
-
-    return badgesSnapshot.docs.map((doc) => doc.data() as Badge);
+    return activityBadges;
   }
 }
