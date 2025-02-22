@@ -5,6 +5,8 @@ import { ActionResult, GameAction } from '../../core/interfaces/action';
 import { ProgressionService } from '../../core/progression/progression.service';
 import { ActivityService } from '../../core/activity/activity.service';
 import { ActivityCounters } from '../../core/interfaces/activity';
+import { getTimeFrameIds } from '../../utils/time-frame.utils';
+import { TimeBasedActivityStats } from '../../core/interfaces/time-based-activity';
 
 export abstract class BaseActionHandler {
   protected abstract actionType: GameActionType;
@@ -75,11 +77,10 @@ export abstract class BaseActionHandler {
     const { userId, metadata } = action;
     logger.info(`Starting action handler for ${this.actionType}`, { userId, metadata });
 
-    // Initialize counters if needed
+    const timeFrames = getTimeFrameIds();
     const userRef = this.db.collection(Collections.Users).doc(userId);
     await this.initializeCountersIfNeeded(userRef);
 
-    // Calculate XP and bonuses
     const baseXP = this.calculateBaseXp();
     const bonuses = this.calculateBonuses(metadata);
     const totalXP = baseXP + bonuses.totalBonus;
@@ -92,51 +93,100 @@ export abstract class BaseActionHandler {
       totalXP,
     });
 
-    // Process the action with progression
     logger.info('Updating progression with calculated XP', { userId, totalXP });
     const progressionUpdate = await this.progressionService.updateProgression(userId, {
       xpGained: totalXP,
       activityType: this.actionType,
     });
 
-    // Get counter updates
     const counterUpdates = this.getCounterUpdates();
-
-    // Record activity and update counters using ActivityService
     const now = getCurrentTimeAsISO();
+
     const activityRef = userRef.collection(Collections.Activities).doc();
+    const statsRef = userRef.collection(Collections.Stats).doc('current');
+    const dailyStatsRef = userRef.collection('activityStats').doc('daily').collection('records').doc(timeFrames.daily);
+    const weeklyStatsRef = userRef
+      .collection('activityStats')
+      .doc('weekly')
+      .collection('records')
+      .doc(timeFrames.weekly);
 
-    // Update both activity and counters in a transaction
     await this.db.runTransaction(async (transaction) => {
-      const statsRef = userRef.collection(Collections.Stats).doc('current');
+      // First, perform all reads
+      const [dailyDoc, weeklyDoc] = await Promise.all([
+        transaction.get(dailyStatsRef),
+        transaction.get(weeklyStatsRef),
+      ]);
 
-      // Update counters
-      transaction.update(statsRef, counterUpdates);
+      // Prepare write operations
+      const writes = [];
+
+      // Update global counters
+      writes.push(() => transaction.update(statsRef, counterUpdates));
+
+      // Initialize and update daily stats
+      if (!dailyDoc.exists) {
+        writes.push(() => this.initializeTimeBasedStats(transaction, dailyStatsRef, timeFrames.daily));
+      }
+      writes.push(() =>
+        transaction.update(dailyStatsRef, {
+          ...counterUpdates,
+          xpGained: FieldValue.increment(totalXP),
+          countersLastUpdated: now,
+          lastActivity: {
+            type: this.actionType,
+            timestamp: now,
+          },
+        }),
+      );
+
+      // Initialize and update weekly stats
+      if (!weeklyDoc.exists) {
+        writes.push(() => this.initializeTimeBasedStats(transaction, weeklyStatsRef, timeFrames.weekly));
+      }
+      writes.push(() =>
+        transaction.update(weeklyStatsRef, {
+          ...counterUpdates,
+          xpGained: FieldValue.increment(totalXP),
+          countersLastUpdated: now,
+          lastActivity: {
+            type: this.actionType,
+            timestamp: now,
+          },
+        }),
+      );
 
       // Record activity
-      transaction.set(activityRef, {
-        id: activityRef.id,
-        userId,
-        type: this.actionType,
-        metadata: {
-          ...metadata,
-          level: progressionUpdate.level,
-          bonuses: bonuses.breakdown,
-        },
-        xp: {
-          earned: totalXP,
-          breakdown: [
-            { type: 'base', amount: baseXP, description: 'Base XP' },
-            ...Object.entries(bonuses.breakdown).map(([type, amount]) => ({
-              type,
-              amount,
-              description: `${type} bonus`,
-            })),
-          ],
-        },
-        createdAt: now,
-        updatedAt: now,
-      });
+      writes.push(() =>
+        transaction.set(activityRef, {
+          id: activityRef.id,
+          userId,
+          type: this.actionType,
+          metadata: {
+            ...metadata,
+            level: progressionUpdate.level,
+            bonuses: bonuses.breakdown,
+          },
+          xp: {
+            earned: totalXP,
+            breakdown: [
+              { type: 'base', amount: baseXP, description: 'Base XP' },
+              ...Object.entries(bonuses.breakdown).map(([type, amount]) => ({
+                type,
+                amount,
+                description: `${type} bonus`,
+              })),
+            ],
+          },
+          createdAt: now,
+          updatedAt: now,
+        }),
+      );
+
+      // Execute all write operations after reads
+      for (const write of writes) {
+        write();
+      }
     });
 
     logger.info('Action handling completed', {
@@ -149,6 +199,33 @@ export abstract class BaseActionHandler {
     return {
       xpGained: totalXP,
       level: progressionUpdate.level,
+    };
+  }
+
+  private async initializeTimeBasedStats(
+    transaction: FirebaseFirestore.Transaction,
+    docRef: FirebaseFirestore.DocumentReference,
+    timeframeId: string,
+  ): Promise<void> {
+    const initialStats: TimeBasedActivityStats = {
+      timeframeId,
+      counters: this.getInitialCounters(),
+      xpGained: 0,
+      countersLastUpdated: getCurrentTimeAsISO(),
+    };
+    transaction.set(docRef, initialStats);
+  }
+
+  protected getInitialCounters(): ActivityCounters {
+    return {
+      pullRequests: {
+        created: 0,
+        merged: 0,
+        closed: 0,
+        total: 0,
+      },
+      codePushes: 0,
+      codeReviews: 0,
     };
   }
 

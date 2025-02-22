@@ -1,12 +1,14 @@
-import { DatabaseInstance, DatabaseService, logger } from '@codeheroes/common';
-import { Firestore } from 'firebase-admin/firestore';
-import { Activity, ActivityStats, ActivityCounters } from '../interfaces/activity';
+import { DatabaseInstance, DatabaseService, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
-import { GameAction } from '../interfaces/action';
-import { UnifiedEventHandlerService } from '../events/unified-event-handler.service';
-import { ProgressionEventType } from '../events/event-types';
-import { Collections } from '@codeheroes/shared/types';
 import { GithubPullRequestEventData, GithubPushEventData } from '@codeheroes/providers';
+import { Collections } from '@codeheroes/shared/types';
+import { Firestore } from 'firebase-admin/firestore';
+import { getRecentDailyIds, getRecentWeeklyIds, getTimeFrameIds } from '../../utils/time-frame.utils';
+import { ProgressionEventType } from '../events/event-types';
+import { UnifiedEventHandlerService } from '../events/unified-event-handler.service';
+import { GameAction } from '../interfaces/action';
+import { Activity, ActivityCounters, ActivityStats } from '../interfaces/activity';
+import { TimeBasedActivityStats, TimeBasedStatsQuery } from '../interfaces/time-based-activity';
 
 export class ActivityService {
   private db: Firestore;
@@ -218,5 +220,96 @@ export class ActivityService {
       .get();
 
     return snapshot.docs.map((doc) => doc.data() as Activity);
+  }
+
+  async getDailyActivityStats(userId: string, date?: string): Promise<TimeBasedActivityStats | null> {
+    const timeframeId = date || getTimeFrameIds().daily;
+    const statsRef = this.db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection('activityStats')
+      .doc('daily')
+      .collection('records')
+      .doc(timeframeId);
+
+    const doc = await statsRef.get();
+    return doc.exists ? (doc.data() as TimeBasedActivityStats) : null;
+  }
+
+  async getWeeklyActivityStats(userId: string, weekId?: string): Promise<TimeBasedActivityStats | null> {
+    const timeframeId = weekId || getTimeFrameIds().weekly;
+    const statsRef = this.db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection('activityStats')
+      .doc('weekly')
+      .collection('records')
+      .doc(timeframeId);
+
+    const doc = await statsRef.get();
+    return doc.exists ? (doc.data() as TimeBasedActivityStats) : null;
+  }
+
+  async getRecentDailyStats(userId: string, days = 7): Promise<TimeBasedActivityStats[]> {
+    const dailyIds = getRecentDailyIds(days);
+    const userRef = this.db.collection(Collections.Users).doc(userId);
+    const dailyStatsRef = userRef.collection('activityStats').doc('daily').collection('records');
+
+    const statsPromises = dailyIds.map(async (id) => {
+      const doc = await dailyStatsRef.doc(id).get();
+      return doc.exists ? (doc.data() as TimeBasedActivityStats) : null;
+    });
+
+    const stats = await Promise.all(statsPromises);
+    return stats.filter((stat): stat is TimeBasedActivityStats => stat !== null);
+  }
+
+  async getRecentWeeklyStats(userId: string, weeks = 4): Promise<TimeBasedActivityStats[]> {
+    const weeklyIds = getRecentWeeklyIds(weeks);
+    const userRef = this.db.collection(Collections.Users).doc(userId);
+    const weeklyStatsRef = userRef.collection('activityStats').doc('weekly').collection('records');
+
+    const statsPromises = weeklyIds.map(async (id) => {
+      const doc = await weeklyStatsRef.doc(id).get();
+      return doc.exists ? (doc.data() as TimeBasedActivityStats) : null;
+    });
+
+    const stats = await Promise.all(statsPromises);
+    return stats.filter((stat): stat is TimeBasedActivityStats => stat !== null);
+  }
+
+  async getTimeBasedActivityStats(userId: string, query: TimeBasedStatsQuery): Promise<TimeBasedActivityStats[]> {
+    const userRef = this.db.collection(Collections.Users).doc(userId);
+    const dailyStatsRef = userRef.collection('activityStats').doc('daily').collection('records');
+
+    let statsQuery = dailyStatsRef.orderBy('timeframeId', 'desc');
+
+    if (query.startDate) {
+      statsQuery = statsQuery.where('timeframeId', '>=', query.startDate);
+    }
+    if (query.endDate) {
+      statsQuery = statsQuery.where('timeframeId', '<=', query.endDate);
+    }
+    if (query.limit) {
+      statsQuery = statsQuery.limit(query.limit);
+    }
+
+    const snapshot = await statsQuery.get();
+    return snapshot.docs.map((doc) => doc.data() as TimeBasedActivityStats);
+  }
+
+  // Helper method to initialize time-based stats document
+  private async initializeTimeBasedStats(
+    transaction: FirebaseFirestore.Transaction,
+    docRef: FirebaseFirestore.DocumentReference,
+    timeframeId: string,
+  ): Promise<void> {
+    const initialStats: TimeBasedActivityStats = {
+      timeframeId,
+      counters: this.getInitialCounters(),
+      xpGained: 0,
+      countersLastUpdated: getCurrentTimeAsISO(),
+    };
+    transaction.set(docRef, initialStats);
   }
 }
