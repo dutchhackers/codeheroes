@@ -98,16 +98,19 @@ export class ProgressionService {
 
       // If user stats don't exist, create them
       if (!userDoc.exists) {
-        transaction.set(statsRef, {
+        await statsRef.set({
           ...initialState,
           createdAt: now,
           updatedAt: now,
         });
       }
 
-      const previousState: ProgressionState = userDoc.exists ? (userDoc.data() as ProgressionState) : initialState;
-      const newTotalXp = previousState.xp + update.xpGained;
-
+      // Re-get the stats doc if we just created it
+      const currentDoc = userDoc.exists ? userDoc : await statsRef.get();
+      const previousState: ProgressionState = currentDoc.exists ? (currentDoc.data() as ProgressionState) : initialState;
+      
+      // Calculate new XP
+      const newTotalXp = (previousState.xp || 0) + update.xpGained;
       const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(newTotalXp);
 
       const newState: ProgressionState = {
