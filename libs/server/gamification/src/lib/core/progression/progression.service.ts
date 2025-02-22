@@ -90,7 +90,6 @@ export class ProgressionService {
         level: 1,
         currentLevelXp: 0,
         xpToNextLevel: 1000,
-        achievements: [],
         lastActivityDate: null,
         counters: initialStats.counters,
         countersLastUpdated: initialStats.countersLastUpdated,
@@ -107,8 +106,10 @@ export class ProgressionService {
 
       // Re-get the stats doc if we just created it
       const currentDoc = userDoc.exists ? userDoc : await statsRef.get();
-      const previousState: ProgressionState = currentDoc.exists ? (currentDoc.data() as ProgressionState) : initialState;
-      
+      const previousState: ProgressionState = currentDoc.exists
+        ? (currentDoc.data() as ProgressionState)
+        : initialState;
+
       // Calculate new XP
       const newTotalXp = (previousState.xp || 0) + update.xpGained;
       const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(newTotalXp);
@@ -119,7 +120,6 @@ export class ProgressionService {
         level: currentLevel,
         currentLevelXp,
         xpToNextLevel,
-        achievements: [...(previousState.achievements || []), ...(update.achievements || [])],
         lastActivityDate: now.split('T')[0],
         counters: previousState.counters || initialState.counters,
         countersLastUpdated: previousState.countersLastUpdated || now,
@@ -170,7 +170,6 @@ export class ProgressionService {
       level: currentLevel,
       currentLevelXp,
       xpToNextLevel,
-      achievements: userStats.achievements || [],
       lastActivityDate: userStats.lastActivityDate,
       counters: userStats.counters || initialStats.counters,
       countersLastUpdated: userStats.countersLastUpdated || initialStats.countersLastUpdated,

@@ -13,8 +13,6 @@ export interface Activity {
       description: string;
     }>;
   };
-  achievements?: string[];
-  badges?: string[];
   timestamp: string;
 }
 
