@@ -98,8 +98,15 @@ export interface PullRequestEvent {
     additions: number;
     deletions: number;
     changed_files: number;
+    comments: number;
     created_at: string;
     updated_at: string;
+    requested_reviewers?: GitHubUser[];
+    requested_teams?: {
+      id: number;
+      name: string;
+      slug: string;
+    }[];
   };
   repository: GitHubRepository;
   sender: GitHubUser;

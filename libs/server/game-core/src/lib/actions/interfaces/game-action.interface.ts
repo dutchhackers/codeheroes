@@ -1,49 +1,43 @@
-import { ConnectedAccountProvider } from '@codeheroes/common';
+import { ConnectedAccountProvider } from '@codeheroes/shared/types';
+import { GameActionContext } from './context.interface';
+import { GameActionMetrics } from './metrics.interface';
 
 export type GameActionType =
+  // Code actions
   | 'code_push'
   | 'pull_request_create'
   | 'pull_request_merge'
   | 'pull_request_close'
   | 'code_review_submit'
-  | 'branch_create'
-  | 'branch_delete';
-
-export interface GameActionContext {
-  repository: {
-    id: string;
-    name: string;
-    owner: string;
-  };
-  ref?: string; // branch/tag name if applicable
-}
-
-export interface GameActionMetrics {
-  commits?: number;
-  additions?: number;
-  deletions?: number;
-  changedFiles?: number;
-  comments?: number;
-}
+  | 'code_review_comment'
+  // Issue actions
+  | 'issue_create'
+  | 'issue_close'
+  | 'issue_reopen'
+  // Workout actions
+  | 'workout_complete'
+  | 'distance_milestone'
+  | 'speed_record';
 
 export interface GameAction {
   id: string;
-  userId: string; // Internal user ID
-  externalId: string; // ID from external system (e.g., GitHub event ID)
+  userId: string;
+  externalId: string;
   provider: ConnectedAccountProvider;
   type: GameActionType;
   timestamp: string;
 
-  // External identity info for debugging/auditing
   externalUser: {
-    id: string; // e.g., GitHub user ID
-    username: string; // e.g., GitHub username
+    id: string;
+    username: string;
   };
 
+  // Context identifies the "where"
   context: GameActionContext;
+
+  // Metrics measure the "how much/well"
   metrics?: GameActionMetrics;
 
-  // Processing status
   status: 'pending' | 'processed' | 'failed';
   processedAt?: string;
   error?: string;

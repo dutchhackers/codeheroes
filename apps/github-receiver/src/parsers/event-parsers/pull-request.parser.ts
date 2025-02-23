@@ -24,6 +24,8 @@ export class PullRequestParser extends GitHubParser<PullRequestEvent, GithubPull
         additions: pull_request.additions,
         deletions: pull_request.deletions,
         changedFiles: pull_request.changed_files,
+        comments: pull_request.comments || 0,
+        reviewers: (pull_request.requested_reviewers?.length || 0) + (pull_request.requested_teams?.length || 0),
       },
     };
   }
