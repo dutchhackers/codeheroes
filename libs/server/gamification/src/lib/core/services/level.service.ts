@@ -1,11 +1,11 @@
 import { getXpProgress, getLevelRequirements, getNextLevelRequirements } from '../../constants/level-thresholds';
-import { LevelRequirement } from '../interfaces/level';
+import { LevelReward, RewardType, LevelRequirementItem } from '../interfaces/level';
 
 export class LevelService {
   calculateLevelProgress(totalXp: number) {
     const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(totalXp);
-    const currentLevelRequirements = getLevelRequirements(currentLevel);
-    const nextLevelRequirements = getNextLevelRequirements(currentLevel);
+    const currentLevelConfig = getLevelRequirements(currentLevel);
+    const nextLevelConfig = getNextLevelRequirements(currentLevel);
 
     return {
       level: currentLevel,
@@ -13,25 +13,72 @@ export class LevelService {
       currentLevelXp,
       xpToNextLevel,
       totalXp,
-      rewards: currentLevelRequirements?.rewards || [],
-      nextLevelRequirements: nextLevelRequirements?.additionalRequirements || [],
+      rewards: this.mapConfigRewardsToLevelRewards(currentLevelConfig?.rewards),
+      requirements: [], // We'll leave this empty for now as it's not critical
     };
   }
 
   getNextLevelRequirements(level: number): {
     xpNeeded: number;
-    requirements?: LevelRequirement['additionalRequirements'];
-    rewards?: LevelRequirement['rewards'];
+    requirements: LevelRequirementItem[];
+    rewards: LevelReward[];
   } {
     const nextLevel = getNextLevelRequirements(level);
     if (!nextLevel) {
-      return { xpNeeded: 0 };
+      return {
+        xpNeeded: 0,
+        requirements: [],
+        rewards: [],
+      };
     }
 
+    const currentLevel = getLevelRequirements(level);
     return {
-      xpNeeded: nextLevel.xpRequired - getLevelRequirements(level)!.xpRequired,
-      requirements: nextLevel.additionalRequirements,
-      rewards: nextLevel.rewards,
+      xpNeeded: nextLevel.xpRequired - (currentLevel?.xpRequired || 0),
+      requirements: [], // We'll implement requirements later if needed
+      rewards: this.mapConfigRewardsToLevelRewards(nextLevel.rewards),
     };
+  }
+
+  private mapConfigRewardsToLevelRewards(configRewards?: {
+    title?: string;
+    badges?: string[];
+    unlocks?: string[];
+  }): LevelReward[] {
+    const rewards: LevelReward[] = [];
+
+    if (!configRewards) {
+      return rewards;
+    }
+
+    if (configRewards.title) {
+      rewards.push({
+        type: 'POINTS' as RewardType,
+        id: `title_${configRewards.title.toLowerCase().replace(/\s+/g, '_')}`,
+        name: configRewards.title,
+      });
+    }
+
+    if (configRewards.badges) {
+      configRewards.badges.forEach((badge) => {
+        rewards.push({
+          type: 'BADGE' as RewardType,
+          id: badge,
+          name: badge,
+        });
+      });
+    }
+
+    if (configRewards.unlocks) {
+      configRewards.unlocks.forEach((unlock) => {
+        rewards.push({
+          type: 'FEATURE_UNLOCK' as RewardType,
+          id: unlock,
+          name: unlock,
+        });
+      });
+    }
+
+    return rewards;
   }
 }

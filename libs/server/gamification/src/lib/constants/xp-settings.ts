@@ -28,10 +28,12 @@ export const XP_SETTINGS = {
       },
     },
   },
-  STREAK: {
-    DAY_1: 500,
-    DAY_3: 1000,
-    DAY_5: 2000,
-    DAY_7: 3000,
+  CODE_REVIEW: {
+    BASE: 80,
+    BONUSES: {
+      DETAILED_REVIEW: 100, // For reviews with substantial comments
+      MULTIPLE_FILES: 50, // For reviewing changes across multiple files
+      THOROUGH_REVIEW: 150, // For reviews that include suggestions and code samples
+    },
   },
 };

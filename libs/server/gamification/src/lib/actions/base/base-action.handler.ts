@@ -1,57 +1,231 @@
 import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
-import { GameActionType } from '@codeheroes/shared/types';
-import { Firestore, FieldValue } from 'firebase-admin/firestore';
+import { Collections, GameActionType } from '@codeheroes/shared/types';
+import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { ActionResult, GameAction } from '../../core/interfaces/action';
-import { ProgressionService } from '../../progression/progression.service';
-import { StreakType } from '../../core/interfaces/streak';
-import { Collections } from '../../core/constants/collections';
+import { ProgressionService } from '../../core/progression/progression.service';
+import { ActivityService } from '../../core/activity/activity.service';
+import { ActivityCounters } from '../../core/interfaces/activity';
+import { getTimeFrameIds } from '../../utils/time-frame.utils';
+import { TimeBasedActivityStats } from '../../core/interfaces/time-based-activity';
 
 export abstract class BaseActionHandler {
   protected abstract actionType: GameActionType;
-  protected abstract streakType: StreakType;
   private progressionService: ProgressionService;
+  private activityService: ActivityService;
 
   constructor(protected db: Firestore) {
     this.progressionService = new ProgressionService();
+    this.activityService = new ActivityService();
+  }
+
+  protected getCounterUpdates(): Record<string, any> {
+    const updates: Record<string, any> = {
+      countersLastUpdated: getCurrentTimeAsISO(),
+    };
+
+    switch (this.actionType) {
+      case 'code_push':
+        updates['counters.codePushes'] = FieldValue.increment(1);
+        break;
+      case 'pull_request_create':
+        updates['counters.pullRequests.created'] = FieldValue.increment(1);
+        updates['counters.pullRequests.total'] = FieldValue.increment(1);
+        break;
+      case 'pull_request_merge':
+        updates['counters.pullRequests.merged'] = FieldValue.increment(1);
+        updates['counters.pullRequests.total'] = FieldValue.increment(1);
+        break;
+      case 'pull_request_close':
+        updates['counters.pullRequests.closed'] = FieldValue.increment(1);
+        updates['counters.pullRequests.total'] = FieldValue.increment(1);
+        break;
+      case 'code_review_submit':
+        updates['counters.codeReviews'] = FieldValue.increment(1);
+        break;
+    }
+
+    return updates;
+  }
+
+  protected async initializeCountersIfNeeded(userRef: FirebaseFirestore.DocumentReference) {
+    const statsRef = userRef.collection(Collections.Stats).doc('current');
+    const statsDoc = await statsRef.get();
+
+    if (!statsDoc.exists || !statsDoc.data()?.counters) {
+      const initialCounters: ActivityCounters = {
+        pullRequests: {
+          created: 0,
+          merged: 0,
+          closed: 0,
+          total: 0,
+        },
+        codePushes: 0,
+        codeReviews: 0,
+      };
+
+      await statsRef.set(
+        {
+          counters: initialCounters,
+          countersLastUpdated: getCurrentTimeAsISO(),
+        },
+        { merge: true },
+      );
+    }
   }
 
   async handle(action: GameAction): Promise<ActionResult> {
     const { userId, metadata } = action;
-    logger.info(`Handling ${this.actionType}`, { userId, metadata });
+    logger.info(`Starting action handler for ${this.actionType}`, { userId, metadata });
 
-    // Calculate XP and bonuses
+    const timeFrames = getTimeFrameIds();
+    const userRef = this.db.collection(Collections.Users).doc(userId);
+    await this.initializeCountersIfNeeded(userRef);
+
     const baseXP = this.calculateBaseXp();
-    logger.info(`Base XP for ${this.actionType}: ${baseXP}`);
     const bonuses = this.calculateBonuses(metadata);
-    logger.info(`Bonuses for ${this.actionType}: ${JSON.stringify(bonuses)}`);
     const totalXP = baseXP + bonuses.totalBonus;
-    logger.info(`Total XP for ${this.actionType}: ${totalXP}`);
 
-    // Process the action with progression
+    logger.info('XP calculation details', {
+      actionType: this.actionType,
+      userId,
+      baseXP,
+      bonuses: bonuses.breakdown,
+      totalXP,
+    });
+
+    logger.info('Updating progression with calculated XP', { userId, totalXP });
     const progressionUpdate = await this.progressionService.updateProgression(userId, {
       xpGained: totalXP,
       activityType: this.actionType,
-      streakUpdates: {
-        code_pushes: this.streakType === 'code_pushes' ? metadata.streakDay || 1 : 0,
-        pr_creations: this.streakType === 'pr_creations' ? metadata.streakDay || 1 : 0,
-        pr_closes: this.streakType === 'pr_closes' ? metadata.streakDay || 1 : 0,
-        pr_merges: this.streakType === 'pr_merges' ? metadata.streakDay || 1 : 0,
-      },
     });
 
-    // Record activity
-    await this.recordActivity(userId, totalXP, {
-      ...metadata,
-      level: progressionUpdate.level,
-      bonuses: bonuses.breakdown,
+    const counterUpdates = this.getCounterUpdates();
+    const now = getCurrentTimeAsISO();
+
+    const activityRef = userRef.collection(Collections.Activities).doc();
+    const statsRef = userRef.collection(Collections.Stats).doc('current');
+    const dailyStatsRef = userRef.collection('activityStats').doc('daily').collection('records').doc(timeFrames.daily);
+    const weeklyStatsRef = userRef
+      .collection('activityStats')
+      .doc('weekly')
+      .collection('records')
+      .doc(timeFrames.weekly);
+
+    await this.db.runTransaction(async (transaction) => {
+      // First, perform all reads
+      const [dailyDoc, weeklyDoc] = await Promise.all([
+        transaction.get(dailyStatsRef),
+        transaction.get(weeklyStatsRef),
+      ]);
+
+      // Prepare write operations
+      const writes = [];
+
+      // Update global counters
+      writes.push(() => transaction.update(statsRef, counterUpdates));
+
+      // Initialize and update daily stats
+      if (!dailyDoc.exists) {
+        writes.push(() => this.initializeTimeBasedStats(transaction, dailyStatsRef, timeFrames.daily));
+      }
+      writes.push(() =>
+        transaction.update(dailyStatsRef, {
+          ...counterUpdates,
+          xpGained: FieldValue.increment(totalXP),
+          countersLastUpdated: now,
+          lastActivity: {
+            type: this.actionType,
+            timestamp: now,
+          },
+        }),
+      );
+
+      // Initialize and update weekly stats
+      if (!weeklyDoc.exists) {
+        writes.push(() => this.initializeTimeBasedStats(transaction, weeklyStatsRef, timeFrames.weekly));
+      }
+      writes.push(() =>
+        transaction.update(weeklyStatsRef, {
+          ...counterUpdates,
+          xpGained: FieldValue.increment(totalXP),
+          countersLastUpdated: now,
+          lastActivity: {
+            type: this.actionType,
+            timestamp: now,
+          },
+        }),
+      );
+
+      // Record activity
+      writes.push(() =>
+        transaction.set(activityRef, {
+          id: activityRef.id,
+          userId,
+          type: this.actionType,
+          metadata: {
+            ...metadata,
+            level: progressionUpdate.level,
+            bonuses: bonuses.breakdown,
+          },
+          xp: {
+            earned: totalXP,
+            breakdown: [
+              { type: 'base', amount: baseXP, description: 'Base XP' },
+              ...Object.entries(bonuses.breakdown).map(([type, amount]) => ({
+                type,
+                amount,
+                description: `${type} bonus`,
+              })),
+            ],
+          },
+          createdAt: now,
+          updatedAt: now,
+        }),
+      );
+
+      // Execute all write operations after reads
+      for (const write of writes) {
+        write();
+      }
+    });
+
+    logger.info('Action handling completed', {
+      userId,
+      actionType: this.actionType,
+      xpGained: totalXP,
+      newLevel: progressionUpdate.level,
     });
 
     return {
       xpGained: totalXP,
-      newStreak: metadata.streakDay,
-      streakBonus: bonuses.breakdown.streakBonus || 0,
-      rewards: bonuses.breakdown,
       level: progressionUpdate.level,
+    };
+  }
+
+  private async initializeTimeBasedStats(
+    transaction: FirebaseFirestore.Transaction,
+    docRef: FirebaseFirestore.DocumentReference,
+    timeframeId: string,
+  ): Promise<void> {
+    const initialStats: TimeBasedActivityStats = {
+      timeframeId,
+      counters: this.getInitialCounters(),
+      xpGained: 0,
+      countersLastUpdated: getCurrentTimeAsISO(),
+    };
+    transaction.set(docRef, initialStats);
+  }
+
+  protected getInitialCounters(): ActivityCounters {
+    return {
+      pullRequests: {
+        created: 0,
+        merged: 0,
+        closed: 0,
+        total: 0,
+      },
+      codePushes: 0,
+      codeReviews: 0,
     };
   }
 
@@ -60,20 +234,4 @@ export abstract class BaseActionHandler {
     totalBonus: number;
     breakdown: Record<string, number>;
   };
-
-  private async recordActivity(userId: string, xpGained: number, metadata: Record<string, any>) {
-    const activityRef = this.db
-      .collection(Collections.UserStats)
-      .doc(userId)
-      .collection(Collections.UserStats_Activities)
-      .doc();
-
-    await activityRef.set({
-      timestamp: FieldValue.serverTimestamp(),
-      actionType: this.actionType,
-      xpGained,
-      metadata,
-      createdAt: getCurrentTimeAsISO(),
-    });
-  }
 }

@@ -13,8 +13,6 @@ export class EventService extends BaseFirestoreService<Event> {
   }
 
   async createEvent(eventInputData: CreateEventInput, eventData: Record<string, unknown>): Promise<Event> {
-    logger.info('Creating event:', { eventInputData, eventData });
-
     if (!eventInputData.source?.id || !eventInputData.provider) {
       throw new Error('Required event fields missing');
     }

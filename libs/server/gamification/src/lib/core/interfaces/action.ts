@@ -8,8 +8,6 @@ export interface GameAction {
 
 export interface ActionResult {
   xpGained: number;
-  newStreak?: number;
-  streakBonus?: number;
   badgesEarned?: string[];
   rewards?: Record<string, any>;
   level?: number;

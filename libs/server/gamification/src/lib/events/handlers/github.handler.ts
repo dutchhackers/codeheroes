@@ -28,6 +28,8 @@ export class GithubEventHandler {
         return this.handlePushEvent(event, userId);
       case 'pull_request':
         return this.handlePullRequestEvent(event, userId);
+      case 'pull_request_review':
+        return this.handlePullRequestReviewEvent(event, userId);
       default:
         return null;
     }
@@ -72,5 +74,26 @@ export class GithubEventHandler {
       default:
         return null;
     }
+  }
+
+  private handlePullRequestReviewEvent(event: Event, userId: string): GameAction | null {
+    const data = event.data as any;
+    if (!data.action) return null;
+
+    // Only process completed reviews
+    if (data.action !== 'submitted') return null;
+
+    const metadata = {
+      commentCount: 0, // to be implemented later,
+      filesReviewed: 0, // data.pull_request?.changed_files || 1,
+      suggestions: 0, // to be implemented later
+      state: data.review?.state,
+    };
+
+    return {
+      userId,
+      actionType: 'code_review_submit',
+      metadata,
+    };
   }
 }

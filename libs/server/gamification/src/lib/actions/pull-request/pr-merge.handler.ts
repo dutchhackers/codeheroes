@@ -1,11 +1,9 @@
 import { GameActionType } from '@codeheroes/shared/types';
 import { BaseActionHandler } from '../base/base-action.handler';
-import { StreakType } from '../../core/interfaces/streak';
 import { XP_SETTINGS } from '../../constants/xp-settings';
 
 export class PullRequestMergeHandler extends BaseActionHandler {
   protected actionType: GameActionType = 'pull_request_merge';
-  protected streakType = StreakType.PullRequestMerge;
 
   protected calculateBaseXp(): number {
     return XP_SETTINGS.PULL_REQUEST.MERGE.BASE;

@@ -1,11 +1,9 @@
 import { GameActionType } from '@codeheroes/shared/types';
 import { BaseActionHandler } from '../base/base-action.handler';
-import { StreakType } from '../../core/interfaces/streak';
 import { XP_SETTINGS } from '../../constants/xp-settings';
 
 export class PullRequestCreateHandler extends BaseActionHandler {
   protected actionType: GameActionType = 'pull_request_create';
-  protected streakType = StreakType.PullRequestCreate;
 
   protected calculateBaseXp(): number {
     return XP_SETTINGS.PULL_REQUEST.CREATE.BASE;
