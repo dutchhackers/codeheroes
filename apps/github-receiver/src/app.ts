@@ -6,6 +6,7 @@ import { EventStorageUtils } from './core/utils/event-storage.utils';
 import { ResponseHandler } from './core/utils/response.handler';
 import { EventProcessor } from './processor/event-processor';
 import { GitHubEventUtils } from './processor/utils';
+import { GameActionService } from '@codeheroes/game-core';
 
 export const App = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -29,6 +30,10 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     const processor = new EventProcessor(eventData);
     const result = await processor.process();
 
+    // New: Create game action from event
+    const gameActionService = new GameActionService();
+    await gameActionService.createFromEvent(result.event);
+
     if (!result.success) {
       if (result.error) {
         throw result.error;
@@ -45,7 +50,7 @@ export const App = async (req: Request, res: Response): Promise<void> => {
       ResponseHandler.handleError(error, res);
       return;
     }
-    
+
     logger.error('Event processing error:', error);
     ResponseHandler.handleError(error, res);
   }

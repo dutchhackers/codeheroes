@@ -7,11 +7,13 @@ import {
   PullRequestReviewThreadEvent,
   PushEvent,
 } from '../core/interfaces/github.interfaces';
+import { Event } from '@codeheroes/event';
 
 export interface ProcessResult {
   success: boolean;
   message: string;
   error?: Error;
+  event?: Event;
 }
 
 export interface GitHubWebhookEvent {
