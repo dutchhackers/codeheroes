@@ -1,29 +1,14 @@
-import { ConnectedAccountProvider } from '@codeheroes/common';
-
-// Base context interface
-export interface BaseContext {
-  type: string;
-  provider: ConnectedAccountProvider;
-}
+import { BaseContext, CommitDetails, Repository } from './common.interface';
 
 // Code-related contexts
 export interface RepositoryContext extends BaseContext {
   type: 'repository';
-  repository: {
-    id: string;
-    name: string;
-    owner: string;
-    ref?: string; // branch/tag reference
-  };
+  repository: Repository;
 }
 
 export interface PullRequestContext extends BaseContext {
   type: 'pull_request';
-  repository: {
-    id: string;
-    name: string;
-    owner: string;
-  };
+  repository: Repository;
   pullRequest: {
     id: string;
     number: number;
@@ -35,11 +20,7 @@ export interface PullRequestContext extends BaseContext {
 
 export interface CodeReviewContext extends BaseContext {
   type: 'code_review';
-  repository: {
-    id: string;
-    name: string;
-    owner: string;
-  };
+  repository: Repository;
   pullRequest: {
     id: string;
     number: number;
@@ -53,11 +34,7 @@ export interface CodeReviewContext extends BaseContext {
 
 export interface IssueContext extends BaseContext {
   type: 'issue';
-  repository: {
-    id: string;
-    name: string;
-    owner: string;
-  };
+  repository: Repository;
   issue: {
     id: string;
     number: number;
@@ -65,23 +42,9 @@ export interface IssueContext extends BaseContext {
   };
 }
 
-export interface CommitDetails {
-  id: string;
-  message: string;
-  timestamp: string;
-  author: {
-    name: string;
-    email: string;
-  };
-}
-
 export interface CodePushContext extends BaseContext {
   type: 'code_push';
-  repository: {
-    id: string;
-    name: string;
-    owner: string;
-  };
+  repository: Repository;
   branch: string;
   commits: CommitDetails[];
   isNew: boolean;
