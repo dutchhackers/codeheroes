@@ -1,8 +1,13 @@
 import { Event } from '@codeheroes/event';
-import { GameAction } from '../interfaces/game-action.interface';
+import {
+  GithubPullRequestEventData,
+  GithubPullRequestMetrics,
+  GithubPullRequestReviewEventData,
+  GithubPullRequestReviewMetrics,
+} from '@codeheroes/providers';
 import { CodeReviewContext, PullRequestContext } from '../interfaces/context.interface';
+import { GameAction } from '../interfaces/game-action.interface';
 import { CodeReviewMetrics, PullRequestMetrics } from '../interfaces/metrics.interface';
-import { GithubPullRequestEventData, GithubPullRequestMetrics } from '@codeheroes/providers';
 
 export class GitHubMapper {
   static mapEventToGameAction(event: Event, userId: string): Partial<GameAction> | null {
@@ -18,7 +23,8 @@ export class GitHubMapper {
   }
 
   private static mapReviewEvent(event: Event, userId: string): Partial<GameAction> {
-    const data = event.data as any;
+    const data = event.data as GithubPullRequestReviewEventData;
+    const metrics = data.metrics as GithubPullRequestReviewMetrics;
 
     const context: CodeReviewContext = {
       type: 'code_review',
@@ -26,26 +32,26 @@ export class GitHubMapper {
       repository: {
         id: data.repository.id,
         name: data.repository.name,
-        owner: data.repository.owner.login,
+        owner: data.repository.owner,
       },
       pullRequest: {
-        id: data.pull_request.id,
-        number: data.pull_request.number,
-        title: data.pull_request.title,
+        id: data.id,
+        number: data.prNumber,
+        title: data.prTitle,
       },
       review: {
-        id: data.review.id,
-        state: data.review.state,
+        id: String(data.prNumber), // Using PR number as review ID since we don't have review ID in the data
+        state: data.state,
       },
     };
 
-    const metrics: CodeReviewMetrics = {
+    const actionMetrics: CodeReviewMetrics = {
       type: 'code_review',
-      timestamp: data.review.submitted_at,
-      commentsCount: data.review.comments || 0,
-      threadCount: data.review.threads || 0,
-      filesReviewed: data.pull_request.changed_files,
-      suggestionsCount: data.review.suggestions_count || 0,
+      timestamp: data.submittedAt,
+      commentsCount: metrics.commentsCount,
+      threadCount: metrics.threadCount,
+      filesReviewed: metrics.changedFiles,
+      suggestionsCount: metrics.suggestionsCount,
       timeToReview: this.calculateReviewTime(data),
       thoroughness: this.calculateThoroughness(data),
     };
@@ -55,13 +61,13 @@ export class GitHubMapper {
       externalId: event.source.id,
       provider: 'github',
       type: 'code_review_submit',
-      timestamp: data.review.submitted_at,
+      timestamp: data.submittedAt,
       externalUser: {
-        id: data.sender.id,
-        username: data.sender.login,
+        id: data.reviewer.id,
+        username: data.reviewer.login,
       },
       context,
-      metrics,
+      metrics: actionMetrics,
     };
   }
 

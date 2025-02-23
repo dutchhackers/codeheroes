@@ -1,5 +1,12 @@
 import { GitHubBaseEventData } from './base-event.model';
 
+export interface GithubPullRequestReviewMetrics {
+  commentsCount: number;
+  threadCount: number;
+  changedFiles: number;
+  suggestionsCount: number;
+}
+
 export interface GithubPullRequestReviewEventData extends GitHubBaseEventData {
   repository: {
     id: string;
@@ -9,6 +16,7 @@ export interface GithubPullRequestReviewEventData extends GitHubBaseEventData {
   };
   action: 'submitted' | 'edited' | 'dismissed';
   state: 'approved' | 'commented' | 'changes_requested';
+  id: string;
   prNumber: number;
   prTitle: string;
   reviewer: {
