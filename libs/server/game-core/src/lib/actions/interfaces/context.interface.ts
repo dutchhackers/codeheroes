@@ -65,6 +65,30 @@ export interface IssueContext extends BaseContext {
   };
 }
 
+export interface CommitDetails {
+  id: string;
+  message: string;
+  timestamp: string;
+  author: {
+    name: string;
+    email: string;
+  };
+}
+
+export interface CodePushContext extends BaseContext {
+  type: 'code_push';
+  repository: {
+    id: string;
+    name: string;
+    owner: string;
+  };
+  branch: string;
+  commits: CommitDetails[];
+  isNew: boolean;
+  isDeleted: boolean;
+  isForced: boolean;
+}
+
 // Fitness-related contexts
 export interface WorkoutContext extends BaseContext {
   type: 'workout';
@@ -87,4 +111,5 @@ export type GameActionContext =
   | PullRequestContext
   | CodeReviewContext
   | IssueContext
-  | WorkoutContext;
+  | WorkoutContext
+  | CodePushContext;

@@ -54,4 +54,15 @@ export interface WorkoutMetrics extends BaseMetrics {
   effort?: number; // calculated score
 }
 
-export type GameActionMetrics = CodeMetrics | PullRequestMetrics | CodeReviewMetrics | IssueMetrics | WorkoutMetrics;
+export interface CodePushMetrics extends BaseMetrics {
+  type: 'code_push';
+  commitCount: number;
+}
+
+export type GameActionMetrics =
+  | CodeMetrics
+  | PullRequestMetrics
+  | CodeReviewMetrics
+  | IssueMetrics
+  | WorkoutMetrics
+  | CodePushMetrics;

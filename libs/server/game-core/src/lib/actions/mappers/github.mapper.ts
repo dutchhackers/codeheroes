@@ -4,14 +4,18 @@ import {
   GithubPullRequestMetrics,
   GithubPullRequestReviewEventData,
   GithubPullRequestReviewMetrics,
+  GithubPushEventData,
+  GithubPushEventMetrics,
 } from '@codeheroes/providers';
-import { CodeReviewContext, PullRequestContext } from '../interfaces/context.interface';
+import { CodePushContext, CodeReviewContext, PullRequestContext } from '../interfaces/context.interface';
 import { GameAction } from '../interfaces/game-action.interface';
-import { CodeReviewMetrics, PullRequestMetrics } from '../interfaces/metrics.interface';
+import { CodePushMetrics, CodeReviewMetrics, PullRequestMetrics } from '../interfaces/metrics.interface';
 
 export class GitHubMapper {
   static mapEventToGameAction(event: Event, userId: string): Partial<GameAction> | null {
     switch (event.source.event) {
+      case 'push':
+        return this.mapCodePushEvent(event, userId);
       case 'pull_request_review':
         return this.mapReviewEvent(event, userId);
       case 'pull_request':
@@ -20,6 +24,54 @@ export class GitHubMapper {
       default:
         return null;
     }
+  }
+
+  private static mapCodePushEvent(event: Event, userId: string): Partial<GameAction> {
+    const data = event.data as GithubPushEventData;
+    const metrics = data.metrics as GithubPushEventMetrics;
+
+    const context: CodePushContext = {
+      type: 'code_push',
+      provider: 'github',
+      repository: {
+        id: data.repository.id,
+        name: data.repository.name,
+        owner: data.repository.owner,
+      },
+      branch: data.branch,
+      commits: data.commits.map((commit) => ({
+        id: commit.id,
+        message: commit.message,
+        timestamp: commit.timestamp,
+        author: {
+          name: commit.author.name,
+          email: commit.author.email,
+        },
+      })),
+      isNew: data.created,
+      isDeleted: data.deleted,
+      isForced: data.forced,
+    };
+
+    const actionMetrics: CodePushMetrics = {
+      type: 'code_push',
+      timestamp: data.commits[0]?.timestamp || new Date().toISOString(),
+      commitCount: metrics.commits,
+    };
+
+    return {
+      userId,
+      externalId: event.source.id,
+      provider: 'github',
+      type: 'code_push',
+      timestamp: actionMetrics.timestamp,
+      externalUser: {
+        id: data.sender.id,
+        username: data.sender.login,
+      },
+      context,
+      metrics: actionMetrics,
+    };
   }
 
   private static mapReviewEvent(event: Event, userId: string): Partial<GameAction> {
