@@ -10,6 +10,8 @@ export class PullRequestParser extends GitHubParser<PullRequestEvent, GithubPull
       action: payload.action,
       prNumber: payload.number,
       title: pull_request.title,
+      branch: pull_request.head.ref,
+      baseBranch: pull_request.base.ref,
       state: pull_request.state,
       merged: pull_request.merged || false,
       draft: pull_request.draft || false,

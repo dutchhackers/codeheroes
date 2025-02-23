@@ -72,6 +72,12 @@ export interface GitHubHeaders {
   [key: string]: string | string[] | undefined;
 }
 
+export interface GitHubTeam {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export interface PullRequestEvent {
   action:
     | 'opened'
@@ -102,11 +108,19 @@ export interface PullRequestEvent {
     created_at: string;
     updated_at: string;
     requested_reviewers?: GitHubUser[];
-    requested_teams?: {
-      id: number;
-      name: string;
-      slug: string;
-    }[];
+    requested_teams?: GitHubTeam[];
+    head: {
+      ref: string;
+      sha: string;
+      user: GitHubUser;
+      repo: GitHubRepository;
+    };
+    base: {
+      ref: string;
+      sha: string;
+      user: GitHubUser;
+      repo: GitHubRepository;
+    };
   };
   repository: GitHubRepository;
   sender: GitHubUser;
