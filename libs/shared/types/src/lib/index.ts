@@ -14,7 +14,7 @@ export * from './user/stats.types';
 
 export * from './gamification/progression.types';
 // export * from './gamification/rewards.types';
-// export * from './gamification/badges.types';
+export * from './gamification/badges.types';
 // export * from './gamification/levels.types';
 
 // export * from './providers/github.types';
