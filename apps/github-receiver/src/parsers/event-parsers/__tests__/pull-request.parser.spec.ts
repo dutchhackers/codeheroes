@@ -19,6 +19,32 @@ describe('PullRequestParser', () => {
     },
   };
 
+  const mockBase = {
+    ref: 'main',
+    sha: 'base-sha',
+    user: {
+      id: 456,
+      login: 'org',
+      avatar_url: 'https://github.com/org.png',
+      html_url: 'https://github.com/org',
+      type: 'Organization' as const,
+    },
+    repo: mockRepository,
+  };
+
+  const mockHead = {
+    ref: 'feature/new-feature',
+    sha: 'head-sha',
+    user: {
+      id: 789,
+      login: 'johndoe',
+      avatar_url: 'https://github.com/johndoe.png',
+      html_url: 'https://github.com/johndoe',
+      type: 'User' as const,
+    },
+    repo: mockRepository,
+  };
+
   beforeEach(() => {
     parser = new PullRequestParser();
   });
@@ -40,9 +66,12 @@ describe('PullRequestParser', () => {
         additions: 100,
         deletions: 50,
         changed_files: 5,
+        comments: 0,
         html_url: 'https://github.com/org/test-repo/pull/123',
         merged_at: null,
         merged_by: null,
+        head: mockHead,
+        base: mockBase,
       },
       repository: mockRepository,
       sender: {
@@ -60,6 +89,8 @@ describe('PullRequestParser', () => {
       action: 'opened',
       prNumber: 123,
       title: 'Feature: Add new functionality',
+      branch: 'feature/new-feature',
+      baseBranch: 'main',
       state: 'open',
       merged: false,
       draft: false,
@@ -70,6 +101,8 @@ describe('PullRequestParser', () => {
         additions: 100,
         deletions: 50,
         changedFiles: 5,
+        comments: 0,
+        reviewers: 0,
       },
       repository: {
         id: '123',
@@ -109,7 +142,10 @@ describe('PullRequestParser', () => {
         additions: 100,
         deletions: 50,
         changed_files: 5,
+        comments: 2,
         html_url: 'https://github.com/org/test-repo/pull/123',
+        head: mockHead,
+        base: mockBase,
       },
       repository: mockRepository,
       sender: {
@@ -127,6 +163,8 @@ describe('PullRequestParser', () => {
       action: 'closed',
       prNumber: 123,
       title: 'Feature: Add new functionality',
+      branch: 'feature/new-feature',
+      baseBranch: 'main',
       state: 'closed',
       merged: true,
       draft: false,
@@ -142,6 +180,8 @@ describe('PullRequestParser', () => {
         additions: 100,
         deletions: 50,
         changedFiles: 5,
+        comments: 2,
+        reviewers: 0,
       },
       repository: {
         id: '123',
