@@ -8,3 +8,11 @@ export interface PaginatedResponse<T> {
   lastId: string | null;
   hasMore: boolean;
 }
+
+// Not in use, yet
+export interface PaginationMeta {
+  currentPage: number;
+  itemsPerPage: number;
+  totalItems: number;
+  totalPages: number;
+}

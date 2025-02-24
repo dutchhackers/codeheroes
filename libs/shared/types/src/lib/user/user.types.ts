@@ -1,4 +1,4 @@
-import { BaseDocument } from './common.types';
+import { BaseDocument } from '../core/base.types';
 
 export interface UserDto extends BaseDocument {
   displayName: string;

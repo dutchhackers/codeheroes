@@ -1,3 +1,5 @@
+import { BaseDocument } from '../core/base.types';
+
 export enum NotificationType {
   LEVEL_UP = 'LEVEL_UP',
   BADGE_EARNED = 'BADGE_EARNED',
@@ -6,7 +8,7 @@ export enum NotificationType {
   SYSTEM = 'SYSTEM',
 }
 
-export interface Notification {
+export interface Notification extends BaseDocument {
   id: string;
   userId: string;
   type: NotificationType;
