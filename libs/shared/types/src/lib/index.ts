@@ -12,6 +12,7 @@ export * from './user/stats.types';
 // export * from './activity/events.types';
 // export * from './activity/context.types';
 
+export * from './gamification/achievements.types';
 export * from './gamification/progression.types';
 // export * from './gamification/rewards.types';
 export * from './gamification/badges.types';
