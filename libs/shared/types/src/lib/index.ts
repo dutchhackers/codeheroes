@@ -3,7 +3,7 @@ export * from './core/enums';
 export * from './core/providers';
 // export * from './core/constants';
 
-// export * from './user/user.types';
+export * from './user/user.types';
 export * from './user/stats.types';
 // export * from './user/settings.types';
 
@@ -30,4 +30,3 @@ export * from './utils/pagination.types';
 
 // Old/existing
 export * from './activity.types';
-export * from './user.types';
