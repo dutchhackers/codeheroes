@@ -25,7 +25,7 @@ export * from './gamification/progression.types';
 // export * from './api/dto.types';
 
 export * from './utils/time.types';
-// export * from './utils/pagination.types';
+export * from './utils/pagination.types';
 
 // Old/existing
 export * from './activity.types';
