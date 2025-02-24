@@ -64,6 +64,7 @@ describe('PullRequestReviewParser', () => {
     expect(result).toEqual({
       action: 'submitted',
       state: 'approved',
+      id: 456,
       prNumber: 123,
       prTitle: 'Feature: Add new functionality',
       reviewer: {
@@ -71,6 +72,12 @@ describe('PullRequestReviewParser', () => {
         login: 'reviewer',
       },
       submittedAt: '2023-01-01T14:00:00Z',
+      metrics: {
+        commentsCount: 1,
+        threadCount: 0,
+        changedFiles: 0,
+        suggestionsCount: 0,
+      },
       repository: {
         id: '123',
         name: 'test-repo',
@@ -98,7 +105,7 @@ describe('PullRequestReviewParser', () => {
           type: 'User',
         },
         body: 'Needs more work',
-        state: 'approved',  // Changed from 'changes_requested' to 'approved' as the original state
+        state: 'approved',
         submitted_at: '2023-01-01T14:00:00Z',
         commit_id: 'abc123',
         html_url: 'https://github.com/org/test-repo/pull/123#pullrequestreview-789',
@@ -124,7 +131,8 @@ describe('PullRequestReviewParser', () => {
 
     expect(result).toEqual({
       action: 'dismissed',
-      state: 'approved',  // Changed to match the review state
+      state: 'approved',
+      id: 456,
       prNumber: 123,
       prTitle: 'Feature: Add new functionality',
       reviewer: {
@@ -132,6 +140,12 @@ describe('PullRequestReviewParser', () => {
         login: 'reviewer',
       },
       submittedAt: '2023-01-01T14:00:00Z',
+      metrics: {
+        commentsCount: 1,
+        threadCount: 0,
+        changedFiles: 0,
+        suggestionsCount: 0,
+      },
       repository: {
         id: '123',
         name: 'test-repo',

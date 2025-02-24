@@ -29,6 +29,7 @@ export class EventProcessor {
         return {
           success: false,
           message: `Event ${this.webhookEvent.eventId} already processed`,
+          event: existingEvent,
         };
       }
 
@@ -47,12 +48,13 @@ export class EventProcessor {
 
       // Create and store the event
       const createEventInput = await this.generateCreateEventInput();
-      await this.eventService.createEvent(createEventInput, eventData);
+      const newEvent = await this.eventService.createEvent(createEventInput, eventData);
 
       logger.info(`Successfully processed ${this.webhookEvent.eventType} event`);
       return {
         success: true,
         message: 'Event processed successfully',
+        event: newEvent,
       };
     } catch (error) {
       logger.error('Failed to process event:', error);

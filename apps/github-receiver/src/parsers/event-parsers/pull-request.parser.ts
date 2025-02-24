@@ -10,6 +10,8 @@ export class PullRequestParser extends GitHubParser<PullRequestEvent, GithubPull
       action: payload.action,
       prNumber: payload.number,
       title: pull_request.title,
+      branch: pull_request.head.ref,
+      baseBranch: pull_request.base.ref,
       state: pull_request.state,
       merged: pull_request.merged || false,
       draft: pull_request.draft || false,
@@ -24,6 +26,8 @@ export class PullRequestParser extends GitHubParser<PullRequestEvent, GithubPull
         additions: pull_request.additions,
         deletions: pull_request.deletions,
         changedFiles: pull_request.changed_files,
+        comments: pull_request.comments || 0,
+        reviewers: (pull_request.requested_reviewers?.length || 0) + (pull_request.requested_teams?.length || 0),
       },
     };
   }

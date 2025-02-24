@@ -6,4 +6,5 @@ export enum Collections {
   Rewards = 'rewards',
   Achievements = 'achievements',
   Notifications = 'notifications',
+  GameActions = 'gameActions',
 }
