@@ -1,4 +1,4 @@
-// export * from './core/base.types';
+export * from './core/base.types';
 // export * from './core/enums';
 // export * from './core/providers';
 // export * from './core/constants';
