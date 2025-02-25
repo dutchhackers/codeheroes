@@ -1,5 +1,4 @@
 import { DatabaseInstance, DatabaseService, getCurrentTimeAsISO, logger } from '@codeheroes/common';
-import { Event } from '@codeheroes/event';
 import { GameAction, GameActionContext } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { GitHubMapper } from './mappers/github.mapper';
@@ -14,45 +13,51 @@ export class GameActionService {
     this.databaseService = new DatabaseService();
   }
 
-  async createFromEvent(event: Event): Promise<GameAction | null> {
+  async generateGameActionFromWebhook(params: {
+    payload: unknown;
+    provider: 'github'; // extend this union type as we add more providers
+    eventType: string;
+    externalUserId: string;
+  }): Promise<GameAction | null> {
     try {
       // First, lookup internal user ID
       const userId = await this.databaseService.lookupUserId({
-        sender: event.data?.sender,
-        provider: event.provider,
+        sender: {
+          id: params.externalUserId,
+        },
+        provider: params.provider,
       });
 
       if (!userId) {
-        logger.warn('No matching user found for event', {
-          provider: event.provider,
-          externalUserId: event.data?.sender,
+        logger.warn('No matching user found for webhook', {
+          provider: params.provider,
+          externalUserId: params.externalUserId,
         });
         return null;
       }
 
-      // Map event to game action based on provider
+      // Map webhook to game action based on provider
       let actionData: Partial<GameAction> | null = null;
-      switch (event.provider) {
+      switch (params.provider) {
         case 'github':
-          actionData = GitHubMapper.mapEventToGameAction(event, userId);
+          actionData = GitHubMapper.mapEventToGameAction(params.eventType, params.payload, userId);
           break;
         // Add other providers here
       }
 
       if (!actionData) {
-        logger.info('Event does not map to a game action', {
-          eventType: event.source.event,
+        logger.info('Webhook does not map to a game action', {
+          eventType: params.eventType,
         });
         return null;
       }
 
       // Check if the action was skipped with a reason
       if ('skipReason' in actionData) {
-        logger.info('Event skipped for game action creation', {
-          eventType: event.source.event,
-          provider: event.provider,
+        logger.info('Webhook skipped for game action creation', {
+          eventType: params.eventType,
+          provider: params.provider,
           reason: actionData.skipReason,
-          externalId: event.source.id,
         });
         return null;
       }
@@ -60,7 +65,7 @@ export class GameActionService {
       // Create and store the game action
       const gameAction = await this.create(actionData);
 
-      logger.info('Created game action', {
+      logger.info('Created game action from webhook', {
         id: gameAction.id,
         type: gameAction.type,
         context: gameAction.context,
@@ -68,7 +73,7 @@ export class GameActionService {
 
       return gameAction;
     } catch (error) {
-      logger.error('Failed to create game action', error);
+      logger.error('Failed to create game action from webhook', error);
       throw error;
     }
   }

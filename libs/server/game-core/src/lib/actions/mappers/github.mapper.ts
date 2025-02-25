@@ -16,26 +16,23 @@ import {
   PullRequestContext,
   PullRequestMetrics,
 } from '@codeheroes/shared/types';
+import { PullRequestReviewEvent, PushEvent, PullRequestEvent } from '../interfaces/github.interfaces';
 
 export class GitHubMapper {
-  static mapEventToGameAction(event: Event, userId: string): Partial<GameAction> | null {
-    switch (event.source.event) {
+  static mapEventToGameAction(eventType: string, eventData: any, userId: string): Partial<GameAction> | null {
+    switch (eventType) {
       case 'push':
-        return this.mapCodePushEvent(event, userId);
+        return this.mapCodePushEvent(eventData as unknown as PushEvent, userId);
       case 'pull_request_review':
-        return this.mapReviewEvent(event, userId);
+        return this.mapReviewEvent(eventData as unknown as PullRequestReviewEvent, userId);
       case 'pull_request':
-        return this.mapPullRequestEvent(event, userId);
-      // Add other event types
+        return this.mapPullRequestEvent(eventData as unknown as PullRequestEvent, userId);
       default:
         return null;
     }
   }
 
-  private static mapCodePushEvent(event: Event, userId: string): Partial<GameAction> | null {
-    const data = event.data as GithubPushEventData;
-    const metrics = data.metrics as GithubPushEventMetrics;
-
+  private static mapCodePushEvent(data: PushEvent, userId: string): Partial<GameAction> | null {
     // Return null with skip reason if there are no commits
     if (!data.commits || data.commits.length === 0) {
       return {
@@ -47,11 +44,11 @@ export class GitHubMapper {
       type: 'code_push',
       provider: 'github',
       repository: {
-        id: data.repository.id,
+        id: String(data.repository.id), // Convert number to string
         name: data.repository.name,
-        owner: data.repository.owner,
+        owner: data.repository.owner.login, // Use owner.login from GitHubUser
       },
-      branch: data.branch,
+      branch: data.ref.replace('refs/heads/', ''), // Extract branch name from ref
       commits: data.commits.map((commit) => ({
         id: commit.id,
         message: commit.message,
@@ -77,17 +74,17 @@ export class GitHubMapper {
     const actionMetrics: CodePushMetrics = {
       type: 'code_push',
       timestamp: data.commits[0]?.timestamp || new Date().toISOString(),
-      commitCount: metrics.commits,
+      commitCount: data.commits.length, // Use actual commit count from the array
     };
 
     return {
       userId,
-      externalId: event.source.id,
+      externalId: data.ref, // Use data.ref instead of event.ref
       provider: 'github',
       type: 'code_push',
       timestamp: actionMetrics.timestamp,
       externalUser: {
-        id: data.sender.id,
+        id: String(data.sender.id), // Convert number to string
         username: data.sender.login,
       },
       context,
@@ -95,104 +92,100 @@ export class GitHubMapper {
     };
   }
 
-  private static mapReviewEvent(event: Event, userId: string): Partial<GameAction> {
-    const data = event.data as GithubPullRequestReviewEventData;
-    const metrics = data.metrics as GithubPullRequestReviewMetrics;
-
+  private static mapReviewEvent(event: PullRequestReviewEvent, userId: string): Partial<GameAction> {
     const context: CodeReviewContext = {
       type: 'code_review',
       provider: 'github',
       repository: {
-        id: data.repository.id,
-        name: data.repository.name,
-        owner: data.repository.owner,
+        id: String(event.repository.id),
+        name: event.repository.name,
+        owner: event.repository.owner.login,
       },
       pullRequest: {
-        id: data.id,
-        number: data.prNumber,
-        title: data.prTitle,
+        id: String(event.pull_request.id),
+        number: event.pull_request.number,
+        title: event.pull_request.title,
       },
       review: {
-        id: String(data.prNumber), // Using PR number as review ID since we don't have review ID in the data
-        state: data.state,
+        id: String(event.review.id),
+        state: event.review.state,
       },
     };
 
     const actionMetrics: CodeReviewMetrics = {
       type: 'code_review',
-      timestamp: data.submittedAt,
-      commentsCount: metrics.commentsCount,
-      threadCount: metrics.threadCount,
-      filesReviewed: metrics.changedFiles,
-      suggestionsCount: metrics.suggestionsCount,
-      timeToReview: this.calculateReviewTime(data),
-      thoroughness: this.calculateThoroughness(data),
+      timestamp: event.review.submitted_at,
+      commentsCount: 0, // Will need to be calculated from review content
+      threadCount: 0, // Not available in webhook payload
+      filesReviewed: 0, // Not available in webhook payload
+      suggestionsCount: 0, // Would need to parse review comments
+      timeToReview: 0, // Would need additional context
+      thoroughness: 0, // Would need additional context
     };
 
     return {
       userId,
-      externalId: event.source.id,
+      externalId: String(event.review.id),
       provider: 'github',
       type: 'code_review_submit',
-      timestamp: data.submittedAt,
+      timestamp: event.review.submitted_at,
       externalUser: {
-        id: data.reviewer.id,
-        username: data.reviewer.login,
+        id: String(event.review.user.id),
+        username: event.review.user.login,
       },
       context,
       metrics: actionMetrics,
     };
   }
 
-  private static mapPullRequestEvent(event: Event, userId: string): Partial<GameAction> {
-    const data = event.data as GithubPullRequestEventData;
-    const dataMetrics = event.data.metrics as GithubPullRequestMetrics;
-
+  private static mapPullRequestEvent(event: PullRequestEvent, userId: string): Partial<GameAction> {
     const context: PullRequestContext = {
       type: 'pull_request',
       provider: 'github',
       repository: {
-        id: data.repository.id,
-        name: data.repository.name,
-        owner: data.repository.owner,
+        id: String(event.repository.id),
+        name: event.repository.name,
+        owner: event.repository.owner.login,
       },
       pullRequest: {
-        id: data.id,
-        number: data.prNumber,
-        title: data.title,
-        branch: data.branch,
-        baseBranch: data.baseBranch,
+        id: String(event.pull_request.id),
+        number: event.pull_request.number,
+        title: event.pull_request.title,
+        branch: event.pull_request.head.ref,
+        baseBranch: event.pull_request.base.ref,
       },
     };
 
     const metrics: PullRequestMetrics = {
       type: 'pull_request',
-      timestamp: data.updatedAt,
-      commits: dataMetrics.commits,
-      additions: dataMetrics.additions,
-      deletions: dataMetrics.deletions,
-      changedFiles: dataMetrics.changedFiles,
-      comments: dataMetrics.comments,
-      reviewers: dataMetrics.reviewers,
-      timeToMerge: data.mergedAt ? this.calculateTimeDifference(data.createdAt, data.mergedAt) : 0,
+      timestamp: event.pull_request.updated_at,
+      commits: event.pull_request.commits,
+      additions: event.pull_request.additions,
+      deletions: event.pull_request.deletions,
+      changedFiles: event.pull_request.changed_files,
+      comments: event.pull_request.comments,
+      reviewers: event.pull_request.requested_reviewers?.length || 0,
+      timeToMerge: event.pull_request.merged_at
+        ? this.calculateTimeDifference(event.pull_request.created_at, event.pull_request.merged_at)
+        : 0,
     };
 
     const type =
-      data.action === 'closed' && data.merged
+      event.action === 'closed' && event.pull_request.merged
         ? 'pull_request_merge'
-        : data.action === 'closed'
+        : event.action === 'closed'
           ? 'pull_request_close'
           : 'pull_request_create';
 
     return {
       userId,
-      externalId: event.source.id,
+      externalId: String(event.pull_request.id),
       provider: 'github',
       type,
-      timestamp: data.updatedAt,
+      timestamp: event.pull_request.updated_at,
       externalUser: {
-        id: data.sender.id,
-        username: data.sender.login,
+        id: String(event.sender.id),
+        username: event.sender.login,
       },
       context,
       metrics,

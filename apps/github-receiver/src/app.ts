@@ -20,30 +20,23 @@ export const App = async (req: Request, res: Response): Promise<void> => {
 
     // Store the raw webhook with GitHub-specific headers
     const webhookService = new WebhookService();
-    await webhookService.storeRawWebhook(
-      req,
-      'github',
-      {
-        eventType: req.headers['x-github-event'] as string,
-        eventId: req.headers['x-github-delivery'] as string
-      }
-    );
-
-    // Respond quickly to GitHub
-    res.status(202).send('Accepted');
-
-    if (req) {
-      ResponseHandler.success(res, 'Ready');
-      return;
-    }
+    await webhookService.storeRawWebhook(req, 'github', {
+      eventType: req.headers['x-github-event'] as string,
+      eventId: req.headers['x-github-delivery'] as string,
+    });
 
     // Process the event
     const processor = new EventProcessor(eventData);
     const result = await processor.process();
 
-    // Create game action from event
+    // Create game action from webhook payload
     const gameActionService = new GameActionService();
-    await gameActionService.createFromEvent(result.event);
+    await gameActionService.generateGameActionFromWebhook({
+      payload: eventData.payload,
+      provider: eventData.provider,
+      eventType: eventData.eventType,
+      externalUserId: req.body.sender?.id?.toString() || '',
+    });
 
     if (!result.success) {
       if (result.error) {
