@@ -1,6 +1,5 @@
 import { ConnectedAccountProvider, logger } from '@codeheroes/common';
 import { CreateEventInput, EventService } from '@codeheroes/event';
-import { ParserFactory } from '../parsers/factory';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
 
 export class EventProcessor {
@@ -33,22 +32,9 @@ export class EventProcessor {
         };
       }
 
-      // Parse the event data using appropriate parser
-      const parser = ParserFactory.createParser(this.webhookEvent);
-      const eventData = parser.parse(this.webhookEvent.payload);
-
-      // If parser returns null, skip processing this event
-      if (eventData === null) {
-        logger.info(`Skipping event ${this.webhookEvent.eventId} as per parser rules`);
-        return {
-          success: true,
-          message: 'Event skipped as per parser rules',
-        };
-      }
-
       // Create and store the event
       const createEventInput = await this.generateCreateEventInput();
-      const newEvent = await this.eventService.createEvent(createEventInput, eventData);
+      const newEvent = await this.eventService.createEvent(createEventInput, {});
 
       logger.info(`Successfully processed ${this.webhookEvent.eventType} event`);
       return {
