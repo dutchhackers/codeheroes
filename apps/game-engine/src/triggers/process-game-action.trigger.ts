@@ -1,5 +1,6 @@
-import { GameAction, GameActionService } from '@codeheroes/game-core';
+import { GameActionService } from '@codeheroes/game-core';
 import { ProgressionService } from '@codeheroes/gamification';
+import { GameAction } from '@codeheroes/shared/types';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 
 export const processGameAction = onDocumentCreated('gameActions/{actionId}', async (event) => {

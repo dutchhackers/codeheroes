@@ -7,9 +7,15 @@ import {
   GithubPushEventData,
   GithubPushEventMetrics,
 } from '@codeheroes/providers';
-import { CodePushContext, CodeReviewContext, PullRequestContext } from '../interfaces/context.interface';
-import { GameAction } from '../interfaces/game-action.interface';
-import { CodePushMetrics, CodeReviewMetrics, PullRequestMetrics } from '../interfaces/metrics.interface';
+import {
+  CodePushContext,
+  CodePushMetrics,
+  CodeReviewContext,
+  CodeReviewMetrics,
+  GameAction,
+  PullRequestContext,
+  PullRequestMetrics,
+} from '@codeheroes/shared/types';
 
 export class GitHubMapper {
   static mapEventToGameAction(event: Event, userId: string): Partial<GameAction> | null {

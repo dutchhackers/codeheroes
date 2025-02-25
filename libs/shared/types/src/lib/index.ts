@@ -18,6 +18,10 @@ export * from './gamification/progression.types';
 export * from './gamification/badges.types';
 // export * from './gamification/levels.types';
 
+export * from './game/action.types';
+export * from './game/context.types';
+export * from './game/metrics.types';
+
 // export * from './providers/github.types';
 // export * from './providers/strava.types';
 

@@ -1,9 +1,8 @@
 import { DatabaseInstance, DatabaseService, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
+import { GameAction, GameActionContext } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
-import { GameAction } from './interfaces/game-action.interface';
 import { GitHubMapper } from './mappers/github.mapper';
-import { GameActionContext } from './interfaces/context.interface';
 
 export class GameActionService {
   private readonly db: Firestore;
