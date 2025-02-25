@@ -7,9 +7,15 @@ import {
   GithubPushEventData,
   GithubPushEventMetrics,
 } from '@codeheroes/providers';
-import { CodePushContext, CodeReviewContext, PullRequestContext } from '../interfaces/context.interface';
-import { GameAction } from '../interfaces/game-action.interface';
-import { CodePushMetrics, CodeReviewMetrics, PullRequestMetrics } from '../interfaces/metrics.interface';
+import {
+  CodePushContext,
+  CodePushMetrics,
+  CodeReviewContext,
+  CodeReviewMetrics,
+  GameAction,
+  PullRequestContext,
+  PullRequestMetrics,
+} from '@codeheroes/shared/types';
 
 export class GitHubMapper {
   static mapEventToGameAction(event: Event, userId: string): Partial<GameAction> | null {
@@ -26,9 +32,16 @@ export class GitHubMapper {
     }
   }
 
-  private static mapCodePushEvent(event: Event, userId: string): Partial<GameAction> {
+  private static mapCodePushEvent(event: Event, userId: string): Partial<GameAction> | null {
     const data = event.data as GithubPushEventData;
     const metrics = data.metrics as GithubPushEventMetrics;
+
+    // Return null with skip reason if there are no commits
+    if (!data.commits || data.commits.length === 0) {
+      return {
+        skipReason: 'No commits in push event',
+      } as any;
+    }
 
     const context: CodePushContext = {
       type: 'code_push',
@@ -46,7 +59,15 @@ export class GitHubMapper {
         author: {
           name: commit.author.name,
           email: commit.author.email,
+          ...(commit.author.username && { username: commit.author.username }),
         },
+        ...(commit.committer && {
+          committer: {
+            name: commit.committer.name,
+            email: commit.committer.email,
+            ...(commit.committer.username && { username: commit.committer.username }),
+          },
+        }),
       })),
       isNew: data.created,
       isDeleted: data.deleted,

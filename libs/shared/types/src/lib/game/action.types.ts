@@ -1,6 +1,6 @@
-import { ConnectedAccountProvider } from '@codeheroes/shared/types';
-import { GameActionContext } from './context.interface';
-import { GameActionMetrics } from './metrics.interface';
+import { ConnectedAccountProvider } from '../core/providers';
+import { GameActionContext } from './context.types';
+import { GameActionMetrics } from './metrics.types';
 
 export type GameActionType =
   // Code actions

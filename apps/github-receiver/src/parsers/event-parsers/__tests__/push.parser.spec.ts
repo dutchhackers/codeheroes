@@ -41,7 +41,7 @@ describe('PushParser', () => {
           author: {
             name: 'John Doe',
             email: 'john@example.com',
-            username: 'johndoe'
+            username: 'johndoe',
           },
         },
         {
@@ -52,7 +52,7 @@ describe('PushParser', () => {
           author: {
             name: 'Jane Doe',
             email: 'jane@example.com',
-            username: 'janedoe'
+            username: 'janedoe',
           },
         },
       ],
@@ -91,6 +91,7 @@ describe('PushParser', () => {
           author: {
             name: 'John Doe',
             email: 'john@example.com',
+            username: 'johndoe',
           },
         },
         {
@@ -101,6 +102,7 @@ describe('PushParser', () => {
           author: {
             name: 'Jane Doe',
             email: 'jane@example.com',
+            username: 'janedoe',
           },
         },
       ],

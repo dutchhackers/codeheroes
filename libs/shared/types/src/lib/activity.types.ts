@@ -1,10 +1,3 @@
-export type GameActionType =
-  | 'code_push'
-  | 'pull_request_create'
-  | 'pull_request_merge'
-  | 'pull_request_close'
-  | 'code_review_submit';
-
 export enum ActivityCategory {
   CODE = 'CODE',
   PULL_REQUEST = 'PULL_REQUEST',

@@ -46,7 +46,15 @@ export abstract class GitHubParser<T extends CommonPayload, R extends CommonMapp
       author: {
         name: commit.author.name,
         email: commit.author.email,
+        ...(commit.author.username && { username: commit.author.username }),
       },
+      ...(commit.committer && {
+        committer: {
+          name: commit.committer.name,
+          email: commit.committer.email,
+          ...(commit.committer.username && { username: commit.committer.username }),
+        },
+      }),
       url: commit.url,
     }));
   }

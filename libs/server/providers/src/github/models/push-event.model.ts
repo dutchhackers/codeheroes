@@ -7,6 +7,12 @@ export interface GithubCommitData {
   author: {
     name: string;
     email: string;
+    username?: string;
+  };
+  committer?: {
+    name: string;
+    email: string;
+    username?: string;
   };
   url: string;
 }

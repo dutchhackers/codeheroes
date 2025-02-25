@@ -1,9 +1,8 @@
 import { DatabaseInstance, DatabaseService, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { Event } from '@codeheroes/event';
+import { GameAction, GameActionContext } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
-import { GameAction } from './interfaces/game-action.interface';
 import { GitHubMapper } from './mappers/github.mapper';
-import { GameActionContext } from './interfaces/context.interface';
 
 export class GameActionService {
   private readonly db: Firestore;
@@ -43,6 +42,17 @@ export class GameActionService {
       if (!actionData) {
         logger.info('Event does not map to a game action', {
           eventType: event.source.event,
+        });
+        return null;
+      }
+
+      // Check if the action was skipped with a reason
+      if ('skipReason' in actionData) {
+        logger.info('Event skipped for game action creation', {
+          eventType: event.source.event,
+          provider: event.provider,
+          reason: actionData.skipReason,
+          externalId: event.source.id,
         });
         return null;
       }
