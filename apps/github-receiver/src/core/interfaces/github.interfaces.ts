@@ -32,7 +32,12 @@ export interface GitHubCommit {
   author: {
     name: string;
     email: string;
-    username?: string; // Made username optional
+    username?: string;
+  };
+  committer?: {
+    name: string;
+    email: string;
+    username?: string;
   };
 }
 
