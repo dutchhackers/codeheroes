@@ -1,12 +1,3 @@
-import { Event } from '@codeheroes/event';
-import {
-  GithubPullRequestEventData,
-  GithubPullRequestMetrics,
-  GithubPullRequestReviewEventData,
-  GithubPullRequestReviewMetrics,
-  GithubPushEventData,
-  GithubPushEventMetrics,
-} from '@codeheroes/providers';
 import {
   CodePushContext,
   CodePushMetrics,
@@ -16,17 +7,17 @@ import {
   PullRequestContext,
   PullRequestMetrics,
 } from '@codeheroes/shared/types';
-import { PullRequestReviewEvent, PushEvent, PullRequestEvent } from '../interfaces/github.interfaces';
+import { PullRequestEvent, PullRequestReviewEvent, PushEvent } from '../interfaces/github.interfaces';
 
 export class GitHubMapper {
   static mapEventToGameAction(eventType: string, eventData: any, userId: string): Partial<GameAction> | null {
     switch (eventType) {
       case 'push':
-        return this.mapCodePushEvent(eventData as unknown as PushEvent, userId);
+        return this.mapCodePushEvent(eventData as PushEvent, userId);
       case 'pull_request_review':
-        return this.mapReviewEvent(eventData as unknown as PullRequestReviewEvent, userId);
+        return this.mapReviewEvent(eventData as PullRequestReviewEvent, userId);
       case 'pull_request':
-        return this.mapPullRequestEvent(eventData as unknown as PullRequestEvent, userId);
+        return this.mapPullRequestEvent(eventData as PullRequestEvent, userId);
       default:
         return null;
     }

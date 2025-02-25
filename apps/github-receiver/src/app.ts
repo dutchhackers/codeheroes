@@ -1,4 +1,4 @@
-import { logger, StorageService, WebhookService } from '@codeheroes/common';
+import { logger, StorageService, WebhookService, DatabaseService } from '@codeheroes/common';
 import { Request, Response } from 'express';
 import { ErrorType, MESSAGES } from './core/constants/constants';
 import { GitHubError } from './core/errors/github-event.error';
@@ -29,13 +29,38 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     const processor = new EventProcessor(eventData);
     const result = await processor.process();
 
+    // Lookup internal user ID
+    const databaseService = new DatabaseService();
+    const externalUserId = req.body.sender?.id?.toString();
+    if (!externalUserId) {
+      logger.warn('No sender ID in webhook payload');
+      ResponseHandler.success(res, MESSAGES.EVENT_PROCESSED);
+      return;
+    }
+
+    const userId = await databaseService.lookupUserId({
+      sender: {
+        id: externalUserId,
+      },
+      provider: 'github',
+    });
+
+    if (!userId) {
+      logger.warn('No matching user found for webhook', {
+        provider: 'github',
+        externalUserId,
+      });
+      ResponseHandler.success(res, MESSAGES.EVENT_PROCESSED);
+      return;
+    }
+
     // Create game action from webhook payload
     const gameActionService = new GameActionService();
     await gameActionService.generateGameActionFromWebhook({
       payload: eventData.payload,
       provider: eventData.provider,
       eventType: eventData.eventType,
-      externalUserId: req.body.sender?.id?.toString() || '',
+      userId,
     });
 
     if (!result.success) {
@@ -55,7 +80,7 @@ export const App = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    logger.error('Event processing error:', error);
+    logger.error('Error processing GitHub event', { error });
     ResponseHandler.handleError(error, res);
   }
 };

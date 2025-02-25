@@ -17,30 +17,14 @@ export class GameActionService {
     payload: unknown;
     provider: 'github'; // extend this union type as we add more providers
     eventType: string;
-    externalUserId: string;
+    userId: string;
   }): Promise<GameAction | null> {
     try {
-      // First, lookup internal user ID
-      const userId = await this.databaseService.lookupUserId({
-        sender: {
-          id: params.externalUserId,
-        },
-        provider: params.provider,
-      });
-
-      if (!userId) {
-        logger.warn('No matching user found for webhook', {
-          provider: params.provider,
-          externalUserId: params.externalUserId,
-        });
-        return null;
-      }
-
       // Map webhook to game action based on provider
       let actionData: Partial<GameAction> | null = null;
       switch (params.provider) {
         case 'github':
-          actionData = GitHubMapper.mapEventToGameAction(params.eventType, params.payload, userId);
+          actionData = GitHubMapper.mapEventToGameAction(params.eventType, params.payload, params.userId);
           break;
         // Add other providers here
       }
