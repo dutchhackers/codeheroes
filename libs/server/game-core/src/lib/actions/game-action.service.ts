@@ -47,6 +47,17 @@ export class GameActionService {
         return null;
       }
 
+      // Check if the action was skipped with a reason
+      if ('skipReason' in actionData) {
+        logger.info('Event skipped for game action creation', {
+          eventType: event.source.event,
+          provider: event.provider,
+          reason: actionData.skipReason,
+          externalId: event.source.id,
+        });
+        return null;
+      }
+
       // Create and store the game action
       const gameAction = await this.create(actionData);
 

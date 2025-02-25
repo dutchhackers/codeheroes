@@ -26,9 +26,16 @@ export class GitHubMapper {
     }
   }
 
-  private static mapCodePushEvent(event: Event, userId: string): Partial<GameAction> {
+  private static mapCodePushEvent(event: Event, userId: string): Partial<GameAction> | null {
     const data = event.data as GithubPushEventData;
     const metrics = data.metrics as GithubPushEventMetrics;
+
+    // Return null with skip reason if there are no commits
+    if (!data.commits || data.commits.length === 0) {
+      return {
+        skipReason: 'No commits in push event',
+      } as any;
+    }
 
     const context: CodePushContext = {
       type: 'code_push',
