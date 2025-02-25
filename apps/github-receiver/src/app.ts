@@ -1,8 +1,7 @@
-import { logger, StorageService } from '@codeheroes/common';
+import { logger, StorageService, WebhookService } from '@codeheroes/common';
 import { Request, Response } from 'express';
 import { ErrorType, MESSAGES } from './core/constants/constants';
 import { GitHubError } from './core/errors/github-event.error';
-import { EventStorageUtils } from './core/utils/event-storage.utils';
 import { ResponseHandler } from './core/utils/response.handler';
 import { EventProcessor } from './processor/event-processor';
 import { GitHubEventUtils } from './processor/utils';
@@ -19,18 +18,30 @@ export const App = async (req: Request, res: Response): Promise<void> => {
       throw error instanceof Error ? error : new GitHubError(MESSAGES.MISSING_GITHUB_EVENT);
     }
 
-    // Store the raw event
-    const storageService = new StorageService();
-    const filePath = EventStorageUtils.generateFilePath(eventData);
-    const headers = EventStorageUtils.formatHeaders(eventData.headers);
-    const content = `${headers}\n\n${JSON.stringify(eventData.payload, null, 2)}`;
-    await storageService.storeFile(filePath, content, { contentType: 'text/plain' });
+    // Store the raw webhook with GitHub-specific headers
+    const webhookService = new WebhookService();
+    await webhookService.storeRawWebhook(
+      req,
+      'github',
+      {
+        eventType: req.headers['x-github-event'] as string,
+        eventId: req.headers['x-github-delivery'] as string
+      }
+    );
+
+    // Respond quickly to GitHub
+    res.status(202).send('Accepted');
+
+    if (req) {
+      ResponseHandler.success(res, 'Ready');
+      return;
+    }
 
     // Process the event
     const processor = new EventProcessor(eventData);
     const result = await processor.process();
 
-    // New: Create game action from event
+    // Create game action from event
     const gameActionService = new GameActionService();
     await gameActionService.createFromEvent(result.event);
 
