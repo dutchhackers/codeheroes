@@ -1,7 +1,7 @@
 import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
-import { Collections, GameActionType } from '@codeheroes/shared/types';
+import { ActionResult, Collections, GameActionType } from '@codeheroes/shared/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { ActionResult, LegacyGameAction } from '../../core/interfaces/action';
+import { LegacyGameAction } from '../../core/interfaces/action';
 import { ProgressionService } from '../../core/progression/progression.service';
 import { ActivityService } from '../../core/activity/activity.service';
 import { ActivityCounters } from '../../core/interfaces/activity';

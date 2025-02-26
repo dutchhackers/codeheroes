@@ -1,4 +1,4 @@
-import { GameAction as SharedGameAction, GameActionType, ActionResult } from '@codeheroes/shared/types';
+import { GameAction as SharedGameAction, GameActionType } from '@codeheroes/shared/types';
 
 // Legacy GameAction interface maintained for backward compatibility
 export interface LegacyGameAction {
@@ -9,9 +9,6 @@ export interface LegacyGameAction {
 
 // Re-export the GameAction from shared types
 export type GameAction = LegacyGameAction;
-
-// Re-export ActionResult from shared types
-export { ActionResult };
 
 // Type conversion utilities
 export function convertSharedToLegacy(sharedAction: SharedGameAction): LegacyGameAction {

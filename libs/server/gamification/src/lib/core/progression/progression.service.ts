@@ -1,11 +1,11 @@
 import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
-import { Collections, GameActionType } from '@codeheroes/shared/types';
+import { ActionResult, Collections, GameActionType } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../constants/level-thresholds';
 import { ActionHandlerFactory } from '../../factories/action-handler.factory';
 import { ProgressionEventService } from '../events/event-types';
-import { ActionResult, LegacyGameAction } from '../interfaces/action';
+import { LegacyGameAction } from '../interfaces/action';
 import { Activity, ActivityStats } from '../interfaces/activity';
 import { ProgressionState, ProgressionUpdate } from '../interfaces/progression';
 import { BadgeService } from '../services/badge.service';
