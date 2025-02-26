@@ -1,6 +1,7 @@
-import { ConnectedAccountProvider, logger } from '@codeheroes/common';
+import { logger } from '@codeheroes/common';
 import { CreateEventInput, EventService } from '@codeheroes/event';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
+import { ConnectedAccountProvider } from '@codeheroes/shared/types';
 
 export class EventProcessor {
   private readonly eventService: EventService;

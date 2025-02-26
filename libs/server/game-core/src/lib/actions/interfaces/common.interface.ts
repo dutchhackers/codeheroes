@@ -1,4 +1,4 @@
-import { ConnectedAccountProvider } from '@codeheroes/common';
+import { ConnectedAccountProvider } from '@codeheroes/shared/types';
 
 export interface Repository {
   id: string;
