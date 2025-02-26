@@ -1,18 +1,18 @@
 import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import {
   ActionResult,
+  ActivityCounters,
   Collections,
   GameAction,
   GameActionContext,
   GameActionMetrics,
   GameActionType,
+  TimeBasedActivityStats,
 } from '@codeheroes/shared/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { ProgressionService } from '../../core/progression/progression.service';
 import { ActivityService } from '../../core/activity/activity.service';
-import { ActivityCounters } from '../../core/interfaces/activity';
+import { ProgressionService } from '../../core/progression/progression.service';
 import { getTimeFrameIds } from '../../utils/time-frame.utils';
-import { TimeBasedActivityStats } from '../../core/interfaces/time-based-activity';
 
 export abstract class BaseActionHandler {
   protected abstract actionType: GameActionType;

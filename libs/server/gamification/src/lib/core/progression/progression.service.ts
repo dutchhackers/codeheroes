@@ -1,13 +1,12 @@
 import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
-import { ActionResult, Collections, GameAction } from '@codeheroes/shared/types';
+import { ActionResult, Collections, GameAction, ProgressionState, ProgressionUpdate } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../constants/level-thresholds';
 import { ActionHandlerFactory } from '../../factories/action-handler.factory';
 import { ActivityService } from '../activity/activity.service';
 import { ProgressionEventService } from '../events/event-types';
 import { Activity } from '../interfaces/activity';
-import { ProgressionState, ProgressionUpdate } from '../interfaces/progression';
 import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
 import { RewardService } from '../services/reward.service';

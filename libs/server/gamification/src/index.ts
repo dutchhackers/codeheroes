@@ -1,8 +1,5 @@
 // Core interfaces
-export * from './lib/core/interfaces/progression';
 export * from './lib/core/interfaces/activity';
-export * from './lib/core/interfaces/level';
-export * from './lib/core/interfaces/time-based-activity';
 
 // Unified Services
 export * from './lib/core/events/unified-event-handler.service';

@@ -1,5 +1,4 @@
 import { LEVEL_CONFIGURATION } from './level-configuration';
-import { LevelRequirementItem } from '../core/interfaces/level';
 
 export function calculateXpForLevel(level: number): number {
   const config = LEVEL_CONFIGURATION.find((c) => c.level === level);

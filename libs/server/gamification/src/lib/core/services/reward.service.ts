@@ -2,7 +2,7 @@ import { DatabaseInstance } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
 import { Collections } from '@codeheroes/shared/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { RewardType } from '../interfaces/level';
+import { RewardType } from '@codeheroes/shared/types';
 import { BadgeService } from './badge.service';
 import { ProgressionEventService } from '../events/event-types';
 

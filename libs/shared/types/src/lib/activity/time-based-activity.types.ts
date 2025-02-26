@@ -1,5 +1,5 @@
-import { ActivityCounters } from './activity';
-import { GameActionType } from '@codeheroes/shared/types';
+import { ActivityCounters } from './activity.types';
+import { GameActionType } from '../game/action.types';
 
 export interface TimeBasedActivityStats {
   timeframeId: string;

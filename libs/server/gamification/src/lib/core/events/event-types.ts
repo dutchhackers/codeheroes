@@ -1,6 +1,6 @@
-import { Activity } from '../interfaces/activity';
-import { ProgressionState } from '../interfaces/progression';
+import { ProgressionState } from '@codeheroes/shared/types';
 import { PubSub } from '@google-cloud/pubsub';
+import { Activity } from '../interfaces/activity';
 
 export enum ProgressionEventType {
   XP_GAINED = 'progression.xp.gained',

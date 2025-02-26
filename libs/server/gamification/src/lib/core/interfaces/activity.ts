@@ -1,4 +1,10 @@
-import { GameActionContext, GameActionMetrics, GameActionType } from '@codeheroes/shared/types';
+import {
+  GameActionContext,
+  GameActionMetrics,
+  GameActionType,
+  ActivityCounters,
+  ActivityStats,
+} from '@codeheroes/shared/types';
 
 export interface Activity {
   id: string;
@@ -19,23 +25,4 @@ export interface Activity {
   updatedAt: string;
 }
 
-export interface ActivityCounters {
-  pullRequests: {
-    created: number;
-    merged: number;
-    closed: number;
-    total: number;
-  };
-  codePushes: number;
-  codeReviews: number;
-}
-
-// Simplified ActivityStats that only uses counters
-export interface ActivityStats {
-  counters: ActivityCounters;
-  countersLastUpdated: string;
-  lastActivity?: {
-    type: GameActionType;
-    timestamp: string;
-  };
-}
+// ActivityCounters and ActivityStats have been moved to @codeheroes/shared/types
