@@ -1,4 +1,4 @@
-import { DatabaseInstance, DatabaseService, getCurrentTimeAsISO } from '@codeheroes/common';
+import { DatabaseInstance, getCurrentTimeAsISO } from '@codeheroes/common';
 import {
   ActivityNotInUse as Activity,
   ActivityCounters,
@@ -14,12 +14,10 @@ import { UnifiedEventHandlerService } from '../events/unified-event-handler.serv
 
 export class ActivityService {
   private db: Firestore;
-  private databaseService: DatabaseService;
   private eventHandler: UnifiedEventHandlerService;
 
   constructor() {
     this.db = DatabaseInstance.getInstance();
-    this.databaseService = new DatabaseService();
     this.eventHandler = new UnifiedEventHandlerService();
   }
 
