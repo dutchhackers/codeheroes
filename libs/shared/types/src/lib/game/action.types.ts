@@ -2,6 +2,40 @@ import { ConnectedAccountProvider } from '../core/providers';
 import { GameActionContext } from './context.types';
 import { GameActionMetrics } from './metrics.types';
 
+/**
+ * Represents the result of processing a game action
+ */
+export interface ActionResult {
+  /**
+   * Amount of XP gained from the action
+   */
+  xpGained: number;
+
+  /**
+   * Any badges earned from the action
+   */
+  badgesEarned?: string[];
+
+  /**
+   * Any rewards granted as a result of the action
+   */
+  rewards?: Record<string, any>;
+
+  /**
+   * The user's level after the action is processed
+   */
+  level?: number;
+
+  /**
+   * Progress information for the user's current level
+   */
+  currentLevelProgress?: {
+    level: number;
+    currentLevelXp: number;
+    xpToNextLevel: number;
+  };
+}
+
 export type GameActionType =
   // Code actions
   | 'code_push'
