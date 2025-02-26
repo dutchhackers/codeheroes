@@ -1,12 +1,11 @@
 import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
-import { ActionResult, Collections } from '@codeheroes/shared/types';
+import { ActionResult, Collections, GameAction } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../constants/level-thresholds';
 import { ActionHandlerFactory } from '../../factories/action-handler.factory';
 import { ActivityService } from '../activity/activity.service';
 import { ProgressionEventService } from '../events/event-types';
-import { LegacyGameAction } from '../interfaces/action';
 import { Activity } from '../interfaces/activity';
 import { ProgressionState, ProgressionUpdate } from '../interfaces/progression';
 import { BadgeService } from '../services/badge.service';
@@ -32,7 +31,7 @@ export class ProgressionService {
     this.activityService = new ActivityService();
   }
 
-  async processGameAction(action: LegacyGameAction): Promise<ActionResult> {
+  async processGameAction(action: GameAction): Promise<ActionResult> {
     const handler = ActionHandlerFactory.getHandler(action);
     const result = await handler.handle(action);
 
@@ -47,13 +46,14 @@ export class ProgressionService {
       action.userId,
       {
         xpGained: result.xpGained,
-        activityType: action.actionType,
+        activityType: action.type,
       },
       {
         id: this.generateId(),
         userId: action.userId,
-        type: action.actionType,
-        metadata: action.metadata,
+        type: action.type,
+        context: action.context,
+        metrics: action.metrics,
         xp: {
           earned: result.xpGained,
           breakdown: [{ type: 'base', amount: result.xpGained, description: 'Base XP' }],
@@ -177,15 +177,15 @@ export class ProgressionService {
     };
   }
 
-  private shouldCheckForMilestoneRewards(action: LegacyGameAction, state: ProgressionState): boolean {
+  private shouldCheckForMilestoneRewards(action: GameAction, state: ProgressionState): boolean {
     return (
       state.level > (state as any).previousLevel || // Level up occurred
       this.isActivityMilestone(action, state)
     );
   }
 
-  private isActivityMilestone(action: LegacyGameAction, state: ProgressionState): boolean {
-    const activityCount = state.counters?.[action.actionType] || 0;
+  private isActivityMilestone(action: GameAction, state: ProgressionState): boolean {
+    const activityCount = state.counters?.[action.type] || 0;
     const milestones = [10, 50, 100, 500];
     return milestones.includes(activityCount);
   }

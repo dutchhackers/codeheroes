@@ -1,10 +1,12 @@
-import { GameActionType } from '@codeheroes/shared/types';
+import { GameActionContext, GameActionMetrics, GameActionType } from '@codeheroes/shared/types';
 
 export interface Activity {
   id: string;
   userId: string;
   type: GameActionType;
-  metadata: Record<string, any>;
+  // Add context and metrics from GameAction
+  context: GameActionContext;
+  metrics: GameActionMetrics;
   xp: {
     earned: number;
     breakdown: Array<{

@@ -1,7 +1,13 @@
 import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
-import { ActionResult, Collections, GameActionType } from '@codeheroes/shared/types';
+import {
+  ActionResult,
+  Collections,
+  GameAction,
+  GameActionContext,
+  GameActionMetrics,
+  GameActionType,
+} from '@codeheroes/shared/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { LegacyGameAction } from '../../core/interfaces/action';
 import { ProgressionService } from '../../core/progression/progression.service';
 import { ActivityService } from '../../core/activity/activity.service';
 import { ActivityCounters } from '../../core/interfaces/activity';
@@ -73,16 +79,16 @@ export abstract class BaseActionHandler {
     }
   }
 
-  async handle(action: LegacyGameAction): Promise<ActionResult> {
-    const { userId, metadata } = action;
-    logger.info(`Starting action handler for ${this.actionType}`, { userId, metadata });
+  async handle(action: GameAction): Promise<ActionResult> {
+    const { userId } = action;
+    logger.info(`Starting action handler for ${this.actionType}`, { userId });
 
     const timeFrames = getTimeFrameIds();
     const userRef = this.db.collection(Collections.Users).doc(userId);
     await this.initializeCountersIfNeeded(userRef);
 
     const baseXP = this.calculateBaseXp();
-    const bonuses = this.calculateBonuses(metadata);
+    const bonuses = this.calculateBonuses(action.context, action.metrics);
     const totalXP = baseXP + bonuses.totalBonus;
 
     logger.info('XP calculation details', {
@@ -163,7 +169,8 @@ export abstract class BaseActionHandler {
           userId,
           type: this.actionType,
           metadata: {
-            ...metadata,
+            //...metadata,
+            // TODO: metrics and context
             level: progressionUpdate.level,
             bonuses: bonuses.breakdown,
           },
@@ -230,7 +237,10 @@ export abstract class BaseActionHandler {
   }
 
   protected abstract calculateBaseXp(): number;
-  protected abstract calculateBonuses(metadata: Record<string, any>): {
+  protected abstract calculateBonuses(
+    context: GameActionContext,
+    metrics: GameActionMetrics,
+  ): {
     totalBonus: number;
     breakdown: Record<string, number>;
   };

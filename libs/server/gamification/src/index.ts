@@ -1,5 +1,4 @@
 // Core interfaces
-export * from './lib/core/interfaces/action';
 export * from './lib/core/interfaces/progression';
 export * from './lib/core/interfaces/activity';
 export * from './lib/core/interfaces/level';
