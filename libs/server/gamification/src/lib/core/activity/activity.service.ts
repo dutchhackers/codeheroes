@@ -1,5 +1,6 @@
 import { DatabaseInstance, DatabaseService, getCurrentTimeAsISO } from '@codeheroes/common';
 import {
+  ActivityNotInUse as Activity,
   ActivityCounters,
   ActivityStats,
   Collections,
@@ -10,7 +11,6 @@ import { Firestore } from 'firebase-admin/firestore';
 import { getRecentDailyIds, getRecentWeeklyIds, getTimeFrameIds } from '../../utils/time-frame.utils';
 import { ProgressionEventType } from '../events/event-types';
 import { UnifiedEventHandlerService } from '../events/unified-event-handler.service';
-import { Activity } from '../interfaces/activity';
 
 export class ActivityService {
   private db: Firestore;

@@ -1,6 +1,3 @@
-// Core interfaces
-export * from './lib/core/interfaces/activity';
-
 // Unified Services
 export * from './lib/core/events/unified-event-handler.service';
 export * from './lib/core/events/event-types';

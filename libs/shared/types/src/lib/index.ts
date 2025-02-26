@@ -32,6 +32,3 @@ export * from './game/metrics.types';
 
 export * from './utils/time.types';
 export * from './utils/pagination.types';
-
-// Old/existing
-export * from './activity.types';
