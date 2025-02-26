@@ -6,7 +6,7 @@ import { CodeReviewSubmitHandler } from '../actions/code-review/code-review-subm
 import { PullRequestCloseHandler } from '../actions/pull-request/pr-close.handler';
 import { PullRequestCreateHandler } from '../actions/pull-request/pr-create.handler';
 import { PullRequestMergeHandler } from '../actions/pull-request/pr-merge.handler';
-import { GameAction } from '../core/interfaces/action';
+import { LegacyGameAction } from '../core/interfaces/action';
 
 export class ActionHandlerFactory {
   private static db: Firestore;
@@ -24,7 +24,7 @@ export class ActionHandlerFactory {
     this.handlers.set('code_review_submit', new CodeReviewSubmitHandler(db));
   }
 
-  static getHandler(action: GameAction): BaseActionHandler {
+  static getHandler(action: LegacyGameAction): BaseActionHandler {
     if (!this.handlers) {
       throw new Error('ActionHandlerFactory not initialized. Call initialize() first.');
     }

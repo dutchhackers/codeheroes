@@ -1,7 +1,7 @@
 import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { Collections, GameActionType } from '@codeheroes/shared/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { ActionResult, GameAction } from '../../core/interfaces/action';
+import { ActionResult, LegacyGameAction } from '../../core/interfaces/action';
 import { ProgressionService } from '../../core/progression/progression.service';
 import { ActivityService } from '../../core/activity/activity.service';
 import { ActivityCounters } from '../../core/interfaces/activity';
@@ -73,7 +73,7 @@ export abstract class BaseActionHandler {
     }
   }
 
-  async handle(action: GameAction): Promise<ActionResult> {
+  async handle(action: LegacyGameAction): Promise<ActionResult> {
     const { userId, metadata } = action;
     logger.info(`Starting action handler for ${this.actionType}`, { userId, metadata });
 

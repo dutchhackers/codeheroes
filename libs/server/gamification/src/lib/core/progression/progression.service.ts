@@ -5,7 +5,7 @@ import { Firestore } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../constants/level-thresholds';
 import { ActionHandlerFactory } from '../../factories/action-handler.factory';
 import { ProgressionEventService } from '../events/event-types';
-import { ActionResult, GameAction } from '../interfaces/action';
+import { ActionResult, LegacyGameAction } from '../interfaces/action';
 import { Activity, ActivityStats } from '../interfaces/activity';
 import { ProgressionState, ProgressionUpdate } from '../interfaces/progression';
 import { BadgeService } from '../services/badge.service';
@@ -32,7 +32,7 @@ export class ProgressionService {
     this.activityService = new ActivityService();
   }
 
-  async processGameAction(action: GameAction): Promise<ActionResult> {
+  async processGameAction(action: LegacyGameAction): Promise<ActionResult> {
     const handler = ActionHandlerFactory.getHandler(action);
     const result = await handler.handle(action);
 
@@ -177,14 +177,14 @@ export class ProgressionService {
     };
   }
 
-  private shouldCheckForMilestoneRewards(action: GameAction, state: ProgressionState): boolean {
+  private shouldCheckForMilestoneRewards(action: LegacyGameAction, state: ProgressionState): boolean {
     return (
       state.level > (state as any).previousLevel || // Level up occurred
       this.isActivityMilestone(action, state)
     );
   }
 
-  private isActivityMilestone(action: GameAction, state: ProgressionState): boolean {
+  private isActivityMilestone(action: LegacyGameAction, state: ProgressionState): boolean {
     const activityCount = state.counters?.[action.actionType] || 0;
     const milestones = [10, 50, 100, 500];
     return milestones.includes(activityCount);
