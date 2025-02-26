@@ -1,8 +1,7 @@
 import { DatabaseInstance } from '@codeheroes/common';
 import { Collections } from '@codeheroes/shared/types';
-import { Firestore, FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { UnifiedEventHandlerService } from '../../core/events/unified-event-handler.service';
-import { ActivityNotInUse as Activity } from '@codeheroes/shared/types';
 
 export interface Badge {
   id: string;
