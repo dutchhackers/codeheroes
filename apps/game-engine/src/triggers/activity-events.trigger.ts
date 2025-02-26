@@ -1,4 +1,5 @@
-import { UnifiedEventHandlerService, ProgressionEventType } from '@codeheroes/gamification';
+import { UnifiedEventHandlerService } from '@codeheroes/gamification';
+import { ProgressionEventType } from '@codeheroes/shared/types';
 import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 
 export const onActivityRecorded = onMessagePublished('progression-events', async (event) => {

@@ -13,11 +13,7 @@ export * from './activity/time-based-activity.types';
 // export * from './activity/events.types';
 // export * from './activity/context.types';
 
-export * from './gamification/achievements.types';
-export * from './gamification/progression.types';
-// export * from './gamification/rewards.types';
-export * from './gamification/badges.types';
-export * from './gamification/level.types';
+export * from './gamification';
 
 export * from './game/action.types';
 export * from './game/context.types';

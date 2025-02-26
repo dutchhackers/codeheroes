@@ -4,12 +4,12 @@ import {
   ActivityCounters,
   ActivityStats,
   Collections,
+  ProgressionEventType,
   TimeBasedActivityStats,
   TimeBasedStatsQuery,
 } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getRecentDailyIds, getRecentWeeklyIds, getTimeFrameIds } from '../../utils/time-frame.utils';
-import { ProgressionEventType } from '../events/event-types';
 import { UnifiedEventHandlerService } from '../events/unified-event-handler.service';
 
 export class ActivityService {

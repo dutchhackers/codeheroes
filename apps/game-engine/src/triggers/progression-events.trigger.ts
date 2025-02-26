@@ -1,6 +1,7 @@
-import { UnifiedEventHandlerService, ProgressionEventType } from '@codeheroes/gamification';
+import { UnifiedEventHandlerService } from '@codeheroes/gamification';
 import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 import { logger } from '@codeheroes/common';
+import { ProgressionEventType } from '@codeheroes/shared/types';
 
 export const onLevelUp = onMessagePublished('progression-events', async (event) => {
   logger.info('Received progression event', {
