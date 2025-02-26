@@ -17,7 +17,7 @@
     "@angular/platform-browser-dynamic": "~19.1.0",
     "@angular/pwa": "^19.1.6",
     "@angular/router": "~19.1.0",
-    "@angular/service-worker": "^19.0.0",
+    "@angular/service-worker": "^19.1.7",
     "@tailwindcss/postcss": "^4.0.6",
     "angular-svg-icon": "^19.1.1",
     "axios": "^1.6.0",
