@@ -2,6 +2,8 @@ import { beforeUserCreated } from 'firebase-functions/v2/identity';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { DEFAULT_REGION, UserService, SettingsService } from '@codeheroes/common';
 import { logger } from '@codeheroes/common';
+import { ProgressionService } from '@codeheroes/gamification';
+import { ProgressionUpdate } from '@codeheroes/shared/types';
 
 export const onBeforeUserCreated = beforeUserCreated(
   {
@@ -60,11 +62,22 @@ export const onBeforeUserCreated = beforeUserCreated(
       }
 
       // Create new user if none exists
-      await userService.createUser({
+      const newUser = await userService.createUser({
         uid: user.uid,
         email: user.email,
         displayName: user.displayName ?? user.email,
         photoUrl: user.photoURL,
+      });
+
+      // Initialize the user's stats (level 1, 0 XP)
+      logger.info('Initializing progression stats for new user', { userId: newUser.id });
+      const progressionService = new ProgressionService();
+
+      // Use an empty update with 0 XP, which will create the initial stats record
+      // The updateProgression method will set the initial level to 1 as defined in the service
+      await progressionService.updateProgression(newUser.id, {
+        xpGained: 0,
+        activityType: 'user_registration',
       });
     } catch (error) {
       const message = 'User creation failed';
