@@ -5,6 +5,7 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
 import { connectFirestoreEmulator, getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { provideFunctions, getFunctions, connectFunctionsEmulator } from '@angular/fire/functions';
+import { getMessaging, provideMessaging } from '@angular/fire/messaging';
 import { provideRouter, Router, withInMemoryScrolling, withViewTransitions } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
@@ -65,6 +66,7 @@ export const appConfig: ApplicationConfig = {
       }
       return functions;
     }),
+    provideMessaging(() => getMessaging()),
     provideAngularSvgIcon(),
     provideHttpClient(),
   ],
