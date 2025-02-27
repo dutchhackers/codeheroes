@@ -61,7 +61,7 @@
     "@typescript-eslint/utils": "^8.19.0",
     "angular-eslint": "^19.0.2",
     "esbuild": "^0.19.2",
-    "eslint": "^9.19.0",
+    "eslint": "^9.21.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.2.1",
     "firebase-functions-test": "^3.4.0",
