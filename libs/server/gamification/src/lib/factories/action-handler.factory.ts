@@ -1,4 +1,4 @@
-import { GameActionType } from '@codeheroes/shared/types';
+import { GameAction, GameActionType } from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { BaseActionHandler } from '../actions/base/base-action.handler';
 import { CodePushHandler } from '../actions/code-push/code-push.handler';
@@ -6,7 +6,6 @@ import { CodeReviewSubmitHandler } from '../actions/code-review/code-review-subm
 import { PullRequestCloseHandler } from '../actions/pull-request/pr-close.handler';
 import { PullRequestCreateHandler } from '../actions/pull-request/pr-create.handler';
 import { PullRequestMergeHandler } from '../actions/pull-request/pr-merge.handler';
-import { GameAction } from '../core/interfaces/action';
 
 export class ActionHandlerFactory {
   private static db: Firestore;
@@ -29,9 +28,9 @@ export class ActionHandlerFactory {
       throw new Error('ActionHandlerFactory not initialized. Call initialize() first.');
     }
 
-    const handler = this.handlers.get(action.actionType);
+    const handler = this.handlers.get(action.type);
     if (!handler) {
-      throw new Error(`No handler found for action type: ${action.actionType}`);
+      throw new Error(`No handler found for action type: ${action.type}`);
     }
 
     return handler;

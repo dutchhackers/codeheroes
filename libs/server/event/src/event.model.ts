@@ -1,4 +1,4 @@
-import { BaseDocument, ConnectedAccountProvider } from '@codeheroes/common';
+import { BaseDocument, ConnectedAccountProvider } from '@codeheroes/shared/types';
 
 export interface EventSource {
   id: string;

@@ -1,21 +1,24 @@
 import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
-import { Collections, GameActionType } from '@codeheroes/shared/types';
+import {
+  ActionResult,
+  ActivityCounters,
+  Collections,
+  GameAction,
+  GameActionContext,
+  GameActionMetrics,
+  GameActionType,
+  TimeBasedActivityStats,
+} from '@codeheroes/shared/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { ActionResult, GameAction } from '../../core/interfaces/action';
 import { ProgressionService } from '../../core/progression/progression.service';
-import { ActivityService } from '../../core/activity/activity.service';
-import { ActivityCounters } from '../../core/interfaces/activity';
 import { getTimeFrameIds } from '../../utils/time-frame.utils';
-import { TimeBasedActivityStats } from '../../core/interfaces/time-based-activity';
 
 export abstract class BaseActionHandler {
   protected abstract actionType: GameActionType;
   private progressionService: ProgressionService;
-  private activityService: ActivityService;
 
   constructor(protected db: Firestore) {
     this.progressionService = new ProgressionService();
-    this.activityService = new ActivityService();
   }
 
   protected getCounterUpdates(): Record<string, any> {
@@ -74,15 +77,15 @@ export abstract class BaseActionHandler {
   }
 
   async handle(action: GameAction): Promise<ActionResult> {
-    const { userId, metadata } = action;
-    logger.info(`Starting action handler for ${this.actionType}`, { userId, metadata });
+    const { userId } = action;
+    logger.info(`Starting action handler for ${this.actionType}`, { userId });
 
     const timeFrames = getTimeFrameIds();
     const userRef = this.db.collection(Collections.Users).doc(userId);
     await this.initializeCountersIfNeeded(userRef);
 
     const baseXP = this.calculateBaseXp();
-    const bonuses = this.calculateBonuses(metadata);
+    const bonuses = this.calculateBonuses(action.context, action.metrics);
     const totalXP = baseXP + bonuses.totalBonus;
 
     logger.info('XP calculation details', {
@@ -163,7 +166,8 @@ export abstract class BaseActionHandler {
           userId,
           type: this.actionType,
           metadata: {
-            ...metadata,
+            //...metadata,
+            // TODO: metrics and context
             level: progressionUpdate.level,
             bonuses: bonuses.breakdown,
           },
@@ -230,7 +234,10 @@ export abstract class BaseActionHandler {
   }
 
   protected abstract calculateBaseXp(): number;
-  protected abstract calculateBonuses(metadata: Record<string, any>): {
+  protected abstract calculateBonuses(
+    context: GameActionContext,
+    metrics: GameActionMetrics,
+  ): {
     totalBonus: number;
     breakdown: Record<string, number>;
   };

@@ -1,5 +1,5 @@
+import { ConnectedAccountProvider } from '@codeheroes/shared/types';
 import { IncomingHttpHeaders } from 'http';
-import { ConnectedAccountProvider } from './common.model';
 
 export interface RawWebhookData {
   eventId: string;

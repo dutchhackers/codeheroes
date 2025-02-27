@@ -1,5 +1,4 @@
-import { ActivityType } from '@codeheroes/shared/types';
-import { BaseDocument, ConnectedAccountProvider } from './common.model';
+import { ActivityType, BaseDocument, ConnectedAccountProvider } from '@codeheroes/shared/types';
 
 export interface UserActivity extends BaseDocument {
   type: ActivityType;

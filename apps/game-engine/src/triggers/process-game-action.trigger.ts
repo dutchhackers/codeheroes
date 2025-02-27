@@ -1,23 +1,8 @@
+import { logger } from '@codeheroes/common';
 import { GameActionService } from '@codeheroes/game-core';
 import { ProgressionService } from '@codeheroes/gamification';
 import { GameAction } from '@codeheroes/shared/types';
-import { GameAction as OldGameAction } from '@codeheroes/gamification';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
-
-function transformToOldGameAction(newAction: GameAction): OldGameAction {
-  return {
-    userId: newAction.userId,
-    actionType: newAction.type,
-    metadata: {
-      ...newAction.context,
-      ...newAction.metrics,
-      externalId: newAction.externalId,
-      provider: newAction.provider,
-      externalUser: newAction.externalUser,
-      timestamp: newAction.timestamp,
-    },
-  };
-}
 
 export const processGameAction = onDocumentCreated('gameActions/{actionId}', async (event) => {
   const gameAction = event.data?.data() as GameAction;
@@ -27,10 +12,15 @@ export const processGameAction = onDocumentCreated('gameActions/{actionId}', asy
   const progressionService = new ProgressionService();
 
   try {
-    const oldGameAction = transformToOldGameAction(gameAction);
-    await progressionService.processGameAction(oldGameAction);
+    logger.info(`Processing game action: ${gameAction.id} of type ${gameAction.type}`);
+
+    // Process the action with the gamification service
+    await progressionService.processGameAction(gameAction);
     await gameActionService.markAsProcessed(gameAction.id);
+
+    logger.info(`Successfully processed game action: ${gameAction.id}`);
   } catch (error) {
+    logger.error(`Failed to process game action: ${gameAction.id}`, { error });
     await gameActionService.markAsFailed(gameAction.id, error.message);
     throw error;
   }

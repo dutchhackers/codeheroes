@@ -1,23 +1,23 @@
-import { DatabaseInstance, DatabaseService, getCurrentTimeAsISO, logger } from '@codeheroes/common';
-import { Event } from '@codeheroes/event';
-import { GithubPullRequestEventData, GithubPushEventData } from '@codeheroes/providers';
-import { Collections } from '@codeheroes/shared/types';
+import { DatabaseInstance, getCurrentTimeAsISO } from '@codeheroes/common';
+import {
+  ActivityNotInUse as Activity,
+  ActivityCounters,
+  ActivityStats,
+  Collections,
+  ProgressionEventType,
+  TimeBasedActivityStats,
+  TimeBasedStatsQuery,
+} from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getRecentDailyIds, getRecentWeeklyIds, getTimeFrameIds } from '../../utils/time-frame.utils';
-import { ProgressionEventType } from '../events/event-types';
 import { UnifiedEventHandlerService } from '../events/unified-event-handler.service';
-import { GameAction } from '../interfaces/action';
-import { Activity, ActivityCounters, ActivityStats } from '../interfaces/activity';
-import { TimeBasedActivityStats, TimeBasedStatsQuery } from '../interfaces/time-based-activity';
 
 export class ActivityService {
   private db: Firestore;
-  private databaseService: DatabaseService;
   private eventHandler: UnifiedEventHandlerService;
 
   constructor() {
     this.db = DatabaseInstance.getInstance();
-    this.databaseService = new DatabaseService();
     this.eventHandler = new UnifiedEventHandlerService();
   }
 

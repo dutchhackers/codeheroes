@@ -1,25 +1,10 @@
-import { Activity } from '../interfaces/activity';
-import { ProgressionState } from '../interfaces/progression';
+import {
+  ActivityNotInUse as Activity,
+  ProgressionState,
+  ProgressionEvent,
+  ProgressionEventType,
+} from '@codeheroes/shared/types';
 import { PubSub } from '@google-cloud/pubsub';
-
-export enum ProgressionEventType {
-  XP_GAINED = 'progression.xp.gained',
-  LEVEL_UP = 'progression.level.up',
-  BADGE_EARNED = 'progression.badge.earned',
-  ACTIVITY_RECORDED = 'progression.activity.recorded',
-}
-
-export interface ProgressionEvent {
-  userId: string;
-  timestamp: string;
-  type: ProgressionEventType;
-  data: {
-    activity?: Activity;
-    state?: Partial<ProgressionState>;
-    previousState?: Partial<ProgressionState>;
-    badgeId?: string;
-  };
-}
 
 export class ProgressionEventService {
   private pubsub: PubSub;

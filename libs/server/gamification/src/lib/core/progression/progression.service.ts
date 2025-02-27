@@ -1,17 +1,21 @@
 import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
-import { Collections, GameActionType } from '@codeheroes/shared/types';
+import {
+  ActionResult,
+  ActivityNotInUse as Activity,
+  Collections,
+  GameAction,
+  ProgressionState,
+  ProgressionUpdate,
+} from '@codeheroes/shared/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../constants/level-thresholds';
 import { ActionHandlerFactory } from '../../factories/action-handler.factory';
+import { ActivityService } from '../activity/activity.service';
 import { ProgressionEventService } from '../events/event-types';
-import { ActionResult, GameAction } from '../interfaces/action';
-import { Activity, ActivityStats } from '../interfaces/activity';
-import { ProgressionState, ProgressionUpdate } from '../interfaces/progression';
 import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
 import { RewardService } from '../services/reward.service';
-import { ActivityService } from '../activity/activity.service';
 
 export class ProgressionService {
   private db: Firestore;
@@ -47,13 +51,14 @@ export class ProgressionService {
       action.userId,
       {
         xpGained: result.xpGained,
-        activityType: action.actionType,
+        activityType: action.type,
       },
       {
         id: this.generateId(),
         userId: action.userId,
-        type: action.actionType,
-        metadata: action.metadata,
+        type: action.type,
+        context: action.context,
+        metrics: action.metrics,
         xp: {
           earned: result.xpGained,
           breakdown: [{ type: 'base', amount: result.xpGained, description: 'Base XP' }],
@@ -185,7 +190,7 @@ export class ProgressionService {
   }
 
   private isActivityMilestone(action: GameAction, state: ProgressionState): boolean {
-    const activityCount = state.counters?.[action.actionType] || 0;
+    const activityCount = state.counters?.[action.type] || 0;
     const milestones = [10, 50, 100, 500];
     return milestones.includes(activityCount);
   }
