@@ -1,25 +1,9 @@
+import { logger } from '@codeheroes/common';
 import { Request } from 'express';
 import { ErrorType, MESSAGES } from '../core/constants/constants';
 import { GitHubEventConfig, SupportedEventType } from '../core/constants/github.constants';
 import { GitHubError } from '../core/errors/github-event.error';
 import { GitHubWebhookEvent } from './interfaces';
-import { logger } from '@codeheroes/common';
-import {
-  IssueEvent,
-  PullRequestEvent,
-  PullRequestReviewCommentEvent,
-  PullRequestReviewEvent,
-  PullRequestReviewThreadEvent,
-  PushEvent,
-} from '../core/interfaces/github.interfaces';
-
-type GitHubPayload =
-  | IssueEvent
-  | PullRequestEvent
-  | PullRequestReviewCommentEvent
-  | PullRequestReviewEvent
-  | PullRequestReviewThreadEvent
-  | PushEvent;
 
 export class GitHubEventUtils {
   static isEventTypeSupported(eventType: string): eventType is SupportedEventType {
@@ -53,7 +37,7 @@ export class GitHubEventUtils {
       throw new GitHubError(MESSAGES.unsupportedAction(action, githubEvent), ErrorType.UNSUPPORTED_EVENT);
     }
 
-    const payload = req.body as GitHubPayload;
+    const payload = req.body as unknown;
 
     return {
       eventId,

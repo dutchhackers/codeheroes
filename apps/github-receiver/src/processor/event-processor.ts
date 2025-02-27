@@ -1,7 +1,7 @@
-import { ConnectedAccountProvider, logger } from '@codeheroes/common';
+import { logger } from '@codeheroes/common';
 import { CreateEventInput, EventService } from '@codeheroes/event';
-import { ParserFactory } from '../parsers/factory';
 import { GitHubWebhookEvent, ProcessResult } from './interfaces';
+import { ConnectedAccountProvider } from '@codeheroes/shared/types';
 
 export class EventProcessor {
   private readonly eventService: EventService;
@@ -29,30 +29,19 @@ export class EventProcessor {
         return {
           success: false,
           message: `Event ${this.webhookEvent.eventId} already processed`,
-        };
-      }
-
-      // Parse the event data using appropriate parser
-      const parser = ParserFactory.createParser(this.webhookEvent);
-      const eventData = parser.parse(this.webhookEvent.payload);
-
-      // If parser returns null, skip processing this event
-      if (eventData === null) {
-        logger.info(`Skipping event ${this.webhookEvent.eventId} as per parser rules`);
-        return {
-          success: true,
-          message: 'Event skipped as per parser rules',
+          event: existingEvent,
         };
       }
 
       // Create and store the event
       const createEventInput = await this.generateCreateEventInput();
-      await this.eventService.createEvent(createEventInput, eventData);
+      const newEvent = await this.eventService.createEvent(createEventInput, {});
 
       logger.info(`Successfully processed ${this.webhookEvent.eventType} event`);
       return {
         success: true,
         message: 'Event processed successfully',
+        event: newEvent,
       };
     } catch (error) {
       logger.error('Failed to process event:', error);

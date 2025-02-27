@@ -1,4 +1,4 @@
-import { BaseDocument, ConnectedAccountProvider } from '@codeheroes/common';
+import { BaseDocument, ConnectedAccountProvider } from '@codeheroes/shared/types';
 
 export interface EventSource {
   id: string;
@@ -6,7 +6,7 @@ export interface EventSource {
 }
 
 export interface Event extends BaseDocument {
-  provider: ConnectedAccountProvider;
+  provider: ConnectedAccountProvider; // Open question: should this be called 'platform'?
   source: EventSource;
   data?: Record<string, unknown>;
 }

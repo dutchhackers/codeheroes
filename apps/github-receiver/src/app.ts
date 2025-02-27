@@ -1,8 +1,8 @@
-import { logger, StorageService } from '@codeheroes/common';
+import { DatabaseService, logger, WebhookService } from '@codeheroes/common';
+import { GameActionService } from '@codeheroes/game-core';
 import { Request, Response } from 'express';
 import { ErrorType, MESSAGES } from './core/constants/constants';
 import { GitHubError } from './core/errors/github-event.error';
-import { EventStorageUtils } from './core/utils/event-storage.utils';
 import { ResponseHandler } from './core/utils/response.handler';
 import { EventProcessor } from './processor/event-processor';
 import { GitHubEventUtils } from './processor/utils';
@@ -18,16 +18,50 @@ export const App = async (req: Request, res: Response): Promise<void> => {
       throw error instanceof Error ? error : new GitHubError(MESSAGES.MISSING_GITHUB_EVENT);
     }
 
-    // Store the raw event
-    const storageService = new StorageService();
-    const filePath = EventStorageUtils.generateFilePath(eventData);
-    const headers = EventStorageUtils.formatHeaders(eventData.headers);
-    const content = `${headers}\n\n${JSON.stringify(eventData.payload, null, 2)}`;
-    await storageService.storeFile(filePath, content, { contentType: 'text/plain' });
+    // Store the raw webhook with GitHub-specific headers
+    const webhookService = new WebhookService();
+    await webhookService.storeRawWebhook(req, 'github', {
+      eventType: req.headers['x-github-event'] as string,
+      eventId: req.headers['x-github-delivery'] as string,
+    });
 
     // Process the event
     const processor = new EventProcessor(eventData);
     const result = await processor.process();
+
+    // Lookup internal user ID
+    const databaseService = new DatabaseService();
+    const externalUserId = req.body.sender?.id?.toString();
+    if (!externalUserId) {
+      logger.warn('No sender ID in webhook payload');
+      ResponseHandler.success(res, MESSAGES.EVENT_PROCESSED);
+      return;
+    }
+
+    const userId = await databaseService.lookupUserId({
+      sender: {
+        id: externalUserId,
+      },
+      provider: 'github',
+    });
+
+    if (!userId) {
+      logger.warn('No matching user found for webhook', {
+        provider: 'github',
+        externalUserId,
+      });
+      ResponseHandler.success(res, MESSAGES.EVENT_PROCESSED);
+      return;
+    }
+
+    // Create game action from webhook payload
+    const gameActionService = new GameActionService();
+    await gameActionService.generateGameActionFromWebhook({
+      payload: eventData.payload,
+      provider: eventData.provider,
+      eventType: eventData.eventType,
+      userId,
+    });
 
     if (!result.success) {
       if (result.error) {
@@ -45,8 +79,8 @@ export const App = async (req: Request, res: Response): Promise<void> => {
       ResponseHandler.handleError(error, res);
       return;
     }
-    
-    logger.error('Event processing error:', error);
+
+    logger.error('Error processing GitHub event', { error });
     ResponseHandler.handleError(error, res);
   }
 };

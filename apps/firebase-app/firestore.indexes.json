@@ -21,6 +21,15 @@
   //    },
   //   ]
   // ]
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "records",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "timeframeId", "order": "DESCENDING" },
+        { "fieldPath": "countersLastUpdated", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }

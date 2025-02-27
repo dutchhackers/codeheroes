@@ -1,8 +1,7 @@
+import { PaginatedResponse, PaginationParams } from '@codeheroes/shared/types';
 import { CollectionReference } from 'firebase-admin/firestore';
-import { PaginatedResponse, PaginationParams } from '../core/interfaces/pagination.interface';
-import { BaseFirestoreService } from '../core/services';
-import { CounterService } from '../core/services';
 import { getCurrentTimeAsISO } from '../core/firebase';
+import { BaseFirestoreService, CounterService } from '../core/services';
 import { userConverter } from './user.converter';
 import { CreateUserInput, UpdateUserInput } from './user.dto';
 import { User } from './user.model';
