@@ -21,7 +21,9 @@ export class AppComponent {
         return;
       }
 
-      this.#router.navigate([ROUTES.PROFILE]);
+      if (window.location.pathname.substring(1) === ROUTES.LOGIN) {
+        this.#router.navigate([ROUTES.PROFILE]);
+      }
     });
   }
 }
