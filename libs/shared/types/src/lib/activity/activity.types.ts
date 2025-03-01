@@ -22,17 +22,6 @@ export interface ActivityStats {
   };
 }
 
-export enum ActivityType {
-  CODE_PUSH = 'CODE_PUSH',
-  PR_CREATED = 'PR_CREATED',
-  PR_MERGED = 'PR_MERGED',
-  PR_REVIEWED = 'PR_REVIEWED',
-  ISSUE_CREATED = 'ISSUE_CREATED',
-  ISSUE_CLOSED = 'ISSUE_CLOSED',
-  REVIEW_COMMENT = 'REVIEW_COMMENT',
-  CODE_REVIEW = 'CODE_REVIEW',
-}
-
 // For UI display purposes - more specific than GameActionType
 export enum ActivityIconType {
   PUSH = 'push',
@@ -51,7 +40,10 @@ export enum ActivityIconType {
 export interface Activity {
   id: string;
   userId: string;
-  type: GameActionType;
+  // Instead of using GameActionType directly, we'll use a const that indicates
+  // this is a game action record, while storing the actual type in sourceActionType
+  type: 'game-action';
+  sourceActionType: GameActionType; // Store the original action type
 
   // Context and metrics from GameAction
   context: GameActionContext;
@@ -70,6 +62,7 @@ export interface Activity {
     };
   };
 
+  // XP information earned from this activity
   xp: {
     earned: number;
     breakdown: Array<{
@@ -78,6 +71,14 @@ export interface Activity {
       description: string;
     }>;
   };
+
+  // Metadata like level at time of activity, bonuses applied
+  metadata?: {
+    level?: number;
+    bonuses?: Record<string, number>;
+    [key: string]: any;
+  };
+
   createdAt: string;
   updatedAt: string;
 }

@@ -55,7 +55,7 @@ export class ActivityService {
 
       // Update last activity
       newStats.lastActivity = {
-        type: activity.type,
+        type: activity.sourceActionType, // Use sourceActionType instead of type
         timestamp: activity.updatedAt,
       };
 

@@ -172,7 +172,8 @@ export abstract class BaseActionHandler {
         transaction.set(activityRef, <Activity>{
           id: activityRef.id,
           userId,
-          type: this.actionType,
+          type: 'game-action',
+          sourceActionType: this.actionType,
           // Store the complete context and metrics
           context: action.context,
           metrics: action.metrics,

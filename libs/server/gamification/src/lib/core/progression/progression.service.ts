@@ -64,14 +64,15 @@ export class ProgressionService {
       {
         id: this.generateId(),
         userId: action.userId,
-        type: action.type,
+        type: 'game-action',
+        sourceActionType: action.type,
         context: action.context,
         metrics: action.metrics,
         // Add display information for UI
         display: {
           title: `${action.type.replace(/_/g, ' ')}`,
           description: '',
-          iconType: 'code' as ActivityIconType,
+          iconType: action.type, // Using action type directly is valid here
           additionalInfo,
         },
         xp: {
