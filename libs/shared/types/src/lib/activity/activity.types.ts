@@ -33,7 +33,23 @@ export enum ActivityType {
   CODE_REVIEW = 'CODE_REVIEW',
 }
 
-export interface Activity {
+// For UI display purposes - more specific than GameActionType
+export enum ActivityIconType {
+  PUSH = 'push',
+  PR_CREATE = 'pr-create',
+  PR_MERGE = 'pr-merge',
+  PR_CLOSE = 'pr-close',
+  REVIEW = 'review',
+  ISSUE = 'issue',
+  ISSUE_OPEN = 'issue-open',
+  ISSUE_CLOSE = 'issue-close',
+  COMMIT = 'commit',
+  CODE = 'code',
+  WORKOUT = 'workout',
+}
+
+// Legacy Activity interface (consider deprecating)
+export interface ActivityLegacy {
   id: string;
   userId: string;
   type: ActivityType;
@@ -63,13 +79,29 @@ export interface Activity {
   };
 }
 
-export interface ActivityNotInUse {
+// New improved Activity interface with UI-friendly data
+export interface Activity {
   id: string;
   userId: string;
   type: GameActionType;
-  // Add context and metrics from GameAction
+
+  // Context and metrics from GameAction
   context: GameActionContext;
   metrics: GameActionMetrics;
+
+  // UI display metadata - these fields make the Activity usable directly in UI
+  display: {
+    title: string; // e.g., "Pushed 3 commits to main" or "Merged PR: Add user settings"
+    description: string; // More detailed info or commit message excerpt
+    url?: string; // Link to the actual item (PR, commit, etc.)
+    iconType: ActivityIconType | GameActionType; // For UI to show appropriate icon
+    additionalInfo?: {
+      repositoryName?: string; // Repository name for display - moved from root level
+      repositoryOwner?: string; // Repository owner for display - moved from root level
+      [key: string]: any;
+    };
+  };
+
   xp: {
     earned: number;
     breakdown: Array<{

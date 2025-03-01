@@ -1,6 +1,6 @@
 import { DatabaseInstance, getCurrentTimeAsISO } from '@codeheroes/common';
 import {
-  ActivityNotInUse as Activity,
+  Activity,
   ActivityCounters,
   ActivityStats,
   Collections,

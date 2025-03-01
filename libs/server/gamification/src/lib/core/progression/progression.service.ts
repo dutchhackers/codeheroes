@@ -2,7 +2,8 @@ import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/commo
 import { NotificationService } from '@codeheroes/notifications';
 import {
   ActionResult,
-  ActivityNotInUse as Activity,
+  Activity,
+  ActivityIconType,
   Collections,
   GameAction,
   ProgressionState,
@@ -46,6 +47,13 @@ export class ProgressionService {
       throw new Error('User state not found');
     }
 
+    // Extract repository information for additionalInfo
+    const additionalInfo: Record<string, any> = {};
+    if ('repository' in action.context) {
+      additionalInfo.repositoryName = action.context.repository.name;
+      additionalInfo.repositoryOwner = action.context.repository.owner;
+    }
+
     // Process XP gain and progression
     const updatedState = await this.updateProgression(
       action.userId,
@@ -59,6 +67,13 @@ export class ProgressionService {
         type: action.type,
         context: action.context,
         metrics: action.metrics,
+        // Add display information for UI
+        display: {
+          title: `${action.type.replace(/_/g, ' ')}`,
+          description: '',
+          iconType: 'code' as ActivityIconType,
+          additionalInfo,
+        },
         xp: {
           earned: result.xpGained,
           breakdown: [{ type: 'base', amount: result.xpGained, description: 'Base XP' }],

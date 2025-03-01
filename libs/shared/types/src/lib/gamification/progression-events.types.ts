@@ -1,4 +1,4 @@
-import { ActivityNotInUse as Activity } from '../activity/activity.types';
+import { Activity } from '../activity/activity.types';
 import { ProgressionState } from './progression.types';
 
 export enum ProgressionEventType {

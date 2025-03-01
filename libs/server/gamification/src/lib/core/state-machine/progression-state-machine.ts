@@ -1,7 +1,7 @@
 import { DatabaseInstance } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
 import { Firestore } from 'firebase-admin/firestore';
-import { ActivityNotInUse as Activity } from '@codeheroes/shared/types';
+import { Activity } from '@codeheroes/shared/types';
 import { RewardType } from '@codeheroes/shared/types';
 import { ProgressionState } from '@codeheroes/shared/types';
 import { BadgeService } from '../services/badge.service';
