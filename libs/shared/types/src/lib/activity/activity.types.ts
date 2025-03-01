@@ -48,38 +48,6 @@ export enum ActivityIconType {
   WORKOUT = 'workout',
 }
 
-// Legacy Activity interface (consider deprecating)
-export interface ActivityLegacy {
-  id: string;
-  userId: string;
-  type: ActivityType;
-  timestamp: string;
-  provider: 'github' | 'gitlab' | 'bitbucket';
-  data: {
-    repository: {
-      id: string;
-      name: string;
-      owner: string;
-    };
-    metrics?: {
-      linesAdded?: number;
-      linesRemoved?: number;
-      filesChanged?: number;
-      commits?: number;
-    };
-    metadata: Record<string, unknown>;
-  };
-  xp: {
-    earned: number;
-    breakdown: Array<{
-      type: string;
-      amount: number;
-      reason: string;
-    }>;
-  };
-}
-
-// New improved Activity interface with UI-friendly data
 export interface Activity {
   id: string;
   userId: string;
