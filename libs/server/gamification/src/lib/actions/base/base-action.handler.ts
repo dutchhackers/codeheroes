@@ -31,26 +31,8 @@ export abstract class BaseActionHandler {
       countersLastUpdated: getCurrentTimeAsISO(),
     };
 
-    switch (this.actionType) {
-      case 'code_push':
-        updates['counters.codePushes'] = FieldValue.increment(1);
-        break;
-      case 'pull_request_create':
-        updates['counters.pullRequests.created'] = FieldValue.increment(1);
-        updates['counters.pullRequests.total'] = FieldValue.increment(1);
-        break;
-      case 'pull_request_merge':
-        updates['counters.pullRequests.merged'] = FieldValue.increment(1);
-        updates['counters.pullRequests.total'] = FieldValue.increment(1);
-        break;
-      case 'pull_request_close':
-        updates['counters.pullRequests.closed'] = FieldValue.increment(1);
-        updates['counters.pullRequests.total'] = FieldValue.increment(1);
-        break;
-      case 'code_review_submit':
-        updates['counters.codeReviews'] = FieldValue.increment(1);
-        break;
-    }
+    // Simple update for the specific action type counter
+    updates[`counters.actions.${this.actionType}`] = FieldValue.increment(1);
 
     return updates;
   }
@@ -60,20 +42,9 @@ export abstract class BaseActionHandler {
     const statsDoc = await statsRef.get();
 
     if (!statsDoc.exists || !statsDoc.data()?.counters) {
-      const initialCounters: ActivityCounters = {
-        pullRequests: {
-          created: 0,
-          merged: 0,
-          closed: 0,
-          total: 0,
-        },
-        codePushes: 0,
-        codeReviews: 0,
-      };
-
       await statsRef.set(
         {
-          counters: initialCounters,
+          counters: this.getInitialCounters(),
           countersLastUpdated: getCurrentTimeAsISO(),
         },
         { merge: true },
@@ -355,14 +326,21 @@ export abstract class BaseActionHandler {
 
   protected getInitialCounters(): ActivityCounters {
     return {
-      pullRequests: {
-        created: 0,
-        merged: 0,
-        closed: 0,
-        total: 0,
+      actions: {
+        // Initialize counters for all known action types to 0
+        code_push: 0,
+        pull_request_create: 0,
+        pull_request_merge: 0,
+        pull_request_close: 0,
+        code_review_submit: 0,
+        code_review_comment: 0,
+        issue_create: 0,
+        issue_close: 0,
+        issue_reopen: 0,
+        workout_complete: 0,
+        distance_milestone: 0,
+        speed_record: 0,
       },
-      codePushes: 0,
-      codeReviews: 0,
     };
   }
 

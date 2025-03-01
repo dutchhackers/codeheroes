@@ -23,14 +23,21 @@ export class ActivityService {
 
   private getInitialCounters(): ActivityCounters {
     return {
-      pullRequests: {
-        created: 0,
-        merged: 0,
-        closed: 0,
-        total: 0,
+      actions: {
+        // Initialize counters for all known action types to 0
+        code_push: 0,
+        pull_request_create: 0,
+        pull_request_merge: 0,
+        pull_request_close: 0,
+        code_review_submit: 0,
+        code_review_comment: 0,
+        issue_create: 0,
+        issue_close: 0,
+        issue_reopen: 0,
+        workout_complete: 0,
+        distance_milestone: 0,
+        speed_record: 0,
       },
-      codePushes: 0,
-      codeReviews: 0,
     };
   }
 

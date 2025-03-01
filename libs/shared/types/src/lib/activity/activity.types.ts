@@ -3,14 +3,10 @@ import { GameActionContext } from '../game/context.types';
 import { GameActionMetrics } from '../game/metrics.types';
 
 export interface ActivityCounters {
-  pullRequests: {
-    created: number;
-    merged: number;
-    closed: number;
-    total: number;
+  // Single consistent approach for all action types
+  actions: {
+    [key in GameActionType]?: number;
   };
-  codePushes: number;
-  codeReviews: number;
 }
 
 export interface ActivityStats {
