@@ -1,6 +1,6 @@
 import { GameAction, GameActionType } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
-import { BaseActionHandler } from '../actions/base/abstract-action.handler';
+import { AbstractActionHandler } from '../actions/base/abstract-action.handler';
 import { CodePushHandler } from '../actions/code-push/code-push.handler';
 import { CodeReviewSubmitHandler } from '../actions/code-review/code-review-submit.handler';
 import { PullRequestCloseHandler } from '../actions/pull-request/pr-close.handler';
@@ -9,7 +9,7 @@ import { PullRequestMergeHandler } from '../actions/pull-request/pr-merge.handle
 
 export class ActionHandlerFactory {
   private static db: Firestore;
-  private static handlers: Map<GameActionType, BaseActionHandler>;
+  private static handlers: Map<GameActionType, AbstractActionHandler>;
 
   static initialize(db: Firestore): void {
     this.db = db;
@@ -23,7 +23,7 @@ export class ActionHandlerFactory {
     this.handlers.set('code_review_submit', new CodeReviewSubmitHandler(db));
   }
 
-  static getHandler(action: GameAction): BaseActionHandler {
+  static getHandler(action: GameAction): AbstractActionHandler {
     if (!this.handlers) {
       throw new Error('ActionHandlerFactory not initialized. Call initialize() first.');
     }

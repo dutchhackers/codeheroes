@@ -1,8 +1,8 @@
 import { GameActionType } from '@codeheroes/types';
-import { BaseActionHandler } from '../base/abstract-action.handler';
+import { AbstractActionHandler } from '../base/abstract-action.handler';
 import { XP_SETTINGS } from '../../constants/xp-values.config';
 
-export class PullRequestMergeHandler extends BaseActionHandler {
+export class PullRequestMergeHandler extends AbstractActionHandler {
   protected actionType: GameActionType = 'pull_request_merge';
 
   protected calculateBaseXp(): number {

@@ -14,7 +14,7 @@ import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { ProgressionService } from '../../core/progression/user-progression.service';
 import { getTimeFrameIds } from '../../utils/time-periods.utils';
 
-export abstract class BaseActionHandler {
+export abstract class AbstractActionHandler {
   protected abstract actionType: GameActionType;
   private progressionService: ProgressionService;
 

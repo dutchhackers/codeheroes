@@ -1,8 +1,8 @@
 import { GameActionType } from '@codeheroes/types';
-import { BaseActionHandler } from '../base/abstract-action.handler';
+import { AbstractActionHandler } from '../base/abstract-action.handler';
 import { XP_SETTINGS } from '../../constants/xp-values.config';
 
-export class PullRequestCreateHandler extends BaseActionHandler {
+export class PullRequestCreateHandler extends AbstractActionHandler {
   protected actionType: GameActionType = 'pull_request_create';
 
   protected calculateBaseXp(): number {

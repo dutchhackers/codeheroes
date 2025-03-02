@@ -1,8 +1,8 @@
 import { GameActionType } from '@codeheroes/types';
-import { BaseActionHandler } from '../base/abstract-action.handler';
+import { AbstractActionHandler } from '../base/abstract-action.handler';
 import { XP_SETTINGS } from '../../constants/xp-values.config';
 
-export class CodePushHandler extends BaseActionHandler {
+export class CodePushHandler extends AbstractActionHandler {
   protected actionType: GameActionType = 'code_push';
 
   protected calculateBaseXp(): number {
