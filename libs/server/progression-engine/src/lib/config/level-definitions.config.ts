@@ -15,7 +15,7 @@ export interface LevelDefinition {
   };
 }
 
-export const LEVEL_DEFINITION: LevelDefinition[] = [
+export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   {
     level: 1,
     xpRequired: 0,
