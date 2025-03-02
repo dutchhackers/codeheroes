@@ -12,7 +12,7 @@ import {
 } from '@codeheroes/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { UserProgressionService } from '../../core/progression/user-progression.service';
-import { getTimeFrameIds } from '../../utils/time-periods.utils';
+import { getTimePeriodIds } from '../../utils/time-periods.utils';
 
 export abstract class AbstractActionHandler {
   protected abstract actionType: GameActionType;
@@ -52,7 +52,7 @@ export abstract class AbstractActionHandler {
     const { userId } = action;
     logger.info(`Starting action handler for ${this.actionType}`, { userId });
 
-    const timeFrames = getTimeFrameIds();
+    const timeFrames = getTimePeriodIds();
     const userRef = this.db.collection(Collections.Users).doc(userId);
     await this.initializeCountersIfNeeded(userRef);
 
