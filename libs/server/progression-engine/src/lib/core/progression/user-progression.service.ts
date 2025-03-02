@@ -17,6 +17,10 @@ import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
 import { RewardService } from '../services/reward.service';
 
+/**
+ * Service for managing user progression, including XP, levels, and rewards
+ * (This was previously named ProgressionService)
+ */
 export class UserProgressionService {
   private db: Firestore;
   private eventService: EventPublisherService;
@@ -193,7 +197,7 @@ export class UserProgressionService {
   }
 
   private isActivityMilestone(action: GameAction, state: ProgressionState): boolean {
-    const activityCount = state.counters?.[action.type] || 0;
+    const activityCount = state.counters?.actions?.[action.type] || 0;
     const milestones = [10, 50, 100, 500];
     return milestones.includes(activityCount);
   }
