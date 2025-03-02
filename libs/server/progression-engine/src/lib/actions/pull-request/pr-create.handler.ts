@@ -1,19 +1,19 @@
 import { GameActionType } from '@codeheroes/types';
 import { AbstractActionHandler } from '../base/abstract-action.handler';
-import { XP_SETTINGS } from '../../constants/xp-values.config';
+import { XP_VALUES } from '../../constants/xp-values.config';
 
 export class PullRequestCreateHandler extends AbstractActionHandler {
   protected actionType: GameActionType = 'pull_request_create';
 
   protected calculateBaseXp(): number {
-    return XP_SETTINGS.PULL_REQUEST.CREATE.BASE;
+    return XP_VALUES.PULL_REQUEST.CREATE.BASE;
   }
 
   protected calculateBonuses(metadata: Record<string, any>) {
     const bonuses = {
-      multipleFiles: metadata.changedFiles > 3 ? XP_SETTINGS.PULL_REQUEST.CREATE.BONUSES.MULTIPLE_FILES : 0,
+      multipleFiles: metadata.changedFiles > 3 ? XP_VALUES.PULL_REQUEST.CREATE.BONUSES.MULTIPLE_FILES : 0,
       significantChanges:
-        metadata.additions + metadata.deletions > 100 ? XP_SETTINGS.PULL_REQUEST.CREATE.BONUSES.SIGNIFICANT_CHANGES : 0,
+        metadata.additions + metadata.deletions > 100 ? XP_VALUES.PULL_REQUEST.CREATE.BONUSES.SIGNIFICANT_CHANGES : 0,
     };
 
     return {

@@ -1,4 +1,4 @@
-export const XP_SETTINGS = {
+export const XP_VALUES = {
   CODE_PUSH: {
     BASE: 120,
     BONUSES: {
