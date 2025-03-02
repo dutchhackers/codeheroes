@@ -4,9 +4,9 @@ import { Firestore } from 'firebase-admin/firestore';
 import { Activity } from '@codeheroes/types';
 import { RewardType } from '@codeheroes/types';
 import { ProgressionState } from '@codeheroes/types';
-import { BadgeService } from '../services/badge.service';
-import { LevelService } from '../services/level.service';
-import { EventPublisherService } from '../events/event-publisher.service';
+import { BadgeService } from '../../rewards/services/badge.service';
+import { LevelService } from '../../rewards/services/level.service';
+import { EventPublisherService } from '../../events/event-publisher.service';
 
 /**
  * Manages the progression state for a user, handling state transitions

@@ -11,7 +11,7 @@ import {
   TimeBasedActivityStats,
 } from '@codeheroes/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { UserProgressionService } from '../../core/progression/user-progression.service';
+import { UserProgressionService } from '../../progression/services/user-progression.service';
 import { getTimePeriodIds } from '../../utils/time-periods.utils';
 
 export abstract class AbstractActionHandler {

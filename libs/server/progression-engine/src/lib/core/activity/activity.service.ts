@@ -10,7 +10,7 @@ import {
 } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getRecentDailyIds, getRecentWeeklyIds, getTimePeriodIds } from '../../utils/time-periods.utils';
-import { EventProcessorService } from '../events/event-processor.service';
+import { EventProcessorService } from '../../events/event-processor.service';
 
 export class ActivityService {
   private db: Firestore;

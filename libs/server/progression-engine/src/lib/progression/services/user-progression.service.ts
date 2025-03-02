@@ -9,13 +9,13 @@ import {
   ProgressionUpdate,
 } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
-import { getXpProgress } from '../../constants/level-thresholds';
+import { getXpProgress } from '../../config/level-thresholds';
+import { ActivityService } from '../../core/activity/activity.service';
+import { EventPublisherService } from '../../events/event-publisher.service';
 import { ActionHandlerFactory } from '../../factories/action-handler.factory';
-import { ActivityService } from '../activity/activity.service';
-import { EventPublisherService } from '../events/event-publisher.service';
-import { BadgeService } from '../services/badge.service';
-import { LevelService } from '../services/level.service';
-import { RewardService } from '../services/reward.service';
+import { BadgeService } from '../../rewards/services/badge.service';
+import { LevelService } from '../../rewards/services/level.service';
+import { RewardService } from '../../rewards/services/reward.service';
 
 /**
  * Service for managing user progression, including XP, levels, and rewards
