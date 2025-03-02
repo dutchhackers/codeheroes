@@ -1,4 +1,4 @@
-import { LevelConfig } from '../../constants/level-definitions.config';
+import { LevelDefinition } from '../../constants/level-definitions.config';
 import {
   calculateXpForLevel,
   getLevelFromXp,
@@ -26,7 +26,7 @@ export function calculateLevelProgress(totalXp: number): number {
   return xpToNextLevel > 0 ? Math.min(100, (currentLevelXp / xpToNextLevel) * 100) : 100;
 }
 
-export function getLevelRewards(level: number): LevelConfig['rewards'] | undefined {
+export function getLevelRewards(level: number): LevelDefinition['rewards'] | undefined {
   const config = getLevelRequirements(level);
   return config?.rewards;
 }

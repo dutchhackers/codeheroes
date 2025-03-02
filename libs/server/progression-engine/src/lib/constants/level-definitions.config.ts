@@ -1,6 +1,6 @@
 import { LevelRequirementItem } from '@codeheroes/types';
 
-export interface LevelConfig {
+export interface LevelDefinition {
   level: number;
   xpRequired: number;
   requirements?: LevelRequirementItem[];
@@ -11,7 +11,7 @@ export interface LevelConfig {
   };
 }
 
-export const LEVEL_CONFIGURATION: LevelConfig[] = [
+export const LEVEL_CONFIGURATION: LevelDefinition[] = [
   {
     level: 1,
     xpRequired: 0,
