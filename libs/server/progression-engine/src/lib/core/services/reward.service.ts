@@ -4,7 +4,7 @@ import { Collections } from '@codeheroes/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { RewardType } from '@codeheroes/types';
 import { BadgeService } from './badge.service';
-import { ProgressionEventService } from '../events/event-types';
+import { ProgressionEventService } from '../events/event-publisher.service';
 
 export interface Reward {
   id: string;

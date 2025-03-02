@@ -11,8 +11,8 @@ import {
   TimeBasedActivityStats,
 } from '@codeheroes/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { ProgressionService } from '../../core/progression/progression.service';
-import { getTimeFrameIds } from '../../utils/time-frame.utils';
+import { ProgressionService } from '../../core/progression/user-progression.service';
+import { getTimeFrameIds } from '../../utils/time-periods.utils';
 
 export abstract class BaseActionHandler {
   protected abstract actionType: GameActionType;

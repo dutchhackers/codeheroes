@@ -6,7 +6,7 @@ import { RewardType } from '@codeheroes/types';
 import { ProgressionState } from '@codeheroes/types';
 import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
-import { ProgressionEventService } from '../events/event-types';
+import { ProgressionEventService } from '../events/event-publisher.service';
 
 interface ProgressionStateMachine {
   handleXpGain(xp: number, activity?: Activity): Promise<void>;

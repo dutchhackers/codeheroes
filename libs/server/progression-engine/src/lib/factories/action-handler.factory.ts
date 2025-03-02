@@ -1,6 +1,6 @@
 import { GameAction, GameActionType } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
-import { BaseActionHandler } from '../actions/base/base-action.handler';
+import { BaseActionHandler } from '../actions/base/abstract-action.handler';
 import { CodePushHandler } from '../actions/code-push/code-push.handler';
 import { CodeReviewSubmitHandler } from '../actions/code-review/code-review-submit.handler';
 import { PullRequestCloseHandler } from '../actions/pull-request/pr-close.handler';

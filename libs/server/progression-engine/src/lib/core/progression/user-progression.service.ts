@@ -12,7 +12,7 @@ import { Firestore } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../constants/level-thresholds';
 import { ActionHandlerFactory } from '../../factories/action-handler.factory';
 import { ActivityService } from '../activity/activity.service';
-import { ProgressionEventService } from '../events/event-types';
+import { ProgressionEventService } from '../events/event-publisher.service';
 import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
 import { RewardService } from '../services/reward.service';

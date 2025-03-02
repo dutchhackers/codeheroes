@@ -9,8 +9,8 @@ import {
   TimeBasedStatsQuery,
 } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
-import { getRecentDailyIds, getRecentWeeklyIds, getTimeFrameIds } from '../../utils/time-frame.utils';
-import { UnifiedEventHandlerService } from '../events/unified-event-handler.service';
+import { getRecentDailyIds, getRecentWeeklyIds, getTimeFrameIds } from '../../utils/time-periods.utils';
+import { UnifiedEventHandlerService } from '../events/event-processor.service';
 
 export class ActivityService {
   private db: Firestore;

@@ -1,4 +1,4 @@
-import { LevelConfig } from '../../constants/level-configuration';
+import { LevelConfig } from '../../constants/level-definitions.config';
 import {
   calculateXpForLevel,
   getLevelFromXp,
