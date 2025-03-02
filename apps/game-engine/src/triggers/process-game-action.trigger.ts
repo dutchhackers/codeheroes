@@ -1,7 +1,7 @@
 import { logger } from '@codeheroes/common';
-import { GameActionService } from '@codeheroes/game-core';
-import { ProgressionService } from '@codeheroes/gamification';
-import { GameAction } from '@codeheroes/shared/types';
+import { GameActionService } from '@codeheroes/integrations';
+import { ProgressionService } from '@codeheroes/progression-engine';
+import { GameAction } from '@codeheroes/types';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 
 export const processGameAction = onDocumentCreated('gameActions/{actionId}', async (event) => {

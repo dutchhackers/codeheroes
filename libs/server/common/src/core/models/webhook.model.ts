@@ -1,4 +1,4 @@
-import { ConnectedAccountProvider } from '@codeheroes/shared/types';
+import { ConnectedAccountProvider } from '@codeheroes/types';
 import { IncomingHttpHeaders } from 'http';
 
 export interface RawWebhookData {
