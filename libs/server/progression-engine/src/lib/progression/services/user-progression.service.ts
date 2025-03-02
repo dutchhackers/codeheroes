@@ -10,7 +10,7 @@ import {
 } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../config/level-thresholds';
-import { ActivityService } from '../../core/activity/activity.service';
+import { ActivityService } from '../../activities/services/activity.service';
 import { EventPublisherService } from '../../events/event-publisher.service';
 import { ActionHandlerFactory } from '../../factories/action-handler.factory';
 import { BadgeService } from '../../rewards/services/badge.service';

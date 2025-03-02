@@ -2,7 +2,7 @@
 export * from './lib/events/event-processor.service';
 export * from './lib/events/event-publisher.service';
 export * from './lib/progression/services/user-progression.service';
-export * from './lib/core/activity/activity.service';
+export * from './lib/activities/services/activity.service';
 
 // Supporting Services
 export * from './lib/rewards/services/badge.service';
