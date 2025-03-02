@@ -1,5 +1,5 @@
 import { logger } from '@codeheroes/common';
-import { GameActionService } from '@codeheroes/game-core';
+import { GameActionService } from '@codeheroes/integrations';
 import { ProgressionService } from '@codeheroes/gamification';
 import { GameAction } from '@codeheroes/shared/types';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';

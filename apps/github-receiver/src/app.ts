@@ -1,5 +1,5 @@
 import { DatabaseService, logger, WebhookService } from '@codeheroes/common';
-import { GameActionService } from '@codeheroes/game-core';
+import { GameActionService } from '@codeheroes/integrations';
 import { Request, Response } from 'express';
 import { ErrorType, MESSAGES } from './core/constants/constants';
 import { GitHubError } from './core/errors/github-event.error';
