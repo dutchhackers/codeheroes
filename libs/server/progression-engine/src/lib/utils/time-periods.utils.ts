@@ -1,6 +1,6 @@
 import { getCurrentTimeAsISO } from '@codeheroes/common';
 
-export interface TimeFrame {
+export interface TimePeriod {
   daily: string;
   weekly: string;
 }
@@ -8,7 +8,7 @@ export interface TimeFrame {
 /**
  * Get daily (YYYY-MM-DD) and weekly (YYYY-WXX) IDs for a given timestamp
  */
-export function getTimeFrameIds(timestamp?: string): TimeFrame {
+export function getTimePeriodIds(timestamp?: string): TimePeriod {
   const date = timestamp ? new Date(timestamp) : new Date();
 
   // Daily ID: YYYY-MM-DD

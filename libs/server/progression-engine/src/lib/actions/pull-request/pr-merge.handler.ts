@@ -1,19 +1,19 @@
 import { GameActionType } from '@codeheroes/types';
-import { BaseActionHandler } from '../base/base-action.handler';
-import { XP_SETTINGS } from '../../constants/xp-settings';
+import { XP_VALUES } from '../../config/xp-values.config';
+import { AbstractActionHandler } from '../base/abstract-action.handler';
 
-export class PullRequestMergeHandler extends BaseActionHandler {
+export class PullRequestMergeHandler extends AbstractActionHandler {
   protected actionType: GameActionType = 'pull_request_merge';
 
   protected calculateBaseXp(): number {
-    return XP_SETTINGS.PULL_REQUEST.MERGE.BASE;
+    return XP_VALUES.PULL_REQUEST.MERGE.BASE;
   }
 
   protected calculateBonuses(metadata: Record<string, any>) {
     const bonuses = {
-      multipleFiles: metadata.changedFiles > 3 ? XP_SETTINGS.PULL_REQUEST.MERGE.BONUSES.MULTIPLE_FILES : 0,
+      multipleFiles: metadata.changedFiles > 3 ? XP_VALUES.PULL_REQUEST.MERGE.BONUSES.MULTIPLE_FILES : 0,
       significantChanges:
-        metadata.additions + metadata.deletions > 100 ? XP_SETTINGS.PULL_REQUEST.MERGE.BONUSES.SIGNIFICANT_CHANGES : 0,
+        metadata.additions + metadata.deletions > 100 ? XP_VALUES.PULL_REQUEST.MERGE.BONUSES.SIGNIFICANT_CHANGES : 0,
       qualityBonus: metadata.approvals > 1 ? metadata.approvals * 50 : 0,
     };
 

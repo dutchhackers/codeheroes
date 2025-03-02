@@ -1,12 +1,12 @@
 import { GameActionType } from '@codeheroes/types';
-import { BaseActionHandler } from '../base/base-action.handler';
-import { XP_SETTINGS } from '../../constants/xp-settings';
+import { XP_VALUES } from '../../config/xp-values.config';
+import { AbstractActionHandler } from '../base/abstract-action.handler';
 
-export class CodePushHandler extends BaseActionHandler {
+export class CodePushHandler extends AbstractActionHandler {
   protected actionType: GameActionType = 'code_push';
 
   protected calculateBaseXp(): number {
-    return XP_SETTINGS.CODE_PUSH.BASE;
+    return XP_VALUES.CODE_PUSH.BASE;
   }
 
   protected calculateBonuses(metadata: Record<string, any>) {
@@ -15,7 +15,7 @@ export class CodePushHandler extends BaseActionHandler {
 
     // Multiple commits bonus
     if (metadata.commits > 1) {
-      const multipleCommitsBonus = XP_SETTINGS.CODE_PUSH.BONUSES.MULTIPLE_COMMITS;
+      const multipleCommitsBonus = XP_VALUES.CODE_PUSH.BONUSES.MULTIPLE_COMMITS;
       bonusXP += multipleCommitsBonus;
       breakdown.multipleCommits = multipleCommitsBonus;
     }

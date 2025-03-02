@@ -16,5 +16,6 @@
         "assets": ["libs/server/activity/*.md"]
       }
     }
-  }
+  },
+  "implicitDependencies": ["types"]
 }

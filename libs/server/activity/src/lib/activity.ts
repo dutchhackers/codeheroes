@@ -1,3 +1,1 @@
-export function activity(): string {
-  return 'activity';
-}
+export const ActivityLib = {};

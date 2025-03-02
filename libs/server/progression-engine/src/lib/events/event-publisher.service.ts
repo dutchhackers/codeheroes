@@ -1,7 +1,7 @@
 import { Activity, ProgressionState, ProgressionEvent, ProgressionEventType } from '@codeheroes/types';
 import { PubSub } from '@google-cloud/pubsub';
 
-export class ProgressionEventService {
+export class EventPublisherService {
   private pubsub: PubSub;
   private readonly topicName = 'progression-events';
 

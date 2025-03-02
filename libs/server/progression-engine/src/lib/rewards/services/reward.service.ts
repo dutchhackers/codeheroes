@@ -4,7 +4,7 @@ import { Collections } from '@codeheroes/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { RewardType } from '@codeheroes/types';
 import { BadgeService } from './badge.service';
-import { ProgressionEventService } from '../events/event-types';
+import { EventPublisherService } from '../../events/event-publisher.service';
 
 export interface Reward {
   id: string;
@@ -27,13 +27,13 @@ export class RewardService {
   private db: Firestore;
   private notificationService: NotificationService;
   private badgeService: BadgeService;
-  private eventService: ProgressionEventService;
+  private eventService: EventPublisherService;
 
   constructor(badgeService?: BadgeService) {
     this.db = DatabaseInstance.getInstance();
     this.notificationService = new NotificationService();
     this.badgeService = badgeService || new BadgeService();
-    this.eventService = new ProgressionEventService();
+    this.eventService = new EventPublisherService();
   }
 
   async grantReward(userId: string, reward: Reward): Promise<void> {

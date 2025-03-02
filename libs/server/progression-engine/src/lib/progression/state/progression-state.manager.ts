@@ -4,29 +4,28 @@ import { Firestore } from 'firebase-admin/firestore';
 import { Activity } from '@codeheroes/types';
 import { RewardType } from '@codeheroes/types';
 import { ProgressionState } from '@codeheroes/types';
-import { BadgeService } from '../services/badge.service';
-import { LevelService } from '../services/level.service';
-import { ProgressionEventService } from '../events/event-types';
+import { BadgeService } from '../../rewards/services/badge.service';
+import { LevelService } from '../../rewards/services/level.service';
+import { EventPublisherService } from '../../events/event-publisher.service';
 
-interface ProgressionStateMachine {
-  handleXpGain(xp: number, activity?: Activity): Promise<void>;
-  handleLevelUp(): Promise<void>;
-  getState(): ProgressionState;
-}
-
-export class GameProgressionStateMachine implements ProgressionStateMachine {
+/**
+ * Manages the progression state for a user, handling state transitions
+ * such as XP gain and level-ups
+ * (This was previously named GameProgressionStateMachine)
+ */
+export class ProgressionStateManager {
   private db: Firestore;
   private state: ProgressionState;
   private readonly levelService: LevelService;
   private readonly badgeService: BadgeService;
-  private readonly eventService: ProgressionEventService;
+  private readonly eventService: EventPublisherService;
   private readonly notificationService: NotificationService;
 
   constructor(
     initialState: ProgressionState,
     levelService: LevelService,
     badgeService: BadgeService,
-    eventService: ProgressionEventService,
+    eventService: EventPublisherService,
     notificationService: NotificationService,
   ) {
     this.db = DatabaseInstance.getInstance();

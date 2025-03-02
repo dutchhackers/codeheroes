@@ -16,5 +16,6 @@
         "assets": ["libs/server/achievements/*.md"]
       }
     }
-  }
+  },
+  "implicitDependencies": ["types"]
 }

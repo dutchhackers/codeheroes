@@ -1,12 +1,12 @@
 import { GameActionType } from '@codeheroes/types';
-import { BaseActionHandler } from '../base/base-action.handler';
-import { XP_SETTINGS } from '../../constants/xp-settings';
+import { XP_VALUES } from '../../config/xp-values.config';
+import { AbstractActionHandler } from '../base/abstract-action.handler';
 
-export class CodeReviewSubmitHandler extends BaseActionHandler {
+export class CodeReviewSubmitHandler extends AbstractActionHandler {
   protected actionType: GameActionType = 'code_review_submit';
 
   protected calculateBaseXp(): number {
-    return XP_SETTINGS.CODE_REVIEW.BASE;
+    return XP_VALUES.CODE_REVIEW.BASE;
   }
 
   protected calculateBonuses(metadata: Record<string, any>) {
@@ -15,19 +15,19 @@ export class CodeReviewSubmitHandler extends BaseActionHandler {
 
     // Bonus for detailed review with substantial comments
     if (metadata.commentCount >= 3) {
-      bonuses.detailedReview = XP_SETTINGS.CODE_REVIEW.BONUSES.DETAILED_REVIEW;
+      bonuses.detailedReview = XP_VALUES.CODE_REVIEW.BONUSES.DETAILED_REVIEW;
       totalBonus += bonuses.detailedReview;
     }
 
     // Bonus for reviewing changes across multiple files
     if (metadata.filesReviewed > 3) {
-      bonuses.multipleFiles = XP_SETTINGS.CODE_REVIEW.BONUSES.MULTIPLE_FILES;
+      bonuses.multipleFiles = XP_VALUES.CODE_REVIEW.BONUSES.MULTIPLE_FILES;
       totalBonus += bonuses.multipleFiles;
     }
 
     // Bonus for thorough reviews with suggestions
     if (metadata.suggestions && metadata.suggestions > 0) {
-      bonuses.thoroughReview = XP_SETTINGS.CODE_REVIEW.BONUSES.THOROUGH_REVIEW;
+      bonuses.thoroughReview = XP_VALUES.CODE_REVIEW.BONUSES.THOROUGH_REVIEW;
       totalBonus += bonuses.thoroughReview;
     }
 

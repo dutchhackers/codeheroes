@@ -1,19 +1,19 @@
 import { GameActionType } from '@codeheroes/types';
-import { BaseActionHandler } from '../base/base-action.handler';
-import { XP_SETTINGS } from '../../constants/xp-settings';
+import { XP_VALUES } from '../../config/xp-values.config';
+import { AbstractActionHandler } from '../base/abstract-action.handler';
 
-export class PullRequestCloseHandler extends BaseActionHandler {
+export class PullRequestCloseHandler extends AbstractActionHandler {
   protected actionType: GameActionType = 'pull_request_close';
 
   protected calculateBaseXp(): number {
-    return XP_SETTINGS.PULL_REQUEST.CLOSE.BASE;
+    return XP_VALUES.PULL_REQUEST.CLOSE.BASE;
   }
 
   protected calculateBonuses(metadata: Record<string, any>) {
     const bonuses = {
-      multipleFiles: metadata.changedFiles > 3 ? XP_SETTINGS.PULL_REQUEST.CLOSE.BONUSES.MULTIPLE_FILES : 0,
+      multipleFiles: metadata.changedFiles > 3 ? XP_VALUES.PULL_REQUEST.CLOSE.BONUSES.MULTIPLE_FILES : 0,
       significantChanges:
-        metadata.additions + metadata.deletions > 100 ? XP_SETTINGS.PULL_REQUEST.CLOSE.BONUSES.SIGNIFICANT_CHANGES : 0,
+        metadata.additions + metadata.deletions > 100 ? XP_VALUES.PULL_REQUEST.CLOSE.BONUSES.SIGNIFICANT_CHANGES : 0,
     };
 
     return {

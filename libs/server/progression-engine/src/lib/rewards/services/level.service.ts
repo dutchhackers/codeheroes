@@ -1,5 +1,5 @@
 import { LevelRequirementItem, LevelReward, RewardType } from '@codeheroes/types';
-import { getLevelRequirements, getNextLevelRequirements, getXpProgress } from '../../constants/level-thresholds';
+import { getLevelRequirements, getNextLevelRequirements, getXpProgress } from '../../config/level-thresholds';
 
 export class LevelService {
   calculateLevelProgress(totalXp: number) {

@@ -1,20 +1,5 @@
-import { LevelConfig } from '../../constants/level-configuration';
-import {
-  calculateXpForLevel,
-  getLevelFromXp,
-  getLevelRequirements,
-  getNextLevelRequirements,
-  getXpProgress,
-} from '../../constants/level-thresholds';
-
-// Re-export level calculation functions
-export {
-  getLevelFromXp as calculateLevel,
-  calculateXpForLevel,
-  getLevelRequirements,
-  getNextLevelRequirements,
-  getXpProgress,
-};
+import { LevelDefinition } from '../../config/level-definitions.config';
+import { getLevelRequirements, getXpProgress } from '../../config/level-thresholds';
 
 export function calculateXpToNextLevel(totalXp: number): number {
   const { xpToNextLevel } = getXpProgress(totalXp);
@@ -26,7 +11,7 @@ export function calculateLevelProgress(totalXp: number): number {
   return xpToNextLevel > 0 ? Math.min(100, (currentLevelXp / xpToNextLevel) * 100) : 100;
 }
 
-export function getLevelRewards(level: number): LevelConfig['rewards'] | undefined {
+export function getLevelRewards(level: number): LevelDefinition['rewards'] | undefined {
   const config = getLevelRequirements(level);
   return config?.rewards;
 }

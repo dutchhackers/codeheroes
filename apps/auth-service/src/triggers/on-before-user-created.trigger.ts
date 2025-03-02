@@ -1,9 +1,7 @@
-import { beforeUserCreated } from 'firebase-functions/v2/identity';
+import { DEFAULT_REGION, logger, SettingsService, UserService } from '@codeheroes/common';
+import { UserProgressionService } from '@codeheroes/progression-engine';
 import { HttpsError } from 'firebase-functions/v2/https';
-import { DEFAULT_REGION, UserService, SettingsService } from '@codeheroes/common';
-import { logger } from '@codeheroes/common';
-import { ProgressionService } from '@codeheroes/progression-engine';
-import { ProgressionUpdate } from '@codeheroes/types';
+import { beforeUserCreated } from 'firebase-functions/v2/identity';
 
 export const onBeforeUserCreated = beforeUserCreated(
   {
@@ -71,7 +69,7 @@ export const onBeforeUserCreated = beforeUserCreated(
 
       // Initialize the user's stats (level 1, 0 XP)
       logger.info('Initializing progression stats for new user', { userId: newUser.id });
-      const progressionService = new ProgressionService();
+      const progressionService = new UserProgressionService();
 
       // Use an empty update with 0 XP, which will create the initial stats record
       // The updateProgression method will set the initial level to 1 as defined in the service

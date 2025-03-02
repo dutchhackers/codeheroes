@@ -9,16 +9,16 @@ import {
   TimeBasedStatsQuery,
 } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
-import { getRecentDailyIds, getRecentWeeklyIds, getTimeFrameIds } from '../../utils/time-frame.utils';
-import { UnifiedEventHandlerService } from '../events/unified-event-handler.service';
+import { getRecentDailyIds, getRecentWeeklyIds, getTimePeriodIds } from '../../utils/time-periods.utils';
+import { EventProcessorService } from '../../events/event-processor.service';
 
 export class ActivityService {
   private db: Firestore;
-  private eventHandler: UnifiedEventHandlerService;
+  private eventHandler: EventProcessorService;
 
   constructor() {
     this.db = DatabaseInstance.getInstance();
-    this.eventHandler = new UnifiedEventHandlerService();
+    this.eventHandler = new EventProcessorService();
   }
 
   private getInitialCounters(): ActivityCounters {
@@ -129,7 +129,7 @@ export class ActivityService {
   }
 
   async getDailyActivityStats(userId: string, date?: string): Promise<TimeBasedActivityStats | null> {
-    const timeframeId = date || getTimeFrameIds().daily;
+    const timeframeId = date || getTimePeriodIds().daily;
     const statsRef = this.db
       .collection(Collections.Users)
       .doc(userId)
@@ -143,7 +143,7 @@ export class ActivityService {
   }
 
   async getWeeklyActivityStats(userId: string, weekId?: string): Promise<TimeBasedActivityStats | null> {
-    const timeframeId = weekId || getTimeFrameIds().weekly;
+    const timeframeId = weekId || getTimePeriodIds().weekly;
     const statsRef = this.db
       .collection(Collections.Users)
       .doc(userId)

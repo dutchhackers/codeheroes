@@ -18,21 +18,6 @@ export interface ActivityStats {
   };
 }
 
-// For UI display purposes - more specific than GameActionType
-export enum ActivityIconType {
-  PUSH = 'push',
-  PR_CREATE = 'pr-create',
-  PR_MERGE = 'pr-merge',
-  PR_CLOSE = 'pr-close',
-  REVIEW = 'review',
-  ISSUE = 'issue',
-  ISSUE_OPEN = 'issue-open',
-  ISSUE_CLOSE = 'issue-close',
-  COMMIT = 'commit',
-  CODE = 'code',
-  WORKOUT = 'workout',
-}
-
 export interface Activity {
   id: string;
   userId: string;
@@ -45,19 +30,6 @@ export interface Activity {
   context: GameActionContext;
   metrics: GameActionMetrics;
 
-  // UI display metadata - these fields make the Activity usable directly in UI
-  display: {
-    title: string; // e.g., "Pushed 3 commits to main" or "Merged PR: Add user settings"
-    description: string; // More detailed info or commit message excerpt
-    url?: string; // Link to the actual item (PR, commit, etc.)
-    iconType: ActivityIconType | GameActionType; // For UI to show appropriate icon
-    additionalInfo?: {
-      repositoryName?: string; // Repository name for display - moved from root level
-      repositoryOwner?: string; // Repository owner for display - moved from root level
-      [key: string]: any;
-    };
-  };
-
   // XP information earned from this activity
   xp: {
     earned: number;
@@ -66,13 +38,6 @@ export interface Activity {
       amount: number;
       description: string;
     }>;
-  };
-
-  // Metadata like level at time of activity, bonuses applied
-  metadata?: {
-    level?: number;
-    bonuses?: Record<string, number>;
-    [key: string]: any;
   };
 
   createdAt: string;

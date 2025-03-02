@@ -1,29 +1,25 @@
 import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import {
   ActionResult,
+  Activity,
   ActivityCounters,
-  ActivityIconType,
   Collections,
   GameAction,
   GameActionContext,
   GameActionMetrics,
   GameActionType,
   TimeBasedActivityStats,
-  PullRequestContext,
-  CodePushContext,
-  CodeReviewContext,
-  Activity,
 } from '@codeheroes/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { ProgressionService } from '../../core/progression/progression.service';
-import { getTimeFrameIds } from '../../utils/time-frame.utils';
+import { UserProgressionService } from '../../progression/services/user-progression.service';
+import { getTimePeriodIds } from '../../utils/time-periods.utils';
 
-export abstract class BaseActionHandler {
+export abstract class AbstractActionHandler {
   protected abstract actionType: GameActionType;
-  private progressionService: ProgressionService;
+  private progressionService: UserProgressionService;
 
   constructor(protected db: Firestore) {
-    this.progressionService = new ProgressionService();
+    this.progressionService = new UserProgressionService();
   }
 
   protected getCounterUpdates(): Record<string, any> {
@@ -56,7 +52,7 @@ export abstract class BaseActionHandler {
     const { userId } = action;
     logger.info(`Starting action handler for ${this.actionType}`, { userId });
 
-    const timeFrames = getTimeFrameIds();
+    const timeFrames = getTimePeriodIds();
     const userRef = this.db.collection(Collections.Users).doc(userId);
     await this.initializeCountersIfNeeded(userRef);
 
@@ -135,9 +131,6 @@ export abstract class BaseActionHandler {
         }),
       );
 
-      // Generate UI-friendly display information
-      const displayInfo = this.generateDisplayInfo(action);
-
       // Record activity with enhanced display information
       writes.push(() =>
         transaction.set(activityRef, <Activity>{
@@ -148,12 +141,7 @@ export abstract class BaseActionHandler {
           // Store the complete context and metrics
           context: action.context,
           metrics: action.metrics,
-          // Add UI-friendly display information
-          display: displayInfo,
-          metadata: {
-            level: progressionUpdate.level,
-            bonuses: bonuses.breakdown,
-          },
+
           xp: {
             earned: totalXP,
             breakdown: [
@@ -186,127 +174,6 @@ export abstract class BaseActionHandler {
     return {
       xpGained: totalXP,
       level: progressionUpdate.level,
-    };
-  }
-
-  /**
-   * Generate UI-friendly display information from the GameAction
-   */
-  protected generateDisplayInfo(action: GameAction): {
-    title: string;
-    description: string;
-    url?: string;
-    iconType: ActivityIconType | GameActionType;
-    additionalInfo?: Record<string, any>;
-  } {
-    let title = '';
-    let description = '';
-    let url = '';
-    let iconType: ActivityIconType | GameActionType = this.actionType;
-    const additionalInfo: Record<string, any> = {};
-
-    // Extract repository information
-    if ('repository' in action.context) {
-      additionalInfo.repositoryName = action.context.repository.name;
-      additionalInfo.repositoryOwner = action.context.repository.owner;
-    }
-
-    // Generate appropriate titles and descriptions based on action type
-    switch (action.type) {
-      case 'code_push': {
-        const context = action.context as CodePushContext;
-        const commitCount = context.commits.length;
-        const branch = context.branch;
-
-        title = `Pushed ${commitCount} commit${commitCount > 1 ? 's' : ''} to ${branch}`;
-
-        // Use the last commit message for description
-        if (commitCount > 0) {
-          description = context.commits[0].message;
-          additionalInfo.commitId = context.commits[0].id;
-          additionalInfo.commitCount = commitCount;
-        }
-
-        iconType = ActivityIconType.PUSH;
-        break;
-      }
-      case 'pull_request_create': {
-        const context = action.context as PullRequestContext;
-        title = `Created PR: ${context.pullRequest.title}`;
-        description = '';
-
-        if (additionalInfo.repositoryName && additionalInfo.repositoryOwner) {
-          url = `https://github.com/${additionalInfo.repositoryOwner}/${additionalInfo.repositoryName}/pull/${context.pullRequest.number}`;
-        }
-
-        additionalInfo.prNumber = context.pullRequest.number;
-        additionalInfo.branch = context.pullRequest.branch;
-        additionalInfo.baseBranch = context.pullRequest.baseBranch;
-
-        iconType = ActivityIconType.PR_CREATE;
-        break;
-      }
-      case 'pull_request_merge': {
-        const context = action.context as PullRequestContext;
-        title = `Merged PR: ${context.pullRequest.title}`;
-        description = '';
-
-        if (additionalInfo.repositoryName && additionalInfo.repositoryOwner) {
-          url = `https://github.com/${additionalInfo.repositoryOwner}/${additionalInfo.repositoryName}/pull/${context.pullRequest.number}`;
-        }
-
-        additionalInfo.prNumber = context.pullRequest.number;
-        additionalInfo.branch = context.pullRequest.branch;
-        additionalInfo.baseBranch = context.pullRequest.baseBranch;
-
-        iconType = ActivityIconType.PR_MERGE;
-        break;
-      }
-      case 'pull_request_close': {
-        const context = action.context as PullRequestContext;
-        title = `Closed PR: ${context.pullRequest.title}`;
-        description = '';
-
-        if (additionalInfo.repositoryName && additionalInfo.repositoryOwner) {
-          url = `https://github.com/${additionalInfo.repositoryOwner}/${additionalInfo.repositoryName}/pull/${context.pullRequest.number}`;
-        }
-
-        additionalInfo.prNumber = context.pullRequest.number;
-        additionalInfo.branch = context.pullRequest.branch;
-        additionalInfo.baseBranch = context.pullRequest.baseBranch;
-
-        iconType = ActivityIconType.PR_CLOSE;
-        break;
-      }
-      case 'code_review_submit': {
-        const context = action.context as CodeReviewContext;
-        const state = context.review.state;
-
-        title = `Reviewed PR: ${context.pullRequest.title}`;
-        description = `${state.charAt(0).toUpperCase() + state.slice(1)} the pull request`;
-
-        if (additionalInfo.repositoryName && additionalInfo.repositoryOwner) {
-          url = `https://github.com/${additionalInfo.repositoryOwner}/${additionalInfo.repositoryName}/pull/${context.pullRequest.number}`;
-        }
-
-        additionalInfo.prNumber = context.pullRequest.number;
-        additionalInfo.reviewState = state;
-
-        iconType = ActivityIconType.REVIEW;
-        break;
-      }
-      default:
-        title = `${action.type.replace(/_/g, ' ')}`;
-        description = '';
-        iconType = action.type;
-    }
-
-    return {
-      title,
-      description,
-      url,
-      iconType,
-      additionalInfo,
     };
   }
 
