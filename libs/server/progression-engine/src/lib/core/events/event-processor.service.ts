@@ -4,7 +4,7 @@ import { Collections, ProgressionEvent, ProgressionEventType } from '@codeheroes
 import { Firestore } from 'firebase-admin/firestore';
 import { BadgeService } from '../services/badge.service';
 
-export class UnifiedEventHandlerService {
+export class EventProcessorService {
   private db: Firestore;
   private notificationService: NotificationService;
   private badgeService: BadgeService;

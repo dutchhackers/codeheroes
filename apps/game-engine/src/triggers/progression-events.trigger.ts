@@ -1,4 +1,4 @@
-import { UnifiedEventHandlerService } from '@codeheroes/progression-engine';
+import { EventProcessorService } from '@codeheroes/progression-engine';
 import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 import { logger } from '@codeheroes/common';
 import { ProgressionEventType } from '@codeheroes/types';
@@ -9,7 +9,7 @@ export const onLevelUp = onMessagePublished('progression-events', async (event) 
     data: event.data.message.json,
   });
 
-  const eventHandler = new UnifiedEventHandlerService();
+  const eventHandler = new EventProcessorService();
   const progressionEvent = event.data.message.json;
   if (progressionEvent.type !== ProgressionEventType.LEVEL_UP) {
     logger.info('Skipping non-level-up event');
@@ -22,7 +22,7 @@ export const onLevelUp = onMessagePublished('progression-events', async (event) 
 });
 
 export const onBadgeEarned = onMessagePublished('progression-events', async (event) => {
-  const eventHandler = new UnifiedEventHandlerService();
+  const eventHandler = new EventProcessorService();
   const progressionEvent = event.data.message.json;
   if (progressionEvent.type !== ProgressionEventType.BADGE_EARNED) return;
   await eventHandler.handleEvent(progressionEvent);

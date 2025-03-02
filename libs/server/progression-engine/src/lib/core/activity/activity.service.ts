@@ -10,15 +10,15 @@ import {
 } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getRecentDailyIds, getRecentWeeklyIds, getTimeFrameIds } from '../../utils/time-periods.utils';
-import { UnifiedEventHandlerService } from '../events/event-processor.service';
+import { EventProcessorService } from '../events/event-processor.service';
 
 export class ActivityService {
   private db: Firestore;
-  private eventHandler: UnifiedEventHandlerService;
+  private eventHandler: EventProcessorService;
 
   constructor() {
     this.db = DatabaseInstance.getInstance();
-    this.eventHandler = new UnifiedEventHandlerService();
+    this.eventHandler = new EventProcessorService();
   }
 
   private getInitialCounters(): ActivityCounters {

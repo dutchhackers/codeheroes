@@ -1,7 +1,7 @@
 import { DatabaseInstance } from '@codeheroes/common';
 import { Collections } from '@codeheroes/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { UnifiedEventHandlerService } from '../events/event-processor.service';
+import { EventProcessorService } from '../events/event-processor.service';
 
 export interface Badge {
   id: string;
@@ -19,11 +19,11 @@ interface BadgeContext {
 
 export class BadgeService {
   private db: Firestore;
-  private eventHandler: UnifiedEventHandlerService;
+  private eventHandler: EventProcessorService;
 
-  constructor(eventHandler?: UnifiedEventHandlerService) {
+  constructor(eventHandler?: EventProcessorService) {
     this.db = DatabaseInstance.getInstance();
-    this.eventHandler = eventHandler || new UnifiedEventHandlerService();
+    this.eventHandler = eventHandler || new EventProcessorService();
   }
 
   async processBadges(userId: string, context: BadgeContext): Promise<Badge[]> {
