@@ -1,10 +1,13 @@
+/**
+ * Firestore collection names
+ */
 export enum Collections {
   Users = 'users',
-  Stats = 'stats',
   Activities = 'activities',
+  Stats = 'stats',
+  Achievements = 'achievements',
   Badges = 'badges',
   Rewards = 'rewards',
-  Achievements = 'achievements',
+  Settings = 'settings',
   Notifications = 'notifications',
-  GameActions = 'gameActions',
 }
