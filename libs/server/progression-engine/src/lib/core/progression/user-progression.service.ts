@@ -12,14 +12,14 @@ import { Firestore } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../constants/level-thresholds';
 import { ActionHandlerFactory } from '../../factories/action-handler.factory';
 import { ActivityService } from '../activity/activity.service';
-import { ProgressionEventService } from '../events/event-publisher.service';
+import { EventPublisherService } from '../events/event-publisher.service';
 import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
 import { RewardService } from '../services/reward.service';
 
 export class ProgressionService {
   private db: Firestore;
-  private eventService: ProgressionEventService;
+  private eventService: EventPublisherService;
   private levelService: LevelService;
   private badgeService: BadgeService;
   private rewardService: RewardService;
@@ -28,7 +28,7 @@ export class ProgressionService {
 
   constructor(badgeService?: BadgeService) {
     this.db = DatabaseInstance.getInstance();
-    this.eventService = new ProgressionEventService();
+    this.eventService = new EventPublisherService();
     this.levelService = new LevelService();
     this.badgeService = badgeService || new BadgeService();
     this.rewardService = new RewardService(this.badgeService);

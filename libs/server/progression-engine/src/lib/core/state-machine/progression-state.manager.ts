@@ -6,7 +6,7 @@ import { RewardType } from '@codeheroes/types';
 import { ProgressionState } from '@codeheroes/types';
 import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
-import { ProgressionEventService } from '../events/event-publisher.service';
+import { EventPublisherService } from '../events/event-publisher.service';
 
 interface ProgressionStateMachine {
   handleXpGain(xp: number, activity?: Activity): Promise<void>;
@@ -19,14 +19,14 @@ export class GameProgressionStateMachine implements ProgressionStateMachine {
   private state: ProgressionState;
   private readonly levelService: LevelService;
   private readonly badgeService: BadgeService;
-  private readonly eventService: ProgressionEventService;
+  private readonly eventService: EventPublisherService;
   private readonly notificationService: NotificationService;
 
   constructor(
     initialState: ProgressionState,
     levelService: LevelService,
     badgeService: BadgeService,
-    eventService: ProgressionEventService,
+    eventService: EventPublisherService,
     notificationService: NotificationService,
   ) {
     this.db = DatabaseInstance.getInstance();
