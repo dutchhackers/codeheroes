@@ -13,7 +13,7 @@ import {
   CodePushContext,
   CodeReviewContext,
   Activity,
-} from '@codeheroes/shared/types';
+} from '@codeheroes/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { ProgressionService } from '../../core/progression/progression.service';
 import { getTimeFrameIds } from '../../utils/time-frame.utils';

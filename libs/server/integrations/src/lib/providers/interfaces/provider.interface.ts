@@ -1,4 +1,4 @@
-import { GameAction } from '@codeheroes/shared/types';
+import { GameAction } from '@codeheroes/types';
 
 /**
  * Interface for external provider adapters

@@ -1,9 +1,9 @@
 import { DatabaseInstance } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
 import { Firestore } from 'firebase-admin/firestore';
-import { Activity } from '@codeheroes/shared/types';
-import { RewardType } from '@codeheroes/shared/types';
-import { ProgressionState } from '@codeheroes/shared/types';
+import { Activity } from '@codeheroes/types';
+import { RewardType } from '@codeheroes/types';
+import { ProgressionState } from '@codeheroes/types';
 import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
 import { ProgressionEventService } from '../events/event-types';

@@ -1,5 +1,5 @@
 import { DatabaseInstance } from '@codeheroes/common';
-import { Collections } from '@codeheroes/shared/types';
+import { Collections } from '@codeheroes/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { UnifiedEventHandlerService } from '../../core/events/unified-event-handler.service';
 

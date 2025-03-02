@@ -8,7 +8,7 @@ import {
   GameAction,
   ProgressionState,
   ProgressionUpdate,
-} from '@codeheroes/shared/types';
+} from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../constants/level-thresholds';
 import { ActionHandlerFactory } from '../../factories/action-handler.factory';

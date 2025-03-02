@@ -2,7 +2,7 @@ import { PubSub } from '@google-cloud/pubsub';
 import { Request } from 'express';
 import { RawWebhookData } from '../models/webhook.model';
 import { logger } from '../firebase';
-import { ConnectedAccountProvider } from '@codeheroes/shared/types';
+import { ConnectedAccountProvider } from '@codeheroes/types';
 
 export interface WebhookHeaders {
   eventType: string;

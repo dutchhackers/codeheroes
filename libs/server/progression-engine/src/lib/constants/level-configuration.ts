@@ -1,4 +1,4 @@
-import { LevelRequirementItem } from '@codeheroes/shared/types';
+import { LevelRequirementItem } from '@codeheroes/types';
 
 export interface LevelConfig {
   level: number;

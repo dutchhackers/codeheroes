@@ -1,4 +1,4 @@
-import { GameAction, GameActionType } from '@codeheroes/shared/types';
+import { GameAction, GameActionType } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { BaseActionHandler } from '../actions/base/base-action.handler';
 import { CodePushHandler } from '../actions/code-push/code-push.handler';

@@ -6,7 +6,7 @@ import {
   CodeReviewMetrics,
   PullRequestContext,
   PullRequestMetrics,
-} from '@codeheroes/shared/types';
+} from '@codeheroes/types';
 import { ProviderAdapter } from '../interfaces/provider.interface';
 import { PullRequestEvent, PullRequestReviewEvent, PushEvent } from './interfaces/github.interfaces';
 

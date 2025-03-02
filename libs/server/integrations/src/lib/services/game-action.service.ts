@@ -1,5 +1,5 @@
 import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
-import { GameAction, GameActionContext } from '@codeheroes/shared/types';
+import { GameAction, GameActionContext } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { ProviderFactory } from '../providers/provider.factory';
 

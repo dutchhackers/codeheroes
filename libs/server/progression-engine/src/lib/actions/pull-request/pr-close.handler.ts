@@ -1,4 +1,4 @@
-import { GameActionType } from '@codeheroes/shared/types';
+import { GameActionType } from '@codeheroes/types';
 import { BaseActionHandler } from '../base/base-action.handler';
 import { XP_SETTINGS } from '../../constants/xp-settings';
 

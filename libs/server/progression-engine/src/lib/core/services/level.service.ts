@@ -1,4 +1,4 @@
-import { LevelRequirementItem, LevelReward, RewardType } from '@codeheroes/shared/types';
+import { LevelRequirementItem, LevelReward, RewardType } from '@codeheroes/types';
 import { getLevelRequirements, getNextLevelRequirements, getXpProgress } from '../../constants/level-thresholds';
 
 export class LevelService {

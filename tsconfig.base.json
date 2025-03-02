@@ -23,7 +23,7 @@
       "@codeheroes/integrations": ["libs/server/integrations/src/index.ts"],
       "@codeheroes/notifications": ["libs/server/notifications/src/index.ts"],
       "@codeheroes/progression-engine": ["libs/server/progression-engine/src/index.ts"],
-      "@codeheroes/shared/types": ["libs/shared/types/src/index.ts"]
+      "@codeheroes/types": ["libs/types/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp", ".local"]

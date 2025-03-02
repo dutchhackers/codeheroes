@@ -1,6 +1,6 @@
 import { DatabaseInstance, logger } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
-import { Collections, ProgressionEvent, ProgressionEventType } from '@codeheroes/shared/types';
+import { Collections, ProgressionEvent, ProgressionEventType } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { BadgeService } from '../services/badge.service';
 

@@ -1,4 +1,4 @@
-import { Activity, ProgressionState, ProgressionEvent, ProgressionEventType } from '@codeheroes/shared/types';
+import { Activity, ProgressionState, ProgressionEvent, ProgressionEventType } from '@codeheroes/types';
 import { PubSub } from '@google-cloud/pubsub';
 
 export class ProgressionEventService {
