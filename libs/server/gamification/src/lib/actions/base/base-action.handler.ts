@@ -2,12 +2,17 @@ import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import {
   ActionResult,
   ActivityCounters,
+  ActivityIconType,
   Collections,
   GameAction,
   GameActionContext,
   GameActionMetrics,
   GameActionType,
   TimeBasedActivityStats,
+  PullRequestContext,
+  CodePushContext,
+  CodeReviewContext,
+  Activity,
 } from '@codeheroes/shared/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { ProgressionService } from '../../core/progression/progression.service';
@@ -26,26 +31,8 @@ export abstract class BaseActionHandler {
       countersLastUpdated: getCurrentTimeAsISO(),
     };
 
-    switch (this.actionType) {
-      case 'code_push':
-        updates['counters.codePushes'] = FieldValue.increment(1);
-        break;
-      case 'pull_request_create':
-        updates['counters.pullRequests.created'] = FieldValue.increment(1);
-        updates['counters.pullRequests.total'] = FieldValue.increment(1);
-        break;
-      case 'pull_request_merge':
-        updates['counters.pullRequests.merged'] = FieldValue.increment(1);
-        updates['counters.pullRequests.total'] = FieldValue.increment(1);
-        break;
-      case 'pull_request_close':
-        updates['counters.pullRequests.closed'] = FieldValue.increment(1);
-        updates['counters.pullRequests.total'] = FieldValue.increment(1);
-        break;
-      case 'code_review_submit':
-        updates['counters.codeReviews'] = FieldValue.increment(1);
-        break;
-    }
+    // Simple update for the specific action type counter
+    updates[`counters.actions.${this.actionType}`] = FieldValue.increment(1);
 
     return updates;
   }
@@ -55,20 +42,9 @@ export abstract class BaseActionHandler {
     const statsDoc = await statsRef.get();
 
     if (!statsDoc.exists || !statsDoc.data()?.counters) {
-      const initialCounters: ActivityCounters = {
-        pullRequests: {
-          created: 0,
-          merged: 0,
-          closed: 0,
-          total: 0,
-        },
-        codePushes: 0,
-        codeReviews: 0,
-      };
-
       await statsRef.set(
         {
-          counters: initialCounters,
+          counters: this.getInitialCounters(),
           countersLastUpdated: getCurrentTimeAsISO(),
         },
         { merge: true },
@@ -159,15 +135,22 @@ export abstract class BaseActionHandler {
         }),
       );
 
-      // Record activity
+      // Generate UI-friendly display information
+      const displayInfo = this.generateDisplayInfo(action);
+
+      // Record activity with enhanced display information
       writes.push(() =>
-        transaction.set(activityRef, {
+        transaction.set(activityRef, <Activity>{
           id: activityRef.id,
           userId,
-          type: this.actionType,
+          type: 'game-action',
+          sourceActionType: this.actionType,
+          // Store the complete context and metrics
+          context: action.context,
+          metrics: action.metrics,
+          // Add UI-friendly display information
+          display: displayInfo,
           metadata: {
-            //...metadata,
-            // TODO: metrics and context
             level: progressionUpdate.level,
             bonuses: bonuses.breakdown,
           },
@@ -206,6 +189,127 @@ export abstract class BaseActionHandler {
     };
   }
 
+  /**
+   * Generate UI-friendly display information from the GameAction
+   */
+  protected generateDisplayInfo(action: GameAction): {
+    title: string;
+    description: string;
+    url?: string;
+    iconType: ActivityIconType | GameActionType;
+    additionalInfo?: Record<string, any>;
+  } {
+    let title = '';
+    let description = '';
+    let url = '';
+    let iconType: ActivityIconType | GameActionType = this.actionType;
+    const additionalInfo: Record<string, any> = {};
+
+    // Extract repository information
+    if ('repository' in action.context) {
+      additionalInfo.repositoryName = action.context.repository.name;
+      additionalInfo.repositoryOwner = action.context.repository.owner;
+    }
+
+    // Generate appropriate titles and descriptions based on action type
+    switch (action.type) {
+      case 'code_push': {
+        const context = action.context as CodePushContext;
+        const commitCount = context.commits.length;
+        const branch = context.branch;
+
+        title = `Pushed ${commitCount} commit${commitCount > 1 ? 's' : ''} to ${branch}`;
+
+        // Use the last commit message for description
+        if (commitCount > 0) {
+          description = context.commits[0].message;
+          additionalInfo.commitId = context.commits[0].id;
+          additionalInfo.commitCount = commitCount;
+        }
+
+        iconType = ActivityIconType.PUSH;
+        break;
+      }
+      case 'pull_request_create': {
+        const context = action.context as PullRequestContext;
+        title = `Created PR: ${context.pullRequest.title}`;
+        description = '';
+
+        if (additionalInfo.repositoryName && additionalInfo.repositoryOwner) {
+          url = `https://github.com/${additionalInfo.repositoryOwner}/${additionalInfo.repositoryName}/pull/${context.pullRequest.number}`;
+        }
+
+        additionalInfo.prNumber = context.pullRequest.number;
+        additionalInfo.branch = context.pullRequest.branch;
+        additionalInfo.baseBranch = context.pullRequest.baseBranch;
+
+        iconType = ActivityIconType.PR_CREATE;
+        break;
+      }
+      case 'pull_request_merge': {
+        const context = action.context as PullRequestContext;
+        title = `Merged PR: ${context.pullRequest.title}`;
+        description = '';
+
+        if (additionalInfo.repositoryName && additionalInfo.repositoryOwner) {
+          url = `https://github.com/${additionalInfo.repositoryOwner}/${additionalInfo.repositoryName}/pull/${context.pullRequest.number}`;
+        }
+
+        additionalInfo.prNumber = context.pullRequest.number;
+        additionalInfo.branch = context.pullRequest.branch;
+        additionalInfo.baseBranch = context.pullRequest.baseBranch;
+
+        iconType = ActivityIconType.PR_MERGE;
+        break;
+      }
+      case 'pull_request_close': {
+        const context = action.context as PullRequestContext;
+        title = `Closed PR: ${context.pullRequest.title}`;
+        description = '';
+
+        if (additionalInfo.repositoryName && additionalInfo.repositoryOwner) {
+          url = `https://github.com/${additionalInfo.repositoryOwner}/${additionalInfo.repositoryName}/pull/${context.pullRequest.number}`;
+        }
+
+        additionalInfo.prNumber = context.pullRequest.number;
+        additionalInfo.branch = context.pullRequest.branch;
+        additionalInfo.baseBranch = context.pullRequest.baseBranch;
+
+        iconType = ActivityIconType.PR_CLOSE;
+        break;
+      }
+      case 'code_review_submit': {
+        const context = action.context as CodeReviewContext;
+        const state = context.review.state;
+
+        title = `Reviewed PR: ${context.pullRequest.title}`;
+        description = `${state.charAt(0).toUpperCase() + state.slice(1)} the pull request`;
+
+        if (additionalInfo.repositoryName && additionalInfo.repositoryOwner) {
+          url = `https://github.com/${additionalInfo.repositoryOwner}/${additionalInfo.repositoryName}/pull/${context.pullRequest.number}`;
+        }
+
+        additionalInfo.prNumber = context.pullRequest.number;
+        additionalInfo.reviewState = state;
+
+        iconType = ActivityIconType.REVIEW;
+        break;
+      }
+      default:
+        title = `${action.type.replace(/_/g, ' ')}`;
+        description = '';
+        iconType = action.type;
+    }
+
+    return {
+      title,
+      description,
+      url,
+      iconType,
+      additionalInfo,
+    };
+  }
+
   private async initializeTimeBasedStats(
     transaction: FirebaseFirestore.Transaction,
     docRef: FirebaseFirestore.DocumentReference,
@@ -222,14 +326,21 @@ export abstract class BaseActionHandler {
 
   protected getInitialCounters(): ActivityCounters {
     return {
-      pullRequests: {
-        created: 0,
-        merged: 0,
-        closed: 0,
-        total: 0,
+      actions: {
+        // Initialize counters for all known action types to 0
+        code_push: 0,
+        pull_request_create: 0,
+        pull_request_merge: 0,
+        pull_request_close: 0,
+        code_review_submit: 0,
+        code_review_comment: 0,
+        issue_create: 0,
+        issue_close: 0,
+        issue_reopen: 0,
+        workout_complete: 0,
+        distance_milestone: 0,
+        speed_record: 0,
       },
-      codePushes: 0,
-      codeReviews: 0,
     };
   }
 

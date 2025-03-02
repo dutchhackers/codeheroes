@@ -10,7 +10,7 @@ export function getLevelFromXp(totalXp: number): number {
     (config, index, array) =>
       totalXp >= config.xpRequired && (index === array.length - 1 || totalXp < array[index + 1].xpRequired),
   );
-  return level === -1 ? 0 : LEVEL_CONFIGURATION[level].level;
+  return level === -1 ? 1 : LEVEL_CONFIGURATION[level].level;
 }
 
 export function getXpProgress(totalXp: number): {
@@ -25,7 +25,7 @@ export function getXpProgress(totalXp: number): {
 
   if (!currentLevelConfig) {
     return {
-      currentLevel: 0,
+      currentLevel: 1,
       currentLevelXp: 0,
       xpToNextLevel: LEVEL_CONFIGURATION[1].xpRequired,
     };

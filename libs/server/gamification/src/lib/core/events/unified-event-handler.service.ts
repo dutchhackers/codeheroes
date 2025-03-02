@@ -121,16 +121,18 @@ export class UnifiedEventHandlerService {
     if (!activity) return;
 
     try {
-      const stats = await this.getActivityStats(userId, activity.type);
+      // Use sourceActionType instead of the type property
+      const actionType = activity.sourceActionType;
+      const stats = await this.getActivityStats(userId, actionType);
       const userRef = this.db.collection(Collections.Users).doc(userId);
       const achievementRef = userRef.collection(Collections.Achievements);
 
       // First-time achievements
       if (stats.total === 1) {
         await this.recordAchievement(null, achievementRef, {
-          id: `first_${activity.type}`,
-          name: `First ${activity.type.replace(/_/g, ' ')}`,
-          description: `Completed your first ${activity.type.replace(/_/g, ' ')}`,
+          id: `first_${actionType}`,
+          name: `First ${actionType.replace(/_/g, ' ')}`,
+          description: `Completed your first ${actionType.replace(/_/g, ' ')}`,
           timestamp: event.timestamp,
         });
       }
@@ -140,9 +142,9 @@ export class UnifiedEventHandlerService {
       const nextMilestone = milestones.find((m) => stats.total === m);
       if (nextMilestone) {
         await this.recordAchievement(null, achievementRef, {
-          id: `${activity.type}_milestone_${nextMilestone}`,
-          name: `${activity.type.replace(/_/g, ' ')} Master ${nextMilestone}`,
-          description: `Completed ${nextMilestone} ${activity.type.replace(/_/g, ' ')}s`,
+          id: `${actionType}_milestone_${nextMilestone}`,
+          name: `${actionType.replace(/_/g, ' ')} Master ${nextMilestone}`,
+          description: `Completed ${nextMilestone} ${actionType.replace(/_/g, ' ')}s`,
           timestamp: event.timestamp,
         });
       }
