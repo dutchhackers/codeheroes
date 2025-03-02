@@ -17,7 +17,7 @@ import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
 import { RewardService } from '../services/reward.service';
 
-export class ProgressionService {
+export class UserProgressionService {
   private db: Firestore;
   private eventService: EventPublisherService;
   private levelService: LevelService;

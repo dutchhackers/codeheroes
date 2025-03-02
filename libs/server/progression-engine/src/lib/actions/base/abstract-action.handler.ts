@@ -11,15 +11,15 @@ import {
   TimeBasedActivityStats,
 } from '@codeheroes/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { ProgressionService } from '../../core/progression/user-progression.service';
+import { UserProgressionService } from '../../core/progression/user-progression.service';
 import { getTimeFrameIds } from '../../utils/time-periods.utils';
 
 export abstract class AbstractActionHandler {
   protected abstract actionType: GameActionType;
-  private progressionService: ProgressionService;
+  private progressionService: UserProgressionService;
 
   constructor(protected db: Firestore) {
-    this.progressionService = new ProgressionService();
+    this.progressionService = new UserProgressionService();
   }
 
   protected getCounterUpdates(): Record<string, any> {

@@ -1,6 +1,6 @@
 import { logger } from '@codeheroes/common';
 import { GameActionService } from '@codeheroes/integrations';
-import { ProgressionService } from '@codeheroes/progression-engine';
+import { UserProgressionService } from '@codeheroes/progression-engine';
 import { GameAction } from '@codeheroes/types';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 
@@ -9,7 +9,7 @@ export const processGameAction = onDocumentCreated('gameActions/{actionId}', asy
   if (!gameAction) return;
 
   const gameActionService = new GameActionService();
-  const progressionService = new ProgressionService();
+  const progressionService = new UserProgressionService();
 
   try {
     logger.info(`Processing game action: ${gameAction.id} of type ${gameAction.type}`);
