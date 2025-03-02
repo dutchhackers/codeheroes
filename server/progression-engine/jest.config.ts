@@ -1,10 +1,10 @@
 export default {
-  displayName: 'gamification',
-  preset: '../../../jest.preset.js',
+  displayName: 'progression-engine',
+  preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../../coverage/libs/server/gamification',
+  coverageDirectory: '../../coverage/server/progression-engine',
 };

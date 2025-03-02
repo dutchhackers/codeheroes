@@ -2,7 +2,7 @@ import { beforeUserCreated } from 'firebase-functions/v2/identity';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { DEFAULT_REGION, UserService, SettingsService } from '@codeheroes/common';
 import { logger } from '@codeheroes/common';
-import { ProgressionService } from '@codeheroes/gamification';
+import { ProgressionService } from '@codeheroes/progression-engine';
 import { ProgressionUpdate } from '@codeheroes/shared/types';
 
 export const onBeforeUserCreated = beforeUserCreated(

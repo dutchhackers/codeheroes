@@ -1,4 +1,4 @@
-import { UnifiedEventHandlerService } from '@codeheroes/gamification';
+import { UnifiedEventHandlerService } from '@codeheroes/progression-engine';
 import { ProgressionEventType } from '@codeheroes/shared/types';
 import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 

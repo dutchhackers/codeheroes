@@ -1,6 +1,6 @@
 import { logger } from '@codeheroes/common';
 import { GameActionService } from '@codeheroes/integrations';
-import { ProgressionService } from '@codeheroes/gamification';
+import { ProgressionService } from '@codeheroes/progression-engine';
 import { GameAction } from '@codeheroes/shared/types';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 
