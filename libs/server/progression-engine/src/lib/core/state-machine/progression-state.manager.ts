@@ -8,13 +8,12 @@ import { BadgeService } from '../services/badge.service';
 import { LevelService } from '../services/level.service';
 import { EventPublisherService } from '../events/event-publisher.service';
 
-interface ProgressionStateMachine {
-  handleXpGain(xp: number, activity?: Activity): Promise<void>;
-  handleLevelUp(): Promise<void>;
-  getState(): ProgressionState;
-}
-
-export class ProgressionStateManager implements ProgressionStateMachine {
+/**
+ * Manages the progression state for a user, handling state transitions
+ * such as XP gain and level-ups
+ * (This was previously named GameProgressionStateMachine)
+ */
+export class ProgressionStateManager {
   private db: Firestore;
   private state: ProgressionState;
   private readonly levelService: LevelService;
