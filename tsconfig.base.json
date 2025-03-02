@@ -15,14 +15,14 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@codeheroes/achievements": ["server/achievements/src/index.ts"],
-      "@codeheroes/activity": ["server/activity/src/index.ts"],
+      "@codeheroes/achievements": ["libs/server/achievements/src/index.ts"],
+      "@codeheroes/activity": ["libs/server/activity/src/index.ts"],
       "@codeheroes/common": ["libs/server/common/src/index.ts"],
       "@codeheroes/database-seeds": ["libs/database-seeds/src/index.ts"],
       "@codeheroes/event": ["libs/server/event/src/index.ts"],
-      "@codeheroes/integrations": ["server/integrations/src/index.ts"],
+      "@codeheroes/integrations": ["libs/server/integrations/src/index.ts"],
       "@codeheroes/notifications": ["libs/server/notifications/src/index.ts"],
-      "@codeheroes/progression-engine": ["server/progression-engine/src/index.ts"],
+      "@codeheroes/progression-engine": ["libs/server/progression-engine/src/index.ts"],
       "@codeheroes/shared/types": ["libs/shared/types/src/index.ts"]
     }
   },
