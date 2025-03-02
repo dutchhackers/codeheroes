@@ -14,7 +14,7 @@ interface ProgressionStateMachine {
   getState(): ProgressionState;
 }
 
-export class GameProgressionStateMachine implements ProgressionStateMachine {
+export class ProgressionStateManager implements ProgressionStateMachine {
   private db: Firestore;
   private state: ProgressionState;
   private readonly levelService: LevelService;
