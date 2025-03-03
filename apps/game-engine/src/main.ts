@@ -1,5 +1,5 @@
 import { DatabaseInstance, DEFAULT_REGION } from '@codeheroes/common';
-import { ActionHandlerFactory } from '@codeheroes/gamification';
+import { ActionHandlerFactory } from '@codeheroes/progression-engine';
 import { initializeApp } from 'firebase-admin/app';
 import { setGlobalOptions } from 'firebase-functions/v2';
 

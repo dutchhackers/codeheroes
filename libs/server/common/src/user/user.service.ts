@@ -1,4 +1,4 @@
-import { PaginatedResponse, PaginationParams } from '@codeheroes/shared/types';
+import { PaginatedResponse, PaginationParams } from '@codeheroes/types';
 import { CollectionReference } from 'firebase-admin/firestore';
 import { getCurrentTimeAsISO } from '../core/firebase';
 import { BaseFirestoreService, CounterService } from '../core/services';

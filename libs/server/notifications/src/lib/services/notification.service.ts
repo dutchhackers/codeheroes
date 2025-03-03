@@ -1,7 +1,7 @@
 import { DatabaseInstance } from '@codeheroes/common';
 import { Firestore } from 'firebase-admin/firestore';
 import { Notification } from '../interfaces/notification.interface';
-import { Collections } from '@codeheroes/shared/types';
+import { Collections } from '@codeheroes/types';
 
 export class NotificationService {
   private db: Firestore;

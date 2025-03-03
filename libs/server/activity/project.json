@@ -1,0 +1,21 @@
+{
+  "name": "activity",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/server/activity/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/server/activity",
+        "tsConfig": "libs/server/activity/tsconfig.lib.json",
+        "packageJson": "libs/server/activity/package.json",
+        "main": "libs/server/activity/src/index.ts",
+        "assets": ["libs/server/activity/*.md"]
+      }
+    }
+  },
+  "implicitDependencies": ["types"]
+}

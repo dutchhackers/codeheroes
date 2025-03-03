@@ -1,3 +1,3 @@
-import { UserDto } from '@codeheroes/shared/types';
+import { UserDto } from '@codeheroes/types';
 
 export type User = UserDto;
