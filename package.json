@@ -14,7 +14,7 @@
     "@angular/fire": "^19.0.0",
     "@angular/forms": "~19.1.0",
     "@angular/platform-browser": "~19.1.0",
-    "@angular/platform-browser-dynamic": "~19.1.0",
+    "@angular/platform-browser-dynamic": "~19.2.1",
     "@angular/pwa": "^19.1.6",
     "@angular/router": "~19.1.0",
     "@angular/service-worker": "^19.0.0",
