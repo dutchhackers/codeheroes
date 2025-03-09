@@ -54,8 +54,7 @@ Characters have their own leveling system:
 | **Spider-Man** | +20% HP for bug fixes | +25% HP for bug fixes + can detect one "hidden bug" per day for bonus HP |
 | **Batman** | +15% HP during night hours (after 6pm) | +25% HP during night hours + can "prepare" one task for tomorrow for guaranteed HP |
 | **Wonder Woman** | +15% HP for documentation | +20% HP for documentation + can "inspire" one team member daily (+10% to their next action) |
-| **Black Panther** | +15% HP for consecutive activity days | +20% HP for streaks + +5% team HP bonus when active |
-
+| **Black Panther** | +15% HP for consecutive activity days | +20% HP for streaks + 5% team HP bonus when active |
 ### Villain/Anti-Hero Character Examples
 
 | Character | Base Ability | Advanced Ability (Level 10+) |
