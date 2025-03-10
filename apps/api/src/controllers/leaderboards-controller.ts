@@ -31,25 +31,51 @@ function getTimePeriodIds(timestamp?: string): TimePeriod {
   return { daily: dailyId, weekly: weeklyId };
 }
 
-async function getWeeklyXpLeaderboard(weekId?: string) {
+/**
+ * Represents an entry in the leaderboard system.
+ * @experimental This interface is experimental and subject to change.
+ * @interface LeaderboardEntry
+ * @property {string} userId - Unique identifier for the user
+ * @property {string} displayName - User's display name shown on the leaderboard
+ * @property {string | null} photoUrl - URL to user's profile photo, null if not set
+ * @property {number} xpGained - Experience points gained in the current period
+ * @property {string} periodId - Identifier for the leaderboard period
+ * @property {number} level - Current level of the user
+ * @property {number} totalXp - Total experience points accumulated by the user
+ * @property {number} currentLevelXp - Experience points in the current level
+ * @property {number} xpToNextLevel - Experience points needed to reach next level
+ */
+interface LeaderboardEntry {
+  userId: string;
+  displayName: string;
+  photoUrl: string | null;
+  xpGained: number;
+  periodId: string;
+  level: number;
+  totalXp: number;
+  currentLevelXp: number;
+  xpToNextLevel: number;
+}
+
+async function getXpLeaderboard(periodType: 'daily' | 'weekly', periodId?: string): Promise<LeaderboardEntry[]> {
   const db = getFirestore();
-  const recordId = weekId || getTimePeriodIds().weekly;
+  const recordId = periodId || getTimePeriodIds()[periodType];
 
   // First get all users
   const usersSnapshot = await db.collection(Collections.Users).get();
 
-  // Then query each user's weekly stats and current stats
+  // Then query each user's stats
   const userPromises = usersSnapshot.docs.map(async (userDoc) => {
     const userId = userDoc.id;
     const userData = userDoc.data();
     const userDisplayName = userData.displayName || userId;
 
-    // Get weekly stats
-    const weeklyStatDoc = await db
+    // Get period stats (daily or weekly)
+    const periodStatDoc = await db
       .collection(Collections.Users)
       .doc(userId)
       .collection('activityStats')
-      .doc('weekly')
+      .doc(periodType)
       .collection('records')
       .doc(recordId)
       .get();
@@ -62,16 +88,15 @@ async function getWeeklyXpLeaderboard(weekId?: string) {
       .doc('current')
       .get();
 
-    const weeklyStats = weeklyStatDoc.exists ? (weeklyStatDoc.data() as TimeBasedActivityStats) : null;
+    const periodStats = periodStatDoc.exists ? (periodStatDoc.data() as TimeBasedActivityStats) : null;
     const userStats = userStatsDoc.exists ? userStatsDoc.data() : null;
 
     return {
       userId,
       displayName: userDisplayName,
       photoUrl: userData.photoUrl || null,
-      xpGained: weeklyStats?.xpGained || 0,
-      weekId: recordId,
-      // Additional user stats
+      xpGained: periodStats?.xpGained || 0,
+      periodId: recordId,
       level: userStats?.level || 0,
       totalXp: userStats?.xp || 0,
       currentLevelXp: userStats?.currentLevelXp || 0,
@@ -79,21 +104,36 @@ async function getWeeklyXpLeaderboard(weekId?: string) {
     };
   });
 
-  // Resolve all promises and sort by XP gained this week
+  // Resolve all promises and sort by XP gained
   const results = await Promise.all(userPromises);
   return results.sort((a, b) => b.xpGained - a.xpGained);
 }
 
+// Weekly leaderboard endpoint
 router.get('/week/:weekId?', async (req, res) => {
   const weekId = req.params.weekId;
   logger.debug(`GET /leaderboards/week${weekId ? `/${weekId}` : ''}`);
 
   try {
-    const leaderboard = await getWeeklyXpLeaderboard(weekId);
+    const leaderboard = await getXpLeaderboard('weekly', weekId);
     res.json(leaderboard);
   } catch (error) {
     logger.error('Error getting weekly leaderboard:', error);
     res.status(500).json({ error: 'Failed to retrieve weekly leaderboard' });
+  }
+});
+
+// Daily leaderboard endpoint
+router.get('/day/:dayId?', async (req, res) => {
+  const dayId = req.params.dayId;
+  logger.debug(`GET /leaderboards/day${dayId ? `/${dayId}` : ''}`);
+
+  try {
+    const leaderboard = await getXpLeaderboard('daily', dayId);
+    res.json(leaderboard);
+  } catch (error) {
+    logger.error('Error getting daily leaderboard:', error);
+    res.status(500).json({ error: 'Failed to retrieve daily leaderboard' });
   }
 });
 
