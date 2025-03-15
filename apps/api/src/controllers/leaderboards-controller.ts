@@ -57,9 +57,22 @@ interface LeaderboardEntry {
   xpToNextLevel: number;
 }
 
-async function getXpLeaderboard(periodType: 'daily' | 'weekly', periodId?: string): Promise<LeaderboardEntry[]> {
+interface LeaderboardOptions {
+  includeZeroXp?: boolean;
+}
+
+async function getXpLeaderboard(
+  periodType: 'daily' | 'weekly',
+  periodId?: string,
+  options: LeaderboardOptions = {},
+): Promise<LeaderboardEntry[]> {
   const db = getFirestore();
   const recordId = periodId || getTimePeriodIds()[periodType];
+  const defaultOptions = {
+    includeZeroXp: false,
+  };
+
+  const mergedOptions = { ...defaultOptions, ...options };
 
   // First get all users
   const usersSnapshot = await db.collection(Collections.Users).get();
@@ -104,18 +117,27 @@ async function getXpLeaderboard(periodType: 'daily' | 'weekly', periodId?: strin
     };
   });
 
-  // Resolve all promises and sort by XP gained
-  const results = await Promise.all(userPromises);
+  // Resolve all promises and filter/sort results
+  let results = await Promise.all(userPromises);
+
+  // Filter out users with 0 XP if required
+  if (!mergedOptions.includeZeroXp) {
+    results = results.filter((entry) => entry.xpGained > 0);
+  }
+
+  // Sort by XP gained (highest first)
   return results.sort((a, b) => b.xpGained - a.xpGained);
 }
 
 // Weekly leaderboard endpoint
 router.get('/week/:weekId?', async (req, res) => {
   const weekId = req.params.weekId;
-  logger.debug(`GET /leaderboards/week${weekId ? `/${weekId}` : ''}`);
+  const includeZeroXp = req.query.includeZeroXp === 'true';
+
+  logger.debug(`GET /leaderboards/week${weekId ? `/${weekId}` : ''}`, { includeZeroXp });
 
   try {
-    const leaderboard = await getXpLeaderboard('weekly', weekId);
+    const leaderboard = await getXpLeaderboard('weekly', weekId, { includeZeroXp });
     res.json(leaderboard);
   } catch (error) {
     logger.error('Error getting weekly leaderboard:', error);
@@ -126,10 +148,12 @@ router.get('/week/:weekId?', async (req, res) => {
 // Daily leaderboard endpoint
 router.get('/day/:dayId?', async (req, res) => {
   const dayId = req.params.dayId;
-  logger.debug(`GET /leaderboards/day${dayId ? `/${dayId}` : ''}`);
+  const includeZeroXp = req.query.includeZeroXp === 'true';
+
+  logger.debug(`GET /leaderboards/day${dayId ? `/${dayId}` : ''}`, { includeZeroXp });
 
   try {
-    const leaderboard = await getXpLeaderboard('daily', dayId);
+    const leaderboard = await getXpLeaderboard('daily', dayId, { includeZeroXp });
     res.json(leaderboard);
   } catch (error) {
     logger.error('Error getting daily leaderboard:', error);
