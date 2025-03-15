@@ -29,6 +29,7 @@ export class UserService extends BaseFirestoreService<User> {
       id: nextId,
       active: true,
       lastLogin: getCurrentTimeAsISO(),
+      userType: input.userType || 'user',
       ...input,
       ...timestamps,
     };

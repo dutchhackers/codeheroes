@@ -65,6 +65,7 @@ export const onBeforeUserCreated = beforeUserCreated(
         email: user.email,
         displayName: user.displayName ?? user.email,
         photoUrl: user.photoURL,
+        userType: 'user',
       });
 
       // Initialize the user's stats (level 1, 0 XP)
