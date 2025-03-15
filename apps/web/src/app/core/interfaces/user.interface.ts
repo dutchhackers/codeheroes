@@ -1,3 +1,5 @@
+import { UserType } from '@codeheroes/types';
+
 export interface IUser {
   active: boolean;
   currentLevelXp: number;
@@ -12,6 +14,7 @@ export interface IUser {
   updatedAt: string;
   xp: number;
   xpToNextLevel: number;
+  userType: UserType;
 }
 
 export interface IUserStats {

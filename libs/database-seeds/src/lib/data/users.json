@@ -6,7 +6,8 @@
       "displayName": "User One",
       "photoUrl": "https://example.com/avatar1.jpg",
       "active": true,
-      "lastLogin": "2024-01-01T00:00:00Z"
+      "lastLogin": "2024-01-01T00:00:00Z",
+      "userType": "user"
     },
     {
       "id": "1000002",
@@ -14,7 +15,8 @@
       "displayName": "User Two",
       "photoUrl": "https://example.com/avatar2.jpg",
       "active": false,
-      "lastLogin": "2024-01-01T00:00:00Z"
+      "lastLogin": "2024-01-01T00:00:00Z",
+      "userType": "user"
     }
   ]
 }
