@@ -71,6 +71,7 @@ export class ProgressionStateRepository {
 
     try {
       return await this.db.runTransaction(async (transaction) => {
+        // STEP 1: Perform ALL reads first
         // Get current state within transaction
         const statsRef = userRef.collection(Collections.Stats).doc('current');
         const statsDoc = await transaction.get(statsRef);
@@ -81,6 +82,23 @@ export class ProgressionStateRepository {
           return this.updateState(userId, update, activity);
         }
 
+        // Read daily stats
+        const dailyStatsRef = userRef
+          .collection('activityStats')
+          .doc('daily')
+          .collection('records')
+          .doc(timeFrames.daily);
+        const dailyDoc = await transaction.get(dailyStatsRef);
+
+        // Read weekly stats
+        const weeklyStatsRef = userRef
+          .collection('activityStats')
+          .doc('weekly')
+          .collection('records')
+          .doc(timeFrames.weekly);
+        const weeklyDoc = await transaction.get(weeklyStatsRef);
+
+        // STEP 2: Process data and prepare updates
         const currentState = statsDoc.data() as ProgressionState;
 
         // Store previous state for comparison
@@ -114,18 +132,14 @@ export class ProgressionStateRepository {
           newState.counters.actions[update.activityType]++;
         }
 
+        // Determine if user leveled up
+        const leveledUp = currentLevel > previousState.level;
+
+        // STEP 3: Perform ALL writes after ALL reads
         // Update state document
         transaction.set(statsRef, newState, { merge: true });
 
         // Update daily stats
-        const dailyStatsRef = userRef
-          .collection('activityStats')
-          .doc('daily')
-          .collection('records')
-          .doc(timeFrames.daily);
-
-        const dailyDoc = await transaction.get(dailyStatsRef);
-
         if (!dailyDoc.exists) {
           // Initialize daily stats if they don't exist
           transaction.set(dailyStatsRef, {
@@ -156,14 +170,6 @@ export class ProgressionStateRepository {
         }
 
         // Update weekly stats
-        const weeklyStatsRef = userRef
-          .collection('activityStats')
-          .doc('weekly')
-          .collection('records')
-          .doc(timeFrames.weekly);
-
-        const weeklyDoc = await transaction.get(weeklyStatsRef);
-
         if (!weeklyDoc.exists) {
           // Initialize weekly stats if they don't exist
           transaction.set(weeklyStatsRef, {
@@ -202,9 +208,6 @@ export class ProgressionStateRepository {
             updatedAt: getCurrentTimeAsISO(),
           });
         }
-
-        // Determine if user leveled up
-        const leveledUp = currentLevel > previousState.level;
 
         return {
           state: newState,
