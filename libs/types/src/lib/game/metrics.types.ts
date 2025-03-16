@@ -3,6 +3,10 @@ export interface BaseMetrics {
   timestamp: string;
 }
 
+export interface ManualMetrics extends BaseMetrics {
+  type: 'manual';
+}
+
 export interface CodeMetrics extends BaseMetrics {
   type: 'code';
   commits?: number;
@@ -65,4 +69,5 @@ export type GameActionMetrics =
   | CodeReviewMetrics
   | IssueMetrics
   | WorkoutMetrics
-  | CodePushMetrics;
+  | CodePushMetrics
+  | ManualMetrics;

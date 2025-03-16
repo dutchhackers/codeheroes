@@ -39,7 +39,10 @@ export interface Activity {
       description: string;
     }>;
   };
-
+  userFacingDescription: string;
   createdAt: string;
   updatedAt: string;
+  eventId: string; // Add this property
+  provider: string; // Make sure this exists too
+  processingResult?: any;
 }

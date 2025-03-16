@@ -2,8 +2,11 @@ import { DatabaseInstance, logger } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
 import { Collections, ProgressionEvent, ProgressionEventType } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
-import { BadgeService } from '../rewards/services/badge.service';
+import { BadgeService } from '../../rewards/services/badge.service';
 
+/**
+ * Service responsible for processing progression events
+ */
 export class EventProcessorService {
   private db: Firestore;
   private notificationService: NotificationService;
@@ -16,6 +19,10 @@ export class EventProcessorService {
     this.badgeService = new BadgeService(this);
   }
 
+  /**
+   * Handle a progression event
+   * @param event The progression event to handle
+   */
   async handleEvent(event: ProgressionEvent): Promise<void> {
     logger.info('Handling progression event', { type: event.type, userId: event.userId });
 
@@ -35,6 +42,10 @@ export class EventProcessorService {
     }
   }
 
+  /**
+   * Handle level up events
+   * @param event Level up event
+   */
   private async handleLevelUp(event: ProgressionEvent): Promise<void> {
     const { userId, data } = event;
     const newLevel = data.state?.level;
@@ -78,6 +89,10 @@ export class EventProcessorService {
     });
   }
 
+  /**
+   * Handle badge earned events
+   * @param event Badge earned event
+   */
   private async handleBadgeEarned(event: ProgressionEvent): Promise<void> {
     const { userId, data } = event;
     const badgeId = data.badgeId;
@@ -115,6 +130,10 @@ export class EventProcessorService {
     });
   }
 
+  /**
+   * Handle activity recorded events
+   * @param event Activity recorded event
+   */
   private async handleActivityRecorded(event: ProgressionEvent): Promise<void> {
     const { userId, data } = event;
     const activity = data.activity;
@@ -154,10 +173,21 @@ export class EventProcessorService {
     }
   }
 
+  /**
+   * Handle XP gained events
+   * @param event XP gained event
+   */
   private async handleXpGained(event: ProgressionEvent): Promise<void> {
     // Handle XP gained events if needed
+    // Most XP-related processing is handled by the progression service
   }
 
+  /**
+   * Record an achievement
+   * @param transaction Firestore transaction or null
+   * @param achievementRef Reference to achievements collection
+   * @param achievement Achievement data to record
+   */
   private async recordAchievement(
     transaction: FirebaseFirestore.Transaction | null,
     achievementRef: FirebaseFirestore.CollectionReference,
@@ -177,6 +207,12 @@ export class EventProcessorService {
     }
   }
 
+  /**
+   * Get activity stats for a user and activity type
+   * @param userId User ID
+   * @param activityType Activity type
+   * @returns Activity stats
+   */
   private async getActivityStats(userId: string, activityType: string): Promise<{ total: number }> {
     const userRef = this.db.collection(Collections.Users).doc(userId);
     const statsDoc = await userRef.collection(Collections.Stats).doc('current').get();

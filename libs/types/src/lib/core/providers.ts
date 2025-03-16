@@ -1,4 +1,4 @@
-export type ConnectedAccountProvider = 'github' | 'strava' | 'azure' | 'bitbucket';
+export type ConnectedAccountProvider = 'github' | 'strava' | 'azure' | 'bitbucket' | 'system';
 
 // ProviderConnection isn't in use yet
 export interface ProviderConnection {

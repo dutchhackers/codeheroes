@@ -1,7 +1,7 @@
 import { DatabaseInstance } from '@codeheroes/common';
 import { Collections } from '@codeheroes/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { EventProcessorService } from '../../events/event-processor.service';
+import { EventProcessorService } from '../../progression/events/event-processor.service';
 
 export interface Badge {
   id: string;
