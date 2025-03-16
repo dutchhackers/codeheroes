@@ -6,6 +6,28 @@ import { ProgressionState, ProgressionUpdate, ProgressionUpdateResult } from '..
 import { getTimePeriodIds } from '../../utils/time-periods.utils';
 
 /**
+ * Interface representing a plan for transaction execution
+ */
+interface TransactionPlan {
+  needsInitialization: boolean;
+  userId?: string;
+  update?: ProgressionUpdate;
+  activity?: any;
+  writes?: {
+    stats: any;
+    daily: any;
+    weekly: any;
+    activity: any;
+  };
+  result?: {
+    state: ProgressionState;
+    previousState: ProgressionState;
+    leveledUp: boolean;
+    newAchievements: string[];
+  };
+}
+
+/**
  * Repository for managing user progression state in Firestore
  */
 export class ProgressionStateRepository {
@@ -66,160 +88,42 @@ export class ProgressionStateRepository {
   async updateState(userId: string, update: ProgressionUpdate, activity?: any): Promise<ProgressionUpdateResult> {
     logger.info('Updating progression state', { userId, xpGained: update.xpGained });
 
-    const timeFrames = getTimePeriodIds();
+    // Get references to all documents we'll need
     const userRef = this.db.collection(Collections.Users).doc(userId);
+    const statsRef = userRef.collection(Collections.Stats).doc('current');
+    const timeFrames = getTimePeriodIds();
+    const dailyStatsRef = userRef.collection('activityStats').doc('daily').collection('records').doc(timeFrames.daily);
+    const weeklyStatsRef = userRef
+      .collection('activityStats')
+      .doc('weekly')
+      .collection('records')
+      .doc(timeFrames.weekly);
 
-    try {
-      return await this.db.runTransaction(async (transaction) => {
-        // STEP 1: Perform ALL reads first
-        // Get current state within transaction
-        const statsRef = userRef.collection(Collections.Stats).doc('current');
-        const statsDoc = await transaction.get(statsRef);
+    // Pre-transaction: gather all data outside the transaction first
+    const [statsDoc, dailyDoc, weeklyDoc] = await Promise.all([
+      statsRef.get(),
+      dailyStatsRef.get(),
+      weeklyStatsRef.get(),
+    ]);
 
-        if (!statsDoc.exists) {
-          // Initialize state if it doesn't exist
-          const initialState = await this.createInitialState(userId);
-          return this.updateState(userId, update, activity);
-        }
+    // Create a plan based on this data
+    const plan = this.createTransactionPlan({
+      userId,
+      update,
+      activity,
+      statsDoc: statsDoc.exists ? statsDoc.data() : null,
+      dailyDoc: dailyDoc.exists ? dailyDoc.data() : null,
+      weeklyDoc: weeklyDoc.exists ? weeklyDoc.data() : null,
+      timeFrames,
+    });
 
-        // Read daily stats
-        const dailyStatsRef = userRef
-          .collection('activityStats')
-          .doc('daily')
-          .collection('records')
-          .doc(timeFrames.daily);
-        const dailyDoc = await transaction.get(dailyStatsRef);
-
-        // Read weekly stats
-        const weeklyStatsRef = userRef
-          .collection('activityStats')
-          .doc('weekly')
-          .collection('records')
-          .doc(timeFrames.weekly);
-        const weeklyDoc = await transaction.get(weeklyStatsRef);
-
-        // STEP 2: Process data and prepare updates
-        const currentState = statsDoc.data() as ProgressionState;
-
-        // Store previous state for comparison
-        const previousState = { ...currentState };
-
-        // Apply XP update and calculate new level
-        const newXp = currentState.xp + update.xpGained;
-        const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(newXp);
-
-        // Create new state
-        const newState: ProgressionState = {
-          ...currentState,
-          xp: newXp,
-          level: currentLevel,
-          currentLevelXp,
-          xpToNextLevel,
-          lastActivityDate: new Date().toISOString().split('T')[0],
-          countersLastUpdated: getCurrentTimeAsISO(),
-        };
-
-        // Update counters if activity type provided
-        if (update.activityType) {
-          if (!newState.counters) {
-            newState.counters = this.getInitialCounters();
-          }
-
-          if (!newState.counters.actions[update.activityType]) {
-            newState.counters.actions[update.activityType] = 0;
-          }
-
-          newState.counters.actions[update.activityType]++;
-        }
-
-        // Determine if user leveled up
-        const leveledUp = currentLevel > previousState.level;
-
-        // STEP 3: Perform ALL writes after ALL reads
-        // Update state document
-        transaction.set(statsRef, newState, { merge: true });
-
-        // Update daily stats
-        if (!dailyDoc.exists) {
-          // Initialize daily stats if they don't exist
-          transaction.set(dailyStatsRef, {
-            timeframeId: timeFrames.daily,
-            xpGained: update.xpGained,
-            counters: this.getInitialCounters(),
-            countersLastUpdated: getCurrentTimeAsISO(),
-            lastActivity: update.activityType
-              ? {
-                  type: update.activityType,
-                  timestamp: getCurrentTimeAsISO(),
-                }
-              : undefined,
-          });
-        } else {
-          // Update existing daily stats
-          transaction.update(dailyStatsRef, {
-            xpGained: FieldValue.increment(update.xpGained),
-            [`counters.actions.${update.activityType}`]: FieldValue.increment(1),
-            countersLastUpdated: getCurrentTimeAsISO(),
-            lastActivity: update.activityType
-              ? {
-                  type: update.activityType,
-                  timestamp: getCurrentTimeAsISO(),
-                }
-              : undefined,
-          });
-        }
-
-        // Update weekly stats
-        if (!weeklyDoc.exists) {
-          // Initialize weekly stats if they don't exist
-          transaction.set(weeklyStatsRef, {
-            timeframeId: timeFrames.weekly,
-            xpGained: update.xpGained,
-            counters: this.getInitialCounters(),
-            countersLastUpdated: getCurrentTimeAsISO(),
-            lastActivity: update.activityType
-              ? {
-                  type: update.activityType,
-                  timestamp: getCurrentTimeAsISO(),
-                }
-              : undefined,
-          });
-        } else {
-          // Update existing weekly stats
-          transaction.update(weeklyStatsRef, {
-            xpGained: FieldValue.increment(update.xpGained),
-            [`counters.actions.${update.activityType}`]: FieldValue.increment(1),
-            countersLastUpdated: getCurrentTimeAsISO(),
-            lastActivity: update.activityType
-              ? {
-                  type: update.activityType,
-                  timestamp: getCurrentTimeAsISO(),
-                }
-              : undefined,
-          });
-        }
-
-        // Record activity if provided
-        if (activity) {
-          const activityRef = userRef.collection(Collections.Activities).doc(activity.id || `activity_${Date.now()}`);
-          transaction.set(activityRef, {
-            ...activity,
-            createdAt: activity.createdAt || getCurrentTimeAsISO(),
-            updatedAt: getCurrentTimeAsISO(),
-          });
-        }
-
-        return {
-          state: newState,
-          previousState,
-          leveledUp,
-          newAchievements: update.achievements,
-        };
-      });
-    } catch (error) {
-      logger.error('Error updating progression state', { userId, error });
-      throw error;
-    }
+    // Execute the transaction with this plan
+    return this.executeStateUpdateTransaction(plan, {
+      statsRef,
+      dailyStatsRef,
+      weeklyStatsRef,
+      userRef,
+    });
   }
 
   /**
@@ -284,5 +188,195 @@ export class ProgressionStateRepository {
         speed_record: 0,
       },
     };
+  }
+
+  /**
+   * Creates a transaction plan using pre-gathered data
+   * This separates the business logic from the actual transaction execution
+   */
+  private createTransactionPlan({
+    userId,
+    update,
+    activity,
+    statsDoc,
+    dailyDoc,
+    weeklyDoc,
+    timeFrames,
+  }): TransactionPlan {
+    // Handle missing state
+    if (!statsDoc) {
+      return {
+        needsInitialization: true,
+        userId,
+        update,
+        activity,
+      };
+    }
+
+    // Calculate new state
+    const currentState = statsDoc as ProgressionState;
+    const previousState = { ...currentState };
+    const newState = this.calculateNewState(currentState, update);
+
+    // Prepare planned writes
+    const writes = {
+      stats: {
+        ref: 'statsRef',
+        data: newState,
+        merge: true,
+      },
+      daily: this.prepareTimeframeWrite(dailyDoc, timeFrames.daily, update),
+      weekly: this.prepareTimeframeWrite(weeklyDoc, timeFrames.weekly, update),
+      activity: activity
+        ? {
+            ref: `${Collections.Activities}/${activity.id || `activity_${Date.now()}`}`,
+            data: {
+              ...activity,
+              createdAt: activity.createdAt || getCurrentTimeAsISO(),
+              updatedAt: getCurrentTimeAsISO(),
+            },
+          }
+        : null,
+    };
+
+    // Prepare result
+    const leveledUp = newState.level > previousState.level;
+
+    return {
+      needsInitialization: false,
+      writes,
+      result: {
+        state: newState,
+        previousState,
+        leveledUp,
+        newAchievements: update.achievements || [],
+      },
+    };
+  }
+
+  /**
+   * Executes the transaction using the prepared plan
+   */
+  private async executeStateUpdateTransaction(
+    plan: TransactionPlan,
+    refs: {
+      statsRef: FirebaseFirestore.DocumentReference;
+      dailyStatsRef: FirebaseFirestore.DocumentReference;
+      weeklyStatsRef: FirebaseFirestore.DocumentReference;
+      userRef: FirebaseFirestore.DocumentReference;
+    },
+  ): Promise<ProgressionUpdateResult> {
+    // If initialization is needed, handle specially
+    if (plan.needsInitialization) {
+      const initialState = await this.createInitialState(plan.userId!);
+      return this.updateState(plan.userId!, plan.update!, plan.activity);
+    }
+
+    return this.db.runTransaction(async (transaction) => {
+      // Read all documents again to verify they haven't changed
+      const freshStatsDoc = await transaction.get(refs.statsRef);
+
+      // Optional: Verify data is still valid or handle conflicts
+      // This step could be expanded depending on your conflict resolution needs
+
+      // Apply all writes from the plan
+      for (const [key, write] of Object.entries(plan.writes!)) {
+        if (!write) continue;
+
+        // Get the right reference based on the key
+        let ref;
+        if (key === 'stats') ref = refs.statsRef;
+        else if (key === 'daily') ref = refs.dailyStatsRef;
+        else if (key === 'weekly') ref = refs.weeklyStatsRef;
+        else if (key === 'activity') ref = refs.userRef.collection(Collections.Activities).doc(write.ref.split('/')[1]);
+        else continue;
+
+        // Apply the appropriate write operation
+        if (write.merge) {
+          transaction.set(ref, write.data, { merge: true });
+        } else if (write.update) {
+          transaction.update(ref, write.data);
+        } else {
+          transaction.set(ref, write.data);
+        }
+      }
+
+      return plan.result!;
+    });
+  }
+
+  /**
+   * Calculate the new state based on the current state and update
+   */
+  private calculateNewState(currentState: ProgressionState, update: ProgressionUpdate): ProgressionState {
+    const newXp = currentState.xp + update.xpGained;
+    const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(newXp);
+
+    const newState = { ...currentState };
+    newState.xp = newXp;
+    newState.level = currentLevel;
+    newState.currentLevelXp = currentLevelXp;
+    newState.xpToNextLevel = xpToNextLevel;
+    newState.lastActivityDate = new Date().toISOString().split('T')[0];
+    newState.countersLastUpdated = getCurrentTimeAsISO();
+
+    // Update counters
+    if (update.activityType) {
+      this.updateStateCounters(newState, update.activityType);
+    }
+
+    return newState;
+  }
+
+  /**
+   * Update the counters in the state object based on activity type
+   */
+  private updateStateCounters(state: ProgressionState, activityType: string): void {
+    if (!state.counters) {
+      state.counters = this.getInitialCounters();
+    }
+
+    if (state.counters.actions[activityType] !== undefined) {
+      state.counters.actions[activityType]++;
+    }
+  }
+
+  /**
+   * Prepare a write operation for a timeframe document (daily/weekly)
+   */
+  private prepareTimeframeWrite(doc: any, timeframeId: string, update: ProgressionUpdate) {
+    if (!doc) {
+      // New document case
+      return {
+        data: {
+          timeframeId,
+          xpGained: update.xpGained,
+          counters: this.getInitialCounters(),
+          countersLastUpdated: getCurrentTimeAsISO(),
+          lastActivity: update.activityType
+            ? {
+                type: update.activityType,
+                timestamp: getCurrentTimeAsISO(),
+              }
+            : undefined,
+        },
+      };
+    } else {
+      // Update existing document case
+      return {
+        update: true,
+        data: {
+          xpGained: FieldValue.increment(update.xpGained),
+          [`counters.actions.${update.activityType}`]: update.activityType ? FieldValue.increment(1) : undefined,
+          countersLastUpdated: getCurrentTimeAsISO(),
+          lastActivity: update.activityType
+            ? {
+                type: update.activityType,
+                timestamp: getCurrentTimeAsISO(),
+              }
+            : undefined,
+        },
+      };
+    }
   }
 }
