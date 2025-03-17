@@ -1,5 +1,5 @@
 import { DEFAULT_REGION, logger, SettingsService, UserService } from '@codeheroes/common';
-import { UserProgressionService } from '@codeheroes/progression-engine';
+import { createServiceRegistry } from '@codeheroes/progression-engine';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
 
@@ -70,11 +70,13 @@ export const onBeforeUserCreated = beforeUserCreated(
 
       // Initialize the user's stats (level 1, 0 XP)
       logger.info('Initializing progression stats for new user', { userId: newUser.id });
-      const progressionService = new UserProgressionService();
 
+      // Create service registry to get the progression service
+      const services = createServiceRegistry();
+
+      // Use the ProgressionService instead of UserProgressionService
       // Use an empty update with 0 XP, which will create the initial stats record
-      // The updateProgression method will set the initial level to 1 as defined in the service
-      await progressionService.updateProgression(newUser.id, {
+      await services.progressionService.updateProgression(newUser.id, {
         xpGained: 0,
         activityType: 'user_registration',
       });

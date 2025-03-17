@@ -1,10 +1,9 @@
 import { DatabaseInstance } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
-import { Collections } from '@codeheroes/types';
+import { Collections, RewardType } from '@codeheroes/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { RewardType } from '@codeheroes/types';
+import { EventPublisherService } from '../../progression/events/event-publisher.service';
 import { BadgeService } from './badge.service';
-import { EventPublisherService } from '../../events/event-publisher.service';
 
 export interface Reward {
   id: string;

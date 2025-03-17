@@ -22,6 +22,11 @@ export interface BaseContext {
   provider: ConnectedAccountProvider;
 }
 
+export interface ManualContext extends BaseContext {
+  type: 'manual';
+  provider: 'system' | ConnectedAccountProvider; // system is used for manual updates; for now added to ConnectedAccountProvider
+}
+
 // Code-related contexts
 export interface RepositoryContext extends BaseContext {
   type: 'repository';
@@ -97,4 +102,5 @@ export type GameActionContext =
   | CodeReviewContext
   | IssueContext
   | WorkoutContext
-  | CodePushContext;
+  | CodePushContext
+  | ManualContext;

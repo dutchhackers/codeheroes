@@ -5,6 +5,7 @@ import { GameActionMetrics } from './metrics.types';
 /**
  * Represents the result of processing a game action
  */
+// Update libs/types/src/lib/game/action.types.ts
 export interface ActionResult {
   /**
    * Amount of XP gained from the action
@@ -34,6 +35,11 @@ export interface ActionResult {
     currentLevelXp: number;
     xpToNextLevel: number;
   };
+
+  /**
+   * Whether the user leveled up as a result of this action
+   */
+  leveledUp?: boolean; // Add this line
 }
 
 export type GameActionType =
@@ -51,7 +57,9 @@ export type GameActionType =
   // Workout actions
   | 'workout_complete'
   | 'distance_milestone'
-  | 'speed_record';
+  | 'speed_record'
+  // Manual actions
+  | 'manual_update';
 
 export interface GameAction {
   id: string;
