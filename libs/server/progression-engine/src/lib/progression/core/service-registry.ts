@@ -3,7 +3,7 @@ import { EventPublisherService } from '../events/event-publisher.service';
 import { ActionHandlerFactory } from '../handlers/action-handler.factory';
 import { ActivityRepository } from '../repositories/activity.repository';
 import { GameActionRepository } from '../repositories/game-action.repository';
-import { ProgressionStateRepository } from '../repositories/progression-state.repository';
+import { ProgressionRepository } from '../repositories/progression.repository';
 import { ActivityRecorderService } from '../services/activity-recorder.service';
 import { ProgressionService } from '../services/progression.service';
 import { XpCalculatorService } from '../services/xp-calculator.service';
@@ -12,7 +12,7 @@ import { XpCalculatorService } from '../services/xp-calculator.service';
  * Acts as a simple dependency injection container
  */
 export interface ServiceRegistry {
-  progressionStateRepository: ProgressionStateRepository;
+  progressionStateRepository: ProgressionRepository;
   activityRepository: ActivityRepository;
   gameActionRepository: GameActionRepository;
   xpCalculatorService: XpCalculatorService;
@@ -30,9 +30,9 @@ export function createServiceRegistry(): ServiceRegistry {
   const db = DatabaseInstance.getInstance();
 
   // Create repositories
-  const progressionStateRepository = new ProgressionStateRepository();
-  const activityRepository = new ActivityRepository();
-  const gameActionRepository = new GameActionRepository();
+  const progressionStateRepository = new ProgressionRepository(db);
+  const activityRepository = new ActivityRepository(db);
+  const gameActionRepository = new GameActionRepository(db);
 
   // Create supporting services
   const xpCalculatorService = new XpCalculatorService();

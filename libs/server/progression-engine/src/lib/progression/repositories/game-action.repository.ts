@@ -1,16 +1,15 @@
-import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
-import { GameAction, Collections } from '@codeheroes/types';
+import { BaseRepository, getCurrentTimeAsISO, logger } from '@codeheroes/common';
+import { Collections, GameAction, GameActionType } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 
 /**
  * Repository for managing game actions in Firestore
  */
-export class GameActionRepository {
-  private db: Firestore;
-  private readonly collection = Collections.GameActions;
+export class GameActionRepository extends BaseRepository<GameAction> {
+  protected collectionPath = Collections.GameActions;
 
-  constructor() {
-    this.db = DatabaseInstance.getInstance();
+  constructor(db: Firestore) {
+    super(db);
   }
 
   /**
@@ -27,7 +26,7 @@ export class GameActionRepository {
     });
 
     try {
-      const docRef = this.db.collection(this.collection).doc();
+      const docRef = this.db.collection(this.collectionPath).doc();
       const now = getCurrentTimeAsISO();
 
       const newGameAction: GameAction = {
@@ -58,7 +57,7 @@ export class GameActionRepository {
    */
   async markAsProcessed(id: string): Promise<void> {
     try {
-      await this.db.collection(this.collection).doc(id).update({
+      await this.db.collection(this.collectionPath).doc(id).update({
         status: 'processed',
         processedAt: getCurrentTimeAsISO(),
         updatedAt: getCurrentTimeAsISO(),
@@ -78,7 +77,7 @@ export class GameActionRepository {
    */
   async markAsFailed(id: string, errorMessage: string): Promise<void> {
     try {
-      await this.db.collection(this.collection).doc(id).update({
+      await this.db.collection(this.collectionPath).doc(id).update({
         status: 'failed',
         error: errorMessage,
         updatedAt: getCurrentTimeAsISO(),
@@ -98,7 +97,7 @@ export class GameActionRepository {
    */
   async getGameAction(id: string): Promise<GameAction | null> {
     try {
-      const doc = await this.db.collection(this.collection).doc(id).get();
+      const doc = await this.db.collection(this.collectionPath).doc(id).get();
 
       return doc.exists ? (doc.data() as GameAction) : null;
     } catch (error) {
@@ -115,7 +114,7 @@ export class GameActionRepository {
   async findPendingGameActions(limit = 10): Promise<GameAction[]> {
     try {
       const snapshot = await this.db
-        .collection(this.collection)
+        .collection(this.collectionPath)
         .where('status', '==', 'pending')
         .orderBy('createdAt')
         .limit(limit)
@@ -137,7 +136,7 @@ export class GameActionRepository {
   async findRecentByUser(userId: string, limit = 10): Promise<GameAction[]> {
     try {
       const snapshot = await this.db
-        .collection(this.collection)
+        .collection(this.collectionPath)
         .where('userId', '==', userId)
         .orderBy('timestamp', 'desc')
         .limit(limit)
@@ -146,6 +145,60 @@ export class GameActionRepository {
       return snapshot.docs.map((doc) => doc.data() as GameAction);
     } catch (error) {
       logger.error('Error finding recent game actions for user', { userId, error });
+      throw error;
+    }
+  }
+
+  /**
+   * Finds actions by type
+   * @param type Game action type
+   * @param limit Maximum number of actions to return
+   * @returns Array of game actions of the specified type
+   */
+  async findByType(type: GameActionType, limit = 50): Promise<GameAction[]> {
+    try {
+      const snapshot = await this.db
+        .collection(this.collectionPath)
+        .where('type', '==', type)
+        .orderBy('timestamp', 'desc')
+        .limit(limit)
+        .get();
+
+      return snapshot.docs.map((doc) => doc.data() as GameAction);
+    } catch (error) {
+      logger.error('Error finding game actions by type', { type, error });
+      throw error;
+    }
+  }
+
+  /**
+   * Finds actions by external ID
+   * @param externalId External ID to search for
+   * @returns Array of matching game actions
+   */
+  async findByExternalId(externalId: string): Promise<GameAction[]> {
+    try {
+      const snapshot = await this.db.collection(this.collectionPath).where('externalId', '==', externalId).get();
+
+      return snapshot.docs.map((doc) => doc.data() as GameAction);
+    } catch (error) {
+      logger.error('Error finding game actions by external ID', { externalId, error });
+      throw error;
+    }
+  }
+
+  /**
+   * Counts actions by status
+   * @param status Status to count
+   * @returns Count of actions with the specified status
+   */
+  async countByStatus(status: 'pending' | 'processed' | 'failed'): Promise<number> {
+    try {
+      const snapshot = await this.db.collection(this.collectionPath).where('status', '==', status).count().get();
+
+      return snapshot.data().count;
+    } catch (error) {
+      logger.error('Error counting game actions by status', { status, error });
       throw error;
     }
   }

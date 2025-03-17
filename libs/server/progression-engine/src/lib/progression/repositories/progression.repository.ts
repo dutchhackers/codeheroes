@@ -1,9 +1,9 @@
-import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
-import { Collections, ActivityCounters } from '@codeheroes/types';
-import { Firestore, FieldValue } from 'firebase-admin/firestore';
+import { BaseRepository, getCurrentTimeAsISO, logger } from '@codeheroes/common';
+import { ActivityCounters, Collections } from '@codeheroes/types';
+import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../config/level-thresholds';
-import { ProgressionState, ProgressionUpdate, ProgressionUpdateResult } from '../core/progression-state.model';
 import { getTimePeriodIds } from '../../utils/time-periods.utils';
+import { ProgressionState, ProgressionUpdate, ProgressionUpdateResult } from '../core/progression-state.model';
 
 /**
  * Interface representing a plan for transaction execution
@@ -30,17 +30,15 @@ interface TransactionPlan {
 /**
  * Repository for managing user progression state in Firestore
  */
-export class ProgressionStateRepository {
-  private db: Firestore;
+export class ProgressionRepository extends BaseRepository<ProgressionState> {
+  protected collectionPath = Collections.Stats;
 
-  constructor() {
-    this.db = DatabaseInstance.getInstance();
+  constructor(db: Firestore) {
+    super(db);
   }
 
   /**
-   * Retrieves the current progression state for a user
-   * @param userId User ID to get state for
-   * @returns The current progression state or null if not found
+   * Get user progression state
    */
   async getState(userId: string): Promise<ProgressionState | null> {
     logger.debug('Getting progression state', { userId });
@@ -62,6 +60,7 @@ export class ProgressionStateRepository {
       const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(userStats.xp || 0);
 
       return {
+        id: userId, // Add this line
         userId,
         xp: userStats.xp || 0,
         level: currentLevel,
@@ -79,16 +78,12 @@ export class ProgressionStateRepository {
   }
 
   /**
-   * Updates a user's progression state with new XP and activity data
-   * @param userId User ID to update
-   * @param update The progression update data
-   * @param activity Optional activity to record
-   * @returns Updated progression state
+   * Update user progression state
    */
   async updateState(userId: string, update: ProgressionUpdate, activity?: any): Promise<ProgressionUpdateResult> {
     logger.info('Updating progression state', { userId, xpGained: update.xpGained });
 
-    // Get references to all documents we'll need
+    // Get all the references we'll need
     const userRef = this.db.collection(Collections.Users).doc(userId);
     const statsRef = userRef.collection(Collections.Stats).doc('current');
     const timeFrames = getTimePeriodIds();
@@ -99,37 +94,46 @@ export class ProgressionStateRepository {
       .collection('records')
       .doc(timeFrames.weekly);
 
-    // Pre-transaction: gather all data outside the transaction first
-    const [statsDoc, dailyDoc, weeklyDoc] = await Promise.all([
-      statsRef.get(),
-      dailyStatsRef.get(),
-      weeklyStatsRef.get(),
-    ]);
+    // First get all data we need for planning
+    try {
+      const [statsDoc, dailyDoc, weeklyDoc] = await Promise.all([
+        statsRef.get(),
+        dailyStatsRef.get(),
+        weeklyStatsRef.get(),
+      ]);
 
-    // Create a plan based on this data
-    const plan = this.createTransactionPlan({
-      userId,
-      update,
-      activity,
-      statsDoc: statsDoc.exists ? statsDoc.data() : null,
-      dailyDoc: dailyDoc.exists ? dailyDoc.data() : null,
-      weeklyDoc: weeklyDoc.exists ? weeklyDoc.data() : null,
-      timeFrames,
-    });
+      // If state doesn't exist, initialize it first
+      if (!statsDoc.exists) {
+        const initialState = await this.createInitialState(userId);
+        return this.updateState(userId, update, activity);
+      }
 
-    // Execute the transaction with this plan
-    return this.executeStateUpdateTransaction(plan, {
-      statsRef,
-      dailyStatsRef,
-      weeklyStatsRef,
-      userRef,
-    });
+      // Create our transaction plan
+      const plan = this.createTransactionPlan({
+        userId,
+        update,
+        activity,
+        statsDoc: statsDoc.data(),
+        dailyDoc: dailyDoc.exists ? dailyDoc.data() : null,
+        weeklyDoc: weeklyDoc.exists ? weeklyDoc.data() : null,
+        timeFrames,
+      });
+
+      // Execute the transaction with this plan
+      return this.executeStateUpdateTransaction(plan, {
+        statsRef,
+        dailyStatsRef,
+        weeklyStatsRef,
+        userRef,
+      });
+    } catch (error) {
+      logger.error('Error updating progression state', { userId, error });
+      throw error;
+    }
   }
 
   /**
-   * Creates an initial progression state for a new user
-   * @param userId User ID to create state for
-   * @returns The newly created progression state
+   * Create initial progression state for a new user
    */
   async createInitialState(userId: string): Promise<ProgressionState> {
     logger.debug('Creating initial progression state', { userId });
@@ -138,11 +142,12 @@ export class ProgressionStateRepository {
     const initialCounters = this.getInitialCounters();
 
     const initialState: ProgressionState = {
+      id: userId, // Add this line
       userId,
       xp: 0,
       level: 1,
       currentLevelXp: 0,
-      xpToNextLevel: 1000, // Default first level requirement
+      xpToNextLevel: 1000,
       lastActivityDate: null,
       counters: initialCounters,
       countersLastUpdated: now,
@@ -165,29 +170,6 @@ export class ProgressionStateRepository {
       logger.error('Error creating initial progression state', { userId, error });
       throw error;
     }
-  }
-
-  /**
-   * Gets initial empty counters structure
-   * @returns Empty counters object
-   */
-  private getInitialCounters(): ActivityCounters {
-    return {
-      actions: {
-        code_push: 0,
-        pull_request_create: 0,
-        pull_request_merge: 0,
-        pull_request_close: 0,
-        code_review_submit: 0,
-        code_review_comment: 0,
-        issue_create: 0,
-        issue_close: 0,
-        issue_reopen: 0,
-        workout_complete: 0,
-        distance_milestone: 0,
-        speed_record: 0,
-      },
-    };
   }
 
   /**
@@ -218,18 +200,27 @@ export class ProgressionStateRepository {
     const previousState = { ...currentState };
     const newState = this.calculateNewState(currentState, update);
 
-    // Prepare planned writes
+    // Determine if user leveled up
+    const leveledUp = newState.level > previousState.level;
+
+    // Prepare activity data for time-based stats
+    const activityData = update.activityType
+      ? {
+          type: update.activityType,
+          timestamp: getCurrentTimeAsISO(),
+        }
+      : undefined;
+
+    // Prepare writes for each document
     const writes = {
       stats: {
-        ref: 'statsRef',
         data: newState,
         merge: true,
       },
-      daily: this.prepareTimeframeWrite(dailyDoc, timeFrames.daily, update),
-      weekly: this.prepareTimeframeWrite(weeklyDoc, timeFrames.weekly, update),
+      daily: this.prepareTimeframeWrite(dailyDoc, timeFrames.daily, update, activityData),
+      weekly: this.prepareTimeframeWrite(weeklyDoc, timeFrames.weekly, update, activityData),
       activity: activity
         ? {
-            ref: `${Collections.Activities}/${activity.id || `activity_${Date.now()}`}`,
             data: {
               ...activity,
               createdAt: activity.createdAt || getCurrentTimeAsISO(),
@@ -238,9 +229,6 @@ export class ProgressionStateRepository {
           }
         : null,
     };
-
-    // Prepare result
-    const leveledUp = newState.level > previousState.level;
 
     return {
       needsInitialization: false,
@@ -272,33 +260,39 @@ export class ProgressionStateRepository {
       return this.updateState(plan.userId!, plan.update!, plan.activity);
     }
 
-    return this.db.runTransaction(async (transaction) => {
+    return this.executeTransaction(async (transaction) => {
       // Read all documents again to verify they haven't changed
       const freshStatsDoc = await transaction.get(refs.statsRef);
 
-      // Optional: Verify data is still valid or handle conflicts
-      // This step could be expanded depending on your conflict resolution needs
+      // Apply stats update
+      if (plan.writes?.stats) {
+        transaction.set(refs.statsRef, plan.writes.stats.data, { merge: true });
+      }
 
-      // Apply all writes from the plan
-      for (const [key, write] of Object.entries(plan.writes!)) {
-        if (!write) continue;
-
-        // Get the right reference based on the key
-        let ref;
-        if (key === 'stats') ref = refs.statsRef;
-        else if (key === 'daily') ref = refs.dailyStatsRef;
-        else if (key === 'weekly') ref = refs.weeklyStatsRef;
-        else if (key === 'activity') ref = refs.userRef.collection(Collections.Activities).doc(write.ref.split('/')[1]);
-        else continue;
-
-        // Apply the appropriate write operation
-        if (write.merge) {
-          transaction.set(ref, write.data, { merge: true });
-        } else if (write.update) {
-          transaction.update(ref, write.data);
+      // Apply daily stats update
+      if (plan.writes?.daily) {
+        if (!plan.writes.daily.exists) {
+          transaction.set(refs.dailyStatsRef, plan.writes.daily.data);
         } else {
-          transaction.set(ref, write.data);
+          transaction.update(refs.dailyStatsRef, plan.writes.daily.updates);
         }
+      }
+
+      // Apply weekly stats update
+      if (plan.writes?.weekly) {
+        if (!plan.writes.weekly.exists) {
+          transaction.set(refs.weeklyStatsRef, plan.writes.weekly.data);
+        } else {
+          transaction.update(refs.weeklyStatsRef, plan.writes.weekly.updates);
+        }
+      }
+
+      // Record activity if provided
+      if (plan.writes?.activity && plan.activity) {
+        const activityRef = refs.userRef
+          .collection(Collections.Activities)
+          .doc(plan.activity.id || `activity_${Date.now()}`);
+        transaction.set(activityRef, plan.writes.activity.data);
       }
 
       return plan.result!;
@@ -344,39 +338,58 @@ export class ProgressionStateRepository {
   /**
    * Prepare a write operation for a timeframe document (daily/weekly)
    */
-  private prepareTimeframeWrite(doc: any, timeframeId: string, update: ProgressionUpdate) {
+  private prepareTimeframeWrite(doc: any, timeframeId: string, update: ProgressionUpdate, activityData?: any) {
     if (!doc) {
       // New document case
       return {
+        exists: false,
         data: {
           timeframeId,
           xpGained: update.xpGained,
           counters: this.getInitialCounters(),
           countersLastUpdated: getCurrentTimeAsISO(),
-          lastActivity: update.activityType
-            ? {
-                type: update.activityType,
-                timestamp: getCurrentTimeAsISO(),
-              }
-            : undefined,
+          lastActivity: activityData,
         },
       };
     } else {
       // Update existing document case
+      const updates: any = {
+        xpGained: FieldValue.increment(update.xpGained),
+        countersLastUpdated: getCurrentTimeAsISO(),
+        lastActivity: activityData,
+      };
+
+      if (update.activityType) {
+        updates[`counters.actions.${update.activityType}`] = FieldValue.increment(1);
+      }
+
       return {
-        update: true,
-        data: {
-          xpGained: FieldValue.increment(update.xpGained),
-          [`counters.actions.${update.activityType}`]: update.activityType ? FieldValue.increment(1) : undefined,
-          countersLastUpdated: getCurrentTimeAsISO(),
-          lastActivity: update.activityType
-            ? {
-                type: update.activityType,
-                timestamp: getCurrentTimeAsISO(),
-              }
-            : undefined,
-        },
+        exists: true,
+        updates,
       };
     }
+  }
+
+  /**
+   * Gets initial empty counters structure
+   * @returns Empty counters object
+   */
+  private getInitialCounters(): ActivityCounters {
+    return {
+      actions: {
+        code_push: 0,
+        pull_request_create: 0,
+        pull_request_merge: 0,
+        pull_request_close: 0,
+        code_review_submit: 0,
+        code_review_comment: 0,
+        issue_create: 0,
+        issue_close: 0,
+        issue_reopen: 0,
+        workout_complete: 0,
+        distance_milestone: 0,
+        speed_record: 0,
+      },
+    };
   }
 }

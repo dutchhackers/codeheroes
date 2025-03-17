@@ -1,7 +1,7 @@
 import { logger } from '@codeheroes/common';
 import { GameAction, ActionResult, Activity } from '@codeheroes/types';
 
-import { ProgressionStateRepository } from '../repositories/progression-state.repository';
+import { ProgressionRepository } from '../repositories/progression.repository';
 import { ActivityRepository } from '../repositories/activity.repository';
 import { GameActionRepository } from '../repositories/game-action.repository';
 import { XpCalculatorService } from './xp-calculator.service';
@@ -15,7 +15,7 @@ import { ProgressionUpdate } from '../core/progression-state.model';
  */
 export class ProgressionService {
   constructor(
-    private stateRepository: ProgressionStateRepository,
+    private stateRepository: ProgressionRepository,
     private activityRepository: ActivityRepository,
     private gameActionRepository: GameActionRepository,
     private xpCalculator: XpCalculatorService,
