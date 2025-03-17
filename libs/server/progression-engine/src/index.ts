@@ -18,11 +18,6 @@ export * from './lib/progression/services/activity-recorder.service';
 export * from './lib/progression/handlers/action-handler.base';
 export * from './lib/progression/handlers/action-handler.factory';
 
-// Commands
-export * from './lib/progression/commands/process-game-action.command';
-export * from './lib/progression/commands/update-progression.command';
-export * from './lib/progression/commands/command-factory';
-
 // Events
 export * from './lib/progression/events/event-processor.service';
 export * from './lib/progression/events/event-publisher.service';

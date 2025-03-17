@@ -7,6 +7,7 @@ import { ProgressionRepository } from '../repositories/progression.repository';
 import { ActivityRecorderService } from '../services/activity-recorder.service';
 import { ProgressionService } from '../services/progression.service';
 import { XpCalculatorService } from '../services/xp-calculator.service';
+
 /**
  * Service registry containing all progression-related services
  * Acts as a simple dependency injection container
