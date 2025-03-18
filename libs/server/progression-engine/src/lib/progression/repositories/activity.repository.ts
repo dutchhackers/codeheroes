@@ -1,5 +1,5 @@
 import { BaseRepository, getCurrentTimeAsISO, logger } from '@codeheroes/common';
-import { Collections, Activity, TimeBasedActivityStats } from '@codeheroes/types';
+import { Activity, Collections, TimeBasedActivityStats } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getTimePeriodIds } from '../../utils/time-periods.utils';
 
