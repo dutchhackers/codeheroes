@@ -1,4 +1,4 @@
-import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
+import { BaseRepository, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { Activity, Collections, TimeBasedActivityStats } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getTimePeriodIds } from '../../utils/time-periods.utils';
@@ -6,17 +6,15 @@ import { getTimePeriodIds } from '../../utils/time-periods.utils';
 /**
  * Repository for managing user activities in Firestore
  */
-export class ActivityRepository {
-  private db: Firestore;
+export class ActivityRepository extends BaseRepository<Activity> {
+  protected collectionPath = Collections.Activities;
 
-  constructor() {
-    this.db = DatabaseInstance.getInstance();
+  constructor(db: Firestore) {
+    super(db);
   }
 
   /**
-   * Records a new activity for a user
-   * @param activity The activity to record
-   * @returns The created activity with ID
+   * Record a new activity for a user
    */
   async recordActivity(activity: Omit<Activity, 'id'>): Promise<Activity> {
     logger.debug('Recording activity', {
@@ -54,10 +52,7 @@ export class ActivityRepository {
   }
 
   /**
-   * Gets recent activities for a user
-   * @param userId User ID to get activities for
-   * @param limit Maximum number of activities to return
-   * @returns Array of activities ordered by createdAt (newest first)
+   * Get recent activities for a user
    */
   async getRecentActivities(userId: string, limit = 10): Promise<Activity[]> {
     try {
@@ -77,10 +72,7 @@ export class ActivityRepository {
   }
 
   /**
-   * Gets daily activity stats for a user
-   * @param userId User ID to get stats for
-   * @param date Optional date string (YYYY-MM-DD), defaults to today
-   * @returns The daily activity stats or null if not found
+   * Get daily activity stats for a user
    */
   async getDailyStats(userId: string, date?: string): Promise<TimeBasedActivityStats | null> {
     const timeframeId = date || getTimePeriodIds().daily;
@@ -104,10 +96,7 @@ export class ActivityRepository {
   }
 
   /**
-   * Gets weekly activity stats for a user
-   * @param userId User ID to get stats for
-   * @param weekId Optional week identifier (YYYY-WXX), defaults to current week
-   * @returns The weekly activity stats or null if not found
+   * Get weekly activity stats for a user
    */
   async getWeeklyStats(userId: string, weekId?: string): Promise<TimeBasedActivityStats | null> {
     const timeframeId = weekId || getTimePeriodIds().weekly;
@@ -126,6 +115,52 @@ export class ActivityRepository {
       return doc.exists ? (doc.data() as TimeBasedActivityStats) : null;
     } catch (error) {
       logger.error('Error getting weekly stats', { userId, weekId, error });
+      throw error;
+    }
+  }
+
+  /**
+   * Get activities by type for a user
+   */
+  async getActivitiesByType(userId: string, activityType: string, limit = 50): Promise<Activity[]> {
+    try {
+      const snapshot = await this.db
+        .collection(Collections.Users)
+        .doc(userId)
+        .collection(Collections.Activities)
+        .where('sourceActionType', '==', activityType)
+        .orderBy('createdAt', 'desc')
+        .limit(limit)
+        .get();
+
+      return snapshot.docs.map((doc) => doc.data() as Activity);
+    } catch (error) {
+      logger.error('Error getting activities by type', { userId, activityType, error });
+      throw error;
+    }
+  }
+
+  /**
+   * Count activities for a user
+   */
+  async countActivities(userId: string, activityType?: string): Promise<number> {
+    try {
+      // Start with a CollectionReference
+      const collectionRef = this.db.collection(Collections.Users).doc(userId).collection(Collections.Activities);
+
+      // Create a query from the CollectionReference
+      let query = collectionRef as FirebaseFirestore.Query<FirebaseFirestore.DocumentData>;
+
+      // Apply the condition if needed
+      if (activityType) {
+        query = query.where('sourceActionType', '==', activityType);
+      }
+
+      // Execute the count
+      const snapshot = await query.count().get();
+      return snapshot.data().count;
+    } catch (error) {
+      logger.error('Error counting activities', { userId, activityType, error });
       throw error;
     }
   }

@@ -4,6 +4,9 @@ import { ActivityCounters } from '@codeheroes/types';
  * Represents the current progression state of a user
  */
 export interface ProgressionState {
+  /** Unique identifier of the progression state */
+  id: string;
+
   /** Unique identifier of the user */
   userId: string;
 

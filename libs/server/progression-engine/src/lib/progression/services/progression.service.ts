@@ -1,7 +1,7 @@
 import { logger } from '@codeheroes/common';
 import { GameAction, ActionResult, Activity } from '@codeheroes/types';
 
-import { ProgressionStateRepository } from '../repositories/progression-state.repository';
+import { ProgressionRepository } from '../repositories/progression.repository';
 import { ActivityRepository } from '../repositories/activity.repository';
 import { GameActionRepository } from '../repositories/game-action.repository';
 import { XpCalculatorService } from './xp-calculator.service';
@@ -15,7 +15,7 @@ import { ProgressionUpdate } from '../core/progression-state.model';
  */
 export class ProgressionService {
   constructor(
-    private stateRepository: ProgressionStateRepository,
+    private stateRepository: ProgressionRepository,
     private activityRepository: ActivityRepository,
     private gameActionRepository: GameActionRepository,
     private xpCalculator: XpCalculatorService,
@@ -29,7 +29,12 @@ export class ProgressionService {
    * @returns Result of the action processing
    */
   async processGameAction(action: GameAction): Promise<ActionResult> {
-    logger.info(`Processing game action: ${action.type} for user: ${action.userId}`);
+    const { id, type, userId } = action;
+    logger.info(`Processing game action: ${action.type} for user: ${action.userId}`, {
+      actionId: id,
+      actionType: type,
+      userId,
+    });
 
     try {
       // 1. Get or create user's progression state
@@ -68,7 +73,7 @@ export class ProgressionService {
       await this.gameActionRepository.markAsProcessed(action.id);
 
       // 8. Return the action result
-      return {
+      const result = {
         xpGained: xpResult.total,
         level: updateResult.state.level,
         currentLevelProgress: {
@@ -78,6 +83,14 @@ export class ProgressionService {
         },
         leveledUp: updateResult.leveledUp,
       };
+
+      logger.info(`Game action processed successfully`, {
+        actionId: id,
+        xpGained: result.xpGained,
+        newLevel: result.level,
+      });
+
+      return result;
     } catch (error) {
       logger.error('Error processing game action', {
         actionId: action.id,
@@ -98,7 +111,11 @@ export class ProgressionService {
    * @returns Updated progression state
    */
   async updateProgression(userId: string, update: ProgressionUpdate): Promise<ActionResult> {
-    logger.info(`Updating progression for user: ${userId}`, { xpGained: update.xpGained });
+    logger.info(`Updating progression for user: ${userId}`, {
+      userId,
+      xpGained: update.xpGained,
+      activityType: update.activityType,
+    });
 
     try {
       // 1. Get or create user's progression state
@@ -123,7 +140,7 @@ export class ProgressionService {
       }
 
       // 5. Return result
-      return {
+      const result = {
         xpGained: update.xpGained,
         level: updateResult.state.level,
         currentLevelProgress: {
@@ -133,6 +150,14 @@ export class ProgressionService {
         },
         leveledUp: updateResult.leveledUp,
       };
+
+      logger.info(`Progression updated successfully`, {
+        userId,
+        xpGained: update.xpGained,
+        newLevel: result.level,
+      });
+
+      return result;
     } catch (error) {
       logger.error('Error updating progression', {
         userId,
