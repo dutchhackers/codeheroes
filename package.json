@@ -27,7 +27,7 @@
     "firebase": "^11.2.0",
     "firebase-admin": "^13.0.2",
     "firebase-functions": "^6.3.2",
-    "postcss": "^8.5.1",
+    "postcss": "^8.5.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "~7.8.2",
     "serializr": "^3.0.3",

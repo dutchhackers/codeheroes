@@ -1,4 +1,9 @@
 @use './styles/tailwind';
+//@import 'tailwindcss';
+
+// @tailwind base;
+// @tailwind components;
+// @tailwind utilities;
 
 :root {
   --primary: #00bc7d;
@@ -43,26 +48,6 @@
   button {
     @apply px-4 py-2 text-sm font-semibold border-2 uppercase rounded-md cursor-pointer disabled:opacity-50 disabled:bg-slate-50 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:text-slate-800 dark:disabled:text-slate-500;
   }
-}
-
-html,
-body {
-  height: 100%;
-}
-
-.background-logo {
-  position: absolute;
-  z-index: -1;
-  top: 0;
-  opacity: 0.2;
-  height: 100vh;
-  width: 90%;
-  margin-left: 5%;
-  background-image: url('/images/logo.svg');
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
-  background-attachment: fixed;
 }
 
 .bg-primary {
