@@ -4,17 +4,40 @@
   --primary: #00bc7d;
 }
 
+@theme {
+  --color-codeheroes-black: #010d01;
+  --color-codeheroes-dark: #0e1821;
+  --color-codeheroes-blue: #1d2e41;
+  --color-codeheroes-grey: #838591;
+  --color-codeheroes-accent: #1fba41;
+  --color-codeheroes-light: #cbe0f8;
+
+  --color-blue-charcoal-50: #f4f7fb;
+  --color-blue-charcoal-100: #e7f0f7;
+  --color-blue-charcoal-200: #cbdfec;
+  --color-blue-charcoal-300: #9dc3dc;
+  --color-blue-charcoal-400: #68a4c8;
+  --color-blue-charcoal-500: #4488b3;
+  --color-blue-charcoal-600: #336d96;
+  --color-blue-charcoal-700: #2a587a;
+  --color-blue-charcoal-800: #264b66;
+  --color-blue-charcoal-900: #244056;
+  --color-blue-charcoal-950: #0e1821;
+
+  --font-montserrat: 'Montserrat', sans-serif;
+}
+
 @layer base {
   h1 {
-    @apply text-2xl sm:text-3xl uppercase tracking-normal font-extrabold;
+    @apply text-2xl sm:text-3xl tracking-normal font-semibold;
   }
 
   h2 {
-    @apply text-xl sm:text-2xl  uppercase tracking-normal;
+    @apply text-xl sm:text-2xl tracking-normal;
   }
 
   h3 {
-    @apply text-lg uppercase tracking-normal;
+    @apply text-lg tracking-normal;
   }
 
   button {
@@ -25,6 +48,21 @@
 html,
 body {
   height: 100%;
+}
+
+.background-logo {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  opacity: 0.2;
+  height: 100vh;
+  width: 90%;
+  margin-left: 5%;
+  background-image: url('/images/logo.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 .bg-primary {
