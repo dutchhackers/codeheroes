@@ -40,7 +40,7 @@
     "@angular-devkit/schematics": "19.2.4",
     "@angular/cli": "~19.2.0",
     "@angular/compiler-cli": "19.2.3",
-    "@angular/language-service": "19.2.3",
+    "@angular/language-service": "19.2.5",
     "@eslint/js": "^9.18.0",
     "@nx/angular": "20.6.3",
     "@nx/esbuild": "20.6.3",
