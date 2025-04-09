@@ -18,10 +18,10 @@ export function getXpProgress(totalXp: number): {
   currentLevelXp: number;
   xpToNextLevel: number;
 } {
-  const currentLevelConfig = LEVEL_DEFINITIONS.find(
-    (config, index, array) =>
-      totalXp >= config.xpRequired && (index === array.length - 1 || totalXp < array[index + 1].xpRequired),
-  );
+  const currentLevelConfig = LEVEL_DEFINITIONS.find((config, index, array) => {
+    const nextConfig = array[index + 1];
+    return totalXp >= config.xpRequired && (!nextConfig || totalXp < nextConfig.xpRequired);
+  });
 
   if (!currentLevelConfig) {
     return {
@@ -33,10 +33,15 @@ export function getXpProgress(totalXp: number): {
 
   const nextLevelConfig = LEVEL_DEFINITIONS.find((config) => config.level === currentLevelConfig.level + 1);
 
+  const currentLevelXp = totalXp - currentLevelConfig.xpRequired;
+  const xpToNextLevel = nextLevelConfig
+    ? nextLevelConfig.xpRequired - currentLevelConfig.xpRequired - currentLevelXp
+    : 0;
+
   return {
     currentLevel: currentLevelConfig.level,
-    currentLevelXp: totalXp - currentLevelConfig.xpRequired,
-    xpToNextLevel: nextLevelConfig ? nextLevelConfig.xpRequired - totalXp : 0,
+    currentLevelXp,
+    xpToNextLevel,
   };
 }
 

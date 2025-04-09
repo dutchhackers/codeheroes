@@ -98,15 +98,15 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 11,
-    xpRequired: 55000, // PoGo L11 Cumulative XP
+    xpRequired: 150000,
     rewards: {
-      title: 'Code Architect', // New plausible title
-      badges: ['code_architect_badge'], // Placeholder badge ID
+      title: 'Code Architect',
+      badges: ['code_architect_badge'],
     },
   },
   {
     level: 12,
-    xpRequired: 65000, // PoGo L12 Cumulative XP
+    xpRequired: 200000,
     rewards: {
       title: 'Code Synthesizer',
       badges: ['code_synthesizer_badge'],
@@ -114,7 +114,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 13,
-    xpRequired: 75000, // PoGo L13 Cumulative XP
+    xpRequired: 250000,
     rewards: {
       title: 'Code Virtuoso',
       badges: ['code_virtuoso_badge'],
@@ -122,7 +122,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 14,
-    xpRequired: 85000, // PoGo L14 Cumulative XP
+    xpRequired: 300000,
     rewards: {
       title: 'Code Mentor',
       badges: ['code_mentor_badge'],
@@ -130,15 +130,15 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 15,
-    xpRequired: 100000, // PoGo L15 Cumulative XP
+    xpRequired: 400000,
     rewards: {
-      title: 'Senior Code Hero', // Milestone title
-      badges: ['senior_code_hero_badge', 'level_15_mastery'], // Multiple badges possible
+      title: 'Senior Code Hero',
+      badges: ['senior_code_hero_badge', 'level_15_mastery'],
     },
   },
   {
     level: 16,
-    xpRequired: 120000, // PoGo L16 Cumulative XP
+    xpRequired: 500000,
     rewards: {
       title: 'Principal Coder',
       badges: ['principal_coder_badge'],
@@ -146,7 +146,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 17,
-    xpRequired: 140000, // PoGo L17 Cumulative XP
+    xpRequired: 650000,
     rewards: {
       title: 'Code Luminary',
       badges: ['code_luminary_badge'],
@@ -154,7 +154,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 18,
-    xpRequired: 160000, // PoGo L18 Cumulative XP
+    xpRequired: 800000,
     rewards: {
       title: 'Distinguished Developer',
       badges: ['distinguished_developer_badge'],
@@ -162,7 +162,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 19,
-    xpRequired: 185000, // PoGo L19 Cumulative XP
+    xpRequired: 1000000,
     rewards: {
       title: 'Code Visionary',
       badges: ['code_visionary_badge'],
@@ -170,11 +170,10 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 20,
-    xpRequired: 210000, // PoGo L20 Cumulative XP
+    xpRequired: 1250000,
     rewards: {
-      title: 'Grandmaster Coder', // Significant title for L20
+      title: 'Grandmaster Coder',
       badges: ['grandmaster_coder_badge', 'level_20_completion'],
-      // unlocks: ['exclusive_avatar_frame'] // Example unlock
     },
   },
 ];
