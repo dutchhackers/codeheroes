@@ -96,4 +96,84 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
       badges: ['code_oracle'],
     },
   },
+  {
+    level: 11,
+    xpRequired: 150000,
+    rewards: {
+      title: 'Code Architect',
+      badges: ['code_architect_badge'],
+    },
+  },
+  {
+    level: 12,
+    xpRequired: 200000,
+    rewards: {
+      title: 'Code Synthesizer',
+      badges: ['code_synthesizer_badge'],
+    },
+  },
+  {
+    level: 13,
+    xpRequired: 250000,
+    rewards: {
+      title: 'Code Virtuoso',
+      badges: ['code_virtuoso_badge'],
+    },
+  },
+  {
+    level: 14,
+    xpRequired: 300000,
+    rewards: {
+      title: 'Code Mentor',
+      badges: ['code_mentor_badge'],
+    },
+  },
+  {
+    level: 15,
+    xpRequired: 400000,
+    rewards: {
+      title: 'Senior Code Hero',
+      badges: ['senior_code_hero_badge', 'level_15_mastery'],
+    },
+  },
+  {
+    level: 16,
+    xpRequired: 500000,
+    rewards: {
+      title: 'Principal Coder',
+      badges: ['principal_coder_badge'],
+    },
+  },
+  {
+    level: 17,
+    xpRequired: 650000,
+    rewards: {
+      title: 'Code Luminary',
+      badges: ['code_luminary_badge'],
+    },
+  },
+  {
+    level: 18,
+    xpRequired: 800000,
+    rewards: {
+      title: 'Distinguished Developer',
+      badges: ['distinguished_developer_badge'],
+    },
+  },
+  {
+    level: 19,
+    xpRequired: 1000000,
+    rewards: {
+      title: 'Code Visionary',
+      badges: ['code_visionary_badge'],
+    },
+  },
+  {
+    level: 20,
+    xpRequired: 1250000,
+    rewards: {
+      title: 'Grandmaster Coder',
+      badges: ['grandmaster_coder_badge', 'level_20_completion'],
+    },
+  },
 ];
