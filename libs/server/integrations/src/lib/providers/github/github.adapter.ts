@@ -6,9 +6,11 @@ import {
   CodeReviewMetrics,
   PullRequestContext,
   PullRequestMetrics,
+  IssueContext,
+  IssueMetrics,
 } from '@codeheroes/types';
 import { ProviderAdapter } from '../interfaces/provider.interface';
-import { PullRequestEvent, PullRequestReviewEvent, PushEvent } from './interfaces/github.interfaces';
+import { IssueEvent, PullRequestEvent, PullRequestReviewEvent, PushEvent } from './interfaces/github.interfaces';
 
 /**
  * GitHub provider adapter implementation
@@ -27,6 +29,8 @@ export class GitHubAdapter implements ProviderAdapter {
         return this.mapReviewEvent(eventData as PullRequestReviewEvent, userId);
       case 'pull_request':
         return this.mapPullRequestEvent(eventData as PullRequestEvent, userId);
+      case 'issues':
+        return this.mapIssueEvent(eventData as IssueEvent, userId);
       default:
         return null;
     }
@@ -229,6 +233,75 @@ export class GitHubAdapter implements ProviderAdapter {
       provider: 'github',
       type,
       timestamp: event.pull_request.updated_at,
+      externalUser: {
+        id: String(event.sender.id),
+        username: event.sender.login,
+      },
+      context,
+      metrics,
+    };
+  }
+
+  private mapIssueEvent(event: IssueEvent, userId: string): Partial<GameAction> {
+    // Convert GitHub issue event to game action based on action type
+    const actionType = (() => {
+      switch (event.action) {
+        case 'opened':
+          return 'issue_create';
+        case 'closed':
+          return 'issue_close';
+        case 'reopened':
+          return 'issue_reopen';
+        default:
+          return null;
+      }
+    })();
+
+    // Skip actions we don't track or give XP for
+    if (!actionType) {
+      return {
+        skipReason: `Issue action '${event.action}' not tracked for XP gains`,
+      } as Partial<GameAction>;
+    }
+
+    // Create the issue context
+    const context: IssueContext = {
+      type: 'issue',
+      provider: 'github',
+      repository: {
+        id: String(event.repository.id),
+        name: event.repository.name,
+        owner: event.repository.owner.login,
+      },
+      issue: {
+        id: String(event.issue.id),
+        number: event.issue.number,
+        title: event.issue.title,
+      },
+    };
+
+    // Calculate metrics for the issue
+    const metrics: IssueMetrics = {
+      type: 'issue',
+      timestamp: event.issue.updated_at,
+      bodyLength: event.issue.body?.length || 0,
+      // Only include optional properties if they exist
+      ...(event.action === 'closed' && event.issue.closed_at
+        ? {
+            timeToClose: this.calculateTimeDifference(event.issue.created_at, event.issue.closed_at),
+          }
+        : {}),
+      // Store complexity as a heuristic based on body length
+      complexity: Math.min(Math.floor((event.issue.body?.length || 0) / 100), 5),
+    };
+
+    // Return the mapped game action
+    return {
+      type: actionType,
+      userId,
+      id: `${actionType}_${event.issue.id}`,
+      externalId: `github_issue_${event.issue.id}_${event.action}`,
+      timestamp: event.issue.updated_at,
       externalUser: {
         id: String(event.sender.id),
         username: event.sender.login,

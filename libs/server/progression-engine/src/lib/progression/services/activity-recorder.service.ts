@@ -160,6 +160,12 @@ export class ActivityRecorderService {
         return this.describePullRequestClose(action);
       case 'code_review_submit':
         return this.describeCodeReview(action);
+      case 'issue_create':
+        return this.describeIssueCreate(action);
+      case 'issue_close':
+        return this.describeIssueClose(action);
+      case 'issue_reopen':
+        return this.describeIssueReopen(action);
       default:
         return `${this.formatActionType(action.type)} activity`;
     }
@@ -255,5 +261,50 @@ export class ActivityRecorderService {
       .split(' ')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
+  }
+
+  /**
+   * Create description for issue creation
+   */
+  private describeIssueCreate(action: GameAction): string {
+    if (action.context.type !== 'issue') {
+      return 'Created an issue';
+    }
+
+    const issueTitle = action.context.issue.title;
+    const issueNumber = action.context.issue.number;
+    const repoName = action.context.repository.name;
+
+    return `Created issue #${issueNumber}: "${issueTitle}" in ${repoName}`;
+  }
+
+  /**
+   * Create description for issue closure
+   */
+  private describeIssueClose(action: GameAction): string {
+    if (action.context.type !== 'issue') {
+      return 'Closed an issue';
+    }
+
+    const issueTitle = action.context.issue.title;
+    const issueNumber = action.context.issue.number;
+    const repoName = action.context.repository.name;
+
+    return `Closed issue #${issueNumber}: "${issueTitle}" in ${repoName}`;
+  }
+
+  /**
+   * Create description for issue reopening
+   */
+  private describeIssueReopen(action: GameAction): string {
+    if (action.context.type !== 'issue') {
+      return 'Reopened an issue';
+    }
+
+    const issueTitle = action.context.issue.title;
+    const issueNumber = action.context.issue.number;
+    const repoName = action.context.repository.name;
+
+    return `Reopened issue #${issueNumber}: "${issueTitle}" in ${repoName}`;
   }
 }
