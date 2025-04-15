@@ -114,6 +114,12 @@ export class XpCalculatorService {
         return XP_VALUES.PULL_REQUEST.CLOSE.BASE;
       case 'code_review_submit':
         return XP_VALUES.CODE_REVIEW.BASE;
+      case 'issue_create':
+        return XP_VALUES.ISSUE.CREATE.BASE;
+      case 'issue_close':
+        return XP_VALUES.ISSUE.CLOSE.BASE;
+      case 'issue_reopen':
+        return XP_VALUES.ISSUE.REOPEN.BASE;
       default:
         // Default value for other action types
         return 50;

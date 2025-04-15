@@ -4,6 +4,7 @@ import { AbstractActionHandler } from './action-handler.base';
 import { CodePushHandler } from './actions/code-push.handler';
 import { PullRequestCreateHandler } from './actions/pull-request.handler';
 import { CodeReviewSubmitHandler } from './actions/code-review.handler';
+import { IssueHandler } from './actions/issue.handler';
 import { ProgressionService } from '../services/progression.service';
 
 /**
@@ -28,6 +29,11 @@ export class ActionHandlerFactory {
     this.handlers.set('pull_request_merge', new PullRequestCreateHandler(db, progressionService, 'merge'));
     this.handlers.set('pull_request_close', new PullRequestCreateHandler(db, progressionService, 'close'));
     this.handlers.set('code_review_submit', new CodeReviewSubmitHandler(db, progressionService));
+
+    // Register issue handlers
+    this.handlers.set('issue_create', new IssueHandler(db, progressionService, 'create'));
+    this.handlers.set('issue_close', new IssueHandler(db, progressionService, 'close'));
+    this.handlers.set('issue_reopen', new IssueHandler(db, progressionService, 'reopen'));
 
     this.initialized = true;
   }

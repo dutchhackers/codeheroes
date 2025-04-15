@@ -28,6 +28,27 @@ export const XP_VALUES = {
       },
     },
   },
+  ISSUE: {
+    CREATE: {
+      BASE: 80,
+      BONUSES: {
+        DETAILED_DESCRIPTION: 70, // For issues with detailed descriptions
+        WITH_LABELS: 30, // For issues with proper labeling
+      },
+    },
+    CLOSE: {
+      BASE: 60,
+      BONUSES: {
+        REFERENCED_IN_PR: 50, // For issues closed via PR references
+      },
+    },
+    REOPEN: {
+      BASE: 40,
+      BONUSES: {
+        WITH_UPDATES: 30, // For reopening with additional information
+      },
+    },
+  },
   CODE_REVIEW: {
     BASE: 80,
     BONUSES: {

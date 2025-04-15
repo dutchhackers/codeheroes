@@ -46,6 +46,7 @@ export interface IssueMetrics extends BaseMetrics {
   labels?: number;
   timeToClose?: number; // in seconds
   complexity?: number; // calculated from content
+  updatedWithNewInfo?: boolean; // Indicates if reopened issue has new information
 }
 
 export interface WorkoutMetrics extends BaseMetrics {

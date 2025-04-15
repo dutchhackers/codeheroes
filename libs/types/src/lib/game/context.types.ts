@@ -67,6 +67,7 @@ export interface IssueContext extends BaseContext {
     number: number;
     title: string;
   };
+  linkedPRs?: string[]; // Optional array of linked Pull Request IDs
 }
 
 export interface CodePushContext extends BaseContext {
