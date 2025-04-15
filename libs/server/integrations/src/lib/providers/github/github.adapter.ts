@@ -299,8 +299,7 @@ export class GitHubAdapter implements ProviderAdapter {
     return {
       type: actionType,
       userId,
-      id: `${actionType}_${event.issue.id}`,
-      externalId: `github_issue_${event.issue.id}_${event.action}`,
+      externalId: String(event.issue.id),
       timestamp: event.issue.updated_at,
       externalUser: {
         id: String(event.sender.id),
