@@ -3,11 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/github-receiver/src",
   "projectType": "application",
-  "tags": [
-    "firebase:function",
-    "firebase:name:github-receiver",
-    "firebase:dep:firebase-app"
-  ],
+  "tags": ["firebase:function", "firebase:name:github-receiver", "firebase:dep:firebase-app"],
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",

@@ -59,3 +59,9 @@ firebase-export*
 .secret.local
 
 .angular
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+
+# Temporary environment files (use templates)
+apps/web/src/environments/environment.local.ts
+apps/web/src/environments/environment.prod.ts
