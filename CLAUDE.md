@@ -87,6 +87,30 @@ for r in json.load(sys.stdin).get('requests',[]):
     print(f\"{r['request']['method']} {r['request']['uri']} -> {r['response']['status']}\")"
 ```
 
+### Replaying Webhooks (Without New GitHub Events)
+
+The system uses `X-GitHub-Delivery` header for idempotency. To replay and have the event fully processed, use a new delivery ID:
+
+```bash
+# 1. Extract payload from a captured request
+curl -s "http://127.0.0.1:4040/api/requests/http" | python3 -c "
+import sys, json, base64
+r = json.load(sys.stdin)['requests'][0]
+raw = r['request'].get('raw', '')
+decoded = base64.b64decode(raw).decode('utf-8')
+body = decoded.split('\r\n\r\n', 1)[1] if '\r\n\r\n' in decoded else ''
+print(body)" > /tmp/webhook_payload.json
+
+# 2. Replay with new delivery ID (bypasses duplicate detection)
+curl -X POST "http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver" \
+  -H "Content-Type: application/json" \
+  -H "X-GitHub-Event: push" \
+  -H "X-GitHub-Delivery: replay-$(date +%s)" \
+  -d @/tmp/webhook_payload.json
+```
+
+**Browser replay:** Click "Replay" in ngrok inspector (http://localhost:4040) - uses same delivery ID, may be detected as duplicate.
+
 ## Database Seeding
 
 After starting with a fresh/empty database, seed it with test data:
@@ -104,6 +128,35 @@ FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
 **Clear database (Emulator UI):** http://localhost:4000/firestore → "Clear all data"
 
 **Data files:** `libs/database-seeds/src/lib/data/*.local.json`
+
+## Data Model: Seeded vs Auto-Created
+
+The system uses a two-tier data model:
+
+| Data Type | Source | Collections |
+|-----------|--------|-------------|
+| **Seeded** | Database seeder | `users`, `users/{id}/connectedAccounts` |
+| **Auto-created** | First activity | `users/{id}/stats/current`, `users/{id}/activities`, `gameActions`, `events` |
+
+**Key insight:** Progression state (`users/{id}/stats/current`) is NOT seeded. It's auto-created when a user's first activity is processed. The `ProgressionRepository.updateState()` method handles this automatically.
+
+**Webhook flow:**
+```
+GitHub webhook (sender.id: 7045335)
+    ↓
+Lookup: connectedAccounts where externalUserId == "7045335"
+    ↓
+Found: users/1000002 (mschilling)
+    ↓
+Create gameAction → Firestore trigger → processGameAction
+    ↓
+Auto-create progression state if missing → Update XP/counters
+```
+
+**Test user mapping:**
+| User | User ID | GitHub ID |
+|------|---------|-----------|
+| Nightcrawler (mschilling) | 1000002 | 7045335 |
 
 ## Environment Configuration
 

@@ -66,11 +66,63 @@ Open http://localhost:4040 when ngrok is running.
 
 ### Replaying Requests
 
-Useful for debugging without triggering new GitHub events:
+Useful for debugging without triggering new GitHub events.
 
-1. Find the request you want to replay
+#### Browser UI Replay
+
+1. Find the request you want to replay in the left panel
 2. Click **Replay** button
 3. Optionally modify headers/body before replaying
+
+**Note:** Browser replay uses the same `X-GitHub-Delivery` header, so the system may detect it as a duplicate and return "Event already processed".
+
+#### Programmatic Replay via API
+
+ngrok doesn't expose a direct replay API, but you can extract captured requests and replay them via curl.
+
+**1. List recent requests:**
+```bash
+curl -s http://127.0.0.1:4040/api/requests/http | python3 -c "
+import sys,json
+for r in json.load(sys.stdin).get('requests',[])[:5]:
+    print(f\"{r['id']}: {r['request']['method']} {r['request']['uri']} -> {r['response']['status']}\")"
+```
+
+**2. Get request details by ID:**
+```bash
+curl -s "http://127.0.0.1:4040/api/requests/http/{request-id}"
+```
+
+**3. Extract and save webhook payload:**
+```bash
+curl -s "http://127.0.0.1:4040/api/requests/http/{request-id}" | python3 -c "
+import sys, json, base64
+data = json.load(sys.stdin)
+raw = data['request'].get('raw', '')
+decoded = base64.b64decode(raw).decode('utf-8')
+body = decoded.split('\r\n\r\n', 1)[1] if '\r\n\r\n' in decoded else ''
+print(body)" > /tmp/webhook_payload.json
+```
+
+**4. Replay with a new delivery ID (bypasses duplicate detection):**
+```bash
+curl -X POST "http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver" \
+  -H "Content-Type: application/json" \
+  -H "X-GitHub-Event: push" \
+  -H "X-GitHub-Delivery: replay-$(date +%s)" \
+  -d @/tmp/webhook_payload.json
+```
+
+#### Event Idempotency
+
+The system uses `X-GitHub-Delivery` header for idempotency:
+- Same delivery ID → "Event already processed" (skipped)
+- New delivery ID → Event fully processed
+
+This is useful for:
+- Testing webhook processing without new GitHub events
+- Debugging event handling logic
+- Load testing with repeated events
 
 ### Filtering Requests
 
@@ -199,6 +251,58 @@ nx run firebase-app:firebase emulators:start --inspect-functions
 2. Verify Firestore rules allow writes
 3. Check document path is correct
 4. Verify data structure matches expected schema
+
+## Quick Reference for AI Agents
+
+### ngrok API Commands
+
+```bash
+# Get ngrok public URL
+curl -s http://127.0.0.1:4040/api/tunnels | python3 -c "import sys,json; print(json.load(sys.stdin)['tunnels'][0]['public_url'])"
+
+# List recent webhook requests (method, path, status)
+curl -s http://127.0.0.1:4040/api/requests/http | python3 -c "
+import sys,json
+for r in json.load(sys.stdin).get('requests',[])[:5]:
+    print(f\"{r['request']['method']} {r['request']['uri']} -> {r['response']['status']}\")"
+
+# Get request details by ID
+curl -s "http://127.0.0.1:4040/api/requests/http/{request-id}"
+
+# Replay webhook with new delivery ID (processes as new event)
+curl -X POST "http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver" \
+  -H "Content-Type: application/json" \
+  -H "X-GitHub-Event: push" \
+  -H "X-GitHub-Delivery: replay-$(date +%s)" \
+  -d @/tmp/webhook_payload.json
+```
+
+### Verification Commands
+
+```bash
+# Check emulator ports are listening
+lsof -i :5001  # Functions
+lsof -i :8080  # Firestore
+lsof -i :4000  # Emulator UI
+
+# Verify ngrok is running
+curl -s http://127.0.0.1:4040/api/status
+
+# Test webhook endpoint directly
+curl -X POST "http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver" \
+  -H "Content-Type: application/json" \
+  -d '{"test": true}'
+```
+
+### Key URLs
+
+| Service | URL |
+|---------|-----|
+| Emulator UI | http://localhost:4000 |
+| Firestore UI | http://localhost:4000/firestore |
+| ngrok Inspector | http://localhost:4040 |
+| ngrok API | http://127.0.0.1:4040/api |
+| Functions | http://localhost:5001 |
 
 ## Next Steps
 

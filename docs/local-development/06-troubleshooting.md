@@ -243,6 +243,49 @@ export NODE_OPTIONS="--max-old-space-size=4096"
 nx serve firebase-app
 ```
 
+## Game Engine / Progression Issues
+
+### "Cannot read properties of undefined (reading 'code_push')"
+
+**Symptom:** Error in game-engine when processing webhook events.
+
+**Cause:** Legacy data with old schema missing `counters.actions` structure.
+
+**Solution:**
+1. Clear Firestore data via Emulator UI
+2. Re-seed the database:
+   ```bash
+   FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+   ```
+3. Re-trigger the webhook
+
+The progression state is auto-created with the correct structure on first activity.
+
+### User Not Found for Webhook
+
+**Symptom:** Webhook returns 200 but no data processed. Logs show "User not found".
+
+**Cause:** No connected account mapping for the GitHub sender ID.
+
+**Debug:**
+1. Check webhook sender ID in ngrok inspector (look for `sender.id` in payload)
+2. Verify connected account exists:
+   ```bash
+   # Check the seed data file
+   grep "externalUserId" libs/database-seeds/src/lib/data/connected-accounts.local.json
+   ```
+3. If missing, add the mapping to `connected-accounts.local.json` and re-seed
+
+### Progression State Not Updating
+
+**Symptom:** XP not increasing, counters not incrementing.
+
+**Debug:**
+1. Check emulator logs for errors during `processGameAction`
+2. Verify the game action was created in `gameActions` collection
+3. Check if Firestore trigger fired (look for "Beginning execution of processGameAction")
+4. Inspect `users/{id}/stats/current` document for current state
+
 ## Reset Everything
 
 When all else fails, start fresh:
