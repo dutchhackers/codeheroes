@@ -20,25 +20,25 @@
     {
       "codebase": "api",
       "source": "dist/apps/api",
-      "runtime": "nodejs20",
+      "runtime": "nodejs24",
       "ignore": ["*.local"]
     },
     {
       "codebase": "auth-service",
       "source": "dist/apps/auth-service",
-      "runtime": "nodejs20",
+      "runtime": "nodejs24",
       "ignore": ["*.local"]
     },
     {
       "codebase": "game-engine",
       "source": "dist/apps/game-engine",
-      "runtime": "nodejs20",
+      "runtime": "nodejs24",
       "ignore": ["*.local"]
     },
     {
       "codebase": "github-receiver",
       "source": "dist/apps/github-receiver",
-      "runtime": "nodejs20",
+      "runtime": "nodejs24",
       "ignore": ["*.local"]
     }
   ],
