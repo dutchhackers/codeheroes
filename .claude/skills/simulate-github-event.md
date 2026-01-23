@@ -14,94 +14,108 @@ Simulates a GitHub webhook event and sends it directly to the local Firebase fun
 **Supported events:**
 - `push` - Simulates a code push to a branch
 
+## Prerequisites
+
+- Firebase emulators must be running: `nx serve firebase-app`
+- Database must be seeded with user data: `FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds`
+- Config file must exist: `.claude/config.local.json` (copy from `.claude/config.example.json`)
+
 ## Instructions
 
 When this skill is invoked, execute the following steps:
 
-### 1. Generate the webhook payload
+### 1. Load configuration
 
-Create a GitHub push event payload with these values:
+Read `.claude/config.local.json` to get user and repository details:
 
-**Timestamps** - Use current time:
-```bash
-TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-UNIX_TIMESTAMP=$(date +%s)
+```json
+{
+  "github": {
+    "userId": 12345678,
+    "username": "your-github-username",
+    "email": "your.email@example.com",
+    "displayName": "Your Name",
+    "nodeId": "MDQ6VXNlcjEyMzQ1Njc4"
+  },
+  "codeheroes": {
+    "userId": "1000000"
+  },
+  "testRepository": {
+    "id": 123456789,
+    "name": "your-test-repo",
+    "owner": "your-github-username",
+    "fullName": "your-github-username/your-test-repo",
+    "nodeId": "R_kgDOAbCdEf"
+  }
+}
 ```
 
-**Default user** (mschilling):
-- GitHub ID: `7045335`
-- Username: `mschilling`
-- Email: `michael.schilling@framna.com`
-- Display Name: `Michael Schilling`
-- CodeHeroes User ID: `1000002`
+If the file doesn't exist, instruct the user to copy `.claude/config.example.json` to `.claude/config.local.json` and fill in their details.
 
-**Repository:**
-- ID: `1140770846`
-- Name: `codeheroes-support`
-- Owner: `mschilling`
-- Full name: `mschilling/codeheroes-support`
-
-### 2. Build and send the request
-
-Use this bash command to send the webhook:
+### 2. Generate timestamps and identifiers
 
 ```bash
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 UNIX_TIMESTAMP=$(date +%s)
 COMMIT_SHA=$(openssl rand -hex 20)
 DELIVERY_ID="simulate-$(date +%s)-$(openssl rand -hex 4)"
+```
 
+### 3. Build and send the request
+
+Construct the payload using values from the config file, then send:
+
+```bash
 curl -s -X POST "http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver" \
   -H "Content-Type: application/json" \
   -H "X-GitHub-Event: push" \
   -H "X-GitHub-Delivery: ${DELIVERY_ID}" \
-  -d @- << 'PAYLOAD_END'
-{
+  -d '{
   "ref": "refs/heads/main",
   "before": "0000000000000000000000000000000000000000",
-  "after": "COMMIT_SHA_PLACEHOLDER",
+  "after": "${COMMIT_SHA}",
   "repository": {
-    "id": 1140770846,
-    "node_id": "R_kgDOQ_7IHg",
-    "name": "codeheroes-support",
-    "full_name": "mschilling/codeheroes-support",
+    "id": ${config.testRepository.id},
+    "node_id": "${config.testRepository.nodeId}",
+    "name": "${config.testRepository.name}",
+    "full_name": "${config.testRepository.fullName}",
     "private": true,
     "owner": {
-      "name": "mschilling",
-      "email": "mschilling@users.noreply.github.com",
-      "login": "mschilling",
-      "id": 7045335,
-      "node_id": "MDQ6VXNlcjcwNDUzMzU=",
-      "avatar_url": "https://avatars.githubusercontent.com/u/7045335?v=4",
-      "url": "https://api.github.com/users/mschilling",
-      "html_url": "https://github.com/mschilling",
+      "name": "${config.github.username}",
+      "email": "${config.github.username}@users.noreply.github.com",
+      "login": "${config.github.username}",
+      "id": ${config.github.userId},
+      "node_id": "${config.github.nodeId}",
+      "avatar_url": "https://avatars.githubusercontent.com/u/${config.github.userId}?v=4",
+      "url": "https://api.github.com/users/${config.github.username}",
+      "html_url": "https://github.com/${config.github.username}",
       "type": "User",
       "site_admin": false
     },
-    "html_url": "https://github.com/mschilling/codeheroes-support",
+    "html_url": "https://github.com/${config.testRepository.fullName}",
     "description": null,
     "fork": false,
-    "url": "https://api.github.com/repos/mschilling/codeheroes-support",
-    "created_at": UNIX_TIMESTAMP_PLACEHOLDER,
-    "updated_at": "TIMESTAMP_PLACEHOLDER",
-    "pushed_at": UNIX_TIMESTAMP_PLACEHOLDER,
-    "git_url": "git://github.com/mschilling/codeheroes-support.git",
-    "ssh_url": "git@github.com:mschilling/codeheroes-support.git",
-    "clone_url": "https://github.com/mschilling/codeheroes-support.git",
+    "url": "https://api.github.com/repos/${config.testRepository.fullName}",
+    "created_at": ${UNIX_TIMESTAMP},
+    "updated_at": "${TIMESTAMP}",
+    "pushed_at": ${UNIX_TIMESTAMP},
+    "git_url": "git://github.com/${config.testRepository.fullName}.git",
+    "ssh_url": "git@github.com:${config.testRepository.fullName}.git",
+    "clone_url": "https://github.com/${config.testRepository.fullName}.git",
     "default_branch": "main",
     "master_branch": "main"
   },
   "pusher": {
-    "name": "mschilling",
-    "email": "mschilling@users.noreply.github.com"
+    "name": "${config.github.username}",
+    "email": "${config.github.username}@users.noreply.github.com"
   },
   "sender": {
-    "login": "mschilling",
-    "id": 7045335,
-    "node_id": "MDQ6VXNlcjcwNDUzMzU=",
-    "avatar_url": "https://avatars.githubusercontent.com/u/7045335?v=4",
-    "url": "https://api.github.com/users/mschilling",
-    "html_url": "https://github.com/mschilling",
+    "login": "${config.github.username}",
+    "id": ${config.github.userId},
+    "node_id": "${config.github.nodeId}",
+    "avatar_url": "https://avatars.githubusercontent.com/u/${config.github.userId}?v=4",
+    "url": "https://api.github.com/users/${config.github.username}",
+    "html_url": "https://github.com/${config.github.username}",
     "type": "User",
     "site_admin": false
   },
@@ -109,24 +123,24 @@ curl -s -X POST "http://localhost:5001/codeheroes-app-test/europe-west1/gitHubRe
   "deleted": false,
   "forced": false,
   "base_ref": null,
-  "compare": "https://github.com/mschilling/codeheroes-support/compare/000000...COMMIT_SHA_PLACEHOLDER",
+  "compare": "https://github.com/${config.testRepository.fullName}/compare/000000...${COMMIT_SHA}",
   "commits": [
     {
-      "id": "COMMIT_SHA_PLACEHOLDER",
-      "tree_id": "COMMIT_SHA_PLACEHOLDER",
+      "id": "${COMMIT_SHA}",
+      "tree_id": "${COMMIT_SHA}",
       "distinct": true,
       "message": "test: simulated push event",
-      "timestamp": "TIMESTAMP_PLACEHOLDER",
-      "url": "https://github.com/mschilling/codeheroes-support/commit/COMMIT_SHA_PLACEHOLDER",
+      "timestamp": "${TIMESTAMP}",
+      "url": "https://github.com/${config.testRepository.fullName}/commit/${COMMIT_SHA}",
       "author": {
-        "name": "Michael Schilling",
-        "email": "michael.schilling@framna.com",
-        "username": "mschilling"
+        "name": "${config.github.displayName}",
+        "email": "${config.github.email}",
+        "username": "${config.github.username}"
       },
       "committer": {
-        "name": "Michael Schilling",
-        "email": "michael.schilling@framna.com",
-        "username": "mschilling"
+        "name": "${config.github.displayName}",
+        "email": "${config.github.email}",
+        "username": "${config.github.username}"
       },
       "added": ["simulated-file.txt"],
       "removed": [],
@@ -134,47 +148,36 @@ curl -s -X POST "http://localhost:5001/codeheroes-app-test/europe-west1/gitHubRe
     }
   ],
   "head_commit": {
-    "id": "COMMIT_SHA_PLACEHOLDER",
-    "tree_id": "COMMIT_SHA_PLACEHOLDER",
+    "id": "${COMMIT_SHA}",
+    "tree_id": "${COMMIT_SHA}",
     "distinct": true,
     "message": "test: simulated push event",
-    "timestamp": "TIMESTAMP_PLACEHOLDER",
-    "url": "https://github.com/mschilling/codeheroes-support/commit/COMMIT_SHA_PLACEHOLDER",
+    "timestamp": "${TIMESTAMP}",
+    "url": "https://github.com/${config.testRepository.fullName}/commit/${COMMIT_SHA}",
     "author": {
-      "name": "Michael Schilling",
-      "email": "michael.schilling@framna.com",
-      "username": "mschilling"
+      "name": "${config.github.displayName}",
+      "email": "${config.github.email}",
+      "username": "${config.github.username}"
     },
     "committer": {
-      "name": "Michael Schilling",
-      "email": "michael.schilling@framna.com",
-      "username": "mschilling"
+      "name": "${config.github.displayName}",
+      "email": "${config.github.email}",
+      "username": "${config.github.username}"
     },
     "added": ["simulated-file.txt"],
     "removed": [],
     "modified": []
   }
-}
-PAYLOAD_END
+}'
 ```
 
-**Important:** Before sending, replace these placeholders in the payload:
-- `COMMIT_SHA_PLACEHOLDER` → the generated `$COMMIT_SHA`
-- `TIMESTAMP_PLACEHOLDER` → the generated `$TIMESTAMP`
-- `UNIX_TIMESTAMP_PLACEHOLDER` → the generated `$UNIX_TIMESTAMP`
-
-### 3. Report the result
+### 4. Report the result
 
 After sending, report:
 - **Success:** "Simulated push event sent successfully. Response: {response body}"
 - **Failure:** "Failed to send simulated event. Error: {error details}"
 
 Include the delivery ID used so it can be referenced later.
-
-## Prerequisites
-
-- Firebase emulators must be running: `nx serve firebase-app`
-- Database must be seeded with user data: `FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds`
 
 ## Example Output
 
@@ -188,9 +191,17 @@ Response: Event processed successfully
 Push event simulated successfully.
 ```
 
+## Configuration
+
+The skill reads from `.claude/config.local.json`. This file is gitignored to keep personal data out of the repository.
+
+To set up:
+1. Copy `.claude/config.example.json` to `.claude/config.local.json`
+2. Fill in your GitHub user ID, username, email, and test repository details
+3. Ensure your GitHub user ID is mapped in the database seed data
+
 ## Future Enhancements
 
 - Support for other event types: `pull_request`, `issues`, `pull_request_review`
-- Configurable user (pass different GitHub username/ID)
 - Configurable commit message
 - Multiple commits in one push

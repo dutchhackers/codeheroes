@@ -62,3 +62,6 @@ firebase-export*
 
 # Session handoff (temporary)
 HANDOFF.md
+
+# Claude local config (personal data)
+.claude/*.local.json
