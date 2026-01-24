@@ -1,0 +1,10 @@
+{
+  "name": "@codeheroes/github-simulator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "main.js",
+  "dependencies": {
+    "commander": "^12.0.0"
+  }
+}

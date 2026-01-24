@@ -14,6 +14,7 @@ codeheroes/
 │   ├── auth-service/     # Authentication functions
 │   ├── game-engine/      # Game logic (Eventarc triggered)
 │   ├── github-receiver/  # GitHub webhook handler
+│   ├── github-simulator/ # CLI for simulating GitHub webhooks (testing)
 │   └── web/              # Angular frontend
 ├── libs/
 │   ├── server/common/    # Shared server utilities
@@ -31,7 +32,8 @@ codeheroes/
 | `npm run setup` | Generate config files from .env |
 | `nx serve firebase-app` | Start ALL backend emulators |
 | `nx serve web` | Start Angular frontend |
-| `ngrok http 5001` | Create tunnel for webhook testing |
+| `nx serve github-simulator -- push` | Simulate GitHub push event |
+| `nx serve github-simulator -- pr open` | Simulate PR creation |
 | `FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds` | Seed database with test data |
 
 ## Important: Starting the Backend
@@ -54,9 +56,62 @@ Do NOT try to start individual functions separately.
 | Web App | http://localhost:4200 |
 | ngrok Inspector | http://localhost:4040 |
 
-## GitHub Webhook Testing
+## Simulating GitHub Events (Recommended)
 
-Use the dedicated test repository:
+Use the GitHub Simulator CLI to test webhook processing locally without ngrok or real GitHub events.
+
+### Quick Start
+
+```bash
+# 1. Ensure emulators are running
+nx serve firebase-app
+
+# 2. Seed database (required once per fresh database)
+FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+
+# 3. Simulate events
+nx serve github-simulator -- push                    # Push event
+nx serve github-simulator -- pr open                 # Open PR
+nx serve github-simulator -- pr merge --number 1     # Merge PR
+nx serve github-simulator -- review approve --pr 1   # Approve PR
+nx serve github-simulator -- issue open              # Open issue
+```
+
+### Common Commands
+
+| Command | GitHub Event | Description |
+|---------|--------------|-------------|
+| `push` | `push` | Code push to branch |
+| `pr open` | `pull_request` | Open a pull request |
+| `pr open --draft` | `pull_request` | Open a draft PR |
+| `pr merge --number N` | `pull_request` | Merge PR #N |
+| `pr close --number N` | `pull_request` | Close PR #N without merging |
+| `pr ready --number N` | `pull_request` | Mark draft PR as ready |
+| `issue open` | `issues` | Open an issue |
+| `issue close --number N` | `issues` | Close issue #N |
+| `review approve --pr N` | `pull_request_review` | Approve PR #N |
+| `review request-changes --pr N` | `pull_request_review` | Request changes on PR #N |
+| `comment pr --pr N` | `issue_comment` | Comment on PR #N |
+| `comment issue --issue N` | `issue_comment` | Comment on issue #N |
+
+### Configuration
+
+Requires `.claude/config.local.json` with your GitHub user and test repository info. See `apps/github-simulator/README.md` for full documentation.
+
+### When to Use Simulator vs Real Webhooks
+
+| Scenario | Use |
+|----------|-----|
+| Testing XP/game logic | Simulator |
+| Rapid iteration | Simulator |
+| Testing webhook signature validation | Real webhooks (ngrok) |
+| Testing with exact GitHub payload structure | Real webhooks (ngrok) |
+
+---
+
+## GitHub Webhook Testing (Alternative: Real Webhooks)
+
+For testing with real GitHub events via ngrok. Use the dedicated test repository:
 
 | Item | Value |
 |------|-------|
@@ -87,6 +142,30 @@ for r in json.load(sys.stdin).get('requests',[]):
     print(f\"{r['request']['method']} {r['request']['uri']} -> {r['response']['status']}\")"
 ```
 
+### Replaying Webhooks (Without New GitHub Events)
+
+The system uses `X-GitHub-Delivery` header for idempotency. To replay and have the event fully processed, use a new delivery ID:
+
+```bash
+# 1. Extract payload from a captured request
+curl -s "http://127.0.0.1:4040/api/requests/http" | python3 -c "
+import sys, json, base64
+r = json.load(sys.stdin)['requests'][0]
+raw = r['request'].get('raw', '')
+decoded = base64.b64decode(raw).decode('utf-8')
+body = decoded.split('\r\n\r\n', 1)[1] if '\r\n\r\n' in decoded else ''
+print(body)" > /tmp/webhook_payload.json
+
+# 2. Replay with new delivery ID (bypasses duplicate detection)
+curl -X POST "http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver" \
+  -H "Content-Type: application/json" \
+  -H "X-GitHub-Event: push" \
+  -H "X-GitHub-Delivery: replay-$(date +%s)" \
+  -d @/tmp/webhook_payload.json
+```
+
+**Browser replay:** Click "Replay" in ngrok inspector (http://localhost:4040) - uses same delivery ID, may be detected as duplicate.
+
 ## Database Seeding
 
 After starting with a fresh/empty database, seed it with test data:
@@ -104,6 +183,35 @@ FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
 **Clear database (Emulator UI):** http://localhost:4000/firestore → "Clear all data"
 
 **Data files:** `libs/database-seeds/src/lib/data/*.local.json`
+
+## Data Model: Seeded vs Auto-Created
+
+The system uses a two-tier data model:
+
+| Data Type | Source | Collections |
+|-----------|--------|-------------|
+| **Seeded** | Database seeder | `users`, `users/{id}/connectedAccounts` |
+| **Auto-created** | First activity | `users/{id}/stats/current`, `users/{id}/activities`, `gameActions`, `events` |
+
+**Key insight:** Progression state (`users/{id}/stats/current`) is NOT seeded. It's auto-created when a user's first activity is processed. The `ProgressionRepository.updateState()` method handles this automatically.
+
+**Webhook flow:**
+```
+GitHub webhook (sender.id: 7045335)
+    ↓
+Lookup: connectedAccounts where externalUserId == "7045335"
+    ↓
+Found: users/1000002 (mschilling)
+    ↓
+Create gameAction → Firestore trigger → processGameAction
+    ↓
+Auto-create progression state if missing → Update XP/counters
+```
+
+**Test user mapping:**
+| User | User ID | GitHub ID |
+|------|---------|-----------|
+| Nightcrawler (mschilling) | 1000002 | 7045335 |
 
 ## Environment Configuration
 

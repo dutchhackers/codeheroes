@@ -1,0 +1,19 @@
+{
+  "github": {
+    "userId": 12345678,
+    "username": "your-github-username",
+    "email": "your.email@example.com",
+    "displayName": "Your Name",
+    "nodeId": "MDQ6VXNlcjEyMzQ1Njc4"
+  },
+  "codeheroes": {
+    "userId": "1000000"
+  },
+  "testRepository": {
+    "id": 123456789,
+    "name": "your-test-repo",
+    "owner": "your-github-username",
+    "fullName": "your-github-username/your-test-repo",
+    "nodeId": "R_kgDOAbCdEf"
+  }
+}
