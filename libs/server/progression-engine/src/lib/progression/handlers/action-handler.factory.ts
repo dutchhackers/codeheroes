@@ -5,6 +5,11 @@ import { CodePushHandler } from './actions/code-push.handler';
 import { PullRequestCreateHandler } from './actions/pull-request.handler';
 import { CodeReviewSubmitHandler } from './actions/code-review.handler';
 import { IssueHandler } from './actions/issue.handler';
+import { CommentHandler } from './actions/comment.handler';
+import { ReviewCommentHandler } from './actions/review-comment.handler';
+import { ReleaseHandler } from './actions/release.handler';
+import { WorkflowRunHandler } from './actions/workflow-run.handler';
+import { DiscussionHandler } from './actions/discussion.handler';
 import { ProgressionService } from '../services/progression.service';
 
 /**
@@ -34,6 +39,20 @@ export class ActionHandlerFactory {
     this.handlers.set('issue_create', new IssueHandler(db, progressionService, 'create'));
     this.handlers.set('issue_close', new IssueHandler(db, progressionService, 'close'));
     this.handlers.set('issue_reopen', new IssueHandler(db, progressionService, 'reopen'));
+
+    // Register comment handlers
+    this.handlers.set('comment_create', new CommentHandler(db, progressionService));
+    this.handlers.set('review_comment_create', new ReviewCommentHandler(db, progressionService));
+
+    // Register release handler
+    this.handlers.set('release_publish', new ReleaseHandler(db, progressionService));
+
+    // Register workflow run handler
+    this.handlers.set('ci_success', new WorkflowRunHandler(db, progressionService));
+
+    // Register discussion handlers
+    this.handlers.set('discussion_create', new DiscussionHandler(db, progressionService, 'create'));
+    this.handlers.set('discussion_comment', new DiscussionHandler(db, progressionService, 'comment'));
 
     this.initialized = true;
   }
