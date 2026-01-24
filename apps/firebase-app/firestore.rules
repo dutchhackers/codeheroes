@@ -5,8 +5,10 @@ service cloud.firestore {
       return request.auth != null;
     }
     
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    function isUserOwner(userId) {
+      // For user documents: check if auth UID matches the uid field in the user document
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(userId)).data.uid == request.auth.uid;
     }
     
     // Users collection - public read for basic info, authenticated write for own data
@@ -15,7 +17,7 @@ service cloud.firestore {
       allow read: if true;
       
       // Allow authenticated users to update their own profile
-      allow update: if isAuthenticated() && isOwner(userId);
+      allow update: if isUserOwner(userId);
       
       // Prevent clients from creating or deleting users (server-only)
       allow create, delete: if false;
@@ -23,7 +25,7 @@ service cloud.firestore {
       // User subcollections
       match /connectedAccounts/{accountId} {
         // Only the user can read their connected accounts
-        allow read: if isAuthenticated() && isOwner(userId);
+        allow read: if isUserOwner(userId);
         // Prevent clients from writing (server-only)
         allow write: if false;
       }
@@ -72,16 +74,16 @@ service cloud.firestore {
       
       match /rewards/{rewardId} {
         // Only the user can read their rewards
-        allow read: if isAuthenticated() && isOwner(userId);
+        allow read: if isUserOwner(userId);
         // Prevent clients from writing (server-only)
         allow write: if false;
       }
       
       match /notifications/{notificationId} {
         // Only the user can read their notifications
-        allow read: if isAuthenticated() && isOwner(userId);
+        allow read: if isUserOwner(userId);
         // Allow users to mark notifications as read
-        allow update: if isAuthenticated() && isOwner(userId);
+        allow update: if isUserOwner(userId);
         // Prevent clients from creating or deleting notifications
         allow create, delete: if false;
       }
