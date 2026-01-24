@@ -255,7 +255,7 @@ nx serve firebase-app
 1. Clear Firestore data via Emulator UI
 2. Re-seed the database:
    ```bash
-   FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+   FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds
    ```
 3. Re-trigger the webhook
 

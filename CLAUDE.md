@@ -34,7 +34,7 @@ codeheroes/
 | `nx serve web` | Start Angular frontend |
 | `nx serve github-simulator -- push` | Simulate GitHub push event |
 | `nx serve github-simulator -- pr open` | Simulate PR creation |
-| `FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds` | Seed database with test data |
+| `FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds` | Seed database with test data |
 
 ## Important: Starting the Backend
 
@@ -67,7 +67,7 @@ Use the GitHub Simulator CLI to test webhook processing locally without ngrok or
 nx serve firebase-app
 
 # 2. Seed database (required once per fresh database)
-FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds
 
 # 3. Simulate events
 nx serve github-simulator -- push                    # Push event
@@ -157,7 +157,7 @@ body = decoded.split('\r\n\r\n', 1)[1] if '\r\n\r\n' in decoded else ''
 print(body)" > /tmp/webhook_payload.json
 
 # 2. Replay with new delivery ID (bypasses duplicate detection)
-curl -X POST "http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver" \
+curl -X POST "http://localhost:5001/your-project-id/europe-west1/gitHubReceiver" \
   -H "Content-Type: application/json" \
   -H "X-GitHub-Event: push" \
   -H "X-GitHub-Delivery: replay-$(date +%s)" \
@@ -171,7 +171,7 @@ curl -X POST "http://localhost:5001/codeheroes-app-test/europe-west1/gitHubRecei
 After starting with a fresh/empty database, seed it with test data:
 
 ```bash
-FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds
 ```
 
 **What it creates:**
@@ -235,8 +235,8 @@ Run `npm run setup` after editing `.env` to regenerate config files.
 
 | Function | URL |
 |----------|-----|
-| api | `http://localhost:5001/codeheroes-app-test/europe-west1/api` |
-| gitHubReceiver | `http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver` |
+| api | `http://localhost:5001/your-project-id/europe-west1/api` |
+| gitHubReceiver | `http://localhost:5001/your-project-id/europe-west1/gitHubReceiver` |
 
 ## Node.js Version
 
@@ -288,7 +288,7 @@ When programmatic access is needed:
 **Option 3: Direct REST API**
 Security rules apply - may get PERMISSION_DENIED:
 ```bash
-curl -X POST "http://localhost:8080/v1/projects/codeheroes-app-test/databases/(default)/documents:runQuery" \
+curl -X POST "http://localhost:8080/v1/projects/your-project-id/databases/(default)/documents:runQuery" \
   -H "Content-Type: application/json" \
   -d '{"structuredQuery": {"from": [{"collectionId": "gameActions"}], "limit": 5}}'
 ```
@@ -361,7 +361,7 @@ Before testing, ensure the environment is clean and ready:
 # Go to http://localhost:4000/firestore → "Clear all data"
 
 # 2. Seed users (required for user → GitHub ID mapping)
-FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds
 
 # 3. Verify emulators are running
 curl -s http://localhost:4000 > /dev/null && echo "Emulators running" || echo "Emulators NOT running"
@@ -409,3 +409,212 @@ for r in json.load(sys.stdin).get('requests',[])[:5]:
 | Nightcrawler | 1000002 | 7045335 | mschilling |
 
 The seeded user maps GitHub ID `7045335` to CodeHeroes user `1000002`. All webhooks from this GitHub account will be attributed to this user.
+
+---
+
+## Deployment
+
+### Deploy Backend (Functions Only)
+
+```bash
+# Stop emulators first (required - ports must be free)
+lsof -ti:8080,8085,5001,4000,9099,9199,9299 | xargs kill -9
+
+# Deploy all functions to test environment
+nx run firebase-app:firebase deploy --only functions
+```
+
+**Deployed functions:**
+- `api` (europe-west1) - REST API
+- `auth-service` (europe-west1) - onBeforeUserCreated, onBeforeUserSignIn
+- `game-engine` (us-central1) - processGameAction, onActivityRecorded, onBadgeEarned, onLevelUp, storeRawWebhook
+- `github-receiver` (europe-west1) - gitHubReceiver webhook endpoint
+
+**Production URLs:**
+| Function | URL |
+|----------|-----|
+| API | https://api-5f4quj3fia-ew.a.run.app |
+| GitHub Receiver | https://githubreceiver-5f4quj3fia-ew.a.run.app |
+
+### Deploy Everything (Functions + Hosting)
+
+```bash
+nx run firebase-app:deploy
+```
+
+### Deploy Hosting Only
+
+```bash
+nx run firebase-app:firebase deploy --only hosting
+```
+
+---
+
+## Activity Wall App
+
+A separate Angular app for displaying real-time activity on TV/public displays.
+
+| Item | Value |
+|------|-------|
+| Location | `apps/activity-wall/` |
+| Port | 4201 |
+| Start | `nx serve activity-wall` |
+
+**Note:** Activity Wall is NOT yet configured for Firebase Hosting deployment. It runs locally only.
+
+---
+
+## GitHub Webhook Management
+
+Use the `gh` CLI to manage webhooks in the test repository.
+
+### List Webhooks
+
+```bash
+gh api repos/mschilling/codeheroes-support/hooks --jq '.[] | {id, url: .config.url, events}'
+```
+
+### Create Webhook
+
+```bash
+gh api repos/mschilling/codeheroes-support/hooks \
+  -X POST \
+  --input - << 'EOF'
+{
+  "config": {
+    "url": "https://githubreceiver-5f4quj3fia-ew.a.run.app",
+    "content_type": "json"
+  },
+  "events": ["*"],
+  "active": true
+}
+EOF
+```
+
+### Update Webhook
+
+```bash
+# Get webhook ID first
+gh api repos/mschilling/codeheroes-support/hooks --jq '.[].id'
+
+# Update to send all events
+gh api repos/mschilling/codeheroes-support/hooks/WEBHOOK_ID \
+  -X PATCH \
+  --input - << 'EOF'
+{
+  "events": ["*"],
+  "active": true
+}
+EOF
+```
+
+### Delete Webhook
+
+```bash
+gh api repos/mschilling/codeheroes-support/hooks/WEBHOOK_ID -X DELETE
+```
+
+### Current Webhooks
+
+| URL | Purpose |
+|-----|---------|
+| https://github.webhooks.m4m.io | Production |
+| https://githubreceiver-5f4quj3fia-ew.a.run.app | Test environment (your-project-id) |
+| ngrok URL | Local development (changes frequently) |
+
+---
+
+## Simulating Events for Multiple Users
+
+The github-simulator only supports one user (configured in `.claude/config.local.json`). To simulate events for multiple users, send direct webhook payloads:
+
+```bash
+# Send a push event for a specific user
+curl -X POST "http://localhost:5001/your-project-id/europe-west1/gitHubReceiver" \
+  -H "Content-Type: application/json" \
+  -H "X-GitHub-Event: push" \
+  -H "X-GitHub-Delivery: sim-$(date +%s)" \
+  -d '{
+    "ref": "refs/heads/main",
+    "repository": {
+      "id": 1140770846,
+      "name": "codeheroes-support",
+      "full_name": "mschilling/codeheroes-support",
+      "owner": {"login": "mschilling", "id": 7045335}
+    },
+    "sender": {"id": GITHUB_USER_ID, "login": "username"},
+    "commits": [{"id": "abc123", "message": "Update"}],
+    "head_commit": {"id": "abc123", "message": "Update"}
+  }'
+```
+
+**User ID Reference (from seed data):**
+
+| Display Name | User ID | GitHub ID | GitHub Username |
+|--------------|---------|-----------|-----------------|
+| Nightcrawler | 1000002 | 7045335 | mschilling |
+| Cassshh | 1000003 | 10263056 | cassshh |
+| Guido | 1000004 | 80984882 | guidovanvilsteren |
+| Nick | 1000005 | 89972776 | nratering |
+| Aalt | 1000006 | 35026618 | aaltw |
+| Jesper | 1000007 | 10846244 | jstrating |
+| Arwin | 1000008 | 30255086 | ArwinStrating |
+| Ronan | 1000009 | 4209748 | rsuper |
+
+Full list in `libs/database-seeds/src/lib/data/connected-accounts.local.json`.
+
+---
+
+## DevTools MCP for Visual Verification
+
+Use DevTools MCP to view and interact with web UIs programmatically.
+
+### Navigate and Screenshot
+
+```
+mcp__devtools-mcp__list_pages              # List open pages
+mcp__devtools-mcp__navigate_page           # Navigate to URL
+mcp__devtools-mcp__take_screenshot         # Capture current view
+mcp__devtools-mcp__take_snapshot           # Get accessibility tree (for element IDs)
+```
+
+### Interact with Elements
+
+```
+mcp__devtools-mcp__click                   # Click element by uid
+mcp__devtools-mcp__fill                    # Fill input field
+mcp__devtools-mcp__press_key               # Press keyboard key (Home, End, Enter, etc.)
+```
+
+### Example: Verify Activity Wall
+
+```
+1. mcp__devtools-mcp__navigate_page url="http://localhost:4201"
+2. mcp__devtools-mcp__take_screenshot
+3. Trigger events: nx serve github-simulator -- push
+4. mcp__devtools-mcp__take_screenshot  # See new activity
+```
+
+---
+
+## Git Workflow
+
+### Fetch and Rebase
+
+```bash
+git fetch origin main
+git log --oneline HEAD..origin/main  # Check new commits on main
+git rebase origin/main               # Rebase current branch
+git push --force-with-lease origin BRANCH_NAME
+```
+
+### Commit Message Format
+
+```
+type(scope): description
+
+- feat: New feature
+- fix: Bug fix
+- chore: Maintenance
+- docs: Documentation
+```

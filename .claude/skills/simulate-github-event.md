@@ -38,7 +38,7 @@ Simulates a GitHub webhook event using the github-simulator CLI and sends it to 
 ## Prerequisites
 
 - Firebase emulators must be running: `nx serve firebase-app`
-- Database must be seeded with user data: `FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds`
+- Database must be seeded with user data: `FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds`
 - Config file must exist: `.claude/config.local.json`
 
 ## Instructions

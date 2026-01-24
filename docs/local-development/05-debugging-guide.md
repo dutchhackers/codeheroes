@@ -106,7 +106,7 @@ print(body)" > /tmp/webhook_payload.json
 
 **4. Replay with a new delivery ID (bypasses duplicate detection):**
 ```bash
-curl -X POST "http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver" \
+curl -X POST "http://localhost:5001/your-project-id/europe-west1/gitHubReceiver" \
   -H "Content-Type: application/json" \
   -H "X-GitHub-Event: push" \
   -H "X-GitHub-Delivery: replay-$(date +%s)" \
@@ -270,7 +270,7 @@ for r in json.load(sys.stdin).get('requests',[])[:5]:
 curl -s "http://127.0.0.1:4040/api/requests/http/{request-id}"
 
 # Replay webhook with new delivery ID (processes as new event)
-curl -X POST "http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver" \
+curl -X POST "http://localhost:5001/your-project-id/europe-west1/gitHubReceiver" \
   -H "Content-Type: application/json" \
   -H "X-GitHub-Event: push" \
   -H "X-GitHub-Delivery: replay-$(date +%s)" \
@@ -289,7 +289,7 @@ lsof -i :4000  # Emulator UI
 curl -s http://127.0.0.1:4040/api/status
 
 # Test webhook endpoint directly
-curl -X POST "http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver" \
+curl -X POST "http://localhost:5001/your-project-id/europe-west1/gitHubReceiver" \
   -H "Content-Type: application/json" \
   -d '{"test": true}'
 ```

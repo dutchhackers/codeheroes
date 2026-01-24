@@ -17,7 +17,7 @@ npm run setup
 nx serve firebase-app
 
 # 4. (Optional) Seed database
-FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds
 
 # 5. (Optional) Start ngrok for webhook testing
 ngrok http 5001
@@ -34,6 +34,7 @@ ngrok http 5001
 | [05-debugging-guide.md](./05-debugging-guide.md) | Debugging tools and techniques |
 | [06-troubleshooting.md](./06-troubleshooting.md) | Common issues and solutions |
 | [07-database-seeding.md](./07-database-seeding.md) | Detailed seeding and data flow |
+| [08-deployment.md](./08-deployment.md) | Deploying to test environment |
 
 ## Architecture Overview
 
@@ -95,7 +96,7 @@ nx serve web                   # Frontend (optional)
 ngrok http 5001                # Webhook tunnel (optional)
 
 # Database operations
-FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds
 
 # Build individual apps
 nx build api
@@ -108,6 +109,10 @@ nx run firebase-app:killports
 
 # Reset emulator data
 rm -rf apps/firebase-app/.emulators/
+
+# Deploy to test environment (stop emulators first!)
+nx run firebase-app:firebase deploy --only functions    # Backend only
+nx run firebase-app:deploy                              # Everything
 ```
 
 ## For AI Agents

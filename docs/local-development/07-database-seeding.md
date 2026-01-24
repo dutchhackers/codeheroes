@@ -16,7 +16,7 @@ CodeHeroes uses a two-tier data initialization approach:
 nx serve firebase-app
 
 # Run the seeder
-FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds
 ```
 
 ## What Gets Seeded
@@ -180,7 +180,7 @@ open http://localhost:4000/firestore
 # Click "Clear all data" button
 
 # Run seeder
-FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds
 ```
 
 ### 2. Verify Seeded Data

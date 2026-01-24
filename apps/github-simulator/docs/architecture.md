@@ -118,7 +118,7 @@ interface Config {
 - Example: `simulate-1705865432-a1b2c3d4`
 
 `sendWebhook(eventType, payload, deliveryId?)` - Sends HTTP POST request
-- Target: `http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver`
+- Target: `http://localhost:5001/your-project-id/europe-west1/gitHubReceiver`
 - Headers: Content-Type, X-GitHub-Event, X-GitHub-Delivery, User-Agent
 - Returns: `SendResult` with status, body, delivery ID
 
@@ -606,7 +606,7 @@ See [test-report-2025-01-24.md](./test-report-2025-01-24.md) for details.
 ## Integration Points
 
 ### Firebase Emulator
-- **Target:** `http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver`
+- **Target:** `http://localhost:5001/your-project-id/europe-west1/gitHubReceiver`
 - **Method:** POST
 - **Required:** Emulator must be running (`nx serve firebase-app`)
 

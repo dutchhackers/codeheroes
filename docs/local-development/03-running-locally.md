@@ -82,7 +82,7 @@ nx serve firebase-app
 After starting with a fresh database, seed it with initial test data:
 
 ```bash
-FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds
 ```
 
 ### What Gets Seeded

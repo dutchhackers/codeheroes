@@ -298,7 +298,7 @@ Ensure `.claude/config.local.json` exists in the project root with all required 
 The database needs to be seeded with user mappings:
 
 ```bash
-FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds
 ```
 
 This creates the `connectedAccounts` that map GitHub user IDs to CodeHeroes users.

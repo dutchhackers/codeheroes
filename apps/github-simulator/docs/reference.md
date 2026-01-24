@@ -421,7 +421,7 @@ gh-sim review approve -p 1
 
 ## Webhook Delivery
 
-**Target:** `http://localhost:5001/codeheroes-app-test/europe-west1/gitHubReceiver`
+**Target:** `http://localhost:5001/your-project-id/europe-west1/gitHubReceiver`
 
 **Method:** POST
 

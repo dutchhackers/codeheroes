@@ -1,0 +1,55 @@
+<div class="min-h-screen gaming-bg text-white relative">
+  <!-- Header -->
+  <header class="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-lg border-b border-cyan-500/20 px-10 py-6">
+    <div class="flex items-center justify-between relative z-10">
+      <div class="flex items-center gap-4">
+        <div class="w-2 h-12 bg-gradient-to-b from-cyan-400 to-purple-500 rounded-full"></div>
+        <h1 class="text-5xl font-black tracking-tight neon-title bg-gradient-to-r from-cyan-400 via-white to-purple-400 bg-clip-text text-transparent">
+          ACTIVITY WALL
+        </h1>
+      </div>
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3 px-5 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50">
+          <span class="text-2xl font-bold text-cyan-400">{{ activities().length }}</span>
+          <span class="text-xl text-slate-400">activities</span>
+        </div>
+        <div class="flex items-center gap-3 px-4 py-2 rounded-lg bg-green-500/10 border border-green-500/30">
+          <span class="w-3 h-3 rounded-full bg-green-400 live-indicator"></span>
+          <span class="text-lg text-green-400 font-medium uppercase tracking-wider">Live</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="pb-20 relative z-10">
+    @if (isLoading()) {
+      <div class="flex items-center justify-center py-32">
+        <div class="text-3xl text-cyan-400/70 animate-pulse">Loading...</div>
+      </div>
+    } @else if (activities().length === 0) {
+      <div class="flex flex-col items-center justify-center py-32">
+        <p class="text-3xl text-slate-400">No activities yet</p>
+        <p class="text-xl mt-4 text-slate-600">Activities will appear here in real-time</p>
+      </div>
+    } @else {
+      <div class="divide-y divide-slate-800/30">
+        @for (activity of activities(); track activity.id; let i = $index) {
+          <app-activity-item
+            [activity]="activity"
+            [userInfo]="getUserInfo(activity.userId)"
+            [isNew]="i === 0"
+            (selectActivity)="onSelectActivity($event)"
+          />
+        }
+      </div>
+    }
+  </main>
+
+  <!-- Debug Panel -->
+  <app-debug-panel
+    [isOpen]="debugPanelOpen()"
+    [selectedActivity]="selectedActivity()"
+    (toggle)="toggleDebugPanel()"
+  />
+</div>

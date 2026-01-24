@@ -5,7 +5,7 @@ Use this skill to run a comprehensive test of all GitHub event types using the s
 ## Prerequisites
 
 1. **Emulators must be running**: `nx serve firebase-app`
-2. **Database should be seeded**: `FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds`
+2. **Database should be seeded**: `FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds`
 
 ## Test Procedure
 
@@ -13,10 +13,10 @@ Use this skill to run a comprehensive test of all GitHub event types using the s
 
 ```bash
 # Clear existing data
-curl -X DELETE "http://localhost:8080/emulator/v1/projects/codeheroes-app-test/databases/(default)/documents"
+curl -X DELETE "http://localhost:8080/emulator/v1/projects/your-project-id/databases/(default)/documents"
 
 # Seed users
-FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds
 ```
 
 ### Step 2: Run All Event Simulations
