@@ -330,3 +330,123 @@ export interface DeleteEvent {
   repository: GitHubRepository;
   sender: GitHubUser;
 }
+
+export interface IssueCommentEvent {
+  action: 'created' | 'edited' | 'deleted';
+  comment: {
+    id: number;
+    node_id: string;
+    user: GitHubUser;
+    body: string;
+    created_at: string;
+    updated_at: string;
+    html_url: string;
+    issue_url: string;
+  };
+  issue: {
+    id: number;
+    node_id: string;
+    number: number;
+    title: string;
+    state: 'open' | 'closed';
+    user: GitHubUser;
+    created_at: string;
+    updated_at: string;
+    html_url: string;
+    // This field indicates if it's a PR (present) or a regular issue (absent/undefined)
+    pull_request?: {
+      url: string;
+      html_url: string;
+      diff_url: string;
+      patch_url: string;
+    };
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}
+
+export interface ReleaseEvent {
+  action: 'published' | 'created' | 'released' | 'prereleased' | 'edited' | 'deleted';
+  release: {
+    id: number;
+    node_id: string;
+    tag_name: string;
+    target_commitish: string;
+    name: string | null;
+    body: string | null;
+    draft: boolean;
+    prerelease: boolean;
+    created_at: string;
+    published_at: string | null;
+    html_url: string;
+    author: GitHubUser;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}
+
+export interface DiscussionEvent {
+  action:
+    | 'created'
+    | 'edited'
+    | 'deleted'
+    | 'pinned'
+    | 'unpinned'
+    | 'closed'
+    | 'reopened'
+    | 'answered'
+    | 'unanswered';
+  discussion: {
+    id: number;
+    node_id: string;
+    number: number;
+    title: string;
+    body: string | null;
+    state: 'open' | 'closed';
+    category: {
+      id: number;
+      name: string;
+      slug: string;
+      is_answerable: boolean;
+    };
+    user: GitHubUser;
+    created_at: string;
+    updated_at: string;
+    html_url: string;
+    answer_html_url?: string | null;
+    answer_chosen_at?: string | null;
+    answer_chosen_by?: GitHubUser | null;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}
+
+export interface DiscussionCommentEvent {
+  action: 'created' | 'edited' | 'deleted';
+  comment: {
+    id: number;
+    node_id: string;
+    body: string;
+    user: GitHubUser;
+    created_at: string;
+    updated_at: string;
+    html_url: string;
+    parent_id?: number | null; // If this is a reply to another comment
+  };
+  discussion: {
+    id: number;
+    node_id: string;
+    number: number;
+    title: string;
+    state: 'open' | 'closed';
+    category: {
+      id: number;
+      name: string;
+      slug: string;
+      is_answerable: boolean;
+    };
+    html_url: string;
+  };
+  repository: GitHubRepository;
+  sender: GitHubUser;
+}
