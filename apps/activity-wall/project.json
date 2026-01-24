@@ -39,7 +39,24 @@
               "maximumError": "8kb"
             }
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "fileReplacements": [
+            {
+              "replace": "apps/activity-wall/src/environments/environment.ts",
+              "with": "apps/activity-wall/src/environments/environment.prod.ts"
+            }
+          ]
+        },
+        "test": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "fileReplacements": [
+            {
+              "replace": "apps/activity-wall/src/environments/environment.ts",
+              "with": "apps/activity-wall/src/environments/environment.test.ts"
+            }
+          ]
         },
         "development": {
           "optimization": false,
@@ -63,6 +80,9 @@
       "configurations": {
         "production": {
           "buildTarget": "activity-wall:build:production"
+        },
+        "test": {
+          "buildTarget": "activity-wall:build:test"
         },
         "development": {
           "buildTarget": "activity-wall:build:development"

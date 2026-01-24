@@ -1,6 +1,6 @@
 import { Component, inject, signal, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Auth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from '@angular/fire/auth';
 import { Activity } from '@codeheroes/types';
 import { ActivityFeedService } from './core/services/activity-feed.service';
 import { UserCacheService } from './core/services/user-cache.service';
@@ -15,19 +15,40 @@ import { DebugPanelComponent } from './components/debug-panel.component';
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
+  readonly #auth = inject(Auth);
   readonly #activityFeedService = inject(ActivityFeedService);
   readonly #userCacheService = inject(UserCacheService);
 
-  activities = toSignal(this.#activityFeedService.getGlobalActivities(100), {
-    initialValue: [],
-  });
-
+  activities = signal<Activity[]>([]);
   selectedActivity = signal<Activity | null>(null);
   debugPanelOpen = signal(false);
   isLoading = signal(true);
+  isAuthenticated = signal(false);
 
-  async ngOnInit() {
+  ngOnInit() {
+    onAuthStateChanged(this.#auth, async (user) => {
+      if (user) {
+        this.isAuthenticated.set(true);
+        await this.#loadData();
+      } else {
+        this.isAuthenticated.set(false);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  async signInWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(this.#auth, provider);
+  }
+
+  async #loadData() {
     await this.#userCacheService.loadUsers();
+
+    this.#activityFeedService.getGlobalActivities(100).subscribe((activities) => {
+      this.activities.set(activities);
+    });
+
     this.isLoading.set(false);
   }
 
