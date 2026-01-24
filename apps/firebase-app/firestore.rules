@@ -6,9 +6,14 @@ service cloud.firestore {
     }
     
     function isUserOwner(userId) {
-      // For user documents: check if auth UID matches the uid field in the user document
+      // For user documents and subcollections: check if auth UID matches the uid field in the user document
+      // Uses get() to fetch parent document - this is necessary because subcollections don't have
+      // direct access to parent document data
+      let userDoc = get(/databases/$(database)/documents/users/$(userId)).data;
       return isAuthenticated() && 
-             get(/databases/$(database)/documents/users/$(userId)).data.uid == request.auth.uid;
+             userDoc != null &&
+             userDoc.uid != null &&
+             userDoc.uid == request.auth.uid;
     }
     
     // Users collection - public read for basic info, authenticated write for own data
