@@ -120,6 +120,18 @@ export class XpCalculatorService {
         return XP_VALUES.ISSUE.CLOSE.BASE;
       case 'issue_reopen':
         return XP_VALUES.ISSUE.REOPEN.BASE;
+      case 'comment_create':
+        return XP_VALUES.COMMENT.BASE;
+      case 'review_comment_create':
+        return XP_VALUES.REVIEW_COMMENT.BASE;
+      case 'release_publish':
+        return XP_VALUES.RELEASE.BASE;
+      case 'ci_success':
+        return XP_VALUES.WORKFLOW.SUCCESS.BASE;
+      case 'discussion_create':
+        return XP_VALUES.DISCUSSION.CREATE.BASE;
+      case 'discussion_comment':
+        return XP_VALUES.DISCUSSION.COMMENT.BASE;
       default:
         // Default value for other action types
         return 50;
@@ -172,6 +184,19 @@ export class XpCalculatorService {
       thoroughReview: 'Bonus for thorough review with suggestions',
       streak: 'Bonus for activity streak',
       firstDaily: 'First activity of the day',
+      // Comment bonuses
+      detailedComment: 'Bonus for detailed comment',
+      // Review comment bonuses
+      withSuggestion: 'Bonus for code suggestion',
+      detailed: 'Bonus for detailed content',
+      // Release bonuses
+      majorVersion: 'Bonus for major version release',
+      minorVersion: 'Bonus for minor version release',
+      withNotes: 'Bonus for release notes',
+      // Workflow bonuses
+      deployment: 'Bonus for deployment workflow',
+      // Discussion bonuses
+      acceptedAnswer: 'Bonus for accepted answer',
     };
 
     return bonusDescriptions[bonusType] || `${bonusType} bonus`;

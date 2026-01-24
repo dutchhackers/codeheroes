@@ -57,4 +57,47 @@ export const XP_VALUES = {
       THOROUGH_REVIEW: 150, // For reviews that include suggestions and code samples
     },
   },
+  COMMENT: {
+    BASE: 30,
+    BONUSES: {
+      DETAILED_COMMENT: 20, // For comments with bodyLength > 100
+    },
+  },
+  REVIEW_COMMENT: {
+    BASE: 40, // Higher than regular comments - inline code review is more valuable
+    BONUSES: {
+      WITH_SUGGESTION: 30, // Contains code suggestion (```suggestion block)
+      DETAILED: 20, // For comments with bodyLength > 150
+    },
+  },
+  RELEASE: {
+    BASE: 200, // High-impact milestone event
+    BONUSES: {
+      MAJOR_VERSION: 150, // Semver major bump (e.g., v2.0.0)
+      MINOR_VERSION: 50, // Semver minor bump (e.g., v1.1.0)
+      WITH_NOTES: 30, // Has release notes body
+    },
+  },
+  WORKFLOW: {
+    SUCCESS: {
+      BASE: 30, // CI success
+      BONUSES: {
+        DEPLOYMENT: 50, // Workflow name contains 'deploy'
+      },
+    },
+  },
+  DISCUSSION: {
+    CREATE: {
+      BASE: 60, // Creating a discussion
+      BONUSES: {
+        DETAILED: 40, // For discussions with bodyLength > 300
+      },
+    },
+    COMMENT: {
+      BASE: 30, // Commenting on a discussion
+      BONUSES: {
+        ACCEPTED_ANSWER: 70, // For comments marked as the accepted answer
+      },
+    },
+  },
 };
