@@ -1,0 +1,43 @@
+<div class="min-h-screen bg-slate-950 text-white">
+  <!-- Header -->
+  <header class="sticky top-0 z-10 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-10 py-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-5xl font-bold tracking-tight">Activity Wall</h1>
+      <div class="flex items-center gap-6 text-2xl text-slate-400">
+        <span>{{ activities().length }} activities</span>
+        <span class="w-4 h-4 rounded-full bg-green-500 animate-pulse" title="Live updates"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="pb-20">
+    @if (isLoading()) {
+      <div class="flex items-center justify-center py-32">
+        <div class="text-3xl text-slate-400">Loading...</div>
+      </div>
+    } @else if (activities().length === 0) {
+      <div class="flex flex-col items-center justify-center py-32 text-slate-500">
+        <p class="text-3xl">No activities yet</p>
+        <p class="text-xl mt-4">Activities will appear here in real-time</p>
+      </div>
+    } @else {
+      <div class="divide-y divide-slate-800/50">
+        @for (activity of activities(); track activity.id) {
+          <app-activity-item
+            [activity]="activity"
+            [userInfo]="getUserInfo(activity.userId)"
+            (selectActivity)="onSelectActivity($event)"
+          />
+        }
+      </div>
+    }
+  </main>
+
+  <!-- Debug Panel -->
+  <app-debug-panel
+    [isOpen]="debugPanelOpen()"
+    [selectedActivity]="selectedActivity()"
+    (toggle)="toggleDebugPanel()"
+  />
+</div>

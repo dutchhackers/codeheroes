@@ -29,6 +29,13 @@
         { "fieldPath": "timeframeId", "order": "DESCENDING" },
         { "fieldPath": "countersLastUpdated", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "activities",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []
