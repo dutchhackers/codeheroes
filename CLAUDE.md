@@ -14,6 +14,7 @@ codeheroes/
 │   ├── auth-service/     # Authentication functions
 │   ├── game-engine/      # Game logic (Eventarc triggered)
 │   ├── github-receiver/  # GitHub webhook handler
+│   ├── github-simulator/ # CLI for simulating GitHub webhooks (testing)
 │   └── web/              # Angular frontend
 ├── libs/
 │   ├── server/common/    # Shared server utilities
@@ -31,7 +32,8 @@ codeheroes/
 | `npm run setup` | Generate config files from .env |
 | `nx serve firebase-app` | Start ALL backend emulators |
 | `nx serve web` | Start Angular frontend |
-| `ngrok http 5001` | Create tunnel for webhook testing |
+| `nx serve github-simulator -- push` | Simulate GitHub push event |
+| `nx serve github-simulator -- pr open` | Simulate PR creation |
 | `FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds` | Seed database with test data |
 
 ## Important: Starting the Backend
@@ -54,9 +56,62 @@ Do NOT try to start individual functions separately.
 | Web App | http://localhost:4200 |
 | ngrok Inspector | http://localhost:4040 |
 
-## GitHub Webhook Testing
+## Simulating GitHub Events (Recommended)
 
-Use the dedicated test repository:
+Use the GitHub Simulator CLI to test webhook processing locally without ngrok or real GitHub events.
+
+### Quick Start
+
+```bash
+# 1. Ensure emulators are running
+nx serve firebase-app
+
+# 2. Seed database (required once per fresh database)
+FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+
+# 3. Simulate events
+nx serve github-simulator -- push                    # Push event
+nx serve github-simulator -- pr open                 # Open PR
+nx serve github-simulator -- pr merge --number 1     # Merge PR
+nx serve github-simulator -- review approve --pr 1   # Approve PR
+nx serve github-simulator -- issue open              # Open issue
+```
+
+### Common Commands
+
+| Command | GitHub Event | Description |
+|---------|--------------|-------------|
+| `push` | `push` | Code push to branch |
+| `pr open` | `pull_request` | Open a pull request |
+| `pr open --draft` | `pull_request` | Open a draft PR |
+| `pr merge --number N` | `pull_request` | Merge PR #N |
+| `pr close --number N` | `pull_request` | Close PR #N without merging |
+| `pr ready --number N` | `pull_request` | Mark draft PR as ready |
+| `issue open` | `issues` | Open an issue |
+| `issue close --number N` | `issues` | Close issue #N |
+| `review approve --pr N` | `pull_request_review` | Approve PR #N |
+| `review request-changes --pr N` | `pull_request_review` | Request changes on PR #N |
+| `comment pr --pr N` | `issue_comment` | Comment on PR #N |
+| `comment issue --issue N` | `issue_comment` | Comment on issue #N |
+
+### Configuration
+
+Requires `.claude/config.local.json` with your GitHub user and test repository info. See `apps/github-simulator/README.md` for full documentation.
+
+### When to Use Simulator vs Real Webhooks
+
+| Scenario | Use |
+|----------|-----|
+| Testing XP/game logic | Simulator |
+| Rapid iteration | Simulator |
+| Testing webhook signature validation | Real webhooks (ngrok) |
+| Testing with exact GitHub payload structure | Real webhooks (ngrok) |
+
+---
+
+## GitHub Webhook Testing (Alternative: Real Webhooks)
+
+For testing with real GitHub events via ngrok. Use the dedicated test repository:
 
 | Item | Value |
 |------|-------|
