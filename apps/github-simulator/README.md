@@ -32,21 +32,21 @@ Create `.claude/config.local.json` in the project root:
 ```json
 {
   "github": {
-    "userId": 7045335,
-    "username": "mschilling",
-    "email": "your-email@example.com",
+    "userId": 12345678,
+    "username": "your-github-username",
+    "email": "your.email@example.com",
     "displayName": "Your Name",
-    "nodeId": "MDQ6VXNlcjcwNDUzMzU="
+    "nodeId": "MDQ6VXNlcjEyMzQ1Njc4"
   },
   "codeheroes": {
-    "userId": "1000002"
+    "userId": "1000000"
   },
   "testRepository": {
-    "id": 1140770846,
-    "name": "codeheroes-support",
-    "owner": "mschilling",
-    "fullName": "mschilling/codeheroes-support",
-    "nodeId": "R_kgDOQ_7IHg"
+    "id": 987654321,
+    "name": "your-test-repo",
+    "owner": "your-github-username",
+    "fullName": "your-github-username/your-test-repo",
+    "nodeId": "R_kgDAaBcDeF"
   }
 }
 ```
@@ -279,7 +279,7 @@ nx serve github-simulator -- issue open
 nx serve github-simulator -- review approve --pr 1
 
 # Check Firestore for updated XP at:
-# http://localhost:4000/firestore/data/users/1000002/stats/current
+# http://localhost:4000/firestore/data/users/{codeheroes-user-id}/stats/current
 ```
 
 ## Troubleshooting
