@@ -1,16 +1,108 @@
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+    
+    // Users collection - public read for basic info, authenticated write for own data
+    match /users/{userId} {
+      // Allow public read access to user profiles (needed for leaderboards and activity feed)
+      allow read: if true;
+      
+      // Allow authenticated users to update their own profile
+      allow update: if isAuthenticated() && isOwner(userId);
+      
+      // Prevent clients from creating or deleting users (server-only)
+      allow create, delete: if false;
+      
+      // User subcollections
+      match /connectedAccounts/{accountId} {
+        // Only the user can read their connected accounts
+        allow read: if isAuthenticated() && isOwner(userId);
+        // Prevent clients from writing (server-only)
+        allow write: if false;
+      }
+      
+      match /activities/{activityId} {
+        // Allow public read access to activities (needed for activity feed)
+        allow read: if true;
+        // Prevent clients from writing (server-only)
+        allow write: if false;
+      }
+      
+      match /stats/{statId} {
+        // Allow public read access to stats (needed for leaderboards)
+        allow read: if true;
+        // Prevent clients from writing (server-only)
+        allow write: if false;
+      }
+      
+      match /activityStats/{type} {
+        // Allow public read access to activity stats (needed for leaderboards)
+        allow read: if true;
+        // Prevent clients from writing (server-only)
+        allow write: if false;
+        
+        match /records/{recordId} {
+          // Allow public read access to activity records (needed for leaderboards)
+          allow read: if true;
+          // Prevent clients from writing (server-only)
+          allow write: if false;
+        }
+      }
+      
+      match /badges/{badgeId} {
+        // Allow users to read their own badges and public read for showcasing
+        allow read: if true;
+        // Prevent clients from writing (server-only)
+        allow write: if false;
+      }
+      
+      match /achievements/{achievementId} {
+        // Allow users to read their own achievements and public read for showcasing
+        allow read: if true;
+        // Prevent clients from writing (server-only)
+        allow write: if false;
+      }
+      
+      match /rewards/{rewardId} {
+        // Only the user can read their rewards
+        allow read: if isAuthenticated() && isOwner(userId);
+        // Prevent clients from writing (server-only)
+        allow write: if false;
+      }
+      
+      match /notifications/{notificationId} {
+        // Only the user can read their notifications
+        allow read: if isAuthenticated() && isOwner(userId);
+        // Allow users to mark notifications as read
+        allow update: if isAuthenticated() && isOwner(userId);
+        // Prevent clients from creating or deleting notifications
+        allow create, delete: if false;
+      }
+    }
+    
+    // Server-only collections - no client access
+    match /gameActions/{actionId} {
+      allow read, write: if false;
+    }
+    
+    match /events/{eventId} {
+      allow read, write: if false;
+    }
+    
+    match /system/{docId} {
+      allow read, write: if false;
+    }
+    
+    // Deny access to all other collections by default
     match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 7, 1);
+      allow read, write: if false;
     }
   }
 }
