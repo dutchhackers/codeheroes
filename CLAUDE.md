@@ -241,3 +241,171 @@ Run `npm run setup` after editing `.env` to regenerate config files.
 ## Node.js Version
 
 Requires Node.js 20 (see `.nvmrc`). Use `nvm use` to switch.
+
+---
+
+## Claude Code Best Practices
+
+### Managing Firebase Emulators
+
+**Starting emulators:**
+```bash
+nx serve firebase-app
+```
+
+**Restarting emulators (when ports are in use):**
+```bash
+# Kill existing processes on emulator ports
+lsof -ti:8080,8085,5001,4000 | xargs kill -9
+
+# Wait a moment, then restart
+nx serve firebase-app
+```
+
+**Important:** Code changes in `libs/server/progression-engine` or handlers may require a full emulator restart to take effect. Watch mode doesn't always pick up all changes.
+
+**Running emulators in background (for Claude):**
+```bash
+nx serve firebase-app  # Use run_in_background: true
+# Check output: tail -50 /path/to/output/file
+```
+
+### Inspecting Firestore Data
+
+**Option 1: Emulator UI (Recommended)**
+- Navigate to http://localhost:4000/firestore
+- Browse collections and documents directly
+- No security rules restrictions
+
+**Option 2: DevTools MCP Browser Automation**
+When programmatic access is needed:
+```
+1. mcp__devtools-mcp__navigate_page -> http://localhost:4000/firestore
+2. mcp__devtools-mcp__take_snapshot -> Get page structure
+3. mcp__devtools-mcp__click -> Navigate to collections/documents
+```
+
+**Option 3: Direct REST API**
+Security rules apply - may get PERMISSION_DENIED:
+```bash
+curl -X POST "http://localhost:8080/v1/projects/codeheroes-app-test/databases/(default)/documents:runQuery" \
+  -H "Content-Type: application/json" \
+  -d '{"structuredQuery": {"from": [{"collectionId": "gameActions"}], "limit": 5}}'
+```
+
+### Firebase MCP Limitations
+
+**Working:** Production Firestore access
+```
+mcp__firebase__firestore_list_collections
+mcp__firebase__firestore_query_collection
+```
+
+**Not working reliably:** Emulator access (`use_emulator: true`)
+- Has project ID caching bug
+- Use Emulator UI or DevTools MCP instead
+
+### Verifying Game Action Processing
+
+After sending a simulated event, check if it was processed:
+
+1. **Send event:**
+   ```bash
+   nx serve github-simulator -- push
+   ```
+
+2. **Check in Emulator UI:**
+   - Go to http://localhost:4000/firestore/default/data/gameActions
+   - Find the newest document
+   - Verify: `status: "processed"` (not "failed")
+   - Check: `xpResult.total` has a value
+   - No `error` field present
+
+3. **If failed:** Check the `error` field for the cause, often:
+   - Missing handler for action type
+   - Missing XP config for action type
+   - Missing action type in `getInitialCounters()`
+
+### Adding New GitHub Event Types
+
+When implementing a new event type, update these files:
+
+1. `apps/github-receiver/src/core/constants/github.constants.ts` - Add to GitHubEventConfig and SupportedEventType
+2. `libs/server/integrations/.../github.interfaces.ts` - Add event interface
+3. `libs/server/integrations/.../github.adapter.ts` - Add mapping method
+4. `libs/types/src/lib/game/action.types.ts` - Add action type
+5. `libs/types/src/lib/game/context.types.ts` - Add context type
+6. `libs/types/src/lib/game/metrics.types.ts` - Add metrics type
+7. `libs/server/progression-engine/.../xp-values.config.ts` - Add XP config
+8. `libs/server/progression-engine/.../xp-calculator.service.ts` - Add to `getBaseXpForActionType()` switch
+9. `libs/server/progression-engine/.../handlers/actions/` - Create handler
+10. `libs/server/progression-engine/.../action-handler.factory.ts` - Register handler
+11. `libs/server/progression-engine/.../progression.repository.ts` - Add to `getInitialCounters()`
+12. `apps/github-simulator/src/commands/` - Add simulator command (optional)
+
+### Testing GitHub Events End-to-End
+
+#### Testing Approach
+
+| Approach | When to Use |
+|----------|-------------|
+| **Real webhooks (ngrok)** | True end-to-end verification, testing exact GitHub payload structure |
+| **Simulator** | Events you can't trigger yourself (e.g., self-approving PRs), rapid iteration |
+
+#### Pre-Test Setup Checklist
+
+Before testing, ensure the environment is clean and ready:
+
+```bash
+# 1. Clear Firestore database
+# Go to http://localhost:4000/firestore → "Clear all data"
+
+# 2. Seed users (required for user → GitHub ID mapping)
+FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+
+# 3. Verify emulators are running
+curl -s http://localhost:4000 > /dev/null && echo "Emulators running" || echo "Emulators NOT running"
+
+# 4. Check ngrok (if using real webhooks)
+curl -s http://127.0.0.1:4040/api/tunnels | python3 -c "import sys,json; t=json.load(sys.stdin)['tunnels']; print(t[0]['public_url'] if t else 'ngrok not running')"
+```
+
+#### Verification Commands
+
+After triggering an event, verify it was processed:
+
+```bash
+# Check ngrok for incoming webhooks
+curl -s http://127.0.0.1:4040/api/requests/http | python3 -c "
+import sys,json
+for r in json.load(sys.stdin).get('requests',[])[:5]:
+    print(f\"{r['request']['method']} {r['request']['uri']} -> {r['response']['status']}\")"
+
+# Check function logs (look for XP calculation)
+# In the terminal running emulators, look for:
+# - "Processing game action"
+# - "XP calculated: ..."
+# - Any error messages
+
+# Check gameActions in Firestore
+# http://localhost:4000/firestore/default/data/gameActions
+# Look for: status: "processed", xpResult.total > 0
+```
+
+#### Key Gotchas
+
+| Gotcha | Solution |
+|--------|----------|
+| One action triggers multiple events | Branch push + PR creation = 2 events. Releases trigger `created`, `published`, `released`. Check all were processed. |
+| Can't self-approve PRs on GitHub | Use simulator: `nx serve github-simulator -- review approve --pr N` |
+| Old failed gameActions cause confusion | Clear database before testing new changes |
+| Handler changes not picked up | Restart emulators after modifying `libs/server/progression-engine` |
+| User not found for webhook | Ensure database is seeded and GitHub ID matches |
+
+#### Test User Reference
+
+| User | User ID | GitHub ID | GitHub Username |
+|------|---------|-----------|-----------------|
+| Nightcrawler | 1000002 | 7045335 | mschilling |
+
+The seeded user maps GitHub ID `7045335` to CodeHeroes user `1000002`. All webhooks from this GitHub account will be attributed to this user.
