@@ -10,6 +10,7 @@ CodeHeroes is a gamification platform that tracks developer activity via GitHub 
 codeheroes/
 ├── apps/
 │   ├── firebase-app/     # Firebase orchestrator (emulators, rules)
+│   ├── activity-wall/    # Real-time activity display (Angular)
 │   ├── api/              # Main REST API (Cloud Function)
 │   ├── auth-service/     # Authentication functions
 │   ├── game-engine/      # Game logic (Eventarc triggered)
@@ -458,9 +459,12 @@ A separate Angular app for displaying real-time activity on TV/public displays.
 |------|-------|
 | Location | `apps/activity-wall/` |
 | Port | 4201 |
-| Start | `nx serve activity-wall` |
-
-**Note:** Activity Wall is NOT yet configured for Firebase Hosting deployment. It runs locally only.
+| Start (local) | `nx serve activity-wall` |
+| Start (test) | `nx serve activity-wall --configuration=test` |
+| Deploy (test) | `firebase deploy --only hosting:activity-wall --project codeheroes-app-test` |
+| Deploy (prod) | `firebase deploy --only hosting:activity-wall --project codeheroes-app` |
+| URL (test) | https://codeheroes-activity-wall.web.app |
+| URL (prod) | https://codeheroes-activity-wall-prod.web.app |
 
 ---
 

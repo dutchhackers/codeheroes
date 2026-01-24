@@ -3,16 +3,30 @@
     "rules": "apps/firebase-app/firestore.rules",
     "indexes": "apps/firebase-app/firestore.indexes.json"
   },
-  "hosting": {
-    "public": "dist/apps/web/browser",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
-  },
+  "hosting": [
+    {
+      "target": "web",
+      "public": "dist/apps/web/browser",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "target": "activity-wall",
+      "public": "dist/apps/activity-wall/browser",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ],
   "storage": {
     "rules": "apps/firebase-app/storage.rules"
   },
