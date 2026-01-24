@@ -113,7 +113,7 @@ export class ActivityRecorderService {
       },
 
       // Add a user-facing description
-      userFacingDescription: `Manual ${update.activityType || 'XP'} update: +${update.xpGained}XP`,
+      userFacingDescription: this.generateManualActivityDescription(update),
 
       // Store timestamps
       createdAt: now,
@@ -306,5 +306,21 @@ export class ActivityRecorderService {
     const repoName = action.context.repository.name;
 
     return `Reopened issue #${issueNumber}: "${issueTitle}" in ${repoName}`;
+  }
+
+  /**
+   * Generate description for manual activities
+   */
+  private generateManualActivityDescription(update: ProgressionUpdate): string {
+    switch (update.activityType) {
+      case 'user_registration':
+        return 'Welcome to Code Heroes!';
+      case 'profile_completion':
+        return 'Completed profile setup';
+      case 'daily_login':
+        return 'Daily login bonus';
+      default:
+        return `Manual ${update.activityType || 'XP'} update: +${update.xpGained}XP`;
+    }
   }
 }

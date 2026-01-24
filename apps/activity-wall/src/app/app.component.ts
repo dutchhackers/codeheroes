@@ -58,9 +58,6 @@ export class AppComponent implements OnInit {
 
   onSelectActivity(activity: Activity) {
     this.selectedActivity.set(activity);
-    if (!this.debugPanelOpen()) {
-      this.debugPanelOpen.set(true);
-    }
   }
 
   toggleDebugPanel() {

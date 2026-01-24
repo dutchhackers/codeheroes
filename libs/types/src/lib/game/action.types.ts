@@ -69,7 +69,9 @@ export type GameActionType =
   | 'distance_milestone'
   | 'speed_record'
   // Manual actions
-  | 'manual_update';
+  | 'manual_update'
+  // System actions
+  | 'user_registration';
 
 export interface GameAction {
   id: string;

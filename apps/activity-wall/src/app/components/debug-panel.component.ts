@@ -7,7 +7,7 @@ import { Activity } from '@codeheroes/types';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700 transition-transform duration-300"
+    <div class="fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700 transition-transform duration-300"
          [class.translate-y-full]="!isOpen()"
          [class.translate-y-0]="isOpen()">
       <!-- Toggle Bar -->

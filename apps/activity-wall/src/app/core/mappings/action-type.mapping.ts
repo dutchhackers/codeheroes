@@ -137,6 +137,14 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
     glowClass: '',
     icon: 'edit',
   },
+
+  // System actions
+  user_registration: {
+    label: 'Welcome',
+    color: 'bg-gradient-to-r from-yellow-400 to-amber-500',
+    glowClass: 'neon-glow-yellow',
+    icon: 'star',
+  },
 };
 
 export function getActionTypeDisplay(actionType: GameActionType): ActionTypeDisplay {

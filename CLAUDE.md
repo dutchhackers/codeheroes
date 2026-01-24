@@ -4,6 +4,8 @@
 
 CodeHeroes is a gamification platform that tracks developer activity via GitHub webhooks and awards points, badges, and achievements.
 
+**Naming convention:** The product name is "Code Heroes" (two words) in user-facing text, but "CodeHeroes" (one word) in code identifiers, file names, and technical references.
+
 ## Repository Structure
 
 ```

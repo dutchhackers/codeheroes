@@ -1,6 +1,6 @@
 <div class="min-h-screen gaming-bg text-white relative">
   <!-- Header -->
-  <header class="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-lg border-b border-cyan-500/20 px-10 py-6">
+  <header class="sticky top-0 z-20 bg-slate-900/80 backdrop-blur-lg border-b border-cyan-500/20 px-10 py-6">
     <div class="flex items-center justify-between relative z-10">
       <div class="flex items-center gap-4">
         <div class="w-2 h-12 bg-gradient-to-b from-cyan-400 to-purple-500 rounded-full"></div>
@@ -22,7 +22,7 @@
   </header>
 
   <!-- Main Content -->
-  <main class="pb-20 relative z-10">
+  <main class="pb-20 relative z-0">
     @if (!isAuthenticated() && !isLoading()) {
       <div class="flex flex-col items-center justify-center py-32">
         <p class="text-3xl text-slate-400 mb-8">Sign in to view activities</p>
