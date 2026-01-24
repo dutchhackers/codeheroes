@@ -2,7 +2,7 @@
 
 **Tool:** CLI for simulating GitHub webhook events for local testing
 **Version:** 1.0.0
-**Status:** ✓ Production-ready (132/132 tests passed, 100% success rate)
+**Status:** Production-ready (132/132 tests passed, 100% success rate)
 
 ---
 
@@ -382,20 +382,20 @@ gh-sim review approve -p 1
 ```json
 {
   "github": {
-    "userId": 7045335,
-    "username": "mschilling",
+    "userId": 12345678,
+    "username": "your-username",
     "email": "user@example.com",
-    "displayName": "Michael Schilling",
-    "nodeId": "MDQ6VXNlcjcwNDUzMzU="
+    "displayName": "Your Name",
+    "nodeId": "MDQ6VXNlcjEyMzQ1Njc4"
   },
   "codeheroes": {
     "userId": "1000002"
   },
   "testRepository": {
-    "id": 1140770846,
-    "name": "codeheroes-support",
-    "owner": "mschilling",
-    "fullName": "mschilling/codeheroes-support",
+    "id": 987654321,
+    "name": "your-test-repo",
+    "owner": "your-username",
+    "fullName": "your-username/your-test-repo",
     "nodeId": "R_kgDOQ_7IHg"
   }
 }
@@ -532,14 +532,14 @@ gh-sim pr merge -n 100
 - **Total Tests:** 132
 - **Passed:** 132 (100%)
 - **Failed:** 0
-- **Status:** ✓ Production-ready
+- **Status:** Production-ready
 
-See [github-simulator-test-report.md](./github-simulator-test-report.md) for full test details.
+See [test-report-2025-01-24.md](./test-report-2025-01-24.md) for full test details.
 
 ---
 
 ## More Information
 
-- Full test report: [github-simulator-test-report.md](./github-simulator-test-report.md)
-- Codebase structure: [codebase-structure.md](./codebase-structure.md)
-- Main documentation: [docs/local-development/](../local-development/)
+- Full test report: [test-report-2025-01-24.md](./test-report-2025-01-24.md)
+- Codebase structure: [architecture.md](./architecture.md)
+- Main documentation: [../../docs/local-development/](../../../docs/local-development/)

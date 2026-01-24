@@ -348,3 +348,11 @@ apps/github-simulator/
 2. Create command in `src/commands/`
 3. Register command in `src/main.ts`
 4. Update this README
+
+## Additional Documentation
+
+For deeper technical details, see the `docs/` folder:
+
+- **[Architecture](docs/architecture.md)** - Internal codebase structure, patterns, and design decisions
+- **[Reference](docs/reference.md)** - Complete command reference with all options and examples
+- **[Test Report](docs/test-report-2025-01-24.md)** - Comprehensive test validation (132 tests, 100% pass rate)
