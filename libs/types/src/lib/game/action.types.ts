@@ -54,6 +54,16 @@ export type GameActionType =
   | 'issue_create'
   | 'issue_close'
   | 'issue_reopen'
+  // Comment actions
+  | 'comment_create'
+  | 'review_comment_create'
+  // Release actions
+  | 'release_publish'
+  // CI/CD actions
+  | 'ci_success'
+  // Discussion actions
+  | 'discussion_create'
+  | 'discussion_comment'
   // Workout actions
   | 'workout_complete'
   | 'distance_milestone'

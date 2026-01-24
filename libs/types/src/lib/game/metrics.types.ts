@@ -64,11 +64,51 @@ export interface CodePushMetrics extends BaseMetrics {
   commitCount: number;
 }
 
+export interface CommentMetrics extends BaseMetrics {
+  type: 'comment';
+  bodyLength: number;
+  isOnPullRequest: boolean;
+}
+
+export interface ReviewCommentMetrics extends BaseMetrics {
+  type: 'review_comment';
+  bodyLength: number;
+  hasSuggestion: boolean; // Contains code suggestion (```suggestion block)
+  isReply: boolean; // Is a reply to another comment
+}
+
+export interface ReleaseMetrics extends BaseMetrics {
+  type: 'release';
+  hasReleaseNotes: boolean; // Has release notes body
+  isMajorVersion: boolean; // Semver major bump (e.g., v2.0.0)
+  isMinorVersion: boolean; // Semver minor bump (e.g., v1.1.0)
+  isPatchVersion: boolean; // Semver patch bump (e.g., v1.0.1)
+  isPrerelease: boolean; // Is a prerelease version
+}
+
+export interface WorkflowRunMetrics extends BaseMetrics {
+  type: 'workflow_run';
+  conclusion: string; // success, failure, cancelled, etc.
+  isDeployment: boolean; // Workflow name contains 'deploy'
+}
+
+export interface DiscussionMetrics extends BaseMetrics {
+  type: 'discussion';
+  bodyLength: number;
+  isAnswerable: boolean; // Discussion category allows answers
+  isAcceptedAnswer?: boolean; // For discussion_comment - is this the accepted answer
+}
+
 export type GameActionMetrics =
   | CodeMetrics
   | PullRequestMetrics
   | CodeReviewMetrics
   | IssueMetrics
+  | CommentMetrics
+  | ReviewCommentMetrics
+  | ReleaseMetrics
+  | WorkflowRunMetrics
+  | DiscussionMetrics
   | WorkoutMetrics
   | CodePushMetrics
   | ManualMetrics;

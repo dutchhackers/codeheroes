@@ -65,3 +65,7 @@ HANDOFF.md
 
 # Claude local config (personal data)
 .claude/*.local.json
+.claude/plans/
+
+# MCP server config (local)
+.mcp.json

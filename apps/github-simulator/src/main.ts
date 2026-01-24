@@ -9,6 +9,10 @@ import { createPrCommand } from './commands/pr';
 import { createIssueCommand } from './commands/issue';
 import { createReviewCommand } from './commands/review';
 import { createCommentCommand } from './commands/comment';
+import { createReviewCommentCommand } from './commands/review-comment';
+import { createReleaseCommand } from './commands/release';
+import { createWorkflowRunCommand } from './commands/workflow-run';
+import { createDiscussionCommand } from './commands/discussion';
 
 let config: Config;
 
@@ -62,6 +66,10 @@ program.addCommand(createPrCommand(getConfig, getCommandOptions));
 program.addCommand(createIssueCommand(getConfig, getCommandOptions));
 program.addCommand(createReviewCommand(getConfig, getCommandOptions));
 program.addCommand(createCommentCommand(getConfig, getCommandOptions));
+program.addCommand(createReviewCommentCommand(getConfig, getCommandOptions));
+program.addCommand(createReleaseCommand(getConfig, getCommandOptions));
+program.addCommand(createWorkflowRunCommand(getConfig, getCommandOptions));
+program.addCommand(createDiscussionCommand(getConfig, getCommandOptions));
 
 program.parseAsync(process.argv).catch((error) => {
   printError(error instanceof Error ? error.message : String(error));

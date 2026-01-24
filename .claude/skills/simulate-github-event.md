@@ -29,6 +29,11 @@ Simulates a GitHub webhook event using the github-simulator CLI and sends it to 
 | `review-comment` | Leave review comment | `nx serve github-simulator -- review comment --pr N` |
 | `comment-pr` | Comment on PR | `nx serve github-simulator -- comment pr --pr N` |
 | `comment-issue` | Comment on issue | `nx serve github-simulator -- comment issue --issue N` |
+| `review-comment` | Inline code review comment | `nx serve github-simulator -- review-comment --pr N` |
+| `release` | Publish a release | `nx serve github-simulator -- release publish --tag vX.Y.Z` |
+| `workflow-run` | CI workflow completed | `nx serve github-simulator -- workflow-run` |
+| `discussion-create` | Create discussion | `nx serve github-simulator -- discussion create` |
+| `discussion-comment` | Comment on discussion | `nx serve github-simulator -- discussion comment --number N` |
 
 ## Prerequisites
 
@@ -69,6 +74,11 @@ Map the requested event type to the appropriate CLI command:
 | `review-comment` | `review comment` |
 | `comment-pr` | `comment pr` |
 | `comment-issue` | `comment issue` |
+| `review-comment` | `review-comment` |
+| `release` | `release publish` |
+| `workflow-run` | `workflow-run` |
+| `discussion-create` | `discussion create` |
+| `discussion-comment` | `discussion comment` |
 
 ### 3. Execute the CLI command
 
