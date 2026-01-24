@@ -80,6 +80,79 @@ export interface CodePushContext extends BaseContext {
   isForced: boolean;
 }
 
+export interface CommentContext extends BaseContext {
+  type: 'comment';
+  repository: Repository;
+  comment: {
+    id: string;
+    body: string;
+  };
+  // Target can be an issue or a pull request
+  target: {
+    type: 'issue' | 'pull_request';
+    id: string;
+    number: number;
+    title: string;
+  };
+}
+
+export interface ReviewCommentContext extends BaseContext {
+  type: 'review_comment';
+  repository: Repository;
+  pullRequest: {
+    id: string;
+    number: number;
+    title: string;
+  };
+  comment: {
+    id: string;
+    body: string;
+    path: string; // File path being commented on
+    line: number; // Line number in the file
+  };
+}
+
+export interface ReleaseContext extends BaseContext {
+  type: 'release';
+  repository: Repository;
+  release: {
+    id: string;
+    tagName: string;
+    name: string | null;
+    body: string | null;
+    isDraft: boolean;
+    isPrerelease: boolean;
+  };
+}
+
+export interface WorkflowRunContext extends BaseContext {
+  type: 'workflow_run';
+  repository: Repository;
+  workflow: {
+    id: string;
+    name: string;
+    headBranch: string;
+    conclusion: string;
+  };
+}
+
+export interface DiscussionContext extends BaseContext {
+  type: 'discussion';
+  repository: Repository;
+  discussion: {
+    id: string;
+    number: number;
+    title: string;
+    categoryName: string;
+    isAnswerable: boolean;
+  };
+  // For discussion_comment action
+  comment?: {
+    id: string;
+    body: string;
+  };
+}
+
 // Fitness-related contexts
 export interface WorkoutContext extends BaseContext {
   type: 'workout';
@@ -102,6 +175,11 @@ export type GameActionContext =
   | PullRequestContext
   | CodeReviewContext
   | IssueContext
+  | CommentContext
+  | ReviewCommentContext
+  | ReleaseContext
+  | WorkflowRunContext
+  | DiscussionContext
   | WorkoutContext
   | CodePushContext
   | ManualContext;
