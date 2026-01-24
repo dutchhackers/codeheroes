@@ -59,6 +59,16 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
       const userStats = statsDoc.data()!;
       const { currentLevel, currentLevelXp, xpToNextLevel } = getXpProgress(userStats.xp || 0);
 
+      // Merge stored counters with initial counters to ensure all action types exist
+      const initialCounters = this.getInitialCounters();
+      const storedCounters = userStats.counters || {};
+      const mergedCounters: ActivityCounters = {
+        actions: {
+          ...initialCounters.actions,
+          ...(storedCounters.actions || {}),
+        },
+      };
+
       return {
         id: userId, // Add this line
         userId,
@@ -67,7 +77,7 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
         currentLevelXp,
         xpToNextLevel,
         lastActivityDate: userStats.lastActivityDate || null,
-        counters: userStats.counters || this.getInitialCounters(),
+        counters: mergedCounters,
         countersLastUpdated: userStats.countersLastUpdated || getCurrentTimeAsISO(),
         achievements: userStats.achievements || [],
       };
@@ -326,13 +336,22 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
    * Update the counters in the state object based on activity type
    */
   private updateStateCounters(state: ProgressionState, activityType: string): void {
+    // Ensure counters structure exists
     if (!state.counters) {
       state.counters = this.getInitialCounters();
     }
 
-    if (state.counters.actions[activityType] !== undefined) {
-      state.counters.actions[activityType]++;
+    // Ensure actions sub-object exists (defensive against incomplete Firestore data)
+    if (!state.counters.actions) {
+      state.counters.actions = this.getInitialCounters().actions;
     }
+
+    // Ensure the specific action type counter exists (handles new action types)
+    if (state.counters.actions[activityType] === undefined) {
+      state.counters.actions[activityType] = 0;
+    }
+
+    state.counters.actions[activityType]++;
   }
 
   /**
@@ -386,6 +405,14 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
         issue_create: 0,
         issue_close: 0,
         issue_reopen: 0,
+        // New action types
+        comment_create: 0,
+        review_comment_create: 0,
+        release_publish: 0,
+        ci_success: 0,
+        discussion_create: 0,
+        discussion_comment: 0,
+        // Fitness-related (existing)
         workout_complete: 0,
         distance_milestone: 0,
         speed_record: 0,
