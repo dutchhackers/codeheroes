@@ -10,51 +10,55 @@ import { UserInfo } from '../core/services/user-cache.service';
   imports: [CommonModule],
   template: `
     <div
-      class="flex items-center gap-6 px-10 py-5 cursor-pointer transition-all duration-300 hover:bg-cyan-500/5 border-l-4 border-transparent hover:border-cyan-500/50"
+      class="flex items-center gap-4 lg:gap-6 px-4 lg:px-10 py-4 lg:py-5 cursor-pointer transition-all duration-300 hover:bg-cyan-500/5 border-l-4 border-transparent hover:border-cyan-500/50"
       [class.activity-item-enter]="isNew()"
       (click)="selectActivity.emit(activity())"
     >
       <!-- Type Badge with Neon Glow -->
       <div
-        class="flex-shrink-0 px-5 py-2.5 rounded-lg text-lg font-bold text-white w-[200px] text-center uppercase tracking-wide transition-all duration-300"
+        class="flex-shrink-0 px-3 lg:px-5 py-2 lg:py-2.5 rounded-lg text-sm lg:text-lg font-bold text-white w-[140px] lg:w-[200px] text-center uppercase tracking-wide transition-all duration-300"
         [class]="actionDisplay().color + ' ' + actionDisplay().glowClass"
       >
         {{ actionDisplay().label }}
       </div>
 
-      <!-- User Info -->
-      <div class="flex items-center gap-4 min-w-[280px]">
+      <!-- User Info (fixed width for column alignment) -->
+      <div class="flex items-center gap-3 lg:gap-4 w-[180px] lg:w-[260px] flex-shrink-0">
         @if (userInfo(); as user) {
           @if (user.photoUrl) {
             <img
               [src]="user.photoUrl"
               [alt]="user.displayName"
-              class="w-14 h-14 rounded-full ring-2 ring-cyan-500/30"
+              class="w-10 h-10 lg:w-14 lg:h-14 rounded-full ring-2 flex-shrink-0"
+              [class]="actionDisplay().ringClass"
             />
           } @else {
-            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-cyan-600 to-purple-600 flex items-center justify-center text-2xl font-bold ring-2 ring-cyan-500/30">
+            <div
+              class="w-10 h-10 lg:w-14 lg:h-14 rounded-full bg-gradient-to-br from-cyan-600 to-purple-600 flex items-center justify-center text-xl lg:text-2xl font-bold ring-2 flex-shrink-0"
+              [class]="actionDisplay().ringClass"
+            >
               {{ user.displayName.charAt(0).toUpperCase() }}
             </div>
           }
-          <span class="text-2xl font-semibold text-white truncate">{{ user.displayName }}</span>
+          <span class="text-lg lg:text-2xl font-semibold text-white truncate">{{ user.displayName }}</span>
         } @else {
-          <div class="w-14 h-14 rounded-full bg-slate-700 ring-2 ring-slate-600"></div>
-          <span class="text-2xl text-slate-500 truncate">Unknown User</span>
+          <div class="w-10 h-10 lg:w-14 lg:h-14 rounded-full bg-slate-700 ring-2 ring-slate-600 flex-shrink-0"></div>
+          <span class="text-lg lg:text-2xl text-slate-500 truncate">Unknown User</span>
         }
       </div>
 
-      <!-- Description (flexible) -->
-      <div class="flex-1 text-slate-300 truncate text-xl">
+      <!-- Description (flexible, hidden on small screens) -->
+      <div class="hidden md:block flex-1 text-slate-300 truncate text-base lg:text-xl min-w-[150px]">
         {{ activity().userFacingDescription }}
       </div>
 
       <!-- XP Badge with Glow -->
-      <div class="flex-shrink-0 px-5 py-2.5 rounded-lg bg-gradient-to-r from-amber-500/30 to-yellow-500/20 text-yellow-300 text-xl font-black xp-glow border border-yellow-500/30">
+      <div class="flex-shrink-0 px-3 lg:px-5 py-2 lg:py-2.5 rounded-lg bg-gradient-to-r from-amber-500/30 to-yellow-500/20 text-yellow-300 text-base lg:text-xl font-black xp-glow border border-yellow-500/30">
         +{{ activity().xp.earned }} XP
       </div>
 
       <!-- Timestamp -->
-      <div class="flex-shrink-0 text-cyan-400/60 text-lg min-w-[100px] text-right font-medium">
+      <div class="flex-shrink-0 text-cyan-400/60 text-sm lg:text-lg min-w-[70px] lg:min-w-[100px] text-right font-medium">
         {{ formattedTime() }}
       </div>
     </div>
