@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   displayName: 'github-receiver',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
