@@ -1,6 +1,7 @@
 import { Component, input, output, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Activity } from '@codeheroes/types';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Activity, GameActionType } from '@codeheroes/types';
 import { getActionTypeDisplay } from '../core/mappings/action-type.mapping';
 import { UserInfo } from '../core/services/user-cache.service';
 
@@ -10,56 +11,36 @@ import { UserInfo } from '../core/services/user-cache.service';
   imports: [CommonModule],
   template: `
     <div
-      class="flex items-center gap-4 lg:gap-6 px-4 lg:px-10 py-4 lg:py-5 cursor-pointer transition-all duration-300 hover:bg-cyan-500/5 border-l-4 border-transparent hover:border-cyan-500/50"
+      class="rounded-lg bg-black/70 cursor-pointer transition-all duration-300 hover:bg-black/90 overflow-hidden"
+      [class]="actionDisplay().cardGlowClass"
       [class.activity-item-enter]="isNew()"
       (click)="selectActivity.emit(activity())"
     >
-      <!-- Type Badge with Neon Glow -->
-      <div
-        class="flex-shrink-0 px-3 lg:px-5 py-2 lg:py-2.5 rounded-lg text-sm lg:text-lg font-bold text-white w-[140px] lg:w-[200px] text-center uppercase tracking-wide transition-all duration-300"
-        [class]="actionDisplay().color + ' ' + actionDisplay().glowClass"
-      >
-        {{ actionDisplay().label }}
-      </div>
-
-      <!-- User Info (fixed width for column alignment) -->
-      <div class="flex items-center gap-3 lg:gap-4 w-[180px] lg:w-[260px] flex-shrink-0">
-        @if (userInfo(); as user) {
-          @if (user.photoUrl) {
-            <img
-              [src]="user.photoUrl"
-              [alt]="user.displayName"
-              class="w-10 h-10 lg:w-14 lg:h-14 rounded-full ring-2 flex-shrink-0"
-              [class]="actionDisplay().ringClass"
-            />
-          } @else {
-            <div
-              class="w-10 h-10 lg:w-14 lg:h-14 rounded-full bg-gradient-to-br from-cyan-600 to-purple-600 flex items-center justify-center text-xl lg:text-2xl font-bold ring-2 flex-shrink-0"
-              [class]="actionDisplay().ringClass"
-            >
-              {{ user.displayName.charAt(0).toUpperCase() }}
-            </div>
-          }
-          <span class="text-lg lg:text-2xl font-semibold text-white truncate">{{ user.displayName }}</span>
-        } @else {
-          <div class="w-10 h-10 lg:w-14 lg:h-14 rounded-full bg-slate-700 ring-2 ring-slate-600 flex-shrink-0"></div>
-          <span class="text-lg lg:text-2xl text-slate-500 truncate">Unknown User</span>
+      <div class="flex items-start gap-3 md:gap-4 p-4 md:p-5">
+        <!-- Icon on LEFT for certain types -->
+        @if (iconPosition() === 'left') {
+          <div
+            class="w-10 h-10 md:w-12 md:h-12 flex-shrink-0"
+            [class]="actionDisplay().textColor"
+            [innerHTML]="sanitizedIcon()"
+          ></div>
         }
-      </div>
 
-      <!-- Description (flexible, hidden on small screens) -->
-      <div class="hidden md:block flex-1 text-slate-300 truncate text-base lg:text-xl min-w-[150px]">
-        {{ activity().userFacingDescription }}
-      </div>
+        <!-- Main content - single color text -->
+        <div class="flex-1 min-w-0 pr-2" [class]="actionDisplay().textColor">
+          <p class="text-base md:text-xl leading-relaxed font-medium break-words">
+            [{{ formattedTime() }}] {{ techUsername() }} {{ descriptionText() }}
+          </p>
+        </div>
 
-      <!-- XP Badge with Glow -->
-      <div class="flex-shrink-0 px-3 lg:px-5 py-2 lg:py-2.5 rounded-lg bg-gradient-to-r from-amber-500/30 to-yellow-500/20 text-yellow-300 text-base lg:text-xl font-black xp-glow border border-yellow-500/30">
-        +{{ activity().xp.earned }} XP
-      </div>
-
-      <!-- Timestamp -->
-      <div class="flex-shrink-0 text-cyan-400/60 text-sm lg:text-lg min-w-[70px] lg:min-w-[100px] text-right font-medium">
-        {{ formattedTime() }}
+        <!-- Icon on RIGHT for certain types -->
+        @if (iconPosition() === 'right') {
+          <div
+            class="w-10 h-10 md:w-14 md:h-14 flex-shrink-0"
+            [class]="actionDisplay().textColor"
+            [innerHTML]="sanitizedIcon()"
+          ></div>
+        }
       </div>
     </div>
   `,
@@ -70,20 +51,131 @@ export class ActivityItemComponent {
   isNew = input<boolean>(false);
   selectActivity = output<Activity>();
 
+  constructor(private sanitizer: DomSanitizer) {}
+
   actionDisplay = computed(() => getActionTypeDisplay(this.activity().sourceActionType));
+
+  sanitizedIcon = computed((): SafeHtml => {
+    return this.sanitizer.bypassSecurityTrustHtml(this.actionDisplay().svgIcon);
+  });
+
+  // Icon position based on action type
+  iconPosition = computed((): 'left' | 'right' => {
+    const actionType = this.activity().sourceActionType;
+    // Right side: push, PR created (code-related creation)
+    const rightSideTypes: GameActionType[] = ['code_push', 'pull_request_create', 'release_publish'];
+    return rightSideTypes.includes(actionType) ? 'right' : 'left';
+  });
+
+  techUsername = computed(() => {
+    const user = this.userInfo();
+    if (!user) return 'UNKNOWN';
+
+    const name = user.displayName;
+    const upper = name.toUpperCase();
+
+    // Check if it's two words (first + last name)
+    const parts = upper.split(/\s+/);
+    if (parts.length >= 2) {
+      // "Sander Elderhorst" → "SANDER.E"
+      return `${parts[0]}.${parts[1].charAt(0)}`;
+    }
+
+    // Single word - try to split camelCase or find natural break
+    const singleWord = upper;
+
+    // Common word breaks for compound names
+    const breakPoints = ['NIGHT', 'CODE', 'DARK', 'FIRE', 'STAR', 'CYBER', 'TECH', 'MEGA', 'ULTRA'];
+    for (const prefix of breakPoints) {
+      if (singleWord.startsWith(prefix) && singleWord.length > prefix.length) {
+        return `${prefix}.${singleWord.slice(prefix.length)}`;
+      }
+    }
+
+    // If word is long enough, split roughly in half
+    if (singleWord.length >= 8) {
+      const mid = Math.floor(singleWord.length / 2);
+      return `${singleWord.slice(0, mid)}.${singleWord.slice(mid)}`;
+    }
+
+    return singleWord;
+  });
+
+  // Plain text description (no HTML, single color)
+  descriptionText = computed((): string => {
+    const activity = this.activity();
+    const actionType = activity.sourceActionType;
+    return this.buildSentence(actionType, activity);
+  });
+
+  private buildSentence(actionType: GameActionType, activity: Activity): string {
+    const desc = activity.userFacingDescription;
+
+    // Extract useful info from description
+    const prMatch = desc.match(/#(\d+)/);
+    const prNumber = prMatch ? prMatch[1] : '';
+
+    // Extract quoted title if present
+    const titleMatch = desc.match(/"([^"]+)"/);
+    const title = titleMatch ? titleMatch[1] : '';
+
+    // Extract repo name
+    const repoMatch = desc.match(/in (\S+)$/);
+    const repo = repoMatch ? repoMatch[1] : '';
+
+    switch (actionType) {
+      case 'code_push':
+        const branchMatch = desc.match(/to (\S+)\s+in/);
+        const branch = branchMatch ? branchMatch[1] : 'main';
+        return `pushed to \`${branch}\`${repo ? ` in \`${repo}\`` : ''}`;
+
+      case 'pull_request_create':
+        return `opened PR #${prNumber}${title ? `: \`${title}\`` : ''}${repo ? ` in \`${repo}\`` : ''}`;
+
+      case 'pull_request_merge':
+        return `merged PR #${prNumber}${title ? `: \`${title}\`` : ''}${repo ? ` into \`${repo}\`` : ''}`;
+
+      case 'pull_request_close':
+        return `closed PR #${prNumber}${title ? `: \`${title}\`` : ''}`;
+
+      case 'code_review_submit':
+        return `approved PR #${prNumber}${repo ? ` in \`${repo}\`` : ''}`;
+
+      case 'code_review_comment':
+        return `commented on PR #${prNumber}${repo ? ` in \`${repo}\`` : ''}`;
+
+      case 'issue_create':
+        return `opened Issue #${prNumber}${title ? `: \`${title}\`` : ''}${repo ? ` in \`${repo}\`` : ''}`;
+
+      case 'issue_close':
+        return `closed Issue #${prNumber}${title ? `: \`${title}\`` : ''}`;
+
+      case 'issue_reopen':
+        return `reopened Issue #${prNumber}`;
+
+      case 'comment_create':
+        return `commented${prNumber ? ` on #${prNumber}` : ''}${repo ? ` in \`${repo}\`` : ''}`;
+
+      case 'release_publish':
+        const versionMatch = desc.match(/v?(\d+\.\d+\.\d+)/);
+        const version = versionMatch ? versionMatch[1] : '';
+        return `published release${version ? ` v${version}` : ''}${repo ? ` in \`${repo}\`` : ''}`;
+
+      case 'user_registration':
+        return `joined Code Heroes!`;
+
+      default:
+        // Fallback: clean up the original description
+        return desc.replace(/^(Created|Merged|Approved|Closed|Pushed|Commented)\s+/i, '');
+    }
+  }
 
   formattedTime = computed(() => {
     const date = new Date(this.activity().createdAt);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffSec = Math.floor(diffMs / 1000);
-    const diffMin = Math.floor(diffSec / 60);
-    const diffHour = Math.floor(diffMin / 60);
-
-    if (diffSec < 60) return 'just now';
-    if (diffMin < 60) return `${diffMin}m ago`;
-    if (diffHour < 24) return `${diffHour}h ago`;
-
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
   });
 }
