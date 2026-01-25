@@ -92,6 +92,14 @@ service cloud.firestore {
     }
 
     // ============================================
+    // COLLECTION GROUP QUERIES
+    // Allow authenticated users to query activities across all users
+    // ============================================
+    match /{path=**}/activities/{activityId} {
+      allow read: if isAuthenticated();
+    }
+
+    // ============================================
     // SERVER-ONLY COLLECTIONS
     // These are only accessed by Cloud Functions via Admin SDK
     // ============================================
