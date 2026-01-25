@@ -1,5 +1,5 @@
 import { Component, inject, signal, HostListener, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Auth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, Unsubscribe } from '@angular/fire/auth';
 import { Subscription } from 'rxjs';
 import { Activity } from '@codeheroes/types';
@@ -11,7 +11,7 @@ import { DebugPanelComponent } from './components/debug-panel.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ActivityItemComponent, DebugPanelComponent],
+  imports: [ActivityItemComponent, DebugPanelComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

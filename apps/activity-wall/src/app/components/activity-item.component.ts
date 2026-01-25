@@ -1,5 +1,5 @@
 import { Component, input, output, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Activity, GameActionType } from '@codeheroes/types';
 import { getActionTypeDisplay } from '../core/mappings/action-type.mapping';
@@ -8,7 +8,7 @@ import { UserInfo } from '../core/services/user-cache.service';
 @Component({
   selector: 'app-activity-item',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div
       class="rounded-lg bg-black/70 cursor-pointer transition-all duration-300 hover:bg-black/90 overflow-hidden focus:outline-none focus:ring-2 focus:ring-white/50"

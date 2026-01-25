@@ -25,7 +25,7 @@ export const appConfig: ApplicationConfig = {
       withViewTransitions({
         onViewTransitionCreated: ({ transition }) => {
           const router = inject(Router);
-          const targetUrl = router.getCurrentNavigation()!.finalUrl!;
+          const targetUrl = router.currentNavigation()!.finalUrl!;
           // Skipping the transition if the only thing changing is the fragment and queryParams
           const config = {
             paths: 'exact' as const,
