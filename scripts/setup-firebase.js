@@ -3,7 +3,9 @@ const fs = require('fs');
 
 // Generate .firebaserc file
 const firebasercTemplate = fs.readFileSync('.firebaserc.template', 'utf8');
-const firebasercConfig = firebasercTemplate.replace('${FIREBASE_PROJECT_ID}', process.env.FIREBASE_PROJECT_ID);
+const firebasercConfig = firebasercTemplate
+  .replaceAll('${FIREBASE_PROJECT_ID}', process.env.FIREBASE_PROJECT_ID)
+  .replace('${FIREBASE_ACTIVITY_WALL_SITE}', process.env.FIREBASE_ACTIVITY_WALL_SITE || `${process.env.FIREBASE_PROJECT_ID}-activity-wall`);
 fs.writeFileSync('.firebaserc', firebasercConfig);
 
 // Generate environment.{local,prod}.ts file

@@ -3,7 +3,7 @@
     "${FIREBASE_PROJECT_ID}": {
       "hosting": {
         "web": ["${FIREBASE_PROJECT_ID}"],
-        "activity-wall": ["codeheroes-activity-wall-test"]
+        "activity-wall": ["${FIREBASE_ACTIVITY_WALL_SITE}"]
       }
     }
   },

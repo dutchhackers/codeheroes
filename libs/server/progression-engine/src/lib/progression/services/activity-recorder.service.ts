@@ -315,10 +315,6 @@ export class ActivityRecorderService {
     switch (update.activityType) {
       case 'user_registration':
         return 'Welcome to Code Heroes!';
-      case 'profile_completion':
-        return 'Completed profile setup';
-      case 'daily_login':
-        return 'Daily login bonus';
       default:
         return `Manual ${update.activityType || 'XP'} update: +${update.xpGained}XP`;
     }
