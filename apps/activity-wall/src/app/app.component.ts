@@ -70,19 +70,28 @@ export class AppComponent implements OnInit, OnDestroy {
     }
     this.#isLoadingData = true;
 
-    await this.#userCacheService.loadUsers();
+    try {
+      await this.#userCacheService.loadUsers();
 
-    // Clean up previous subscription before creating new one
-    if (this.#activitiesSubscription) {
-      this.#activitiesSubscription.unsubscribe();
+      // Clean up previous subscription before creating new one
+      if (this.#activitiesSubscription) {
+        this.#activitiesSubscription.unsubscribe();
+      }
+
+      this.#activitiesSubscription = this.#activityFeedService.getGlobalActivities(100).subscribe({
+        next: (activities) => {
+          this.activities.set(activities);
+        },
+        error: (error) => {
+          console.error('Failed to load activities:', error);
+        },
+      });
+    } catch (error) {
+      console.error('Failed to load data:', error);
+    } finally {
+      this.isLoading.set(false);
+      this.#isLoadingData = false;
     }
-
-    this.#activitiesSubscription = this.#activityFeedService.getGlobalActivities(100).subscribe((activities) => {
-      this.activities.set(activities);
-    });
-
-    this.isLoading.set(false);
-    this.#isLoadingData = false;
   }
 
   getUserInfo(userId: string) {

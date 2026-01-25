@@ -18,7 +18,7 @@ import { UserInfo } from '../core/services/user-cache.service';
       role="button"
       (click)="selectActivity.emit(activity())"
       (keydown.enter)="selectActivity.emit(activity())"
-      (keydown.space)="selectActivity.emit(activity())"
+      (keydown.space)="$event.preventDefault(); selectActivity.emit(activity())"
     >
       <div class="flex items-center gap-3 md:gap-4 p-4 md:p-5">
         <!-- Icon on LEFT for certain types -->
@@ -27,6 +27,8 @@ import { UserInfo } from '../core/services/user-cache.service';
             class="w-10 h-10 md:w-12 md:h-12 flex-shrink-0"
             [class]="actionDisplay().textColor"
             [innerHTML]="sanitizedIcon()"
+            role="img"
+            [attr.aria-label]="actionDisplay().label + ' icon'"
           ></div>
         }
 
@@ -91,6 +93,8 @@ import { UserInfo } from '../core/services/user-cache.service';
             class="w-10 h-10 md:w-14 md:h-14 flex-shrink-0"
             [class]="actionDisplay().textColor"
             [innerHTML]="sanitizedIcon()"
+            role="img"
+            [attr.aria-label]="actionDisplay().label + ' icon'"
           ></div>
         }
       </div>
@@ -252,10 +256,13 @@ export class ActivityItemComponent {
         return `closed PR #${prNumber}${title ? `: \`${title}\`` : ''}`;
 
       case 'code_review_submit':
-        return `approved PR #${prNumber}${repo ? ` in \`${repo}\`` : ''}`;
+        return `reviewed PR #${prNumber}${repo ? ` in \`${repo}\`` : ''}`;
 
       case 'code_review_comment':
         return `commented on PR #${prNumber}${repo ? ` in \`${repo}\`` : ''}`;
+
+      case 'review_comment_create':
+        return `added review comment${prNumber ? ` on #${prNumber}` : ''}${repo ? ` in \`${repo}\`` : ''}`;
 
       case 'issue_create':
         return `opened Issue #${prNumber}${title ? `: \`${title}\`` : ''}${repo ? ` in \`${repo}\`` : ''}`;
@@ -277,6 +284,21 @@ export class ActivityItemComponent {
 
       case 'user_registration':
         return `joined Code Heroes!`;
+
+      case 'ci_success':
+        return `CI passed${repo ? ` in \`${repo}\`` : ''}`;
+
+      case 'discussion_create':
+        return `started a discussion${repo ? ` in \`${repo}\`` : ''}`;
+
+      case 'discussion_comment':
+        return `commented on a discussion${repo ? ` in \`${repo}\`` : ''}`;
+
+      case 'workout_complete':
+        return `completed a workout`;
+
+      case 'manual_update':
+        return desc;
 
       default:
         // Fallback: clean up the original description

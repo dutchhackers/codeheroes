@@ -37,7 +37,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   code_push: {
     label: 'Push',
     color: 'bg-cyan-500',
-    glowClass: 'neon-glow-cyan',
+    glowClass: '',
     ringClass: 'ring-cyan-500/50',
     icon: 'arrow-up',
     borderColor: '#00f5ff',
@@ -48,7 +48,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   pull_request_create: {
     label: 'PR Created',
     color: 'bg-purple-500',
-    glowClass: 'neon-glow-purple',
+    glowClass: '',
     ringClass: 'ring-purple-500/50',
     icon: 'git-pull-request',
     borderColor: '#bf00ff',
@@ -59,7 +59,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   pull_request_merge: {
     label: 'PR Merged',
     color: 'bg-green-500',
-    glowClass: 'neon-glow-green',
+    glowClass: '',
     ringClass: 'ring-green-500/50',
     icon: 'git-merge',
     borderColor: '#00ff88',
@@ -81,7 +81,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   code_review_submit: {
     label: 'Review',
     color: 'bg-orange-500',
-    glowClass: 'neon-glow-orange',
+    glowClass: '',
     ringClass: 'ring-orange-500/50',
     icon: 'eye',
     borderColor: '#ff6600',
@@ -92,7 +92,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   code_review_comment: {
     label: 'Review Comment',
     color: 'bg-orange-400',
-    glowClass: 'neon-glow-orange',
+    glowClass: '',
     ringClass: 'ring-orange-400/50',
     icon: 'message-square',
     borderColor: '#ff6600',
@@ -105,7 +105,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   issue_create: {
     label: 'Issue Created',
     color: 'bg-pink-500',
-    glowClass: 'neon-glow-pink',
+    glowClass: '',
     ringClass: 'ring-pink-500/50',
     icon: 'alert-circle',
     borderColor: '#ff00aa',
@@ -116,18 +116,18 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   issue_close: {
     label: 'Issue Closed',
     color: 'bg-green-400',
-    glowClass: 'neon-glow-green',
+    glowClass: '',
     ringClass: 'ring-green-400/50',
     icon: 'check-circle',
-    borderColor: '#ff4444',
-    cardGlowClass: 'card-glow-red',
-    textColor: 'text-red-400',
+    borderColor: '#00ff88',
+    cardGlowClass: 'card-glow-green',
+    textColor: 'text-green-400',
     svgIcon: SVG_ICONS.checkCircle,
   },
   issue_reopen: {
     label: 'Issue Reopened',
     color: 'bg-orange-500',
-    glowClass: 'neon-glow-orange',
+    glowClass: '',
     ringClass: 'ring-orange-500/50',
     icon: 'refresh-cw',
     borderColor: '#ff6600',
@@ -140,7 +140,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   comment_create: {
     label: 'Comment',
     color: 'bg-cyan-400',
-    glowClass: 'neon-glow-cyan',
+    glowClass: '',
     ringClass: 'ring-cyan-400/50',
     icon: 'message-circle',
     borderColor: '#00f5ff',
@@ -151,7 +151,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   review_comment_create: {
     label: 'Review Comment',
     color: 'bg-cyan-500',
-    glowClass: 'neon-glow-cyan',
+    glowClass: '',
     ringClass: 'ring-cyan-500/50',
     icon: 'code',
     borderColor: '#00f5ff',
@@ -164,7 +164,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   release_publish: {
     label: 'Release',
     color: 'bg-emerald-500',
-    glowClass: 'neon-glow-green',
+    glowClass: '',
     ringClass: 'ring-emerald-500/50',
     icon: 'package',
     borderColor: '#00ff88',
@@ -177,7 +177,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   ci_success: {
     label: 'CI Success',
     color: 'bg-green-500',
-    glowClass: 'neon-glow-green',
+    glowClass: '',
     ringClass: 'ring-green-500/50',
     icon: 'check',
     borderColor: '#00ff88',
@@ -190,7 +190,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   discussion_create: {
     label: 'Discussion',
     color: 'bg-purple-400',
-    glowClass: 'neon-glow-purple',
+    glowClass: '',
     ringClass: 'ring-purple-400/50',
     icon: 'message-square',
     borderColor: '#bf00ff',
@@ -201,7 +201,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   discussion_comment: {
     label: 'Discussion Comment',
     color: 'bg-purple-400',
-    glowClass: 'neon-glow-purple',
+    glowClass: '',
     ringClass: 'ring-purple-400/50',
     icon: 'message-circle',
     borderColor: '#bf00ff',
@@ -214,7 +214,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   workout_complete: {
     label: 'Workout',
     color: 'bg-orange-500',
-    glowClass: 'neon-glow-orange',
+    glowClass: '',
     ringClass: 'ring-orange-500/50',
     icon: 'activity',
     borderColor: '#ff6600',
@@ -225,7 +225,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   distance_milestone: {
     label: 'Distance Milestone',
     color: 'bg-orange-400',
-    glowClass: 'neon-glow-orange',
+    glowClass: '',
     ringClass: 'ring-orange-400/50',
     icon: 'map-pin',
     borderColor: '#ff6600',
@@ -236,7 +236,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   speed_record: {
     label: 'Speed Record',
     color: 'bg-yellow-500',
-    glowClass: 'neon-glow-yellow',
+    glowClass: '',
     ringClass: 'ring-yellow-500/50',
     icon: 'zap',
     borderColor: '#ffdd00',
@@ -262,7 +262,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   user_registration: {
     label: 'Welcome',
     color: 'bg-gradient-to-r from-yellow-400 to-amber-500',
-    glowClass: 'neon-glow-yellow',
+    glowClass: '',
     ringClass: 'ring-yellow-400/50',
     icon: 'star',
     borderColor: '#ffdd00',
