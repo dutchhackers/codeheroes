@@ -4,12 +4,15 @@
 
 CodeHeroes is a gamification platform that tracks developer activity via GitHub webhooks and awards points, badges, and achievements.
 
+**Naming convention:** The product name is "Code Heroes" (two words) in user-facing text, but "CodeHeroes" (one word) in code identifiers, file names, and technical references.
+
 ## Repository Structure
 
 ```
 codeheroes/
 ├── apps/
 │   ├── firebase-app/     # Firebase orchestrator (emulators, rules)
+│   ├── activity-wall/    # Real-time activity display (Angular)
 │   ├── api/              # Main REST API (Cloud Function)
 │   ├── auth-service/     # Authentication functions
 │   ├── game-engine/      # Game logic (Eventarc triggered)
@@ -111,13 +114,9 @@ Requires `.claude/config.local.json` with your GitHub user and test repository i
 
 ## GitHub Webhook Testing (Alternative: Real Webhooks)
 
-For testing with real GitHub events via ngrok. Use the dedicated test repository:
+For testing with real GitHub events via ngrok. Use the dedicated test repository.
 
-| Item | Value |
-|------|-------|
-| Test Repo | https://github.com/mschilling/codeheroes-support |
-| Local Clone | `/Users/michael.schilling/workspace/projects/sideprojects/code-heroes/codeheroes-support` |
-| Webhook Settings | https://github.com/mschilling/codeheroes-support/settings/hooks |
+> **Note:** Test repository URLs are in `.claude/CLAUDE.local.md` (not committed).
 
 The test repo has webhooks pre-configured for local (ngrok) and production.
 
@@ -430,11 +429,7 @@ nx run firebase-app:firebase deploy --only functions
 - `game-engine` (us-central1) - processGameAction, onActivityRecorded, onBadgeEarned, onLevelUp, storeRawWebhook
 - `github-receiver` (europe-west1) - gitHubReceiver webhook endpoint
 
-**Production URLs:**
-| Function | URL |
-|----------|-----|
-| API | https://api-5f4quj3fia-ew.a.run.app |
-| GitHub Receiver | https://githubreceiver-5f4quj3fia-ew.a.run.app |
+> **Note:** Production URLs are in `.claude/CLAUDE.local.md` (not committed).
 
 ### Deploy Everything (Functions + Hosting)
 
@@ -458,9 +453,10 @@ A separate Angular app for displaying real-time activity on TV/public displays.
 |------|-------|
 | Location | `apps/activity-wall/` |
 | Port | 4201 |
-| Start | `nx serve activity-wall` |
-
-**Note:** Activity Wall is NOT yet configured for Firebase Hosting deployment. It runs locally only.
+| Start (local) | `nx serve activity-wall` |
+| Start (test) | `nx serve activity-wall --configuration=test` |
+| Deploy (test) | `nx run firebase-app:firebase deploy --only hosting:activity-wall` (uses test project) |
+| Deploy (prod) | `nx run firebase-app:firebase deploy --only hosting:activity-wall` (uses prod project) |
 
 ---
 
@@ -468,21 +464,23 @@ A separate Angular app for displaying real-time activity on TV/public displays.
 
 Use the `gh` CLI to manage webhooks in the test repository.
 
+> **Note:** Repository and webhook URLs are in `.claude/CLAUDE.local.md` (not committed).
+
 ### List Webhooks
 
 ```bash
-gh api repos/mschilling/codeheroes-support/hooks --jq '.[] | {id, url: .config.url, events}'
+gh api repos/OWNER/REPO/hooks --jq '.[] | {id, url: .config.url, events}'
 ```
 
 ### Create Webhook
 
 ```bash
-gh api repos/mschilling/codeheroes-support/hooks \
+gh api repos/OWNER/REPO/hooks \
   -X POST \
   --input - << 'EOF'
 {
   "config": {
-    "url": "https://githubreceiver-5f4quj3fia-ew.a.run.app",
+    "url": "YOUR_WEBHOOK_RECEIVER_URL",
     "content_type": "json"
   },
   "events": ["*"],
@@ -495,10 +493,10 @@ EOF
 
 ```bash
 # Get webhook ID first
-gh api repos/mschilling/codeheroes-support/hooks --jq '.[].id'
+gh api repos/OWNER/REPO/hooks --jq '.[].id'
 
 # Update to send all events
-gh api repos/mschilling/codeheroes-support/hooks/WEBHOOK_ID \
+gh api repos/OWNER/REPO/hooks/WEBHOOK_ID \
   -X PATCH \
   --input - << 'EOF'
 {
@@ -511,16 +509,8 @@ EOF
 ### Delete Webhook
 
 ```bash
-gh api repos/mschilling/codeheroes-support/hooks/WEBHOOK_ID -X DELETE
+gh api repos/OWNER/REPO/hooks/WEBHOOK_ID -X DELETE
 ```
-
-### Current Webhooks
-
-| URL | Purpose |
-|-----|---------|
-| https://github.webhooks.m4m.io | Production |
-| https://githubreceiver-5f4quj3fia-ew.a.run.app | Test environment (your-project-id) |
-| ngrok URL | Local development (changes frequently) |
 
 ---
 
@@ -530,17 +520,17 @@ The github-simulator only supports one user (configured in `.claude/config.local
 
 ```bash
 # Send a push event for a specific user
-curl -X POST "http://localhost:5001/your-project-id/europe-west1/gitHubReceiver" \
+curl -X POST "http://localhost:5001/YOUR_PROJECT_ID/europe-west1/gitHubReceiver" \
   -H "Content-Type: application/json" \
   -H "X-GitHub-Event: push" \
   -H "X-GitHub-Delivery: sim-$(date +%s)" \
   -d '{
     "ref": "refs/heads/main",
     "repository": {
-      "id": 1140770846,
-      "name": "codeheroes-support",
-      "full_name": "mschilling/codeheroes-support",
-      "owner": {"login": "mschilling", "id": 7045335}
+      "id": 12345678,
+      "name": "your-test-repo",
+      "full_name": "owner/your-test-repo",
+      "owner": {"login": "owner", "id": 12345}
     },
     "sender": {"id": GITHUB_USER_ID, "login": "username"},
     "commits": [{"id": "abc123", "message": "Update"}],

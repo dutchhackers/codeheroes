@@ -1,5 +1,11 @@
 {
   "targets": {
+    "${FIREBASE_PROJECT_ID}": {
+      "hosting": {
+        "web": ["${FIREBASE_PROJECT_ID}"],
+        "activity-wall": ["${FIREBASE_ACTIVITY_WALL_SITE}"]
+      }
+    }
   },
   "projects": {
     "default": "${FIREBASE_PROJECT_ID}"

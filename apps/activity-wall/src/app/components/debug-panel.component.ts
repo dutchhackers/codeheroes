@@ -7,13 +7,13 @@ import { Activity } from '@codeheroes/types';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700 transition-transform duration-300"
+    <div class="fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700 transition-transform duration-300"
          [class.translate-y-full]="!isOpen()"
          [class.translate-y-0]="isOpen()">
       <!-- Toggle Bar -->
       <button
         class="w-full px-4 py-2 flex items-center justify-between bg-slate-800 hover:bg-slate-700 transition-colors"
-        (click)="toggle.emit()"
+        (click)="togglePanel.emit()"
       >
         <span class="text-sm font-medium text-slate-400">
           Debug Panel
@@ -40,7 +40,7 @@ import { Activity } from '@codeheroes/types';
 export class DebugPanelComponent {
   isOpen = input(false);
   selectedActivity = input<Activity | null>(null);
-  toggle = output<void>();
+  togglePanel = output<void>();
 
   formattedJson = computed(() => {
     const activity = this.selectedActivity();

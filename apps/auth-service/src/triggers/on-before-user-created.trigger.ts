@@ -74,10 +74,9 @@ export const onBeforeUserCreated = beforeUserCreated(
       // Create service registry to get the progression service
       const services = createServiceRegistry();
 
-      // Use the ProgressionService instead of UserProgressionService
-      // Use an empty update with 0 XP, which will create the initial stats record
+      // Use the ProgressionService to initialize and award welcome XP
       await services.progressionService.updateProgression(newUser.id, {
-        xpGained: 0,
+        xpGained: 100,
         activityType: 'user_registration',
       });
     } catch (error) {
