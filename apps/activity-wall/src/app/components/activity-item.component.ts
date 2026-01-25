@@ -16,7 +16,7 @@ import { UserInfo } from '../core/services/user-cache.service';
       [class.activity-item-enter]="isNew()"
       (click)="selectActivity.emit(activity())"
     >
-      <div class="flex items-start gap-3 md:gap-4 p-4 md:p-5">
+      <div class="flex items-center gap-3 md:gap-4 p-4 md:p-5">
         <!-- Icon on LEFT for certain types -->
         @if (iconPosition() === 'left') {
           <div
@@ -26,12 +26,56 @@ import { UserInfo } from '../core/services/user-cache.service';
           ></div>
         }
 
+        <!-- Avatar on LEFT (when icon is on right) -->
+        @if (iconPosition() === 'right') {
+          <div class="flex-shrink-0">
+            @if (userInfo()?.photoUrl) {
+              <img
+                [src]="userInfo()!.photoUrl"
+                [alt]="userInfo()!.displayName"
+                class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover cyber-avatar"
+                [style.--glow-color]="actionDisplay().borderColor"
+              />
+            } @else {
+              <div
+                class="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base font-bold cyber-avatar-placeholder"
+                [class]="actionDisplay().textColor"
+                [style.--glow-color]="actionDisplay().borderColor"
+              >
+                {{ userInitials() }}
+              </div>
+            }
+          </div>
+        }
+
         <!-- Main content - single color text -->
-        <div class="flex-1 min-w-0 pr-2" [class]="actionDisplay().textColor">
+        <div class="flex-1 min-w-0" [class]="actionDisplay().textColor">
           <p class="text-base md:text-xl leading-relaxed font-medium break-words">
             [{{ formattedTime() }}] {{ techUsername() }} {{ descriptionText() }}
           </p>
         </div>
+
+        <!-- Avatar on RIGHT (when icon is on left) -->
+        @if (iconPosition() === 'left') {
+          <div class="flex-shrink-0">
+            @if (userInfo()?.photoUrl) {
+              <img
+                [src]="userInfo()!.photoUrl"
+                [alt]="userInfo()!.displayName"
+                class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover cyber-avatar"
+                [style.--glow-color]="actionDisplay().borderColor"
+              />
+            } @else {
+              <div
+                class="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base font-bold cyber-avatar-placeholder"
+                [class]="actionDisplay().textColor"
+                [style.--glow-color]="actionDisplay().borderColor"
+              >
+                {{ userInitials() }}
+              </div>
+            }
+          </div>
+        }
 
         <!-- Icon on RIGHT for certain types -->
         @if (iconPosition() === 'right') {
@@ -44,6 +88,30 @@ import { UserInfo } from '../core/services/user-cache.service';
       </div>
     </div>
   `,
+  styles: [`
+    /* Cyber-styled avatar with grayscale + color glow */
+    .cyber-avatar {
+      filter: grayscale(100%) contrast(1.1) brightness(1.1);
+      border: 2px solid var(--glow-color, #00f5ff);
+      box-shadow:
+        0 0 8px var(--glow-color, #00f5ff),
+        0 0 16px color-mix(in srgb, var(--glow-color, #00f5ff) 50%, transparent);
+      transition: filter 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .cyber-avatar:hover {
+      filter: grayscale(30%) contrast(1.05) brightness(1.05);
+    }
+
+    /* Placeholder avatar with glow */
+    .cyber-avatar-placeholder {
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid var(--glow-color, #00f5ff);
+      box-shadow:
+        0 0 8px var(--glow-color, #00f5ff),
+        0 0 16px color-mix(in srgb, var(--glow-color, #00f5ff) 50%, transparent);
+    }
+  `],
 })
 export class ActivityItemComponent {
   activity = input.required<Activity>();
@@ -65,6 +133,18 @@ export class ActivityItemComponent {
     // Right side: push, PR created (code-related creation)
     const rightSideTypes: GameActionType[] = ['code_push', 'pull_request_create', 'release_publish'];
     return rightSideTypes.includes(actionType) ? 'right' : 'left';
+  });
+
+  userInitials = computed(() => {
+    const user = this.userInfo();
+    if (!user) return '?';
+
+    const name = user.displayName;
+    const parts = name.split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
   });
 
   techUsername = computed(() => {
