@@ -9,7 +9,7 @@ Real-time activity feed display for TV/public screens. Shows developer activitie
 | Environment        | Command                                        | Description                        |
 | ------------------ | ---------------------------------------------- | ---------------------------------- |
 | Local (emulators)  | `nx serve activity-wall`                       | Uses local Firebase emulators      |
-| Test               | `nx serve activity-wall --configuration=test`  | Connects to codeheroes-app-test    |
+| Test               | `nx serve activity-wall --configuration=test`  | Connects to test Firebase project  |
 
 **URLs:**
 
@@ -36,11 +36,6 @@ nx run firebase-app:firebase deploy --only hosting:activity-wall
 # Deploy all hosting sites (web + activity-wall)
 nx run firebase-app:firebase deploy --only hosting
 ```
-
-**Deployed URLs:**
-
-- Test: https://codeheroes-activity-wall.web.app
-- Production: https://codeheroes-activity-wall-prod.web.app
 
 ## Authentication
 

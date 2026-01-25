@@ -463,10 +463,8 @@ A separate Angular app for displaying real-time activity on TV/public displays.
 | Port | 4201 |
 | Start (local) | `nx serve activity-wall` |
 | Start (test) | `nx serve activity-wall --configuration=test` |
-| Deploy (test) | `firebase deploy --only hosting:activity-wall --project codeheroes-app-test` |
-| Deploy (prod) | `firebase deploy --only hosting:activity-wall --project codeheroes-app` |
-| URL (test) | https://codeheroes-activity-wall.web.app |
-| URL (prod) | https://codeheroes-activity-wall-prod.web.app |
+| Deploy (test) | `nx run firebase-app:firebase deploy --only hosting:activity-wall` (uses test project) |
+| Deploy (prod) | `nx run firebase-app:firebase deploy --only hosting:activity-wall` (uses prod project) |
 
 ---
 
