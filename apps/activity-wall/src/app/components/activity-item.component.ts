@@ -11,10 +11,14 @@ import { UserInfo } from '../core/services/user-cache.service';
   imports: [CommonModule],
   template: `
     <div
-      class="rounded-lg bg-black/70 cursor-pointer transition-all duration-300 hover:bg-black/90 overflow-hidden"
+      class="rounded-lg bg-black/70 cursor-pointer transition-all duration-300 hover:bg-black/90 overflow-hidden focus:outline-none focus:ring-2 focus:ring-white/50"
       [class]="actionDisplay().cardGlowClass"
       [class.activity-item-enter]="isNew()"
+      tabindex="0"
+      role="button"
       (click)="selectActivity.emit(activity())"
+      (keydown.enter)="selectActivity.emit(activity())"
+      (keydown.space)="selectActivity.emit(activity())"
     >
       <div class="flex items-center gap-3 md:gap-4 p-4 md:p-5">
         <!-- Icon on LEFT for certain types -->
@@ -30,12 +34,14 @@ import { UserInfo } from '../core/services/user-cache.service';
         @if (iconPosition() === 'right') {
           <div class="flex-shrink-0">
             @if (userInfo()?.photoUrl) {
-              <img
-                [src]="userInfo()!.photoUrl"
-                [alt]="userInfo()!.displayName"
-                class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover cyber-avatar"
-                [style.--glow-color]="actionDisplay().borderColor"
-              />
+              <div class="cyber-avatar-wrapper" [style.--glow-color]="actionDisplay().borderColor">
+                <img
+                  [src]="userInfo()!.photoUrl"
+                  [alt]="userInfo()!.displayName"
+                  class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover cyber-avatar"
+                />
+                <div class="cyber-avatar-tint"></div>
+              </div>
             } @else {
               <div
                 class="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base font-bold cyber-avatar-placeholder"
@@ -59,12 +65,14 @@ import { UserInfo } from '../core/services/user-cache.service';
         @if (iconPosition() === 'left') {
           <div class="flex-shrink-0">
             @if (userInfo()?.photoUrl) {
-              <img
-                [src]="userInfo()!.photoUrl"
-                [alt]="userInfo()!.displayName"
-                class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover cyber-avatar"
-                [style.--glow-color]="actionDisplay().borderColor"
-              />
+              <div class="cyber-avatar-wrapper" [style.--glow-color]="actionDisplay().borderColor">
+                <img
+                  [src]="userInfo()!.photoUrl"
+                  [alt]="userInfo()!.displayName"
+                  class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover cyber-avatar"
+                />
+                <div class="cyber-avatar-tint"></div>
+              </div>
             } @else {
               <div
                 class="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base font-bold cyber-avatar-placeholder"
@@ -89,18 +97,42 @@ import { UserInfo } from '../core/services/user-cache.service';
     </div>
   `,
   styles: [`
-    /* Cyber-styled avatar with grayscale + color glow */
-    .cyber-avatar {
-      filter: grayscale(100%) contrast(1.1) brightness(1.1);
+    /* Avatar wrapper for color tint effect */
+    .cyber-avatar-wrapper {
+      position: relative;
+      display: inline-block;
+      border-radius: 50%;
       border: 2px solid var(--glow-color, #00f5ff);
       box-shadow:
         0 0 8px var(--glow-color, #00f5ff),
         0 0 16px color-mix(in srgb, var(--glow-color, #00f5ff) 50%, transparent);
-      transition: filter 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .cyber-avatar:hover {
-      filter: grayscale(30%) contrast(1.05) brightness(1.05);
+    /* Cyber-styled avatar with grayscale */
+    .cyber-avatar {
+      display: block;
+      filter: grayscale(100%) contrast(1.2) brightness(1.1);
+      transition: filter 0.3s ease;
+    }
+
+    /* Color tint overlay */
+    .cyber-avatar-tint {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--glow-color, #00f5ff);
+      mix-blend-mode: color;
+      opacity: 0.6;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .cyber-avatar-wrapper:hover .cyber-avatar {
+      filter: grayscale(50%) contrast(1.1) brightness(1.05);
+    }
+
+    .cyber-avatar-wrapper:hover .cyber-avatar-tint {
+      opacity: 0.3;
     }
 
     /* Placeholder avatar with glow */
@@ -204,10 +236,11 @@ export class ActivityItemComponent {
     const repo = repoMatch ? repoMatch[1] : '';
 
     switch (actionType) {
-      case 'code_push':
+      case 'code_push': {
         const branchMatch = desc.match(/to (\S+)\s+in/);
         const branch = branchMatch ? branchMatch[1] : 'main';
         return `pushed to \`${branch}\`${repo ? ` in \`${repo}\`` : ''}`;
+      }
 
       case 'pull_request_create':
         return `opened PR #${prNumber}${title ? `: \`${title}\`` : ''}${repo ? ` in \`${repo}\`` : ''}`;
@@ -236,10 +269,11 @@ export class ActivityItemComponent {
       case 'comment_create':
         return `commented${prNumber ? ` on #${prNumber}` : ''}${repo ? ` in \`${repo}\`` : ''}`;
 
-      case 'release_publish':
+      case 'release_publish': {
         const versionMatch = desc.match(/v?(\d+\.\d+\.\d+)/);
         const version = versionMatch ? versionMatch[1] : '';
         return `published release${version ? ` v${version}` : ''}${repo ? ` in \`${repo}\`` : ''}`;
+      }
 
       case 'user_registration':
         return `joined Code Heroes!`;
