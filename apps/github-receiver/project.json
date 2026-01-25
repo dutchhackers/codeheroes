@@ -3,11 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/github-receiver/src",
   "projectType": "application",
-  "tags": [
-    "firebase:function",
-    "firebase:name:github-receiver",
-    "firebase:dep:firebase-app"
-  ],
+  "tags": ["firebase:function", "firebase:name:github-receiver", "firebase:dep:firebase-app"],
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",
@@ -29,7 +25,7 @@
         "bundle": true,
         "thirdParty": false,
         "dependenciesFieldType": "dependencies",
-        "target": "node20",
+        "target": "node22",
         "format": ["esm"],
         "esbuildOptions": {
           "logLevel": "info"

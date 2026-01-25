@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   displayName: 'progression-engine',
   preset: '../../../jest.preset.js',
   testEnvironment: 'node',

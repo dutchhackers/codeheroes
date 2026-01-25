@@ -7,6 +7,6 @@ initializeApp();
 
 import { App } from './app';
 
-setGlobalOptions({ region: DEFAULT_REGION });
+setGlobalOptions({ region: DEFAULT_REGION, memory: '2GiB' });
 
 export const gitHubReceiver = onRequest(App);

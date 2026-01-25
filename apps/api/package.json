@@ -8,7 +8,7 @@
     "deploy": "nx deploy api"
   },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "dependencies": {},
   "devDependencies": {},

@@ -1,11 +1,11 @@
 import { Component, input, output, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Activity } from '@codeheroes/types';
 
 @Component({
   selector: 'app-debug-panel',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700 transition-transform duration-300"
          [class.translate-y-full]="!isOpen()"
