@@ -1,36 +1,32 @@
-<div class="min-h-screen gaming-bg text-white relative">
+<div class="min-h-screen cyber-grid-bg text-white relative">
   <!-- Header -->
-  <header class="sticky top-0 z-20 bg-slate-900/80 backdrop-blur-lg border-b border-cyan-500/20 px-10 py-6">
+  <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-4 py-4 md:px-8 md:py-5">
     <div class="flex items-center justify-between relative z-10">
-      <div class="flex items-center gap-4">
-        <div class="w-2 h-12 bg-gradient-to-b from-cyan-400 to-purple-500 rounded-full"></div>
-        <h1 class="text-5xl font-black tracking-tight neon-title bg-gradient-to-r from-cyan-400 via-white to-purple-400 bg-clip-text text-transparent">
-          ACTIVITY WALL
-        </h1>
-      </div>
-      <div class="flex items-center gap-6">
-        <div class="flex items-center gap-3 px-5 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <span class="text-2xl font-bold text-cyan-400">{{ activities().length }}</span>
-          <span class="text-xl text-slate-400">activities</span>
+      <h1 class="text-2xl md:text-4xl font-bold italic text-white">
+        Activity Wall
+      </h1>
+      <div class="flex items-center gap-2 md:gap-4">
+        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded border border-slate-700 bg-black/50">
+          <span class="text-lg md:text-xl font-bold text-cyan-400 font-mono">{{ activities().length }}</span>
         </div>
-        <div class="flex items-center gap-3 px-4 py-2 rounded-lg bg-green-500/10 border border-green-500/30">
-          <span class="w-3 h-3 rounded-full bg-green-400 live-indicator"></span>
-          <span class="text-lg text-green-400 font-medium uppercase tracking-wider">Live</span>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded border border-green-500/30 bg-black/50">
+          <span class="w-2.5 h-2.5 rounded-full bg-green-400 live-indicator"></span>
+          <span class="text-sm md:text-base text-green-400 font-mono">LIVE</span>
         </div>
       </div>
     </div>
   </header>
 
   <!-- Main Content -->
-  <main class="pb-20 relative z-0">
+  <main class="relative z-10 px-3 md:px-6 lg:px-8 pb-20">
     @if (!isAuthenticated() && !isLoading()) {
-      <div class="flex flex-col items-center justify-center py-32">
-        <p class="text-3xl text-slate-400 mb-8">Sign in to view activities</p>
+      <div class="flex flex-col items-center justify-center py-20 md:py-32">
+        <p class="text-lg md:text-2xl text-slate-500 mb-6 md:mb-8 font-mono text-center">Authentication Required</p>
         <button
           (click)="signInWithGoogle()"
-          class="flex items-center gap-3 px-6 py-3 bg-white text-slate-900 rounded-lg font-medium hover:bg-slate-100 transition-colors"
+          class="flex items-center gap-3 px-5 py-2.5 bg-white/10 text-white rounded border border-white/30 font-mono hover:bg-white/20 transition-colors"
         >
-          <svg class="w-6 h-6" viewBox="0 0 24 24">
+          <svg class="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -40,16 +36,16 @@
         </button>
       </div>
     } @else if (isLoading()) {
-      <div class="flex items-center justify-center py-32">
-        <div class="text-3xl text-cyan-400/70 animate-pulse">Loading...</div>
+      <div class="flex items-center justify-center py-20 md:py-32">
+        <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse font-mono">Loading...</div>
       </div>
     } @else if (activities().length === 0) {
-      <div class="flex flex-col items-center justify-center py-32">
-        <p class="text-3xl text-slate-400">No activities yet</p>
-        <p class="text-xl mt-4 text-slate-600">Activities will appear here in real-time</p>
+      <div class="flex flex-col items-center justify-center py-20 md:py-32">
+        <p class="text-lg md:text-2xl text-slate-500 font-mono">No activities yet</p>
+        <p class="text-sm md:text-lg mt-3 text-slate-600 font-mono">Awaiting activity stream...</p>
       </div>
     } @else {
-      <div class="divide-y divide-slate-800/30">
+      <div class="py-6 flex flex-col gap-6 md:gap-8 lg:gap-10">
         @for (activity of activities(); track activity.id; let i = $index) {
           <app-activity-item
             [activity]="activity"
@@ -66,6 +62,6 @@
   <app-debug-panel
     [isOpen]="debugPanelOpen()"
     [selectedActivity]="selectedActivity()"
-    (toggle)="toggleDebugPanel()"
+    (togglePanel)="toggleDebugPanel()"
   />
 </div>
