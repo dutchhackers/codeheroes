@@ -1,16 +1,117 @@
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Helper function: Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function: Check if user is accessing their own data
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ============================================
+    // USERS COLLECTION
+    // ============================================
+    match /users/{userId} {
+      // Any authenticated user can read basic profile info
+      // (displayName, photoUrl needed for activity-wall)
+      allow read: if isAuthenticated();
+
+      // Only the user can write their own profile
+      allow write: if isOwner(userId);
+
+      // --------------------------------------------
+      // ACTIVITIES SUBCOLLECTION
+      // Any authenticated user can read activities (for global feed)
+      // Only server (Cloud Functions) writes activities
+      // --------------------------------------------
+      match /activities/{activityId} {
+        allow read: if isAuthenticated();
+        allow write: if false; // Server-only via Admin SDK
+      }
+
+      // --------------------------------------------
+      // CONNECTED ACCOUNTS - SENSITIVE
+      // Only the owner can read/write their connected accounts
+      // Contains OAuth tokens, external account IDs
+      // --------------------------------------------
+      match /connectedAccounts/{accountId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // --------------------------------------------
+      // STATS SUBCOLLECTION
+      // Owner can read their own stats
+      // Authenticated users can read others' stats (leaderboard)
+      // Only server writes stats
+      // --------------------------------------------
+      match /stats/{statId} {
+        allow read: if isAuthenticated();
+        allow write: if false; // Server-only via Admin SDK
+      }
+
+      // --------------------------------------------
+      // REWARDS, BADGES, ACHIEVEMENTS
+      // Owner can read their own
+      // Others can read (for profile viewing)
+      // Only server writes
+      // --------------------------------------------
+      match /rewards/{rewardId} {
+        allow read: if isAuthenticated();
+        allow write: if false; // Server-only via Admin SDK
+      }
+
+      match /badges/{badgeId} {
+        allow read: if isAuthenticated();
+        allow write: if false; // Server-only via Admin SDK
+      }
+
+      match /achievements/{achievementId} {
+        allow read: if isAuthenticated();
+        allow write: if false; // Server-only via Admin SDK
+      }
+
+      // --------------------------------------------
+      // NOTIFICATIONS - PERSONAL
+      // Only owner can read/write their notifications
+      // --------------------------------------------
+      match /notifications/{notificationId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // --------------------------------------------
+      // SETTINGS - PERSONAL
+      // Only owner can read/write their settings
+      // --------------------------------------------
+      match /settings/{settingId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ============================================
+    // SERVER-ONLY COLLECTIONS
+    // These are only accessed by Cloud Functions via Admin SDK
+    // ============================================
+
+    // Game actions - server processing only
+    match /gameActions/{actionId} {
+      allow read, write: if false;
+    }
+
+    // Raw events - server processing only
+    match /events/{eventId} {
+      allow read, write: if false;
+    }
+
+    // ============================================
+    // DENY ALL OTHER ACCESS
+    // Catch-all rule for any undefined paths
+    // ============================================
     match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 7, 1);
+      allow read, write: if false;
     }
   }
 }
