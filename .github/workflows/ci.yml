@@ -26,7 +26,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Check cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: node-cache
         with:
           path: '**/node_modules'
