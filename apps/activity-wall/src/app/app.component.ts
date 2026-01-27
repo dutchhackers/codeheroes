@@ -1,7 +1,8 @@
-import { Component, inject, signal, HostListener, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, HostListener, OnInit, OnDestroy } from '@angular/core';
 
 import { Auth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, Unsubscribe } from '@angular/fire/auth';
-import { Subscription, map } from 'rxjs';
+import { QueryDocumentSnapshot, DocumentData } from '@angular/fire/firestore';
+import { Subscription } from 'rxjs';
 import { Activity } from '@codeheroes/types';
 import { ActivityFeedService } from './core/services/activity-feed.service';
 import { UserCacheService } from './core/services/user-cache.service';
@@ -29,11 +30,40 @@ export class AppComponent implements OnInit, OnDestroy {
   #activitiesSubscription: Subscription | null = null;
   #isLoadingData = false;
 
-  feedItems = signal<FeedItem[]>([]);
+  // Activity state
+  #liveActivities = signal<Activity[]>([]);
+  #historicalActivities = signal<Activity[]>([]);
+  #lastDoc = signal<QueryDocumentSnapshot<DocumentData> | null>(null);
+
+  // Combined and stacked feed items
+  feedItems = computed(() => {
+    const live = this.#liveActivities();
+    const historical = this.#historicalActivities();
+
+    // Combine and deduplicate by activity ID
+    const allActivities = [...live];
+    const liveIds = new Set(live.map((a) => a.id));
+
+    for (const activity of historical) {
+      if (!liveIds.has(activity.id)) {
+        allActivities.push(activity);
+      }
+    }
+
+    // Sort by createdAt desc
+    allActivities.sort((a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    return this.#activityStacker.stackActivities(allActivities);
+  });
+
   selectedActivity = signal<Activity | null>(null);
   debugPanelOpen = signal(false);
   isLoading = signal(true);
   isAuthenticated = signal(false);
+  isLoadingMore = signal(false);
+  hasMore = signal(true);
 
   // Type guards exposed for template
   readonly isStack = isActivityStack;
@@ -87,11 +117,22 @@ export class AppComponent implements OnInit, OnDestroy {
       }
 
       this.#activitiesSubscription = this.#activityFeedService
-        .getGlobalActivities(100)
-        .pipe(map((activities) => this.#activityStacker.stackActivities(activities)))
+        .getGlobalActivities(50)
         .subscribe({
-          next: (items) => {
-            this.feedItems.set(items);
+          next: async (activities) => {
+            this.#liveActivities.set(activities);
+
+            // Get cursor for pagination from the last live activity
+            if (activities.length > 0 && !this.#lastDoc()) {
+              const lastActivity = activities[activities.length - 1];
+              const doc = await this.#activityFeedService.getDocumentForActivity(
+                lastActivity.id,
+                lastActivity.userId
+              );
+              if (doc) {
+                this.#lastDoc.set(doc);
+              }
+            }
           },
           error: (error) => {
             console.error('Failed to load activities:', error);
@@ -102,6 +143,32 @@ export class AppComponent implements OnInit, OnDestroy {
     } finally {
       this.isLoading.set(false);
       this.#isLoadingData = false;
+    }
+  }
+
+  async loadMore() {
+    const lastDoc = this.#lastDoc();
+    if (!lastDoc || this.isLoadingMore()) {
+      return;
+    }
+
+    this.isLoadingMore.set(true);
+
+    try {
+      const result = await this.#activityFeedService.loadMoreActivities(lastDoc, 50);
+
+      // Append to historical activities
+      this.#historicalActivities.update((current) => [...current, ...result.activities]);
+
+      // Update cursor and hasMore flag
+      if (result.lastDoc) {
+        this.#lastDoc.set(result.lastDoc);
+      }
+      this.hasMore.set(result.hasMore);
+    } catch (error) {
+      console.error('Failed to load more activities:', error);
+    } finally {
+      this.isLoadingMore.set(false);
     }
   }
 
