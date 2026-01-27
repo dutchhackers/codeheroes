@@ -144,7 +144,7 @@ export class ActivityStackComponent {
       case 'merged':
         return 'card-glow-green';
       case 'closed':
-        return ''; // No glow for closed
+        return 'card-glow-slate';
       case 'open':
         return 'card-glow-purple';
       default:

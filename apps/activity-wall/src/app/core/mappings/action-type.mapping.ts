@@ -74,7 +74,7 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
     ringClass: 'ring-slate-500/50',
     icon: 'x-circle',
     borderColor: '#64748b',
-    cardGlowClass: '',
+    cardGlowClass: 'card-glow-slate',
     textColor: 'text-slate-400',
     svgIcon: SVG_ICONS.xCircle,
   },
