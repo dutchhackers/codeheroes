@@ -59,7 +59,7 @@ import { UserInfo } from '../core/services/user-cache.service';
 
         <!-- Main content - single color text -->
         <div class="flex-1 min-w-0" [class]="actionDisplay().textColor">
-          <p class="text-base md:text-xl leading-relaxed font-medium break-words">
+          <p class="text-base md:text-xl leading-relaxed font-medium description-text">
             [{{ formattedTime() }}] {{ techUsername() }} {{ descriptionText() }}
           </p>
         </div>
@@ -113,6 +113,14 @@ import { UserInfo } from '../core/services/user-cache.service';
     </div>
   `,
   styles: [`
+    /* Line clamp for long descriptions */
+    .description-text {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
     /* Avatar wrapper for color tint effect */
     .cyber-avatar-wrapper {
       position: relative;
