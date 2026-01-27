@@ -305,8 +305,13 @@ export class ActivityItemComponent {
       case 'user_registration':
         return `joined Code Heroes!`;
 
-      case 'ci_success':
-        return `CI passed${repo ? ` in \`${repo}\`` : ''}`;
+      case 'ci_success': {
+        const context = activity.context;
+        const branch = 'workflow' in context && context.workflow?.headBranch
+          ? context.workflow.headBranch
+          : '';
+        return `CI passed${branch ? ` on \`${branch}\`` : ''}`;
+      }
 
       case 'discussion_create':
         return `started a discussion${repo ? ` in \`${repo}\`` : ''}`;
