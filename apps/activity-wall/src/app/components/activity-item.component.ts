@@ -20,7 +20,8 @@ import { UserInfo } from '../core/services/user-cache.service';
       (keydown.enter)="selectActivity.emit(activity())"
       (keydown.space)="$event.preventDefault(); selectActivity.emit(activity())"
     >
-      <div class="flex items-center gap-3 md:gap-4 p-4 md:p-5">
+      <!-- Main content area -->
+      <div class="flex items-center gap-3 md:gap-4 p-4 md:p-5 pb-3 md:pb-4">
         <!-- Icon on LEFT for certain types -->
         @if (iconPosition() === 'left') {
           <div
@@ -97,6 +98,17 @@ import { UserInfo } from '../core/services/user-cache.service';
             [attr.aria-label]="actionDisplay().label + ' icon'"
           ></div>
         }
+      </div>
+
+      <!-- Footer with separator -->
+      <div class="px-4 md:px-5 pb-3 md:pb-4">
+        <div
+          class="border-t pt-2 md:pt-3 flex items-center justify-between text-xs md:text-sm font-mono"
+          [style.border-color]="actionDisplay().borderColor + '33'"
+        >
+          <span class="text-slate-500 truncate">{{ repoName() }}</span>
+          <span class="text-slate-400 flex-shrink-0 ml-4">+{{ xpEarned() }} XP</span>
+        </div>
       </div>
     </div>
   `,
@@ -313,5 +325,17 @@ export class ActivityItemComponent {
       minute: '2-digit',
       hour12: true,
     });
+  });
+
+  repoName = computed((): string => {
+    const context = this.activity().context;
+    if ('repository' in context && context.repository) {
+      return context.repository.name;
+    }
+    return '';
+  });
+
+  xpEarned = computed((): number => {
+    return this.activity().xp?.earned ?? 0;
   });
 }

@@ -25,7 +25,7 @@ const STACK_ICONS = {
       <!-- Stack Header (always visible, clickable) -->
       <button
         type="button"
-        class="w-full flex items-center gap-3 md:gap-4 p-4 md:p-5 cursor-pointer hover:bg-black/90 transition-colors text-left"
+        class="w-full flex items-center gap-3 md:gap-4 p-4 md:p-5 pb-3 md:pb-4 cursor-pointer hover:bg-black/90 transition-colors text-left"
         (click)="toggleExpanded()"
         [attr.aria-expanded]="isExpanded()"
         aria-label="Toggle PR timeline"
@@ -42,9 +42,6 @@ const STACK_ICONS = {
           <p class="text-base md:text-xl font-medium leading-relaxed">
             PR #{{ stack().prNumber }}: {{ truncatedTitle() }}
           </p>
-          <p class="text-sm md:text-base text-slate-400 mt-1 font-mono">
-            +{{ stack().totalXp }} XP total · {{ stack().activities.length }} events · {{ stack().repoName }}
-          </p>
         </div>
 
         <!-- Expand/collapse chevron -->
@@ -55,11 +52,36 @@ const STACK_ICONS = {
         ></div>
       </button>
 
+      <!-- Footer with separator (before timeline if expanded) -->
+      @if (!isExpanded()) {
+        <div class="px-4 md:px-5 pb-3 md:pb-4">
+          <div
+            class="border-t pt-2 md:pt-3 flex items-center justify-between text-xs md:text-sm font-mono"
+            [style.border-color]="stateBorderColor() + '33'"
+          >
+            <span class="text-slate-500 truncate">
+              {{ stack().repoName }} · {{ stack().activities.length }} events
+            </span>
+            <span class="text-slate-400 flex-shrink-0 ml-4">+{{ stack().totalXp }} XP</span>
+          </div>
+        </div>
+      }
+
       <!-- Expanded Timeline -->
       @if (isExpanded()) {
         <div class="px-4 md:px-5 pb-4 md:pb-5 border-t border-slate-800/50">
           <div class="pt-4">
             <app-stack-timeline [activities]="stack().activities" />
+          </div>
+          <!-- Footer at bottom when expanded -->
+          <div
+            class="border-t mt-4 pt-2 md:pt-3 flex items-center justify-between text-xs md:text-sm font-mono"
+            [style.border-color]="stateBorderColor() + '33'"
+          >
+            <span class="text-slate-500 truncate">
+              {{ stack().repoName }} · {{ stack().activities.length }} events
+            </span>
+            <span class="text-slate-400 flex-shrink-0 ml-4">+{{ stack().totalXp }} XP</span>
           </div>
         </div>
       }
@@ -103,6 +125,11 @@ export class ActivityStackComponent {
     return this.getTextColorForState(state);
   });
 
+  stateBorderColor = computed(() => {
+    const state = this.stack().finalState;
+    return this.getBorderColorForState(state);
+  });
+
   truncatedTitle = computed(() => {
     const title = this.stack().prTitle;
     const maxLength = 60;
@@ -135,6 +162,19 @@ export class ActivityStackComponent {
         return 'text-purple-400';
       default:
         return 'text-slate-400';
+    }
+  }
+
+  private getBorderColorForState(state: PRFinalState): string {
+    switch (state) {
+      case 'merged':
+        return '#00ff88';
+      case 'closed':
+        return '#64748b';
+      case 'open':
+        return '#bf00ff';
+      default:
+        return '#64748b';
     }
   }
 }
