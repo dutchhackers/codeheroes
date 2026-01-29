@@ -57,12 +57,43 @@ export class UserStatsService {
   getUserStats(userId: string): Observable<UserStats | null> {
     const statsDocRef = doc(this.#firestore, `users/${userId}/stats/current`);
     return docData(statsDocRef).pipe(
-      map((data) => (data as UserStats) ?? null),
+      map((data) => this.#transformStats(data)),
       catchError((error) => {
         console.error('Error fetching user stats:', error);
         return of(null);
       })
     );
+  }
+
+  /**
+   * Transform raw Firestore stats data to UserStats type
+   * Maps flat counters.actions structure to nested counters structure
+   */
+  #transformStats(data: unknown): UserStats | null {
+    if (!data) return null;
+
+    const raw = data as Record<string, unknown>;
+    const actions = (raw['counters'] as Record<string, unknown>)?.['actions'] as Record<string, number> | undefined;
+
+    return {
+      xp: (raw['xp'] as number) ?? 0,
+      level: (raw['level'] as number) ?? 1,
+      currentLevelXp: (raw['currentLevelXp'] as number) ?? 0,
+      xpToNextLevel: (raw['xpToNextLevel'] as number) ?? 0,
+      lastActivityDate: (raw['lastActivityDate'] as string) ?? null,
+      counters: {
+        pullRequests: {
+          created: actions?.['pull_request_create'] ?? 0,
+          merged: actions?.['pull_request_merge'] ?? 0,
+          closed: actions?.['pull_request_close'] ?? 0,
+          total: actions?.['pull_request_create'] ?? 0,
+        },
+        codePushes: actions?.['code_push'] ?? 0,
+        codeReviews: actions?.['code_review_submit'] ?? 0,
+      },
+      countersLastUpdated: (raw['countersLastUpdated'] as string) ?? '',
+      lastUpdated: (raw['updatedAt'] as string) ?? '',
+    };
   }
 
   /**
