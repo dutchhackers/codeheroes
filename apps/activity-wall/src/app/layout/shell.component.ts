@@ -1,5 +1,6 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject, signal, OnInit, OnDestroy, HostListener, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Router, RouterOutlet } from '@angular/router';
 import { Auth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, Unsubscribe } from '@angular/fire/auth';
 import { BottomNavComponent } from './bottom-nav.component';
 
@@ -51,16 +52,76 @@ import { BottomNavComponent } from './bottom-nav.component';
 })
 export class ShellComponent implements OnInit, OnDestroy {
   readonly #auth = inject(Auth);
+  readonly #router = inject(Router);
+  readonly #platformId = inject(PLATFORM_ID);
+
   #authUnsubscribe: Unsubscribe | null = null;
+  #touchStartX = 0;
+  #touchStartY = 0;
+  #isTouchDevice = false;
 
   isAuthenticated = signal(false);
   isLoading = signal(true);
+
+  readonly #routes = ['/activity', '/profile'];
+  readonly #swipeThreshold = 50;
+  readonly #verticalThreshold = 100; // Ignore swipes that are more vertical than horizontal
 
   ngOnInit() {
     this.#authUnsubscribe = onAuthStateChanged(this.#auth, (user) => {
       this.isAuthenticated.set(!!user);
       this.isLoading.set(false);
     });
+
+    // Detect touch device
+    if (isPlatformBrowser(this.#platformId)) {
+      this.#isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    }
+  }
+
+  @HostListener('touchstart', ['$event'])
+  onTouchStart(event: TouchEvent) {
+    if (!this.#isTouchDevice || !this.isAuthenticated()) return;
+    this.#touchStartX = event.touches[0].clientX;
+    this.#touchStartY = event.touches[0].clientY;
+  }
+
+  @HostListener('touchend', ['$event'])
+  onTouchEnd(event: TouchEvent) {
+    if (!this.#isTouchDevice || !this.isAuthenticated()) return;
+
+    const touchEndX = event.changedTouches[0].clientX;
+    const touchEndY = event.changedTouches[0].clientY;
+    const deltaX = touchEndX - this.#touchStartX;
+    const deltaY = Math.abs(touchEndY - this.#touchStartY);
+
+    // Ignore if vertical movement is greater than horizontal (likely scrolling)
+    if (deltaY > this.#verticalThreshold) return;
+
+    // Swipe left (negative deltaX) -> go to profile
+    if (deltaX < -this.#swipeThreshold) {
+      this.#navigateToNextRoute();
+    }
+    // Swipe right (positive deltaX) -> go to activity
+    else if (deltaX > this.#swipeThreshold) {
+      this.#navigateToPreviousRoute();
+    }
+  }
+
+  #navigateToNextRoute() {
+    const currentIndex = this.#routes.indexOf(this.#router.url);
+    const nextIndex = Math.min(currentIndex + 1, this.#routes.length - 1);
+    if (nextIndex !== currentIndex) {
+      this.#router.navigate([this.#routes[nextIndex]]);
+    }
+  }
+
+  #navigateToPreviousRoute() {
+    const currentIndex = this.#routes.indexOf(this.#router.url);
+    const prevIndex = Math.max(currentIndex - 1, 0);
+    if (prevIndex !== currentIndex) {
+      this.#router.navigate([this.#routes[prevIndex]]);
+    }
   }
 
   ngOnDestroy() {

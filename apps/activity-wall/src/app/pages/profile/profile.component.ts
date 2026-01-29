@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Auth, signOut } from '@angular/fire/auth';
 import { Subscription } from 'rxjs';
 import { Activity, UserDto, UserStats } from '@codeheroes/types';
 import { UserStatsService } from '../../core/services/user-stats.service';
@@ -24,9 +25,21 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
         <h1 class="text-2xl md:text-4xl font-bold italic text-white">
           Profile
         </h1>
-        <div class="card-glow-green flex items-center gap-2 px-3 py-1.5 rounded bg-black/50" role="status" aria-label="Real-time updates active">
-          <span class="w-2.5 h-2.5 rounded-full live-indicator" style="background-color: var(--neon-green)"></span>
-          <span class="text-sm md:text-base font-mono" style="color: var(--neon-green)">LIVE</span>
+        <div class="flex items-center gap-3">
+          <div class="card-glow-green flex items-center gap-2 px-3 py-1.5 rounded bg-black/50" role="status" aria-label="Real-time updates active">
+            <span class="w-2.5 h-2.5 rounded-full live-indicator" style="background-color: var(--neon-green)"></span>
+            <span class="text-sm md:text-base font-mono" style="color: var(--neon-green)">LIVE</span>
+          </div>
+          <button
+            type="button"
+            (click)="logout()"
+            aria-label="Sign out"
+            class="p-2 rounded bg-black/50 border border-white/20 text-slate-400 hover:text-white hover:border-white/40 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
         </div>
       </div>
     </header>
@@ -102,6 +115,7 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
   `],
 })
 export class ProfileComponent implements OnInit, OnDestroy {
+  readonly #auth = inject(Auth);
   readonly #userStatsService = inject(UserStatsService);
   readonly #userCacheService = inject(UserCacheService);
 
@@ -185,5 +199,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
   onSelectActivity(activity: Activity) {
     // Could open debug panel or show details
     console.log('Selected activity:', activity);
+  }
+
+  async logout() {
+    try {
+      await signOut(this.#auth);
+    } catch (error) {
+      console.error('Sign out failed:', error);
+    }
   }
 }
