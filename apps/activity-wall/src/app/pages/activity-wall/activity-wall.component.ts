@@ -17,14 +17,9 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
         <h1 class="text-2xl md:text-4xl font-bold italic text-white">
           Activity Wall
         </h1>
-        <div class="flex items-center gap-2 md:gap-4">
-          <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded border border-slate-700 bg-black/50">
-            <span class="text-lg md:text-xl font-bold text-cyan-400 font-mono">{{ activities().length }}</span>
-          </div>
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded border border-green-500/30 bg-black/50">
-            <span class="w-2.5 h-2.5 rounded-full bg-green-400 live-indicator"></span>
-            <span class="text-sm md:text-base text-green-400 font-mono">LIVE</span>
-          </div>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded border border-green-500/30 bg-black/50">
+          <span class="w-2.5 h-2.5 rounded-full bg-green-400 live-indicator"></span>
+          <span class="text-sm md:text-base text-green-400 font-mono">LIVE</span>
         </div>
       </div>
     </header>
