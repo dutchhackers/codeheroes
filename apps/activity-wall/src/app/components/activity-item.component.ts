@@ -42,6 +42,7 @@ import { UserInfo } from '../core/services/user-cache.service';
                   [src]="userInfo()!.photoUrl"
                   [alt]="userInfo()!.displayName"
                   class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover cyber-avatar"
+                  referrerpolicy="no-referrer"
                 />
                 <div class="cyber-avatar-tint"></div>
               </div>
@@ -73,6 +74,7 @@ import { UserInfo } from '../core/services/user-cache.service';
                   [src]="userInfo()!.photoUrl"
                   [alt]="userInfo()!.displayName"
                   class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover cyber-avatar"
+                  referrerpolicy="no-referrer"
                 />
                 <div class="cyber-avatar-tint"></div>
               </div>
