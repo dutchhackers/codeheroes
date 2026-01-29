@@ -21,12 +21,12 @@ jobs:
           persist-credentials: false
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6.0.0
+        uses: actions/setup-node@v6.2.0
         with:
           node-version: ${{ matrix.node-version }}
 
       - name: Check cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: node-cache
         with:
           path: '**/node_modules'
