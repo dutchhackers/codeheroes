@@ -40,6 +40,7 @@
             }
           ],
           "outputHashing": "all",
+          "serviceWorker": "apps/activity-wall/ngsw-config.json",
           "fileReplacements": [
             {
               "replace": "apps/activity-wall/src/environments/environment.ts",
@@ -51,6 +52,7 @@
           "optimization": false,
           "extractLicenses": false,
           "sourceMap": true,
+          "serviceWorker": "apps/activity-wall/ngsw-config.json",
           "fileReplacements": [
             {
               "replace": "apps/activity-wall/src/environments/environment.ts",
