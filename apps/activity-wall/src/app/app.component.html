@@ -7,7 +7,7 @@
       </h1>
       <div class="flex items-center gap-2 md:gap-4">
         <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded border border-slate-700 bg-black/50">
-          <span class="text-lg md:text-xl font-bold text-cyan-400 font-mono">{{ activities().length }}</span>
+          <span class="text-lg md:text-xl font-bold text-cyan-400 font-mono">{{ feedItems().length }}</span>
         </div>
         <div class="flex items-center gap-2 px-3 py-1.5 rounded border border-green-500/30 bg-black/50">
           <span class="w-2.5 h-2.5 rounded-full bg-green-400 live-indicator"></span>
@@ -41,20 +41,49 @@
       <div class="flex items-center justify-center py-20 md:py-32">
         <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse font-mono">Loading...</div>
       </div>
-    } @else if (activities().length === 0) {
+    } @else if (feedItems().length === 0) {
       <div class="flex flex-col items-center justify-center py-20 md:py-32">
         <p class="text-lg md:text-2xl text-slate-500 font-mono">No activities yet</p>
         <p class="text-sm md:text-lg mt-3 text-slate-600 font-mono">Awaiting activity stream...</p>
       </div>
     } @else {
       <div class="py-6 flex flex-col gap-6 md:gap-8 lg:gap-10">
-        @for (activity of activities(); track activity.id; let i = $index) {
-          <app-activity-item
-            [activity]="activity"
-            [userInfo]="getUserInfo(activity.userId)"
-            [isNew]="i === 0"
-            (selectActivity)="onSelectActivity($event)"
-          />
+        @for (item of feedItems(); track item.type === 'stack' ? item.id : item.activity.id; let i = $index) {
+          @if (isStack(item)) {
+            <app-activity-stack
+              [stack]="item"
+              [isNew]="i === 0"
+              (selectActivity)="onSelectActivity($event)"
+            />
+          } @else if (isSingle(item)) {
+            <app-activity-item
+              [activity]="item.activity"
+              [userInfo]="getUserInfo(item.activity.userId)"
+              [isNew]="i === 0"
+              (selectActivity)="onSelectActivity($event)"
+            />
+          }
+        }
+
+        <!-- Load More Button -->
+        @if (hasMore()) {
+          <div class="flex justify-center py-4">
+            <button
+              type="button"
+              (click)="loadMore()"
+              [disabled]="isLoadingMore()"
+              class="px-6 py-3 rounded-lg border-2 border-purple-500/50 bg-black/70 text-purple-400 font-mono text-sm md:text-base hover:bg-purple-500/20 hover:border-purple-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              @if (isLoadingMore()) {
+                <span class="flex items-center gap-2">
+                  <span class="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></span>
+                  Loading...
+                </span>
+              } @else {
+                Load More
+              }
+            </button>
+          </div>
         }
       </div>
     }

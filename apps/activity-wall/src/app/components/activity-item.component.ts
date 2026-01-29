@@ -20,7 +20,8 @@ import { UserInfo } from '../core/services/user-cache.service';
       (keydown.enter)="selectActivity.emit(activity())"
       (keydown.space)="$event.preventDefault(); selectActivity.emit(activity())"
     >
-      <div class="flex items-center gap-3 md:gap-4 p-4 md:p-5">
+      <!-- Main content area -->
+      <div class="flex items-center gap-3 md:gap-4 p-4 md:p-5 pb-3 md:pb-4">
         <!-- Icon on LEFT for certain types -->
         @if (iconPosition() === 'left') {
           <div
@@ -58,7 +59,7 @@ import { UserInfo } from '../core/services/user-cache.service';
 
         <!-- Main content - single color text -->
         <div class="flex-1 min-w-0" [class]="actionDisplay().textColor">
-          <p class="text-base md:text-xl leading-relaxed font-medium break-words">
+          <p class="text-base md:text-xl leading-relaxed font-medium description-text">
             [{{ formattedTime() }}] {{ techUsername() }} {{ descriptionText() }}
           </p>
         </div>
@@ -98,9 +99,28 @@ import { UserInfo } from '../core/services/user-cache.service';
           ></div>
         }
       </div>
+
+      <!-- Footer with separator -->
+      <div class="px-4 md:px-5 pb-3 md:pb-4">
+        <div
+          class="border-t pt-2 md:pt-3 flex items-center justify-between text-xs md:text-sm font-mono"
+          [style.border-color]="actionDisplay().borderColor + '33'"
+        >
+          <span class="text-slate-500 truncate">{{ repoName() }}</span>
+          <span class="text-slate-400 flex-shrink-0 ml-4">+{{ xpEarned() }} XP</span>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
+    /* Line clamp for long descriptions */
+    .description-text {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
     /* Avatar wrapper for color tint effect */
     .cyber-avatar-wrapper {
       position: relative;
@@ -285,8 +305,13 @@ export class ActivityItemComponent {
       case 'user_registration':
         return `joined Code Heroes!`;
 
-      case 'ci_success':
-        return `CI passed${repo ? ` in \`${repo}\`` : ''}`;
+      case 'ci_success': {
+        const context = activity.context;
+        const branch = 'workflow' in context && context.workflow?.headBranch
+          ? context.workflow.headBranch
+          : '';
+        return `CI passed${branch ? ` on \`${branch}\`` : ''}`;
+      }
 
       case 'discussion_create':
         return `started a discussion${repo ? ` in \`${repo}\`` : ''}`;
@@ -313,5 +338,17 @@ export class ActivityItemComponent {
       minute: '2-digit',
       hour12: true,
     });
+  });
+
+  repoName = computed((): string => {
+    const context = this.activity().context;
+    if ('repository' in context && context.repository) {
+      return context.repository.name;
+    }
+    return '';
+  });
+
+  xpEarned = computed((): number => {
+    return this.activity().xp?.earned ?? 0;
   });
 }

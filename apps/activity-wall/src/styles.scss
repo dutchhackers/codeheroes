@@ -9,6 +9,7 @@
   --neon-orange: #ff6600;
   --neon-yellow: #ffdd00;
   --neon-red: #ff4444;
+  --neon-slate: #64748b;
   --grid-color: rgba(138, 43, 226, 0.4);
 }
 
@@ -131,6 +132,14 @@ body {
     0 0 8px var(--neon-yellow),
     0 0 16px rgba(255, 221, 0, 0.3),
     inset 0 0 12px rgba(255, 221, 0, 0.05);
+}
+
+.card-glow-slate {
+  border: 2px solid var(--neon-slate);
+  box-shadow:
+    0 0 6px var(--neon-slate),
+    0 0 12px rgba(100, 116, 139, 0.25),
+    inset 0 0 8px rgba(100, 116, 139, 0.05);
 }
 
 /* Slide-in animation for new items */
