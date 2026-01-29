@@ -24,9 +24,9 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
         <h1 class="text-2xl md:text-4xl font-bold italic text-white">
           Profile
         </h1>
-        <div class="flex items-center gap-2 px-3 py-1.5 rounded border border-green-500/30 bg-black/50">
-          <span class="w-2.5 h-2.5 rounded-full bg-green-400 live-indicator"></span>
-          <span class="text-sm md:text-base text-green-400 font-mono">LIVE</span>
+        <div class="card-glow-green flex items-center gap-2 px-3 py-1.5 rounded bg-black/50">
+          <span class="w-2.5 h-2.5 rounded-full live-indicator" style="background-color: var(--neon-green)"></span>
+          <span class="text-sm md:text-base font-mono" style="color: var(--neon-green)">LIVE</span>
         </div>
       </div>
     </header>
@@ -73,7 +73,7 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
           <!-- Recent Activity -->
           @if (activities().length > 0) {
             <div class="mt-8">
-              <h3 class="text-sm uppercase tracking-wider text-slate-500 mb-4 font-mono">
+              <h3 class="text-sm uppercase tracking-wider mb-4 font-mono" style="color: var(--neon-cyan)">
                 Recent Activity
               </h3>
               <div class="flex flex-col gap-4">

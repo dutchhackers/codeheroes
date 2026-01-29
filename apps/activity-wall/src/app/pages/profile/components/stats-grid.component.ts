@@ -36,16 +36,22 @@ interface StatItem {
 
     .stat-card {
       background: rgba(0, 0, 0, 0.6);
-      border: 1px solid color-mix(in srgb, var(--stat-color) 40%, transparent);
+      border: 2px solid var(--stat-color);
       border-radius: 8px;
       padding: 1rem 0.75rem;
       text-align: center;
       transition: all 0.2s ease;
+      box-shadow:
+        0 0 8px var(--stat-color),
+        0 0 16px color-mix(in srgb, var(--stat-color) 30%, transparent),
+        inset 0 0 12px color-mix(in srgb, var(--stat-color) 5%, transparent);
     }
 
     .stat-card:hover {
-      border-color: var(--stat-color);
-      box-shadow: 0 0 15px color-mix(in srgb, var(--stat-color) 30%, transparent);
+      box-shadow:
+        0 0 12px var(--stat-color),
+        0 0 24px color-mix(in srgb, var(--stat-color) 40%, transparent),
+        inset 0 0 16px color-mix(in srgb, var(--stat-color) 8%, transparent);
     }
 
     .stat-value {

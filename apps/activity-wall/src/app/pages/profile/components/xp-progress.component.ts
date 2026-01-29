@@ -5,7 +5,7 @@ import { UserStats } from '@codeheroes/types';
   selector: 'app-xp-progress',
   standalone: true,
   template: `
-    <div class="xp-container">
+    <div class="xp-container card-glow-cyan">
       <div class="xp-header">
         <span class="xp-label">XP</span>
         <span class="xp-total">{{ formatNumber(stats()?.xp ?? 0) }}</span>
@@ -27,7 +27,6 @@ import { UserStats } from '@codeheroes/types';
   styles: [`
     .xp-container {
       background: rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(0, 245, 255, 0.3);
       border-radius: 8px;
       padding: 1rem;
       margin: 1rem 0;
