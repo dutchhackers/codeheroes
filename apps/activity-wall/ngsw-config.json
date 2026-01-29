@@ -7,7 +7,7 @@
       "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
-        "files": ["/app-icons/*.png", "/favicon.ico", "/index.csr.html", "/manifest.webmanifest", "/*.css", "/*.js"]
+        "files": ["/app-icons/*.png", "/favicon.ico", "/index.html", "/manifest.webmanifest", "/*.css", "/*.js"]
       }
     },
     {

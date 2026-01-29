@@ -48,7 +48,7 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
     <main class="relative z-10 px-4 md:px-6 lg:px-8 pb-24">
       @if (isLoading()) {
         <div class="flex items-center justify-center py-20">
-          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse font-mono">Loading...</div>
+          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse font-mono" role="status" aria-live="polite">Loading...</div>
         </div>
       } @else if (!user()) {
         <div class="flex flex-col items-center justify-center py-20">

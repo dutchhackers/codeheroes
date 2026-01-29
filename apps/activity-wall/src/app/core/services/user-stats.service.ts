@@ -8,9 +8,10 @@ import {
   limit as firestoreLimit,
   orderBy,
   query,
+  where,
 } from '@angular/fire/firestore';
 import { Auth, user } from '@angular/fire/auth';
-import { Observable, of, switchMap, map, catchError, combineLatest } from 'rxjs';
+import { Observable, of, switchMap, map, catchError } from 'rxjs';
 import { Activity, UserDto, UserStats } from '@codeheroes/types';
 
 export interface CurrentUserProfile {
@@ -36,10 +37,10 @@ export class UserStatsService {
         }
         // Query users collection where uid matches the auth user's UID
         const usersRef = collection(this.#firestore, 'users');
-        const usersQuery = query(usersRef);
+        const usersQuery = query(usersRef, where('uid', '==', authUser.uid));
         return collectionData(usersQuery, { idField: 'id' }).pipe(
           map((users) => {
-            const matchingUser = (users as UserDto[]).find((u) => u.uid === authUser.uid);
+            const matchingUser = (users as UserDto[])[0];
             return matchingUser ?? null;
           }),
           catchError((error) => {

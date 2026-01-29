@@ -20,7 +20,7 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
         <h1 class="text-2xl md:text-4xl font-bold italic text-white">
           Activity Wall
         </h1>
-        <div class="flex items-center gap-2 px-3 py-1.5 rounded border border-green-500/30 bg-black/50">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded border border-green-500/30 bg-black/50" role="status" aria-label="Real-time updates active">
           <span class="w-2.5 h-2.5 rounded-full bg-green-400 live-indicator"></span>
           <span class="text-sm md:text-base text-green-400 font-mono">LIVE</span>
         </div>
@@ -31,7 +31,7 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
     <main class="relative z-10 px-3 md:px-6 lg:px-8 pb-24">
       @if (isLoading()) {
         <div class="flex items-center justify-center py-20 md:py-32">
-          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse font-mono">Loading...</div>
+          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse font-mono" role="status" aria-live="polite">Loading...</div>
         </div>
       } @else if (feedItems().length === 0) {
         <div class="flex flex-col items-center justify-center py-20 md:py-32">

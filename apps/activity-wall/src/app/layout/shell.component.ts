@@ -35,7 +35,7 @@ import { BottomNavComponent } from './bottom-nav.component';
       } @else if (isLoading()) {
         <!-- Loading state -->
         <div class="flex items-center justify-center min-h-screen">
-          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse font-mono">Loading...</div>
+          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse font-mono" role="status" aria-live="polite">Loading...</div>
         </div>
       } @else {
         <!-- Authenticated content -->
@@ -108,18 +108,23 @@ export class ShellComponent implements OnInit, OnDestroy {
     }
   }
 
+  #getCurrentRoutePath(): string {
+    // Strip query params and fragments to get just the path
+    return this.#router.url.split('?')[0].split('#')[0];
+  }
+
   #navigateToNextRoute() {
-    const currentIndex = this.#routes.indexOf(this.#router.url);
+    const currentIndex = this.#routes.indexOf(this.#getCurrentRoutePath());
     const nextIndex = Math.min(currentIndex + 1, this.#routes.length - 1);
-    if (nextIndex !== currentIndex) {
+    if (nextIndex !== currentIndex && currentIndex >= 0) {
       this.#router.navigate([this.#routes[nextIndex]]);
     }
   }
 
   #navigateToPreviousRoute() {
-    const currentIndex = this.#routes.indexOf(this.#router.url);
+    const currentIndex = this.#routes.indexOf(this.#getCurrentRoutePath());
     const prevIndex = Math.max(currentIndex - 1, 0);
-    if (prevIndex !== currentIndex) {
+    if (prevIndex !== currentIndex && currentIndex >= 0) {
       this.#router.navigate([this.#routes[prevIndex]]);
     }
   }

@@ -10,7 +10,14 @@ import { UserStats } from '@codeheroes/types';
         <span class="xp-label">XP</span>
         <span class="xp-total">{{ formatNumber(stats()?.xp ?? 0) }}</span>
       </div>
-      <div class="progress-bar-container">
+      <div
+        class="progress-bar-container"
+        role="progressbar"
+        [attr.aria-valuenow]="progressPercent()"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-label]="'Experience progress: ' + progressPercent() + ' percent'"
+      >
         <div
           class="progress-bar"
           [style.width.%]="progressPercent()"

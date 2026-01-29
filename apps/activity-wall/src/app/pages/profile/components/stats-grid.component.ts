@@ -13,7 +13,12 @@ interface StatItem {
   template: `
     <div class="stats-grid">
       @for (stat of statsItems(); track stat.label) {
-        <div class="stat-card" [style.--stat-color]="stat.color">
+        <div
+          class="stat-card"
+          [style.--stat-color]="stat.color"
+          role="group"
+          [attr.aria-label]="stat.value + ' ' + stat.label"
+        >
           <span class="stat-value">{{ stat.value }}</span>
           <span class="stat-label">{{ stat.label }}</span>
         </div>
