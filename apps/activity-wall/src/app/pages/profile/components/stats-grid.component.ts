@@ -89,18 +89,18 @@ export class StatsGridComponent {
     const s = this.stats();
     if (!s) {
       return [
-        { value: 0, label: 'Pushes', color: '#00f5ff' },
-        { value: 0, label: 'PRs', color: '#bf00ff' },
-        { value: 0, label: 'Merged', color: '#00ff88' },
-        { value: 0, label: 'Reviews', color: '#ff6600' },
+        { value: 0, label: 'Pushes', color: 'var(--neon-cyan)' },
+        { value: 0, label: 'PRs', color: 'var(--neon-purple)' },
+        { value: 0, label: 'Merged', color: 'var(--neon-green)' },
+        { value: 0, label: 'Reviews', color: 'var(--neon-orange)' },
       ];
     }
 
     return [
-      { value: s.counters?.codePushes ?? 0, label: 'Pushes', color: '#00f5ff' },
-      { value: s.counters?.pullRequests?.total ?? 0, label: 'PRs', color: '#bf00ff' },
-      { value: s.counters?.pullRequests?.merged ?? 0, label: 'Merged', color: '#00ff88' },
-      { value: s.counters?.codeReviews ?? 0, label: 'Reviews', color: '#ff6600' },
+      { value: s.counters?.codePushes ?? 0, label: 'Pushes', color: 'var(--neon-cyan)' },
+      { value: s.counters?.pullRequests?.total ?? 0, label: 'PRs', color: 'var(--neon-purple)' },
+      { value: s.counters?.pullRequests?.merged ?? 0, label: 'Merged', color: 'var(--neon-green)' },
+      { value: s.counters?.codeReviews ?? 0, label: 'Reviews', color: 'var(--neon-orange)' },
     ];
   }
 }

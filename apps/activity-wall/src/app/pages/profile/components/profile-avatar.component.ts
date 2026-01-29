@@ -18,7 +18,7 @@ import { Component, input, computed } from '@angular/core';
           </div>
         </div>
       } @else {
-        <div class="avatar-placeholder">
+        <div class="avatar-placeholder" role="img" [attr.aria-label]="displayName() + ' avatar'">
           {{ initials() }}
         </div>
       }
@@ -43,7 +43,7 @@ import { Component, input, computed } from '@angular/core';
       height: 100%;
       border-radius: 50%;
       padding: 3px;
-      background: linear-gradient(135deg, var(--neon-cyan, #00f5ff), var(--neon-purple, #bf00ff));
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
       z-index: 1;
     }
 
@@ -59,11 +59,11 @@ import { Component, input, computed } from '@angular/core';
       position: absolute;
       inset: -4px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--neon-cyan, #00f5ff), var(--neon-purple, #bf00ff));
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
       opacity: 0.6;
       filter: blur(12px);
       z-index: 0;
-      animation: avatarPulse 3s ease-in-out infinite;
+      animation: avatarPulse 2.5s ease-in-out infinite;
     }
 
     .avatar-placeholder {
@@ -75,27 +75,27 @@ import { Component, input, computed } from '@angular/core';
       justify-content: center;
       font-size: 2rem;
       font-weight: bold;
-      color: var(--neon-cyan, #00f5ff);
+      color: var(--neon-cyan);
       border: 3px solid transparent;
       background:
         linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)) padding-box,
-        linear-gradient(135deg, var(--neon-cyan, #00f5ff), var(--neon-purple, #bf00ff)) border-box;
+        linear-gradient(135deg, var(--neon-cyan), var(--neon-purple)) border-box;
       box-shadow:
-        0 0 20px rgba(0, 245, 255, 0.4),
-        0 0 40px rgba(191, 0, 255, 0.2);
-      animation: avatarPulse 3s ease-in-out infinite;
+        0 0 20px color-mix(in srgb, var(--neon-cyan) 40%, transparent),
+        0 0 40px color-mix(in srgb, var(--neon-purple) 20%, transparent);
+      animation: avatarPulse 2.5s ease-in-out infinite;
     }
 
     @keyframes avatarPulse {
       0%, 100% {
         box-shadow:
-          0 0 20px rgba(0, 245, 255, 0.4),
-          0 0 40px rgba(191, 0, 255, 0.2);
+          0 0 20px color-mix(in srgb, var(--neon-cyan) 40%, transparent),
+          0 0 40px color-mix(in srgb, var(--neon-purple) 20%, transparent);
       }
       50% {
         box-shadow:
-          0 0 30px rgba(191, 0, 255, 0.5),
-          0 0 50px rgba(0, 245, 255, 0.3);
+          0 0 30px color-mix(in srgb, var(--neon-purple) 50%, transparent),
+          0 0 50px color-mix(in srgb, var(--neon-cyan) 30%, transparent);
       }
     }
 

@@ -49,8 +49,8 @@ import { UserStats } from '@codeheroes/types';
     .xp-total {
       font-size: 1.25rem;
       font-weight: bold;
-      color: var(--neon-cyan, #00f5ff);
-      text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+      color: var(--neon-cyan);
+      text-shadow: 0 0 10px color-mix(in srgb, var(--neon-cyan) 50%, transparent);
     }
 
     .progress-bar-container {
@@ -63,10 +63,10 @@ import { UserStats } from '@codeheroes/types';
 
     .progress-bar {
       height: 100%;
-      background: linear-gradient(90deg, var(--neon-cyan, #00f5ff), var(--neon-purple, #bf00ff));
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
       border-radius: 4px;
       transition: width 0.5s ease;
-      box-shadow: 0 0 10px var(--neon-cyan, #00f5ff);
+      box-shadow: 0 0 10px var(--neon-cyan);
     }
 
     .xp-footer {
@@ -79,7 +79,7 @@ import { UserStats } from '@codeheroes/types';
     }
 
     .xp-current {
-      color: var(--neon-cyan, #00f5ff);
+      color: var(--neon-cyan);
     }
 
     .xp-divider {

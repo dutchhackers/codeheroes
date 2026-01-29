@@ -19,12 +19,12 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
   ],
   template: `
     <!-- Header -->
-    <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-4 py-4 md:px-8 md:py-5">
+    <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-4 py-4 md:px-6 lg:px-8 md:py-5">
       <div class="flex items-center justify-between relative z-10">
         <h1 class="text-2xl md:text-4xl font-bold italic text-white">
           Profile
         </h1>
-        <div class="card-glow-green flex items-center gap-2 px-3 py-1.5 rounded bg-black/50">
+        <div class="card-glow-green flex items-center gap-2 px-3 py-1.5 rounded bg-black/50" role="status" aria-label="Real-time updates active">
           <span class="w-2.5 h-2.5 rounded-full live-indicator" style="background-color: var(--neon-green)"></span>
           <span class="text-sm md:text-base font-mono" style="color: var(--neon-green)">LIVE</span>
         </div>
@@ -32,7 +32,7 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
     </header>
 
     <!-- Main Content -->
-    <main class="relative z-10 px-4 md:px-8 pb-24">
+    <main class="relative z-10 px-4 md:px-6 lg:px-8 pb-24">
       @if (isLoading()) {
         <div class="flex items-center justify-center py-20">
           <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse font-mono">Loading...</div>
@@ -59,7 +59,7 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
             <h2 class="text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
               {{ formatDisplayName(user()?.displayName ?? '') }}
             </h2>
-            <p class="text-sm md:text-base text-purple-400 font-mono mt-1">
+            <p class="text-sm md:text-base text-purple-400 font-mono mt-1" aria-label="Current level {{ stats()?.level ?? 1 }}">
               Level {{ stats()?.level ?? 1 }}
             </p>
           </div>
@@ -73,7 +73,7 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
           <!-- Recent Activity -->
           @if (activities().length > 0) {
             <div class="mt-8">
-              <h3 class="text-sm uppercase tracking-wider mb-4 font-mono" style="color: var(--neon-cyan)">
+              <h3 class="text-xs md:text-sm uppercase tracking-wider mb-4 font-mono text-cyan-400">
                 Recent Activity
               </h3>
               <div class="flex flex-col gap-4">
