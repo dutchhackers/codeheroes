@@ -65,7 +65,8 @@ import { UserStats } from '@codeheroes/types';
       height: 100%;
       background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
       border-radius: 4px;
-      transition: width 0.5s ease;
+      transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      will-change: width;
       box-shadow: 0 0 10px var(--neon-cyan);
     }
 

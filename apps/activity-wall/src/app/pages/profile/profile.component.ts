@@ -71,11 +71,11 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
           <app-stats-grid [stats]="stats()" />
 
           <!-- Recent Activity -->
-          @if (activities().length > 0) {
-            <div class="mt-8">
-              <h3 class="text-xs md:text-sm uppercase tracking-wider mb-4 font-mono text-cyan-400">
-                Recent Activity
-              </h3>
+          <div class="mt-8">
+            <h3 class="text-xs md:text-sm uppercase tracking-wider mb-4 font-mono text-cyan-400">
+              Recent Activity
+            </h3>
+            @if (activities().length > 0) {
               <div class="flex flex-col gap-4">
                 @for (activity of activities(); track activity.id) {
                   <app-activity-item
@@ -85,8 +85,12 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
                   />
                 }
               </div>
-            </div>
-          }
+            } @else {
+              <div class="text-center py-8 text-slate-600 font-mono text-sm">
+                No recent activity yet. Keep building!
+              </div>
+            }
+          </div>
         </div>
       }
     </main>

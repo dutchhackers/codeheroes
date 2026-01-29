@@ -54,6 +54,16 @@ interface StatItem {
         inset 0 0 16px color-mix(in srgb, var(--stat-color) 8%, transparent);
     }
 
+    /* Touch device active state */
+    @media (hover: none) {
+      .stat-card:active {
+        box-shadow:
+          0 0 12px var(--stat-color),
+          0 0 24px color-mix(in srgb, var(--stat-color) 40%, transparent),
+          inset 0 0 16px color-mix(in srgb, var(--stat-color) 8%, transparent);
+      }
+    }
+
     .stat-value {
       display: block;
       font-size: 1.5rem;
