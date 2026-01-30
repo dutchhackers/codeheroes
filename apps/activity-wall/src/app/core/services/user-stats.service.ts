@@ -8,6 +8,7 @@ import {
   limit as firestoreLimit,
   orderBy,
   query,
+  updateDoc,
   where,
 } from '@angular/fire/firestore';
 import { Auth, user } from '@angular/fire/auth';
@@ -144,5 +145,21 @@ export class UserStatsService {
         return this.getUserActivities(userDoc.id, limitCount);
       })
     );
+  }
+
+  /**
+   * Update the current user's display name
+   */
+  async updateDisplayName(userId: string, newName: string): Promise<void> {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed.length < 2 || trimmed.length > 50) {
+      throw new Error('Display name must be 2-50 characters');
+    }
+
+    const userDocRef = doc(this.#firestore, `users/${userId}`);
+    await updateDoc(userDocRef, {
+      displayName: trimmed,
+      updatedAt: new Date().toISOString(),
+    });
   }
 }
