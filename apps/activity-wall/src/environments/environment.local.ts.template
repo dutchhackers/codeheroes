@@ -1,5 +1,6 @@
 export const environment = {
   useEmulators: true,
+  apiUrl: 'http://localhost:5001/${FIREBASE_PROJECT_ID}/europe-west1/api',
   firebase: {
     apiKey: '${FIREBASE_API_KEY}',
     authDomain: '${FIREBASE_AUTH_DOMAIN}',

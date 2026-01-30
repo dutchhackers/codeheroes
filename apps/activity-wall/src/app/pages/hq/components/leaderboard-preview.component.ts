@@ -23,7 +23,12 @@ import { LeaderboardEntry } from '../../../core/services/hq-data.service';
               [class.is-current-user]="entry.userId === currentUserId()"
               [class.top-three]="i < 3"
             >
-              <span class="rank" [class]="getRankClass(i)">
+              <span
+                class="rank"
+                [class.gold]="i === 0"
+                [class.silver]="i === 1"
+                [class.bronze]="i === 2"
+              >
                 @if (i === 0) {
                   🥇
                 } @else if (i === 1) {
@@ -211,13 +216,6 @@ export class LeaderboardPreviewComponent {
   entries = input<LeaderboardEntry[]>([]);
   currentUserRank = input<number | null>(null);
   currentUserId = input<string | null>(null);
-
-  getRankClass(index: number): string {
-    if (index === 0) return 'gold';
-    if (index === 1) return 'silver';
-    if (index === 2) return 'bronze';
-    return '';
-  }
 
   getInitials(name: string): string {
     return name
