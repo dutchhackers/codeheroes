@@ -127,6 +127,7 @@ import { ProfileEditModalComponent } from './components/profile-edit-modal.compo
       <app-profile-edit-modal
         [currentDisplayName]="user()?.displayName ?? ''"
         [isSaving]="isSavingProfile()"
+        [saveError]="profileSaveError()"
         (dismiss)="closeEditModal()"
         (save)="saveDisplayName($event)"
       />
@@ -171,6 +172,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   isLoading = signal(true);
   showEditModal = signal(false);
   isSavingProfile = signal(false);
+  profileSaveError = signal<string | null>(null);
 
   ngOnInit() {
     this.#loadProfile();
@@ -255,11 +257,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   openEditModal() {
+    this.profileSaveError.set(null);
     this.showEditModal.set(true);
   }
 
   closeEditModal() {
     this.showEditModal.set(false);
+    this.profileSaveError.set(null);
   }
 
   async saveDisplayName(newName: string) {
@@ -267,16 +271,22 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (!currentUser?.id) return;
 
     this.isSavingProfile.set(true);
+    this.profileSaveError.set(null);
     try {
       await this.#userStatsService.updateDisplayName(currentUser.id, newName);
       // Update the user cache so activity items show the new name
       this.#userCacheService.updateUserInCache(currentUser.id, {
         displayName: newName,
       });
+      // Update the user signal for immediate UI feedback in profile header
+      this.user.set({
+        ...currentUser,
+        displayName: newName,
+      });
       this.closeEditModal();
     } catch (error) {
       console.error('Failed to update display name:', error);
-      // Could show an error toast here
+      this.profileSaveError.set('Failed to save. Please try again.');
     } finally {
       this.isSavingProfile.set(false);
     }

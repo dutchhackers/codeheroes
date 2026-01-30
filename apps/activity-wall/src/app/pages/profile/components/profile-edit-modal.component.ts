@@ -57,16 +57,25 @@ import {
             type="text"
             id="displayName"
             class="input-field"
-            [class.input-error]="hasError()"
+            [class.input-error]="hasError() || saveError()"
             [value]="inputValue()"
             (input)="onInputChange($event)"
             (keydown.enter)="onSave()"
             [disabled]="isSaving()"
             maxlength="50"
             autocomplete="off"
+            aria-describedby="displayName-hint"
+            [attr.aria-invalid]="hasError() || saveError() ? 'true' : 'false'"
           />
-          <div class="input-hint" [class.error-text]="hasError()">
-            @if (hasError()) {
+          <div
+            id="displayName-hint"
+            class="input-hint"
+            [class.error-text]="hasError() || saveError()"
+            aria-live="polite"
+          >
+            @if (saveError()) {
+              {{ saveError() }}
+            } @else if (hasError()) {
               {{ errorMessage() }}
             } @else {
               2-50 characters
@@ -282,6 +291,7 @@ import {
 export class ProfileEditModalComponent implements AfterViewInit {
   currentDisplayName = input.required<string>();
   isSaving = input<boolean>(false);
+  saveError = input<string | null>(null);
 
   dismiss = output<void>();
   save = output<string>();
