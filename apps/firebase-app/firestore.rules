@@ -26,7 +26,8 @@ service cloud.firestore {
         && request.auth.uid == resource.data.uid
         // Only allow specific fields to be modified
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'updatedAt'])
-        // Validate displayName
+        // Validate displayName. Note: size() uses the untrimmed value; trimming and final
+        // length validation are enforced in the backend service.
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() >= 2
         && request.resource.data.displayName.size() <= 50;
