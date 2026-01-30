@@ -8,6 +8,7 @@ import { ProfileAvatarComponent } from './components/profile-avatar.component';
 import { XpProgressComponent } from './components/xp-progress.component';
 import { StatsGridComponent } from './components/stats-grid.component';
 import { ActivityItemComponent } from '../../components/activity-item.component';
+import { ProfileEditModalComponent } from './components/profile-edit-modal.component';
 
 @Component({
   selector: 'app-profile',
@@ -17,6 +18,7 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
     XpProgressComponent,
     StatsGridComponent,
     ActivityItemComponent,
+    ProfileEditModalComponent,
   ],
   template: `
     <!-- Header -->
@@ -69,9 +71,21 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
 
           <!-- Name and Level -->
           <div class="text-center mb-4">
-            <h2 class="text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
-              {{ formatDisplayName(user()?.displayName ?? '') }}
-            </h2>
+            <div class="inline-flex items-center gap-2">
+              <h2 class="text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
+                {{ formatDisplayName(user()?.displayName ?? '') }}
+              </h2>
+              <button
+                type="button"
+                class="edit-button"
+                (click)="openEditModal()"
+                aria-label="Edit profile"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </button>
+            </div>
             <p class="text-sm md:text-base text-purple-400 font-mono mt-1" aria-label="Current level {{ stats()?.level ?? 1 }}">
               Level {{ stats()?.level ?? 1 }}
             </p>
@@ -107,10 +121,40 @@ import { ActivityItemComponent } from '../../components/activity-item.component'
         </div>
       }
     </main>
+
+    <!-- Edit Profile Modal -->
+    @if (showEditModal()) {
+      <app-profile-edit-modal
+        [currentDisplayName]="user()?.displayName ?? ''"
+        [isSaving]="isSavingProfile()"
+        [saveError]="profileSaveError()"
+        (dismiss)="closeEditModal()"
+        (save)="saveDisplayName($event)"
+      />
+    }
   `,
   styles: [`
     :host {
       display: block;
+    }
+
+    .edit-button {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      padding: 0.375rem;
+      color: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .edit-button:hover {
+      color: var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
     }
   `],
 })
@@ -126,6 +170,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
   stats = signal<UserStats | null>(null);
   activities = signal<Activity[]>([]);
   isLoading = signal(true);
+  showEditModal = signal(false);
+  isSavingProfile = signal(false);
+  profileSaveError = signal<string | null>(null);
 
   ngOnInit() {
     this.#loadProfile();
@@ -206,6 +253,42 @@ export class ProfileComponent implements OnInit, OnDestroy {
       await signOut(this.#auth);
     } catch (error) {
       console.error('Sign out failed:', error);
+    }
+  }
+
+  openEditModal() {
+    this.profileSaveError.set(null);
+    this.showEditModal.set(true);
+  }
+
+  closeEditModal() {
+    this.showEditModal.set(false);
+    this.profileSaveError.set(null);
+  }
+
+  async saveDisplayName(newName: string) {
+    const currentUser = this.user();
+    if (!currentUser?.id) return;
+
+    this.isSavingProfile.set(true);
+    this.profileSaveError.set(null);
+    try {
+      await this.#userStatsService.updateDisplayName(currentUser.id, newName);
+      // Update the user cache so activity items show the new name
+      this.#userCacheService.updateUserInCache(currentUser.id, {
+        displayName: newName,
+      });
+      // Update the user signal for immediate UI feedback in profile header
+      this.user.set({
+        ...currentUser,
+        displayName: newName,
+      });
+      this.closeEditModal();
+    } catch (error) {
+      console.error('Failed to update display name:', error);
+      this.profileSaveError.set('Failed to save. Please try again.');
+    } finally {
+      this.isSavingProfile.set(false);
     }
   }
 }

@@ -20,8 +20,20 @@ service cloud.firestore {
       // (displayName, photoUrl needed for activity-wall)
       allow read: if isAuthenticated();
 
-      // Only the user can write their own profile
-      allow write: if isOwner(userId);
+      // User can only update their own profile (match auth UID to document's uid field)
+      // Note: userId in path is the custom user ID (e.g., "1000002"), not Firebase Auth UID
+      allow update: if isAuthenticated()
+        && request.auth.uid == resource.data.uid
+        // Only allow specific fields to be modified
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'updatedAt'])
+        // Validate displayName. Note: size() uses the untrimmed value; trimming and final
+        // length validation are enforced in the backend service.
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() >= 2
+        && request.resource.data.displayName.size() <= 50;
+
+      // Only server can create/delete users
+      allow create, delete: if false;
 
       // --------------------------------------------
       // ACTIVITIES SUBCOLLECTION

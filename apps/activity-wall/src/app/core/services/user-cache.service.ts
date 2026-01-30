@@ -44,4 +44,16 @@ export class UserCacheService {
   getUserInfo(userId: string): UserInfo | null {
     return this.#usersMap().get(userId) ?? null;
   }
+
+  /**
+   * Update a single user's info in the cache
+   */
+  updateUserInCache(userId: string, updates: Partial<UserInfo>): void {
+    const current = this.#usersMap().get(userId);
+    if (current) {
+      const updated = new Map(this.#usersMap());
+      updated.set(userId, { ...current, ...updates });
+      this.#usersMap.set(updated);
+    }
+  }
 }
