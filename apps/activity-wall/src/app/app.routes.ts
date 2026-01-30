@@ -3,8 +3,13 @@ import { Routes } from '@angular/router';
 export const appRoutes: Routes = [
   {
     path: '',
-    redirectTo: 'activity',
+    redirectTo: 'hq',
     pathMatch: 'full',
+  },
+  {
+    path: 'hq',
+    loadComponent: () =>
+      import('./pages/hq/hq.component').then((m) => m.HqComponent),
   },
   {
     path: 'activity',
@@ -22,6 +27,6 @@ export const appRoutes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'activity',
+    redirectTo: 'hq',
   },
 ];

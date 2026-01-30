@@ -63,7 +63,7 @@ export class ShellComponent implements OnInit, OnDestroy {
   isAuthenticated = signal(false);
   isLoading = signal(true);
 
-  readonly #routes = ['/activity', '/profile'];
+  readonly #routes = ['/hq', '/activity', '/profile'];
   readonly #swipeThreshold = 50;
   readonly #verticalThreshold = 100; // Ignore swipes that are more vertical than horizontal
 
