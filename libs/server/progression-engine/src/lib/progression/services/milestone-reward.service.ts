@@ -34,7 +34,7 @@ export class MilestoneRewardService {
         newLevel: state.level,
       });
 
-      await this.handleLevelUpRewards(userId, state.level);
+      await this.handleLevelUpRewards(userId, previousState.level || 0, state.level);
       rewardsGranted = true;
     }
 
@@ -86,27 +86,30 @@ export class MilestoneRewardService {
 
   /**
    * Handle rewards for level-up milestones
+   * Iterates through ALL levels gained to ensure no rewards are skipped
    */
-  private async handleLevelUpRewards(userId: string, newLevel: number): Promise<void> {
-    const previousLevel = newLevel - 1;
-    const levelRequirements = this.levelService.getNextLevelRequirements(previousLevel);
+  private async handleLevelUpRewards(userId: string, oldLevel: number, newLevel: number): Promise<void> {
+    // Iterate through ALL levels gained (fixes level skipping bug)
+    for (let level = oldLevel + 1; level <= newLevel; level++) {
+      const levelRequirements = this.levelService.getNextLevelRequirements(level - 1);
 
-    if (levelRequirements.rewards && levelRequirements.rewards.length > 0) {
-      logger.info('Granting level-up rewards', {
-        userId,
-        newLevel,
-        rewardCount: levelRequirements.rewards.length,
-      });
-
-      for (const reward of levelRequirements.rewards) {
-        const rewardId = `level_${newLevel}_reward_${reward.id}_${Date.now()}`;
-
-        await this.rewardService.grantReward(userId, {
-          id: rewardId,
-          type: reward.type,
-          name: reward.name,
-          amount: reward.amount,
+      if (levelRequirements?.rewards && levelRequirements.rewards.length > 0) {
+        logger.info('Granting level-up rewards', {
+          userId,
+          level,
+          rewardCount: levelRequirements.rewards.length,
         });
+
+        for (const reward of levelRequirements.rewards) {
+          const rewardId = `level_${level}_reward_${reward.id}_${Date.now()}`;
+
+          await this.rewardService.grantReward(userId, {
+            id: rewardId,
+            type: reward.type,
+            name: reward.name,
+            amount: reward.amount,
+          });
+        }
       }
     }
   }
