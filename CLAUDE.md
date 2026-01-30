@@ -51,13 +51,32 @@ Do NOT try to start individual functions separately.
 
 ## Local Development URLs
 
-| Service | URL |
-|---------|-----|
-| Emulator UI | http://localhost:4000 |
-| Functions | http://localhost:5001 |
-| Firestore | http://localhost:8080 |
-| Web App | http://localhost:4200 |
-| ngrok Inspector | http://localhost:4040 |
+| Service | URL | Port |
+|---------|-----|------|
+| Emulator UI | http://localhost:4000 | 4000 |
+| Emulator Hub | http://localhost:4400 | 4400 |
+| Functions | http://localhost:5001 | 5001 |
+| Firestore | http://localhost:8080 | 8080 |
+| Pub/Sub | http://localhost:8085 | 8085 |
+| Auth | http://localhost:9099 | 9099 |
+| Storage | http://localhost:9199 | 9199 |
+| Eventarc | http://localhost:9299 | 9299 |
+| Web App | http://localhost:4200 | 4200 |
+| Activity Wall | http://localhost:4201 | 4201 |
+| ngrok Inspector | http://localhost:4040 | 4040 |
+
+### Verify Emulators Running
+
+```bash
+# Quick check - returns JSON if hub is running
+curl -s http://127.0.0.1:4400/emulators
+
+# Check specific ports
+lsof -i:4000 -i:8080 -i:5001 -i:9099
+
+# Kill all emulator processes (before restart)
+lsof -ti:8080,8085,5001,4000,9099,9199,9299 | xargs kill -9 2>/dev/null || true
+```
 
 ## Simulating GitHub Events (Recommended)
 
@@ -211,6 +230,46 @@ Auto-create progression state if missing → Update XP/counters
 | User | User ID | GitHub ID |
 |------|---------|-----------|
 | Nightcrawler (mschilling) | 1000002 | 7045335 |
+
+## XP Values Reference
+
+Base XP values and bonuses for each game action type. Config in `libs/server/progression-engine/.../xp-values.config.ts`.
+
+| Game Action Type | Base XP | Possible Bonuses |
+|------------------|---------|------------------|
+| `code_push` | 120 | +250 (multiple commits) |
+| `pull_request_create` | 100 | +100 (multiple files), +200 (significant changes) |
+| `pull_request_merge` | 100 | +100 (multiple files), +200 (significant changes) |
+| `pull_request_close` | 50 | +50 (multiple files), +100 (significant changes) |
+| `code_review_submit` | 80 | +50 (approval), +100 (detailed), +50 (multiple files), +150 (thorough) |
+| `review_comment_create` | 40 | +30 (with suggestion), +20 (detailed) |
+| `comment_create` | 30 | +20 (detailed) |
+| `issue_create` | 80 | +70 (detailed description), +30 (with labels) |
+| `issue_close` | 60 | +50 (referenced in PR) |
+| `release_publish` | 200 | +150 (major), +50 (minor), +30 (with notes) |
+| `ci_success` | 30 | +50 (deployment) |
+| `discussion_create` | 60 | +40 (detailed) |
+| `discussion_comment` | 30 | +70 (accepted answer) |
+
+### GitHub Event → Game Action Mapping
+
+| # | GitHub Event | Simulator Command | Game Action Type |
+|---|--------------|-------------------|------------------|
+| 1 | `push` | `push` | `code_push` |
+| 2 | `pull_request` (opened) | `pr open` | `pull_request_create` |
+| 3 | `pull_request` (closed+merged) | `pr merge --number N` | `pull_request_merge` |
+| 4 | `pull_request` (closed) | `pr close --number N` | `pull_request_close` |
+| 5 | `pull_request_review` (approve) | `review approve --pr N` | `code_review_submit` |
+| 6 | `pull_request_review` (comment) | `review comment --pr N` | `code_review_submit` |
+| 7 | `pull_request_review_comment` | `review-comment create --pr N` | `review_comment_create` |
+| 8 | `issue_comment` (PR) | `comment pr --pr N` | `comment_create` |
+| 9 | `issue_comment` (issue) | `comment issue --issue N` | `comment_create` |
+| 10 | `issues` (opened) | `issue open` | `issue_create` |
+| 11 | `issues` (closed) | `issue close --number N` | `issue_close` |
+| 12 | `release` (published) | `release publish --tag vX.X.X` | `release_publish` |
+| 13 | `workflow_run` (success) | `workflow success` | `ci_success` |
+| 14 | `discussion` (created) | `discussion create` | `discussion_create` |
+| 15 | `discussion_comment` | `discussion comment --discussion N` | `discussion_comment` |
 
 ## Environment Configuration
 
@@ -584,6 +643,129 @@ mcp__devtools-mcp__press_key               # Press keyboard key (Home, End, Ente
 3. Trigger events: nx serve github-simulator -- push
 4. mcp__devtools-mcp__take_screenshot  # See new activity
 ```
+
+---
+
+## Programmatic Login to Activity Wall (Auth Emulator)
+
+When testing the Activity Wall locally, you can log in programmatically without clicking through the Google Sign-In popup. This is useful for automated testing and CI/CD.
+
+### How It Works
+
+The Firebase Auth Emulator accepts fake Google credentials. The flow:
+
+1. **POST to Auth Emulator** - Send a fake Google ID token
+2. **Store tokens in IndexedDB** - Save the response tokens where Firebase SDK expects them
+3. **Reload the page** - Firebase SDK picks up the stored session
+
+### Step 1: Call Auth Emulator REST API
+
+```bash
+# Get your API key from apps/activity-wall/src/environments/environment.ts
+API_KEY="your-firebase-api-key"
+
+# Create URL-encoded id_token payload
+ID_TOKEN=$(python3 -c "import urllib.parse, json; print(urllib.parse.quote(json.dumps({
+  'sub': 'test-user-google-id',
+  'email': 'testuser@example.com',
+  'name': 'Test User',
+  'picture': 'https://example.com/photo.png',
+  'email_verified': True,
+  'iss': '', 'aud': '', 'exp': 0, 'iat': 0
+})))")
+
+curl -s -X POST "http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=${API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"requestUri\": \"http://localhost:9099/emulator/auth/handler?providerId=google.com&id_token=${ID_TOKEN}\",
+    \"sessionId\": \"ValueNotUsedByAuthEmulator\",
+    \"returnSecureToken\": true,
+    \"returnIdpCredential\": true
+  }"
+```
+
+The response contains `localId` (Firebase UID), `idToken`, and `refreshToken`.
+
+### Step 2: Store Tokens via Browser JavaScript
+
+Execute this in the browser (via DevTools MCP `evaluate_script`) on http://localhost:4201:
+
+```javascript
+async (apiKey, user, authResponse) => {
+  // user = { sub, email, name, picture }
+  // authResponse = response from step 1
+
+  const userObject = {
+    uid: authResponse.localId,
+    email: authResponse.email,
+    emailVerified: authResponse.emailVerified,
+    displayName: authResponse.displayName,
+    isAnonymous: false,
+    photoURL: authResponse.photoUrl,
+    providerData: [{
+      providerId: "google.com",
+      uid: user.sub,
+      displayName: authResponse.displayName,
+      email: authResponse.email,
+      phoneNumber: null,
+      photoURL: authResponse.photoUrl
+    }],
+    stsTokenManager: {
+      refreshToken: authResponse.refreshToken,
+      accessToken: authResponse.idToken,
+      expirationTime: Date.now() + (parseInt(authResponse.expiresIn) * 1000)
+    },
+    createdAt: Date.now().toString(),
+    lastLoginAt: Date.now().toString(),
+    apiKey: apiKey,
+    appName: "[DEFAULT]"
+  };
+
+  // Store in IndexedDB
+  const request = indexedDB.open('firebaseLocalStorageDb', 1);
+  request.onupgradeneeded = (e) => {
+    const db = e.target.result;
+    if (!db.objectStoreNames.contains('firebaseLocalStorage')) {
+      db.createObjectStore('firebaseLocalStorage', { keyPath: 'fbase_key' });
+    }
+  };
+  request.onsuccess = (e) => {
+    const db = e.target.result;
+    const tx = db.transaction('firebaseLocalStorage', 'readwrite');
+    const store = tx.objectStore('firebaseLocalStorage');
+    const key = `firebase:authUser:${apiKey}:[DEFAULT]`;
+    store.put({ fbase_key: key, value: userObject });
+  };
+}
+```
+
+### Step 3: Reload the Page
+
+After storing tokens, reload the page. Firebase SDK will read from IndexedDB and the user will be authenticated.
+
+### Complete Flow with DevTools MCP
+
+```
+1. mcp__devtools-mcp__navigate_page  url="http://localhost:4201"
+2. mcp__devtools-mcp__evaluate_script  function="<combined login script>"
+3. mcp__devtools-mcp__navigate_page  type="reload"
+4. mcp__devtools-mcp__take_screenshot  # Verify logged in
+```
+
+### Key Endpoints
+
+| Endpoint | Purpose |
+|----------|---------|
+| `http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp` | Create/login user |
+| `http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:lookup` | Get user info |
+| `http://localhost:4000/auth` | View users in Emulator UI |
+
+### Notes
+
+- The `sub` field in the ID token becomes the Google provider UID
+- Each unique `sub` + `email` combination creates a new Firebase Auth user
+- Tokens are stored in IndexedDB key: `firebase:authUser:{apiKey}:[DEFAULT]`
+- This only works with the Auth Emulator, not production Firebase Auth
 
 ---
 
