@@ -14,6 +14,7 @@ import {
 import { Auth, user } from '@angular/fire/auth';
 import { Observable, of, switchMap, map, catchError } from 'rxjs';
 import { Activity, UserDto, UserStats } from '@codeheroes/types';
+import { UserBadge } from '../models/user-badge.model';
 
 export interface CurrentUserProfile {
   user: UserDto | null;
@@ -161,5 +162,34 @@ export class UserStatsService {
       displayName: trimmed,
       updatedAt: new Date().toISOString(),
     });
+  }
+
+  /**
+   * Get badges for a specific user from users/{userId}/badges subcollection
+   */
+  getUserBadges(userId: string): Observable<UserBadge[]> {
+    const badgesRef = collection(this.#firestore, `users/${userId}/badges`);
+    const badgesQuery = query(badgesRef, orderBy('earnedAt', 'desc'));
+    return collectionData(badgesQuery, { idField: 'id' }).pipe(
+      map((badges) => badges as UserBadge[]),
+      catchError((error) => {
+        console.error('Error fetching user badges:', error);
+        return of([]);
+      })
+    );
+  }
+
+  /**
+   * Get the current user's badges
+   */
+  getCurrentUserBadges(): Observable<UserBadge[]> {
+    return this.getCurrentUserDoc().pipe(
+      switchMap((userDoc) => {
+        if (!userDoc) {
+          return of([]);
+        }
+        return this.getUserBadges(userDoc.id);
+      })
+    );
   }
 }

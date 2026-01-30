@@ -4,9 +4,11 @@ import { Subscription } from 'rxjs';
 import { Activity, UserDto, UserStats } from '@codeheroes/types';
 import { UserStatsService } from '../../core/services/user-stats.service';
 import { UserCacheService } from '../../core/services/user-cache.service';
+import { UserBadge } from '../../core/models/user-badge.model';
 import { ProfileAvatarComponent } from './components/profile-avatar.component';
 import { XpProgressComponent } from './components/xp-progress.component';
 import { StatsGridComponent } from './components/stats-grid.component';
+import { BadgesGridComponent } from './components/badges-grid.component';
 import { ActivityItemComponent } from '../../components/activity-item.component';
 import { ProfileEditModalComponent } from './components/profile-edit-modal.component';
 
@@ -17,6 +19,7 @@ import { ProfileEditModalComponent } from './components/profile-edit-modal.compo
     ProfileAvatarComponent,
     XpProgressComponent,
     StatsGridComponent,
+    BadgesGridComponent,
     ActivityItemComponent,
     ProfileEditModalComponent,
   ],
@@ -97,6 +100,9 @@ import { ProfileEditModalComponent } from './components/profile-edit-modal.compo
           <!-- Stats Grid -->
           <app-stats-grid [stats]="stats()" />
 
+          <!-- Badges -->
+          <app-badges-grid [badges]="badges()" />
+
           <!-- Recent Activity -->
           <div class="mt-8">
             <h3 class="text-xs md:text-sm uppercase tracking-wider mb-4 font-mono text-cyan-400">
@@ -165,10 +171,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   #profileSubscription: Subscription | null = null;
   #activitiesSubscription: Subscription | null = null;
+  #badgesSubscription: Subscription | null = null;
 
   user = signal<UserDto | null>(null);
   stats = signal<UserStats | null>(null);
   activities = signal<Activity[]>([]);
+  badges = signal<UserBadge[]>([]);
   isLoading = signal(true);
   showEditModal = signal(false);
   isSavingProfile = signal(false);
@@ -181,6 +189,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.#profileSubscription?.unsubscribe();
     this.#activitiesSubscription?.unsubscribe();
+    this.#badgesSubscription?.unsubscribe();
   }
 
   async #loadProfile() {
@@ -207,6 +216,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Failed to load activities:', error);
+      },
+    });
+
+    // Subscribe to badges
+    this.#badgesSubscription = this.#userStatsService.getCurrentUserBadges().subscribe({
+      next: (badges) => {
+        this.badges.set(badges);
+      },
+      error: (error) => {
+        console.error('Failed to load badges:', error);
       },
     });
   }
