@@ -64,7 +64,7 @@ export class HqDataService {
   readonly #auth = inject(Auth);
   readonly #http = inject(HttpClient);
 
-  readonly #DEFAULT_DAILY_GOAL = 600;
+  readonly #DEFAULT_DAILY_GOAL = 8000;
 
   /**
    * Get the current authenticated user's Firestore user document

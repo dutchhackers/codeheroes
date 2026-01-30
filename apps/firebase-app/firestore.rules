@@ -101,6 +101,15 @@ service cloud.firestore {
       match /settings/{settingId} {
         allow read, write: if isOwner(userId);
       }
+
+      // --------------------------------------------
+      // ACTIVITY STATS SUBCOLLECTION
+      // Time-based stats (daily, weekly) for progress tracking
+      // --------------------------------------------
+      match /activityStats/{document=**} {
+        allow read: if isAuthenticated();
+        allow write: if false; // Server-only via Admin SDK
+      }
     }
 
     // ============================================
