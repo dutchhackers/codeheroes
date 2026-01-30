@@ -42,50 +42,52 @@ FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
 
 ### 5. Maak test logins aan in Auth emulator
 
-Voor elke test user, maak een Google Sign-In account aan via de Auth emulator REST API:
+Voor elke test user, maak een Google Sign-In account aan via de Auth emulator REST API.
+
+**BELANGRIJK**: Begin elk bash commando direct met `curl` (niet met comments of variabelen). Dit matcht met de `Bash(curl:*)` allow rule en voorkomt permissie prompts.
+
+Test users om aan te maken:
+
+| Naam | Email | Google Sub ID | Firestore Doc ID |
+|------|-------|---------------|------------------|
+| Cassshh | cas.van.dinter@framna.com | cas-google-id-123 | 1000003 |
+| Nightcrawler | michael.schilling@framna.com | mschilling-google-id | 1000002 |
+| Guido | guido.van.vilsteren@framna.com | guido-google-id | 1000004 |
+| Nick | nick.ratering@framna.com | nick-google-id | 1000005 |
+
+Voor elke user, gebruik `python3` om de URL-encoded id_token te genereren, en `curl` direct daarna:
 
 ```bash
 curl -s -X POST "http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=AIzaSyD5itLlGIFn652bgBi6HOveUuS_4qxnWdE" \
   -H "Content-Type: application/json" \
-  -d '{
-    "requestUri": "http://localhost:9099/emulator/auth/handler?providerId=google.com&id_token=URL_ENCODED_ID_TOKEN",
-    "sessionId": "ValueNotUsedByAuthEmulator",
-    "returnSecureToken": true,
-    "returnIdpCredential": true
-  }'
+  -d "{\"requestUri\": \"http://localhost:9099/emulator/auth/handler?providerId=google.com&id_token=$(python3 -c "import urllib.parse, json; print(urllib.parse.quote(json.dumps({'sub': 'USER_GOOGLE_SUB_ID', 'email': 'USER_EMAIL', 'name': 'DISPLAY_NAME', 'picture': 'https://github.com/USERNAME.png?size=200', 'email_verified': True, 'iss': '', 'aud': '', 'exp': 0, 'iat': 0})))")\", \"sessionId\": \"ValueNotUsedByAuthEmulator\", \"returnSecureToken\": true, \"returnIdpCredential\": true}"
 ```
 
-De `id_token` moet URL-encoded JSON zijn:
-```json
-{
-  "sub": "google-USER_ID",
-  "email": "USER_EMAIL",
-  "name": "DISPLAY_NAME",
-  "picture": "PHOTO_URL",
-  "email_verified": true
-}
-```
-
-Het `localId` in de response is de Firebase Auth UID.
+Het `localId` in de response is de Firebase Auth UID. Bewaar deze voor stap 6.
 
 ### 6. Koppel Firestore users aan Auth users
 
-Update elk user document met het Firebase Auth UID:
+Update elk user document met het Firebase Auth UID. Begin direct met `curl`:
 
 ```bash
-curl -X PATCH "http://localhost:8080/v1/projects/codeheroes-app-test/databases/(default)/documents/users/USER_DOC_ID?updateMask.fieldPaths=uid" \
+curl -s -X PATCH "http://localhost:8080/v1/projects/codeheroes-app-test/databases/(default)/documents/users/USER_DOC_ID?updateMask.fieldPaths=uid" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer owner" \
   -d '{"fields": {"uid": {"stringValue": "FIREBASE_AUTH_UID"}}}'
 ```
 
-### 7. Verificatie
+### 7. Open pagina's in browser
 
-Controleer of alles draait:
+**ALTIJD** aan het eind de belangrijkste pagina's openen in Chrome via DevTools MCP:
 
+```
+mcp__devtools-mcp__new_page  url="http://localhost:4000"
+mcp__devtools-mcp__new_page  url="http://localhost:4201"
+```
+
+Dit opent:
 1. **Emulator UI**: http://localhost:4000
 2. **Activity Wall**: http://localhost:4201
-3. **Auth emulator users**: http://localhost:4000/auth
 
 ---
 
