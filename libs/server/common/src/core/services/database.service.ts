@@ -1,4 +1,4 @@
-import { logger } from '@codeheroes/common';
+import { logger } from '../firebase/logger.util';
 import { BaseFirestoreService } from './base.service';
 import { DocumentData } from 'firebase-admin/firestore';
 

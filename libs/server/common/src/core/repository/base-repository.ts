@@ -15,7 +15,8 @@ import {
   QueryOptions,
   TransactionFunction,
 } from './repository.interface';
-import { getCurrentTimeAsISO, logger } from '@codeheroes/common';
+import { getCurrentTimeAsISO } from '../firebase/time.utils';
+import { logger } from '../firebase/logger.util';
 
 export abstract class BaseRepository<T extends { id: string }>
   implements IAdvancedRepository<T>, ITransactionalRepository
