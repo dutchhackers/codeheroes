@@ -2,7 +2,15 @@ import { LevelRequirementItem } from '@codeheroes/types';
 
 /**
  * Defines the configuration for each level, including XP requirements and rewards
- * (This was previously named LEVEL_CONFIGURATION)
+ *
+ * HYBRID SYSTEM:
+ * - Levels 1-20: Static hand-tuned configuration (defined below)
+ * - Levels 21-80+: Algorithmic (calculated in level-thresholds.ts)
+ *
+ * The formula for levels 21+: XP = 1500 * Level²
+ * This targets Level 80 at approximately 9,600,000 XP
+ *
+ * XP values were scaled 12x to match the new XP economy.
  */
 export interface LevelDefinition {
   level: number;
@@ -15,6 +23,10 @@ export interface LevelDefinition {
   };
 }
 
+/**
+ * Static level definitions for levels 1-20 (onboarding phase)
+ * Hand-tuned for rapid early progression and smooth transition to algorithmic levels
+ */
 export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   {
     level: 1,
@@ -26,154 +38,186 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 2,
-    xpRequired: 1000,
+    xpRequired: 3000,
+    rewards: {
+      title: 'Code Initiate',
+      badges: ['code_initiate'],
+    },
+  },
+  {
+    level: 3,
+    xpRequired: 7500,
+    rewards: {
+      title: 'Code Apprentice',
+      badges: ['code_apprentice'],
+    },
+  },
+  {
+    level: 4,
+    xpRequired: 15000,
+    rewards: {
+      title: 'Code Student',
+      badges: ['code_student'],
+    },
+  },
+  {
+    level: 5,
+    xpRequired: 25000,
     rewards: {
       title: 'Code Explorer',
       badges: ['code_explorer'],
     },
   },
   {
-    level: 3,
-    xpRequired: 2500,
+    level: 6,
+    xpRequired: 40000,
+    rewards: {
+      title: 'Code Adventurer',
+      badges: ['code_adventurer'],
+    },
+  },
+  {
+    level: 7,
+    xpRequired: 60000,
     rewards: {
       title: 'Code Adept',
       badges: ['code_adept'],
     },
   },
   {
-    level: 4,
-    xpRequired: 5000,
+    level: 8,
+    xpRequired: 85000,
     rewards: {
       title: 'Code Enthusiast',
       badges: ['code_enthusiast'],
     },
   },
   {
-    level: 5,
-    xpRequired: 10000,
+    level: 9,
+    xpRequired: 115000,
+    rewards: {
+      title: 'Code Practitioner',
+      badges: ['code_practitioner'],
+    },
+  },
+  {
+    level: 10,
+    xpRequired: 150000,
     rewards: {
       title: 'Code Hero',
       badges: ['code_hero'],
     },
   },
   {
-    level: 6,
-    xpRequired: 20000,
+    level: 11,
+    xpRequired: 190000,
+    rewards: {
+      title: 'Code Warrior',
+      badges: ['code_warrior'],
+    },
+  },
+  {
+    level: 12,
+    xpRequired: 235000,
     rewards: {
       title: 'Code Veteran',
       badges: ['code_veteran'],
     },
   },
   {
-    level: 7,
-    xpRequired: 35000,
-    rewards: {
-      title: 'Code Master',
-      badges: ['code_master'],
-    },
-  },
-  {
-    level: 8,
-    xpRequired: 55000,
-    rewards: {
-      title: 'Code Legend',
-      badges: ['code_legend'],
-    },
-  },
-  {
-    level: 9,
-    xpRequired: 80000,
-    rewards: {
-      title: 'Code Champion',
-      badges: ['code_champion'],
-    },
-  },
-  {
-    level: 10,
-    xpRequired: 110000,
-    rewards: {
-      title: 'Code Oracle',
-      badges: ['code_oracle'],
-    },
-  },
-  {
-    level: 11,
-    xpRequired: 150000,
-    rewards: {
-      title: 'Code Architect',
-      badges: ['code_architect_badge'],
-    },
-  },
-  {
-    level: 12,
-    xpRequired: 200000,
-    rewards: {
-      title: 'Code Synthesizer',
-      badges: ['code_synthesizer_badge'],
-    },
-  },
-  {
     level: 13,
-    xpRequired: 250000,
+    xpRequired: 285000,
     rewards: {
-      title: 'Code Virtuoso',
-      badges: ['code_virtuoso_badge'],
+      title: 'Code Specialist',
+      badges: ['code_specialist'],
     },
   },
   {
     level: 14,
-    xpRequired: 300000,
+    xpRequired: 340000,
     rewards: {
-      title: 'Code Mentor',
-      badges: ['code_mentor_badge'],
+      title: 'Code Expert',
+      badges: ['code_expert'],
     },
   },
   {
     level: 15,
     xpRequired: 400000,
     rewards: {
-      title: 'Senior Code Hero',
-      badges: ['senior_code_hero_badge', 'level_15_mastery'],
+      title: 'Code Master',
+      badges: ['code_master'],
     },
   },
   {
     level: 16,
-    xpRequired: 500000,
+    xpRequired: 465000,
     rewards: {
-      title: 'Principal Coder',
-      badges: ['principal_coder_badge'],
+      title: 'Code Sage',
+      badges: ['code_sage'],
     },
   },
   {
     level: 17,
-    xpRequired: 650000,
+    xpRequired: 535000,
     rewards: {
-      title: 'Code Luminary',
-      badges: ['code_luminary_badge'],
+      title: 'Code Legend',
+      badges: ['code_legend'],
     },
   },
   {
     level: 18,
-    xpRequired: 800000,
+    xpRequired: 610000,
     rewards: {
-      title: 'Distinguished Developer',
-      badges: ['distinguished_developer_badge'],
+      title: 'Code Champion',
+      badges: ['code_champion'],
     },
   },
   {
     level: 19,
-    xpRequired: 1000000,
+    xpRequired: 690000,
     rewards: {
-      title: 'Code Visionary',
-      badges: ['code_visionary_badge'],
+      title: 'Code Oracle',
+      badges: ['code_oracle'],
     },
   },
   {
     level: 20,
-    xpRequired: 1250000,
+    xpRequired: 775000,
     rewards: {
-      title: 'Grandmaster Coder',
-      badges: ['grandmaster_coder_badge', 'level_20_completion'],
+      title: 'Code Architect',
+      badges: ['code_architect', 'level_20_mastery'],
     },
   },
 ];
+
+/**
+ * Maximum level defined in static config.
+ * Levels beyond this use the algorithmic formula.
+ */
+export const MAX_STATIC_LEVEL = 20;
+
+/**
+ * Algorithmic level titles for levels 21-80
+ * Used by level-thresholds.ts for dynamic level generation
+ */
+export const ALGORITHMIC_LEVEL_TITLES: Record<number, { title: string; badge: string }> = {
+  25: { title: 'Code Virtuoso', badge: 'code_virtuoso' },
+  30: { title: 'Code Mentor', badge: 'code_mentor' },
+  35: { title: 'Code Synthesizer', badge: 'code_synthesizer' },
+  40: { title: 'Senior Code Hero', badge: 'senior_code_hero' },
+  45: { title: 'Principal Coder', badge: 'principal_coder' },
+  50: { title: 'Code Luminary', badge: 'code_luminary' },
+  55: { title: 'Distinguished Developer', badge: 'distinguished_developer' },
+  60: { title: 'Code Visionary', badge: 'code_visionary' },
+  65: { title: 'Code Titan', badge: 'code_titan' },
+  70: { title: 'Code Deity', badge: 'code_deity' },
+  75: { title: 'Code Immortal', badge: 'code_immortal' },
+  80: { title: 'Grandmaster Coder', badge: 'grandmaster_coder' },
+};
+
+/**
+ * Default title for algorithmic levels without specific titles
+ */
+export function getDefaultAlgorithmicTitle(level: number): string {
+  return `Code Hero Level ${level}`;
+}
