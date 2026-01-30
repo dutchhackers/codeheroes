@@ -1,5 +1,6 @@
 export const environment = {
   useEmulators: false,
+  apiUrl: '',
   firebase: {
     apiKey: '',
     authDomain: '',
