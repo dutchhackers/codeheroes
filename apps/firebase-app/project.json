@@ -32,11 +32,14 @@
     "firebase": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "firebase --config=firebase.json --project=${FIREBASE_TEST_PROJECT_ID}"
+        "command": "firebase --config=firebase.json"
       },
       "configurations": {
+        "test": {
+          "command": "firebase --config=firebase.json --project=codeheroes-test"
+        },
         "production": {
-          "command": "firebase --config=firebase.json --project=${FIREBASE_TEST_PROJECT_ID}"
+          "command": "firebase --config=firebase.json --project=codeheroes-prod"
         }
       }
     },

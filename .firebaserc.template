@@ -1,13 +1,21 @@
 {
+  "projects": {
+    "default": "${FIREBASE_TEST_PROJECT_ID}",
+    "test": "${FIREBASE_TEST_PROJECT_ID}",
+    "production": "${FIREBASE_PROD_PROJECT_ID}"
+  },
   "targets": {
-    "${FIREBASE_PROJECT_ID}": {
+    "${FIREBASE_TEST_PROJECT_ID}": {
       "hosting": {
-        "web-legacy": ["${FIREBASE_PROJECT_ID}"],
-        "app": ["${FIREBASE_ACTIVITY_WALL_SITE}"]
+        "web-legacy": ["${FIREBASE_TEST_PROJECT_ID}"],
+        "app": ["${FIREBASE_TEST_APP_SITE}"]
+      }
+    },
+    "${FIREBASE_PROD_PROJECT_ID}": {
+      "hosting": {
+        "web-legacy": ["${FIREBASE_PROD_PROJECT_ID}"],
+        "app": ["${FIREBASE_PROD_APP_SITE}"]
       }
     }
-  },
-  "projects": {
-    "default": "${FIREBASE_PROJECT_ID}"
   }
 }
