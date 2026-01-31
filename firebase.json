@@ -5,8 +5,8 @@
   },
   "hosting": [
     {
-      "target": "web",
-      "public": "dist/apps/web/browser",
+      "target": "web-legacy",
+      "public": "dist/apps/frontend/web-legacy/browser",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
         {
@@ -16,8 +16,8 @@
       ]
     },
     {
-      "target": "activity-wall",
-      "public": "dist/apps/activity-wall/browser",
+      "target": "app",
+      "public": "dist/apps/frontend/app/browser",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
         {
