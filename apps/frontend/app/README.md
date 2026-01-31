@@ -1,4 +1,4 @@
-# Activity Wall
+# Code Heroes App
 
 Real-time activity feed display for TV/public screens. Shows developer activities (commits, PRs, reviews) as they happen.
 
@@ -8,8 +8,8 @@ Real-time activity feed display for TV/public screens. Shows developer activitie
 
 | Environment       | Command                                       | Description                       |
 | ----------------- | --------------------------------------------- | --------------------------------- |
-| Local (emulators) | `nx serve activity-wall`                      | Uses local Firebase emulators     |
-| Test              | `nx serve activity-wall --configuration=test` | Connects to test Firebase project |
+| Local (emulators) | `nx serve app`                      | Uses local Firebase emulators     |
+| Test              | `nx serve app --configuration=test` | Connects to test Firebase project |
 
 **URLs:**
 
@@ -20,20 +20,20 @@ Real-time activity feed display for TV/public screens. Shows developer activitie
 
 | Environment | Command                                             |
 | ----------- | --------------------------------------------------- |
-| Test        | `nx build activity-wall --configuration=test`       |
-| Production  | `nx build activity-wall --configuration=production` |
+| Test        | `nx build app --configuration=test`       |
+| Production  | `nx build app --configuration=production` |
 
-Output: `dist/apps/activity-wall/browser/`
+Output: `dist/apps/frontend/app/browser/`
 
 ## Deployment
 
-Activity Wall is deployed to Firebase Hosting as a separate site.
+Code Heroes App is deployed to Firebase Hosting as a separate site.
 
 ```bash
-# Deploy activity-wall only
-nx run firebase-app:firebase deploy --only hosting:activity-wall
+# Deploy app only
+nx run firebase-app:firebase deploy --only hosting:app
 
-# Deploy all hosting sites (web + activity-wall)
+# Deploy all hosting sites (web-legacy + app)
 nx run firebase-app:firebase deploy --only hosting
 ```
 

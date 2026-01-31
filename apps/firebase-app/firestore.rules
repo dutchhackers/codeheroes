@@ -17,7 +17,7 @@ service cloud.firestore {
     // ============================================
     match /users/{userId} {
       // Any authenticated user can read basic profile info
-      // (displayName, photoUrl needed for activity-wall)
+      // (displayName, photoUrl needed for app)
       allow read: if isAuthenticated();
 
       // User can only update their own profile (match auth UID to document's uid field)

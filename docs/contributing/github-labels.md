@@ -35,8 +35,8 @@ Labels that identify which part of the codebase an issue relates to.
 
 | Label | Color | Description |
 |-------|-------|-------------|
-| `app: web` | ![#5319e7](https://via.placeholder.com/15/5319e7/5319e7.png) `#5319e7` | Frontend web app (`apps/web`) |
-| `app: activity-wall` | ![#5319e7](https://via.placeholder.com/15/5319e7/5319e7.png) `#5319e7` | Activity wall display (`apps/activity-wall`) |
+| `app: web-legacy` | ![#5319e7](https://via.placeholder.com/15/5319e7/5319e7.png) `#5319e7` | Legacy frontend web app (`apps/frontend/web-legacy`) |
+| `app: app` | ![#5319e7](https://via.placeholder.com/15/5319e7/5319e7.png) `#5319e7` | Main PWA app (`apps/frontend/app`) |
 | `app: api` | ![#1d76db](https://via.placeholder.com/15/1d76db/1d76db.png) `#1d76db` | REST API (`apps/api`) |
 | `app: game-engine` | ![#1d76db](https://via.placeholder.com/15/1d76db/1d76db.png) `#1d76db` | Game logic/XP processing (`apps/game-engine`) |
 | `app: github-receiver` | ![#1d76db](https://via.placeholder.com/15/1d76db/1d76db.png) `#1d76db` | Webhook handler (`apps/github-receiver`) |

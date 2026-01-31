@@ -57,9 +57,11 @@ The script (`scripts/setup-firebase.js`) generates:
 | Generated File | Template | Purpose |
 |----------------|----------|---------|
 | `.firebaserc` | `.firebaserc.template` | Firebase project targeting |
-| `apps/web/src/environments/environment.local.ts` | `environment.ts.template` | Local Angular config |
-| `apps/web/src/environments/environment.prod.ts` | `environment.ts.template` | Production Angular config |
-| `apps/web/public/firebase-messaging-sw.js` | `firebase-messaging-sw.js.template` | Push notification service worker |
+| `apps/frontend/web-legacy/src/environments/environment.local.ts` | `environment.ts.template` | Local Angular config |
+| `apps/frontend/web-legacy/src/environments/environment.prod.ts` | `environment.ts.template` | Production Angular config |
+| `apps/frontend/web-legacy/public/firebase-messaging-sw.js` | `firebase-messaging-sw.js.template` | Push notification service worker |
+| `apps/frontend/app/src/environments/environment.local.ts` | `environment.local.ts.template` | Local App config |
+| `apps/frontend/app/src/environments/environment.prod.ts` | `environment.prod.ts.template` | Production App config |
 
 ## Step 4: Verify Generated Files
 
@@ -69,11 +71,14 @@ Check that all files were generated:
 # Firebase project config
 cat .firebaserc
 
-# Angular environment files
-ls -la apps/web/src/environments/
+# Angular environment files (legacy)
+ls -la apps/frontend/web-legacy/src/environments/
+
+# Angular environment files (app)
+ls -la apps/frontend/app/src/environments/
 
 # Service worker
-ls -la apps/web/public/firebase-messaging-sw.js
+ls -la apps/frontend/web-legacy/public/firebase-messaging-sw.js
 ```
 
 Expected `.firebaserc` content:
@@ -103,8 +108,10 @@ Ensure all required variables are in `.env`:
 
 Ensure these template files exist:
 - `.firebaserc.template`
-- `apps/web/src/environments/environment.ts.template`
-- `apps/web/public/firebase-messaging-sw.js.template`
+- `apps/frontend/web-legacy/src/environments/environment.ts.template`
+- `apps/frontend/web-legacy/public/firebase-messaging-sw.js.template`
+- `apps/frontend/app/src/environments/environment.local.ts.template`
+- `apps/frontend/app/src/environments/environment.prod.ts.template`
 
 ### Setup complete?
 

@@ -87,7 +87,7 @@
           "buildTarget": "app:build:test"
         },
         "development": {
-          "buildTarget": "activity-wall:build:development"
+          "buildTarget": "app:build:development"
         }
       },
       "defaultConfiguration": "development",

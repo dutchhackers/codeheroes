@@ -614,7 +614,7 @@ Fix any failing tests.
 
 Add badge display to the Activity Wall.
 
-**File**: `apps/activity-wall/src/app/components/badges/badge-list.component.ts`
+**File**: `apps/frontend/app/src/app/components/badges/badge-list.component.ts`
 
 Create a component that:
 1. Fetches user badges from Firestore
@@ -724,7 +724,7 @@ When ALL success criteria are met and verified:
 
 ### New Files:
 - `libs/server/progression-engine/src/lib/config/badge-catalog.config.ts`
-- `apps/activity-wall/src/app/components/badges/badge-list.component.ts` (or similar)
+- `apps/frontend/app/src/app/components/badges/badge-list.component.ts` (or similar)
 
 ### Modified Files:
 - `libs/types/src/lib/gamification/badges.types.ts`
@@ -741,5 +741,5 @@ When ALL success criteria are met and verified:
 1. **Test after each phase** - Don't wait until the end
 2. **Check emulator logs** - Look for errors in the Firebase emulator output
 3. **Use DevTools MCP** - For browser verification, use `mcp__devtools-mcp__take_screenshot`
-4. **Activity Wall structure** - Explore `apps/activity-wall/src/app` to understand current component structure before adding badge display
+4. **App structure** - Explore `apps/frontend/app/src/app` to understand current component structure before adding badge display
 5. **Firestore rules** - Badge collection should be readable by the user (check existing rules)

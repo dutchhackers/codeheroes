@@ -12,13 +12,14 @@ CodeHeroes is a gamification platform that tracks developer activity via GitHub 
 codeheroes/
 ├── apps/
 │   ├── firebase-app/     # Firebase orchestrator (emulators, rules)
-│   ├── activity-wall/    # Real-time activity display (Angular)
+│   ├── frontend/
+│   │   ├── app/          # Main PWA app (Angular) - formerly activity-wall
+│   │   └── web-legacy/   # Legacy Angular frontend
 │   ├── api/              # Main REST API (Cloud Function)
 │   ├── auth-service/     # Authentication functions
 │   ├── game-engine/      # Game logic (Eventarc triggered)
 │   ├── github-receiver/  # GitHub webhook handler
-│   ├── github-simulator/ # CLI for simulating GitHub webhooks (testing)
-│   └── web/              # Angular frontend
+│   └── github-simulator/ # CLI for simulating GitHub webhooks (testing)
 ├── libs/
 │   ├── server/common/    # Shared server utilities
 │   └── shared/           # Code shared between server/client
@@ -34,7 +35,7 @@ codeheroes/
 | `npm install` | Install dependencies |
 | `npm run setup` | Generate config files from .env |
 | `nx serve firebase-app` | Start ALL backend emulators |
-| `nx serve web` | Start Angular frontend |
+| `nx serve web-legacy` | Start legacy Angular frontend |
 | `nx serve github-simulator -- push` | Simulate GitHub push event |
 | `nx serve github-simulator -- pr open` | Simulate PR creation |
 | `FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds` | Seed database with test data |
@@ -505,18 +506,18 @@ nx run firebase-app:firebase deploy --only hosting
 
 ---
 
-## Activity Wall App
+## Code Heroes App (Main PWA)
 
-A separate Angular app for displaying real-time activity on TV/public displays.
+The main Angular app for displaying real-time activity on TV/public displays.
 
 | Item | Value |
 |------|-------|
-| Location | `apps/activity-wall/` |
+| Location | `apps/frontend/app/` |
 | Port | 4201 |
-| Start (local) | `nx serve activity-wall` |
-| Start (test) | `nx serve activity-wall --configuration=test` |
-| Deploy (test) | `nx run firebase-app:firebase deploy --only hosting:activity-wall` (uses test project) |
-| Deploy (prod) | `nx run firebase-app:firebase deploy --only hosting:activity-wall` (uses prod project) |
+| Start (local) | `nx serve app` |
+| Start (test) | `nx serve app --configuration=test` |
+| Deploy (test) | `nx run firebase-app:firebase deploy --only hosting:app` (uses test project) |
+| Deploy (prod) | `nx run firebase-app:firebase deploy --only hosting:app` (uses prod project) |
 
 ---
 
@@ -662,7 +663,7 @@ The Firebase Auth Emulator accepts fake Google credentials. The flow:
 ### Step 1: Call Auth Emulator REST API
 
 ```bash
-# Get your API key from apps/activity-wall/src/environments/environment.ts
+# Get your API key from apps/frontend/app/src/environments/environment.ts
 API_KEY="your-firebase-api-key"
 
 # Create URL-encoded id_token payload

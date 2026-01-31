@@ -290,7 +290,7 @@ A stack shows:
 
 ### Real-Time Feed Service
 
-**Location:** `apps/activity-wall/src/app/core/services/activity-feed.service.ts`
+**Location:** `apps/frontend/app/src/app/core/services/activity-feed.service.ts`
 
 ```typescript
 // Real-time subscription
@@ -304,7 +304,7 @@ loadMoreActivities(lastDoc, limit = 50): Promise<LoadMoreResult>
 
 ### Display Mapping
 
-**Location:** `apps/activity-wall/src/app/core/mappings/action-type.mapping.ts`
+**Location:** `apps/frontend/app/src/app/core/mappings/action-type.mapping.ts`
 
 Each activity type has visual configuration:
 
@@ -355,14 +355,14 @@ Creates reward activities:
 - `recordLevelUp(userId, prevLevel, newLevel, xp)` - Level up
 
 ### ActivityFeedService (Frontend)
-**Location:** `apps/activity-wall/src/app/core/services/activity-feed.service.ts`
+**Location:** `apps/frontend/app/src/app/core/services/activity-feed.service.ts`
 
 Queries activities:
 - `getGlobalActivities(limit)` - Real-time subscription
 - `loadMoreActivities(lastDoc, limit)` - Pagination
 
 ### ActivityStackerService (Frontend)
-**Location:** `apps/activity-wall/src/app/core/services/activity-stacker.service.ts`
+**Location:** `apps/frontend/app/src/app/core/services/activity-stacker.service.ts`
 
 Groups related activities:
 - `stackActivities(activities)` - Returns stacks or singles

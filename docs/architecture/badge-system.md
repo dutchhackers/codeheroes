@@ -359,7 +359,7 @@ Badges appear in:
 2. **User Profile** - Grid of earned badges
 3. **Debug Panel** - Full activity JSON for development
 
-The `activity-wall` app uses:
+The `app` (main PWA) uses:
 - `ACTIVITY_TYPE_DISPLAY` mapping for badge/level-up styling
 - `getActivityTypeDisplay()` to get display config
 - Type guards (`isBadgeEarnedActivity`, `isLevelUpActivity`) for type-safe rendering
