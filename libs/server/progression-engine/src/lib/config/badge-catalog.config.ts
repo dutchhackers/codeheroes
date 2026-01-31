@@ -1,5 +1,6 @@
 import { BadgeRarity } from '@codeheroes/types';
 import { MILESTONE_BADGES } from './milestone-badges.config';
+import { SPECIAL_BADGES } from './special-badges.config';
 
 export interface BadgeDefinition {
   id: string;
@@ -13,6 +14,8 @@ export interface BadgeDefinition {
     level?: number; // For level badges
     threshold?: number; // For milestone badges
     activityType?: string; // For milestone badges
+    trigger?: string; // For special badges (e.g., 'time_early', 'time_late', 'weekend_count')
+    hour?: number; // For time-based badges
   };
 }
 
@@ -229,6 +232,8 @@ export const BADGE_CATALOG: Record<string, BadgeDefinition> = {
   },
   // Merge in milestone badges
   ...MILESTONE_BADGES,
+  // Merge in special badges
+  ...SPECIAL_BADGES,
 };
 
 /**

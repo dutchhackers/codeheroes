@@ -4,6 +4,7 @@ import { Collections, ProgressionEvent, ProgressionEventType } from '@codeheroes
 import { Firestore } from 'firebase-admin/firestore';
 import { BadgeService } from '../../rewards/services/badge.service';
 import { MilestoneBadgeService } from '../../rewards/services/milestone-badge.service';
+import { SpecialBadgeService } from '../../rewards/services/special-badge.service';
 import { getLevelRequirements } from '../../config/level-thresholds';
 
 /**
@@ -14,12 +15,14 @@ export class EventProcessorService {
   private notificationService: NotificationService;
   private badgeService: BadgeService;
   private milestoneBadgeService: MilestoneBadgeService;
+  private specialBadgeService: SpecialBadgeService;
 
   constructor() {
     this.db = DatabaseInstance.getInstance();
     this.notificationService = new NotificationService();
     this.badgeService = new BadgeService();
     this.milestoneBadgeService = new MilestoneBadgeService(this.badgeService);
+    this.specialBadgeService = new SpecialBadgeService(this.badgeService);
   }
 
   /**
@@ -127,18 +130,36 @@ export class EventProcessorService {
     logger.info('Checking milestone badges', { userId, activityType, count: newCount });
 
     // Check and grant milestone badge if threshold reached
-    const grantedBadge = await this.milestoneBadgeService.checkAndGrantMilestoneBadge(userId, activityType, newCount);
+    const grantedMilestoneBadge = await this.milestoneBadgeService.checkAndGrantMilestoneBadge(
+      userId,
+      activityType,
+      newCount
+    );
 
-    if (grantedBadge) {
-      // Send notification for the new badge
+    if (grantedMilestoneBadge) {
       await this.notificationService.createNotification(userId, {
         type: 'BADGE_EARNED',
         title: 'Milestone Reached!',
-        message: `You earned: ${grantedBadge.icon} ${grantedBadge.name}`,
+        message: `You earned: ${grantedMilestoneBadge.icon} ${grantedMilestoneBadge.name}`,
         metadata: {
-          badgeId: grantedBadge.id,
+          badgeId: grantedMilestoneBadge.id,
           activityType,
           count: newCount,
+        },
+      });
+    }
+
+    // Check and grant special time-based badges
+    const grantedSpecialBadges = await this.specialBadgeService.checkTimeBadges(userId, activity);
+
+    for (const badge of grantedSpecialBadges) {
+      await this.notificationService.createNotification(userId, {
+        type: 'BADGE_EARNED',
+        title: 'Special Badge Earned!',
+        message: `You earned: ${badge.icon} ${badge.name}`,
+        metadata: {
+          badgeId: badge.id,
+          category: 'special',
         },
       });
     }
