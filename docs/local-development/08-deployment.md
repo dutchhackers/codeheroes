@@ -73,10 +73,12 @@ nx run firebase-app:firebase deploy --only functions:github-receiver
 
 After deployment, you'll see the function URLs:
 
-| Function | URL |
-|----------|-----|
-| API | https://api-5f4quj3fia-ew.a.run.app |
-| GitHub Receiver | https://githubreceiver-5f4quj3fia-ew.a.run.app |
+| Function | Environment | URL |
+|----------|-------------|-----|
+| API | Test | https://api-vq3onlpxua-ew.a.run.app |
+| API | Production | https://api-xxxxx-ew.a.run.app |
+| GitHub Receiver | Test | https://githubreceiver-vq3onlpxua-ew.a.run.app |
+| GitHub Receiver | Production | https://githubreceiver-xxxxx-ew.a.run.app |
 
 ## Firestore Rules & Indexes
 
@@ -120,21 +122,21 @@ nx run firebase-app:firebase deploy
 
 ## GitHub Webhook Configuration
 
-After deploying backend, configure the webhook in your test repository to point to the deployed URL.
+After deploying backend, configure webhooks on repositories that should send events to Code Heroes.
 
 ### Using GitHub CLI
 
 ```bash
 # List existing webhooks
-gh api repos/mschilling/codeheroes-support/hooks --jq '.[] | {id, url: .config.url}'
+gh api repos/OWNER/REPO/hooks --jq '.[] | {id, url: .config.url}'
 
 # Create new webhook for test environment
-gh api repos/mschilling/codeheroes-support/hooks \
+gh api repos/OWNER/REPO/hooks \
   -X POST \
   --input - << 'EOF'
 {
   "config": {
-    "url": "https://githubreceiver-5f4quj3fia-ew.a.run.app",
+    "url": "https://githubreceiver-vq3onlpxua-ew.a.run.app",
     "content_type": "json"
   },
   "events": ["*"],
@@ -143,21 +145,29 @@ gh api repos/mschilling/codeheroes-support/hooks \
 EOF
 
 # Update existing webhook to send all events
-gh api repos/mschilling/codeheroes-support/hooks/WEBHOOK_ID \
+gh api repos/OWNER/REPO/hooks/WEBHOOK_ID \
   -X PATCH \
   --input - << 'EOF'
 {
+  "config": {
+    "url": "https://githubreceiver-vq3onlpxua-ew.a.run.app",
+    "content_type": "json"
+  },
   "events": ["*"],
   "active": true
 }
 EOF
+
+# Check recent webhook deliveries
+gh api repos/OWNER/REPO/hooks/WEBHOOK_ID/deliveries \
+  --jq '.[:5] | .[] | {id, event, status_code, delivered_at}'
 ```
 
 ### Using GitHub Web UI
 
-1. Go to https://github.com/mschilling/codeheroes-support/settings/hooks
+1. Go to Repository Settings → Webhooks
 2. Click "Add webhook"
-3. Payload URL: `https://githubreceiver-5f4quj3fia-ew.a.run.app`
+3. Payload URL: `https://githubreceiver-vq3onlpxua-ew.a.run.app` (test) or your production URL
 4. Content type: `application/json`
 5. Select "Send me everything"
 6. Click "Add webhook"
@@ -213,6 +223,39 @@ nx run firebase-app:firebase deploy --only functions
 ```bash
 nx run firebase-app:firebase functions:list
 ```
+
+### Webhooks Returning 500 Errors
+
+Check function logs for the specific error:
+
+```bash
+firebase --project=codeheroes-test functions:log --only gitHubReceiver
+```
+
+**"The query requires an index"**: Deploy indexes:
+```bash
+firebase --project=codeheroes-test deploy --only firestore:indexes
+```
+
+**"Index is currently building"**: Wait a few minutes, then redeliver the webhook:
+```bash
+gh api repos/OWNER/REPO/hooks/WEBHOOK_ID/deliveries/DELIVERY_ID/attempts -X POST
+```
+
+### Check Firestore Indexes
+
+Verify all required indexes are deployed:
+
+```bash
+firebase firestore:indexes --project=codeheroes-test
+```
+
+Required indexes include:
+- `connectedAccounts` (collection group) - externalUserId + provider
+- `activities` - createdAt + type, createdAt + processingResult.xp.awarded
+- `events` - source.event + createdAt
+- `records` - timeframeId + countersLastUpdated
+- `users` - active + id
 
 ## Frontend Deployment
 

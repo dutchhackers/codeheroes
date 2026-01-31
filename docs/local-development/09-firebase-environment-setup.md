@@ -15,7 +15,9 @@ Code Heroes uses multiple Firebase environments:
 ## Prerequisites
 
 - Firebase CLI installed: `npm install -g firebase-tools`
+- GitHub CLI installed: `brew install gh` (for webhook setup)
 - Logged into Firebase: `firebase login`
+- Logged into GitHub: `gh auth login`
 - Access to create Firebase projects
 - A Google Cloud billing account (for Cloud Functions)
 
@@ -163,17 +165,37 @@ export const environment = {
 };
 ```
 
-## Step 9: Deploy Security Rules
+## Step 9: Deploy Security Rules and Indexes
 
-Deploy Firestore and Storage security rules:
+Deploy Firestore rules, indexes, and Storage rules:
 
 ```bash
 # Deploy Firestore rules
 firebase --project=codeheroes-test deploy --only firestore:rules
 
+# Deploy Firestore indexes (required for queries to work)
+firebase --project=codeheroes-test deploy --only firestore:indexes
+
 # Deploy Storage rules
 firebase --project=codeheroes-test deploy --only storage
 ```
+
+### Verify Indexes
+
+Check that all indexes are created:
+
+```bash
+firebase firestore:indexes --project=codeheroes-test
+```
+
+You should see indexes for:
+- `activities` - createdAt + type, createdAt + processingResult.xp.awarded
+- `connectedAccounts` - externalUserId + provider (collection group)
+- `events` - data.action + source.event + createdAt, source.event + createdAt
+- `records` - timeframeId + countersLastUpdated
+- `users` - active + id
+
+**Note:** Indexes may take a few minutes to build. Webhooks will fail with 500 errors until the `connectedAccounts` collection group index is ready.
 
 ## Step 10: Deploy Functions
 
@@ -195,14 +217,15 @@ Or using nx:
 nx run firebase-app:firebase -c test deploy --only functions
 ```
 
-### Note the API URL
+### Note the Function URLs
 
-After deployment, note the API URL from the output:
+After deployment, note the URLs from the output:
 ```
 Function URL (api:api(europe-west1)): https://api-xxxxx-ew.a.run.app
+Function URL (github-receiver:gitHubReceiver(europe-west1)): https://githubreceiver-xxxxx-ew.a.run.app
 ```
 
-Update `environment.test.ts` with this URL.
+Update `environment.test.ts` with the API URL.
 
 ## Step 11: Configure Blocking Functions
 
@@ -274,7 +297,70 @@ Or combined:
 nx build app -c test && nx run firebase-app:firebase -c test deploy --only hosting:app
 ```
 
-## Step 14: Verify Deployment
+## Step 14: Configure GitHub Webhooks
+
+Configure webhooks on repositories that should send events to Code Heroes.
+
+### List Existing Webhooks
+
+```bash
+gh api repos/OWNER/REPO/hooks --jq '.[] | {id, url: .config.url, active}'
+```
+
+### Create Webhook
+
+```bash
+gh api repos/OWNER/REPO/hooks \
+  -X POST \
+  --input - << 'EOF'
+{
+  "config": {
+    "url": "https://githubreceiver-xxxxx-ew.a.run.app",
+    "content_type": "json"
+  },
+  "events": ["*"],
+  "active": true
+}
+EOF
+```
+
+Replace:
+- `OWNER/REPO` with your repository (e.g., `dutchhackers/codeheroes`)
+- `githubreceiver-xxxxx-ew.a.run.app` with your deployed function URL
+
+### Update Existing Webhook
+
+```bash
+# Get webhook ID
+gh api repos/OWNER/REPO/hooks --jq '.[].id'
+
+# Update webhook URL
+gh api repos/OWNER/REPO/hooks/WEBHOOK_ID \
+  -X PATCH \
+  --input - << 'EOF'
+{
+  "config": {
+    "url": "https://githubreceiver-xxxxx-ew.a.run.app",
+    "content_type": "json"
+  },
+  "events": ["*"],
+  "active": true
+}
+EOF
+```
+
+### Verify Webhook Deliveries
+
+Check recent deliveries:
+
+```bash
+gh api repos/OWNER/REPO/hooks/WEBHOOK_ID/deliveries \
+  --jq '.[:5] | .[] | {id, event, status_code, delivered_at}'
+```
+
+Successful deliveries should show `status_code: 200`.
+
+## Step 15: Verify Deployment
 
 ### Check App
 
@@ -292,11 +378,23 @@ firebase --project=codeheroes-test functions:list
 firebase --project=codeheroes-test firestore:rules:get
 ```
 
+### Check Firestore Indexes
+
+```bash
+firebase firestore:indexes --project=codeheroes-test
+```
+
 ### Test Login
 
 1. Go to the app URL
 2. Sign in with Google (using an allowed domain email)
 3. Verify profile loads correctly
+
+### Test Webhook Processing
+
+1. Trigger a GitHub event (push, PR, etc.)
+2. Check webhook delivery status: `gh api repos/OWNER/REPO/hooks/WEBHOOK_ID/deliveries`
+3. Verify XP was awarded in user's profile or Firestore
 
 ## Quick Reference Commands
 
@@ -313,11 +411,17 @@ firebase --project=codeheroes-test deploy --only functions
 # Deploy only hosting
 nx build app -c test && nx run firebase-app:firebase -c test deploy --only hosting:app
 
-# Deploy only rules
-firebase --project=codeheroes-test deploy --only firestore:rules,storage
+# Deploy only rules and indexes
+firebase --project=codeheroes-test deploy --only firestore:rules,firestore:indexes,storage
+
+# Check indexes
+firebase firestore:indexes --project=codeheroes-test
 
 # Seed database
 GOOGLE_APPLICATION_CREDENTIALS=".local/sa/codeheroes-test-firebase-adminsdk.json" nx seed database-seeds -c test
+
+# Check function logs
+firebase --project=codeheroes-test functions:log --only gitHubReceiver
 ```
 
 ### Production Environment
@@ -363,6 +467,21 @@ Check browser console for errors. Usually means:
 - User not authenticated
 - API URL incorrect in environment file
 
+### Webhooks Returning 500 Errors
+
+Check function logs:
+```bash
+firebase --project=codeheroes-test functions:log --only gitHubReceiver
+```
+
+Common causes:
+1. **"The query requires an index"** - Deploy indexes:
+   ```bash
+   firebase --project=codeheroes-test deploy --only firestore:indexes
+   ```
+2. **"Index is currently building"** - Wait a few minutes for index to build, then retry
+3. **User not found** - Ensure database is seeded with user and connectedAccounts
+
 ### Functions Not Updating
 
 Force rebuild:
@@ -375,6 +494,17 @@ firebase --project=codeheroes-test deploy --only functions
 
 Verify they're configured in Firebase Console:
 Authentication → Settings → Blocking functions
+
+### Redeliver Failed Webhooks
+
+After fixing issues, redeliver failed webhooks:
+```bash
+# Get delivery ID
+gh api repos/OWNER/REPO/hooks/WEBHOOK_ID/deliveries --jq '.[0].id'
+
+# Redeliver
+gh api repos/OWNER/REPO/hooks/WEBHOOK_ID/deliveries/DELIVERY_ID/attempts -X POST
+```
 
 ## Checklist
 
@@ -391,6 +521,7 @@ Use this checklist when setting up a new environment:
 - [ ] Update `.env` with credentials
 - [ ] Create/update environment.ts file
 - [ ] Deploy Firestore rules
+- [ ] Deploy Firestore indexes
 - [ ] Deploy Storage rules
 - [ ] Build and deploy functions
 - [ ] Configure blocking functions in Console
@@ -399,4 +530,6 @@ Use this checklist when setting up a new environment:
 - [ ] Create service account key
 - [ ] Configure allowed domains in seed data
 - [ ] Seed database
+- [ ] Configure GitHub webhooks
 - [ ] Test login and profile
+- [ ] Verify webhook processing and XP awards
