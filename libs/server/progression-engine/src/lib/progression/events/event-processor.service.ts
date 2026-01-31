@@ -72,7 +72,7 @@ export class EventProcessorService {
     for (let level = previousLevel + 1; level <= newLevel; level++) {
       const levelConfig = getLevelRequirements(level);
 
-      if (levelConfig?.rewards?.badges) {
+      if (levelConfig?.rewards?.badges && levelConfig.rewards.badges.length > 0) {
         logger.info('Granting level badges', { userId, level, badges: levelConfig.rewards.badges });
 
         const grantedBadges = await this.badgeService.grantBadges(userId, levelConfig.rewards.badges);
