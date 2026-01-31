@@ -1,4 +1,5 @@
 import { BadgeRarity } from '@codeheroes/types';
+import { MILESTONE_BADGES } from './milestone-badges.config';
 
 export interface BadgeDefinition {
   id: string;
@@ -11,6 +12,7 @@ export interface BadgeDefinition {
   metadata?: {
     level?: number; // For level badges
     threshold?: number; // For milestone badges
+    activityType?: string; // For milestone badges
   };
 }
 
@@ -225,6 +227,8 @@ export const BADGE_CATALOG: Record<string, BadgeDefinition> = {
     category: 'level',
     metadata: { level: 20 },
   },
+  // Merge in milestone badges
+  ...MILESTONE_BADGES,
 };
 
 /**

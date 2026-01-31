@@ -118,14 +118,16 @@ export class EventPublisherService {
    * Emit an activity recorded event
    * @param userId User ID whose activity was recorded
    * @param activity The recorded activity
+   * @param state Current progression state (includes counters for milestone checking)
    */
-  async emitActivityRecorded(userId: string, activity: Activity): Promise<void> {
+  async emitActivityRecorded(userId: string, activity: Activity, state: ProgressionState): Promise<void> {
     await this.emit({
       userId,
       timestamp: new Date().toISOString(),
       type: ProgressionEventType.ACTIVITY_RECORDED,
       data: {
         activity,
+        state,
       },
     });
 

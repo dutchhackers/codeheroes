@@ -3,6 +3,7 @@ import { NotificationService } from '@codeheroes/notifications';
 import { Collections, ProgressionEvent, ProgressionEventType } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { BadgeService } from '../../rewards/services/badge.service';
+import { MilestoneBadgeService } from '../../rewards/services/milestone-badge.service';
 import { getLevelRequirements } from '../../config/level-thresholds';
 
 /**
@@ -12,11 +13,13 @@ export class EventProcessorService {
   private db: Firestore;
   private notificationService: NotificationService;
   private badgeService: BadgeService;
+  private milestoneBadgeService: MilestoneBadgeService;
 
   constructor() {
     this.db = DatabaseInstance.getInstance();
     this.notificationService = new NotificationService();
     this.badgeService = new BadgeService();
+    this.milestoneBadgeService = new MilestoneBadgeService(this.badgeService);
   }
 
   /**
@@ -100,15 +103,46 @@ export class EventProcessorService {
 
   /**
    * Handle activity recorded events
+   * Checks for milestone badges based on activity counts
    * @param event Activity recorded event
    */
   private async handleActivityRecorded(event: ProgressionEvent): Promise<void> {
     const { userId, data } = event;
     const activity = data.activity;
-    if (!activity) return;
+    const state = data.state;
 
-    // Activity recording is handled by the progression service
-    // Future: Add activity milestone badges here (Option B)
+    if (!activity || !state) {
+      logger.warn('Activity recorded event missing activity or state', { userId });
+      return;
+    }
+
+    const activityType = activity.sourceActionType;
+    const newCount = state.counters?.actions?.[activityType];
+
+    if (newCount === undefined) {
+      logger.warn('Activity count not found in state', { userId, activityType });
+      return;
+    }
+
+    logger.info('Checking milestone badges', { userId, activityType, count: newCount });
+
+    // Check and grant milestone badge if threshold reached
+    const grantedBadge = await this.milestoneBadgeService.checkAndGrantMilestoneBadge(userId, activityType, newCount);
+
+    if (grantedBadge) {
+      // Send notification for the new badge
+      await this.notificationService.createNotification(userId, {
+        type: 'BADGE_EARNED',
+        title: 'Milestone Reached!',
+        message: `You earned: ${grantedBadge.icon} ${grantedBadge.name}`,
+        metadata: {
+          badgeId: grantedBadge.id,
+          activityType,
+          count: newCount,
+        },
+      });
+    }
+
     logger.info('Activity recorded event processed', { userId, activityType: activity.sourceActionType });
   }
 

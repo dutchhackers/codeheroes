@@ -24,6 +24,7 @@ export * from './lib/progression/events/event-publisher.service';
 
 // Supporting Services (existing)
 export * from './lib/rewards/services/badge.service';
+export * from './lib/rewards/services/milestone-badge.service';
 export * from './lib/rewards/services/level.service';
 export * from './lib/rewards/services/reward.service';
 
@@ -32,6 +33,7 @@ export * from './lib/config/xp-values.config';
 export * from './lib/config/level-thresholds';
 export * from './lib/config/level-definitions.config';
 export * from './lib/config/badge-catalog.config';
+export * from './lib/config/milestone-badges.config';
 
 // Utilities
 export * from './lib/utils/time-periods.utils';

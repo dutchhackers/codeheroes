@@ -193,8 +193,8 @@ export class ProgressionService {
    * @param activity The activity that caused the update
    */
   private async publishProgressionEvents(userId: string, updateResult: any, activity: Activity) {
-    // 1. Always publish activity recorded event
-    await this.eventPublisher.emitActivityRecorded(userId, activity);
+    // 1. Always publish activity recorded event (include state for milestone badge checking)
+    await this.eventPublisher.emitActivityRecorded(userId, activity, updateResult.state);
 
     // 2. Publish XP gained event
     await this.eventPublisher.emitXpGained(userId, activity, updateResult.state, updateResult.previousState);
