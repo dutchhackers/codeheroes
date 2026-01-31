@@ -27,6 +27,9 @@ export interface WeeklyStatsRecord {
   data: Record<string, unknown> | undefined;
 }
 
+/** Milliseconds in one day (24 * 60 * 60 * 1000) */
+const MS_PER_DAY = 86400000;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -261,7 +264,7 @@ export class UserStatsService {
     // Set to Thursday of the current week (ISO week starts Monday)
     d.setDate(d.getDate() + 4 - (d.getDay() || 7));
     const yearStart = new Date(d.getFullYear(), 0, 1);
-    const weekNumber = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+    const weekNumber = Math.ceil(((d.getTime() - yearStart.getTime()) / MS_PER_DAY + 1) / 7);
     return `${d.getFullYear()}-W${weekNumber.toString().padStart(2, '0')}`;
   }
 

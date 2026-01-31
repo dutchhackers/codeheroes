@@ -110,8 +110,18 @@ export class MyStatsComponent {
   fourWeekAverages = computed(() => {
     const history = this.weeklyHistory();
     const weeksWithData = history.filter(w => w.data);
-    const weekCount = weeksWithData.length || 1; // Avoid division by zero
 
+    // Return zeros when no data available
+    if (weeksWithData.length === 0) {
+      return {
+        prsPerWeek: '0',
+        reviewsPerWeek: '0',
+        xpPerWeek: 0,
+        pushesPerWeek: '0',
+      };
+    }
+
+    const weekCount = weeksWithData.length;
     let totalPrs = 0;
     let totalReviews = 0;
     let totalXp = 0;
