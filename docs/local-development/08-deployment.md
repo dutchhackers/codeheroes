@@ -71,14 +71,14 @@ nx run firebase-app:firebase deploy --only functions:github-receiver
 
 ### Deployed Endpoints
 
-After deployment, you'll see the function URLs:
+After deployment, you'll see the function URLs in the output:
 
-| Function | Environment | URL |
-|----------|-------------|-----|
-| API | Test | https://api-vq3onlpxua-ew.a.run.app |
-| API | Production | https://api-xxxxx-ew.a.run.app |
-| GitHub Receiver | Test | https://githubreceiver-vq3onlpxua-ew.a.run.app |
-| GitHub Receiver | Production | https://githubreceiver-xxxxx-ew.a.run.app |
+```
+Function URL (api:api(europe-west1)): https://api-HASH-ew.a.run.app
+Function URL (github-receiver:gitHubReceiver(europe-west1)): https://githubreceiver-HASH-ew.a.run.app
+```
+
+Note these URLs for webhook configuration and environment files.
 
 ## Firestore Rules & Indexes
 
@@ -130,13 +130,13 @@ After deploying backend, configure webhooks on repositories that should send eve
 # List existing webhooks
 gh api repos/OWNER/REPO/hooks --jq '.[] | {id, url: .config.url}'
 
-# Create new webhook for test environment
+# Create new webhook
 gh api repos/OWNER/REPO/hooks \
   -X POST \
   --input - << 'EOF'
 {
   "config": {
-    "url": "https://githubreceiver-vq3onlpxua-ew.a.run.app",
+    "url": "https://githubreceiver-HASH-ew.a.run.app",
     "content_type": "json"
   },
   "events": ["*"],
@@ -144,13 +144,13 @@ gh api repos/OWNER/REPO/hooks \
 }
 EOF
 
-# Update existing webhook to send all events
+# Update existing webhook
 gh api repos/OWNER/REPO/hooks/WEBHOOK_ID \
   -X PATCH \
   --input - << 'EOF'
 {
   "config": {
-    "url": "https://githubreceiver-vq3onlpxua-ew.a.run.app",
+    "url": "https://githubreceiver-HASH-ew.a.run.app",
     "content_type": "json"
   },
   "events": ["*"],
@@ -167,7 +167,7 @@ gh api repos/OWNER/REPO/hooks/WEBHOOK_ID/deliveries \
 
 1. Go to Repository Settings → Webhooks
 2. Click "Add webhook"
-3. Payload URL: `https://githubreceiver-vq3onlpxua-ew.a.run.app` (test) or your production URL
+3. Payload URL: Your deployed `gitHubReceiver` function URL
 4. Content type: `application/json`
 5. Select "Send me everything"
 6. Click "Add webhook"
