@@ -1,4 +1,4 @@
-import { Component, Input, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, inject, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { BadgeRarity } from '@codeheroes/types';
 import {
@@ -19,6 +19,7 @@ interface BadgeDisplay {
   selector: 'app-badges-grid',
   standalone: true,
   imports: [DatePipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="badges-section" aria-labelledby="badges-heading">
       <div class="section-header">
