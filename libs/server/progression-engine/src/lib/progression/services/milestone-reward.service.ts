@@ -71,14 +71,17 @@ export class MilestoneRewardService {
    * Handle rewards for reaching an activity count milestone
    */
   private async handleActivityMilestone(userId: string, actionType: string, milestone: number): Promise<void> {
-    // Generate a unique ID for the reward
+    // Generate a unique ID for the reward document
     const rewardId = `${actionType}_milestone_${milestone}_${Date.now()}`;
+    // The catalog badge ID follows a different format
+    const badgeId = `${actionType}_${milestone}`;
 
     await this.rewardService.grantReward(userId, {
       id: rewardId,
       type: 'BADGE',
       name: `${actionType.replace(/_/g, ' ')} Expert`,
       description: `Completed ${milestone} ${actionType.replace(/_/g, ' ')} actions`,
+      metadata: { badgeId },
     });
 
     logger.info('Activity milestone reward granted', { userId, actionType, milestone });
@@ -108,6 +111,8 @@ export class MilestoneRewardService {
             type: reward.type,
             name: reward.name,
             amount: reward.amount,
+            // For BADGE rewards, pass the catalog badge ID in metadata
+            metadata: reward.type === 'BADGE' ? { badgeId: reward.id } : undefined,
           });
         }
       }
