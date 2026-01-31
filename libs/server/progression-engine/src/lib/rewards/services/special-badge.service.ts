@@ -94,8 +94,9 @@ export class SpecialBadgeService {
 
       logger.debug('Weekend activity count', { userId, weekendId, count: result });
 
-      // Check if threshold reached exactly (to avoid duplicate grants)
-      if (result === threshold) {
+      // Check if threshold reached (use >= to handle edge cases where grant failed previously)
+      // BadgeService.grantBadge() handles duplicate prevention via atomic create()
+      if (result >= threshold) {
         const badge = await this.grantBadgeIfNotEarned(userId, 'weekend_warrior');
         if (badge) {
           logger.info('Weekend Warrior badge granted', { userId, weekendId, count: result });

@@ -70,9 +70,11 @@ export class RewardService {
       // Handle specific reward types
       switch (reward.type) {
         case 'BADGE':
-          // Grant the badge using the new catalog-based BadgeService
-          if (reward.id) {
-            await this.badgeService.grantBadge(userId, reward.id);
+          // Grant the badge using the catalog-based BadgeService
+          // Use metadata.badgeId for the catalog lookup (reward.id is the document ID, not badge catalog ID)
+          const badgeId = reward.metadata?.badgeId ?? reward.id;
+          if (badgeId) {
+            await this.badgeService.grantBadge(userId, badgeId);
           }
           break;
         case 'POINTS':
