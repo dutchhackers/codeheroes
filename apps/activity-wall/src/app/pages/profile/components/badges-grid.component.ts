@@ -75,11 +75,19 @@ const VISIBLE_BADGES_COUNT = 5;
 
     <!-- Modal Overlay -->
     @if (isModalOpen()) {
-      <div class="modal-overlay" (click)="closeModal()" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div
+        class="modal-overlay"
+        (click)="closeModal()"
+        (keydown.escape)="closeModal()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        tabindex="-1"
+      >
         <div class="modal-content" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <h2 id="modal-title" class="modal-title">All Badges</h2>
-            <button class="modal-close" (click)="closeModal()" aria-label="Close">✕</button>
+            <button class="modal-close" (click)="closeModal()" aria-label="Close" autofocus>✕</button>
           </div>
           <div class="modal-body">
             <div class="modal-badges-grid" role="list">
