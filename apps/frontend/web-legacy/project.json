@@ -1,0 +1,96 @@
+{
+  "name": "web-legacy",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/frontend/web-legacy/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/frontend/web-legacy",
+        "index": "apps/frontend/web-legacy/src/index.html",
+        "browser": "apps/frontend/web-legacy/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/frontend/web-legacy/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/frontend/web-legacy/public"
+          }
+        ],
+        "styles": ["apps/frontend/web-legacy/src/styles.scss"],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all",
+          "serviceWorker": "apps/frontend/web-legacy/ngsw-config.json",
+          "fileReplacements": [
+            {
+              "replace": "apps/frontend/web-legacy/src/environments/environment.ts",
+              "with": "apps/frontend/web-legacy/src/environments/environment.prod.ts"
+            }
+          ]
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "fileReplacements": [
+            {
+              "replace": "apps/frontend/web-legacy/src/environments/environment.ts",
+              "with": "apps/frontend/web-legacy/src/environments/environment.local.ts"
+            }
+          ]
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "web-legacy:build:production"
+        },
+        "development": {
+          "buildTarget": "web-legacy:build:development"
+        }
+      },
+      "defaultConfiguration": "development",
+      "continuous": true
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "web-legacy:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "web-legacy:build",
+        "staticFilePath": "dist/apps/frontend/web-legacy/browser",
+        "spa": true
+      }
+    }
+  }
+}
