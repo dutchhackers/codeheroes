@@ -211,7 +211,7 @@ nx run firebase-app:firebase functions:list
 
 **CRITICAL NOTE: Firebase Hosting for this project (`codeheroes-app-test`) is currently suspended due to a policy violation.**
 
-Attempts to deploy frontend applications (e.g., `apps/web` and `apps/activity-wall`) to Firebase Hosting will appear to succeed but the deployed sites will return a 404 "Site Not Found" error.
+Attempts to deploy frontend applications (e.g., `apps/frontend/web-legacy` and `apps/frontend/app`) to Firebase Hosting will appear to succeed but the deployed sites will return a 404 "Site Not Found" error.
 
 To resolve this, the project owner must:
 1. Review the project for any content that violates Google Cloud's Terms of Service (e.g., phishing content) and secure the project if compromised.

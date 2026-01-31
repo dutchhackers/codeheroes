@@ -1,5 +1,5 @@
 ---
-description: "Start de volledige lokale dev omgeving (emulators, activity-wall, test users)"
+description: "Start de volledige lokale dev omgeving (emulators, app, test users)"
 ---
 
 # Dev Setup Start
@@ -26,10 +26,10 @@ nx serve firebase-app
 
 Start met `run_in_background: true`. Wacht tot "All emulators ready!" verschijnt in de output (controleer met `tail`).
 
-### 3. Start Activity Wall (background)
+### 3. Start App (background)
 
 ```bash
-nx serve activity-wall
+nx serve app
 ```
 
 Start met `run_in_background: true`.

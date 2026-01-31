@@ -73,12 +73,13 @@ codeheroes/
 │   ├── github-simulator/    # CLI for simulating GitHub webhooks
 │   │   └── src/             # Testing tool
 │   │
-│   ├── activity-wall/       # Real-time activity display (Angular)
-│   │   └── src/             # TV/public display app
-│   │
-│   └── web/                 # Angular frontend
-│       └── src/
-│           └── environments/ # Firebase config
+│   └── frontend/
+│       ├── app/             # Main PWA app (Angular) - real-time activity display
+│       │   └── src/         # TV/public display app
+│       │
+│       └── web-legacy/      # Legacy Angular frontend
+│           └── src/
+│               └── environments/ # Firebase config
 │
 ├── libs/                    # Shared libraries
 │   ├── server/
@@ -181,8 +182,8 @@ codeheroes/
 | `npm install` | Install all dependencies |
 | `npm run setup` | Generate config files from .env |
 | `nx serve firebase-app` | Start all emulators + watch mode |
-| `nx serve web` | Start Angular dev server |
-| `nx serve activity-wall` | Start activity wall display |
+| `nx serve web-legacy` | Start legacy Angular dev server |
+| `nx serve app` | Start main PWA app |
 | `nx serve github-simulator -- push` | Simulate GitHub push event |
 | `nx build api` | Build api functions |
 | `nx run firebase-app:killports` | Kill all emulator ports |

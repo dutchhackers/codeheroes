@@ -2,8 +2,8 @@
   "targets": {
     "${FIREBASE_PROJECT_ID}": {
       "hosting": {
-        "web": ["${FIREBASE_PROJECT_ID}"],
-        "activity-wall": ["${FIREBASE_ACTIVITY_WALL_SITE}"]
+        "web-legacy": ["${FIREBASE_PROJECT_ID}"],
+        "app": ["${FIREBASE_ACTIVITY_WALL_SITE}"]
       }
     }
   },

@@ -34,7 +34,7 @@ jobs:
         run: npm run setup
 
       - name: Build artifact
-        run: npx nx run web:build
+        run: npx nx run web-legacy:build
 
       - name: Deploy Hosting to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0

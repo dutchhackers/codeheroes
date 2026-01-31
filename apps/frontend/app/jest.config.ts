@@ -1,5 +1,5 @@
 module.exports = {
-  displayName: 'activity-wall',
+  displayName: 'app',
   preset: '../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   coverageDirectory: '../../../coverage/apps/frontend/app',
