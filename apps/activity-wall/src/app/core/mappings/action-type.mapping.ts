@@ -1,4 +1,4 @@
-import { GameActionType } from '@codeheroes/types';
+import { ActivityType, GameActionType } from '@codeheroes/types';
 
 export interface ActionTypeDisplay {
   label: string;
@@ -30,6 +30,8 @@ const SVG_ICONS = {
   refreshCw: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`,
   mapPin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
   check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+  award: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>`,
+  trendingUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>`,
 };
 
 export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
@@ -272,9 +274,63 @@ export const ACTION_TYPE_DISPLAY: Record<GameActionType, ActionTypeDisplay> = {
   },
 };
 
+/**
+ * Display configuration for special activity types (badge-earned, level-up)
+ */
+export const ACTIVITY_TYPE_DISPLAY: Record<Exclude<ActivityType, 'game-action'>, ActionTypeDisplay> = {
+  'badge-earned': {
+    label: 'Badge Earned',
+    color: 'bg-gradient-to-r from-yellow-400 to-amber-500',
+    glowClass: '',
+    ringClass: 'ring-yellow-400/50',
+    icon: 'award',
+    borderColor: '#fbbf24',
+    cardGlowClass: 'card-glow-gold',
+    textColor: 'text-yellow-400',
+    svgIcon: SVG_ICONS.award,
+  },
+  'level-up': {
+    label: 'Level Up',
+    color: 'bg-gradient-to-r from-purple-500 to-pink-500',
+    glowClass: '',
+    ringClass: 'ring-purple-500/50',
+    icon: 'trending-up',
+    borderColor: '#a855f7',
+    cardGlowClass: 'card-glow-purple',
+    textColor: 'text-purple-400',
+    svgIcon: SVG_ICONS.trendingUp,
+  },
+};
+
 export function getActionTypeDisplay(actionType: GameActionType): ActionTypeDisplay {
   return ACTION_TYPE_DISPLAY[actionType] ?? {
     label: actionType,
+    color: 'bg-slate-500',
+    glowClass: '',
+    ringClass: 'ring-slate-500/50',
+    icon: 'circle',
+    borderColor: '#64748b',
+    cardGlowClass: '',
+    textColor: 'text-slate-400',
+    svgIcon: SVG_ICONS.codeBrackets,
+  };
+}
+
+/**
+ * Get display configuration for any activity type
+ */
+export function getActivityTypeDisplay(activityType: ActivityType, sourceActionType?: GameActionType): ActionTypeDisplay {
+  if (activityType === 'game-action' && sourceActionType) {
+    return getActionTypeDisplay(sourceActionType);
+  }
+
+  if (activityType === 'badge-earned' || activityType === 'level-up') {
+    return ACTIVITY_TYPE_DISPLAY[activityType];
+  }
+
+  // Fallback
+  return {
+    label: activityType,
     color: 'bg-slate-500',
     glowClass: '',
     ringClass: 'ring-slate-500/50',

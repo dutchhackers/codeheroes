@@ -1,5 +1,5 @@
 import { BaseRepository, getCurrentTimeAsISO, logger } from '@codeheroes/common';
-import { Activity, Collections, TimeBasedActivityStats } from '@codeheroes/types';
+import { Activity, Collections, TimeBasedActivityStats, isGameActionActivity } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { getTimePeriodIds } from '../../utils/time-periods.utils';
 
@@ -17,9 +17,13 @@ export class ActivityRepository extends BaseRepository<Activity> {
    * Record a new activity for a user
    */
   async recordActivity(activity: Omit<Activity, 'id'>): Promise<Activity> {
+    const activityType = isGameActionActivity(activity as Activity)
+      ? (activity as Activity & { sourceActionType: string }).sourceActionType
+      : activity.type;
+
     logger.debug('Recording activity', {
       userId: activity.userId,
-      type: activity.sourceActionType,
+      type: activityType,
     });
 
     try {

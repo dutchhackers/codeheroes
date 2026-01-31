@@ -1,5 +1,5 @@
 import { logger } from '@codeheroes/common';
-import { Activity, ProgressionEvent, ProgressionEventType, ProgressionState } from '@codeheroes/types';
+import { GameActionActivity, ProgressionEvent, ProgressionEventType, ProgressionState } from '@codeheroes/types';
 import { PubSub } from '@google-cloud/pubsub';
 
 /**
@@ -22,7 +22,7 @@ export class EventPublisherService {
    */
   async emitXpGained(
     userId: string,
-    activity: Activity,
+    activity: GameActionActivity,
     state: ProgressionState,
     previousState: ProgressionState,
   ): Promise<void> {
@@ -117,15 +117,17 @@ export class EventPublisherService {
   /**
    * Emit an activity recorded event
    * @param userId User ID whose activity was recorded
-   * @param activity The recorded activity
+   * @param activity The recorded activity (game action activities only)
+   * @param state Current progression state (includes counters for milestone checking)
    */
-  async emitActivityRecorded(userId: string, activity: Activity): Promise<void> {
+  async emitActivityRecorded(userId: string, activity: GameActionActivity, state: ProgressionState): Promise<void> {
     await this.emit({
       userId,
       timestamp: new Date().toISOString(),
       type: ProgressionEventType.ACTIVITY_RECORDED,
       data: {
         activity,
+        state,
       },
     });
 

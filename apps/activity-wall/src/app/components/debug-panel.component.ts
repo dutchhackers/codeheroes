@@ -1,6 +1,6 @@
 import { Component, input, output, computed } from '@angular/core';
 
-import { Activity } from '@codeheroes/types';
+import { Activity, isGameActionActivity } from '@codeheroes/types';
 
 @Component({
   selector: 'app-debug-panel',
@@ -18,7 +18,7 @@ import { Activity } from '@codeheroes/types';
         <span class="text-sm font-medium text-slate-400">
           Debug Panel
           @if (selectedActivity(); as activity) {
-            <span class="text-slate-500 ml-2">- {{ activity.sourceActionType }}</span>
+            <span class="text-slate-500 ml-2">- {{ activityTypeLabel() }}</span>
           }
         </span>
         <span class="text-slate-500">{{ isOpen() ? '(Press D to close)' : '(Press D to open)' }}</span>
@@ -46,5 +46,14 @@ export class DebugPanelComponent {
     const activity = this.selectedActivity();
     if (!activity) return '';
     return JSON.stringify(activity, null, 2);
+  });
+
+  activityTypeLabel = computed(() => {
+    const activity = this.selectedActivity();
+    if (!activity) return '';
+    if (isGameActionActivity(activity)) {
+      return activity.sourceActionType;
+    }
+    return activity.type;
   });
 }

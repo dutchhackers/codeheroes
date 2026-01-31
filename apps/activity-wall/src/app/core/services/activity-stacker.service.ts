@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Activity, GameActionType } from '@codeheroes/types';
+import { Activity, GameActionActivity, GameActionContext, isGameActionActivity } from '@codeheroes/types';
 import {
   PR_STACKABLE_ACTION_TYPES,
   PRFinalState,
@@ -78,6 +78,12 @@ export class ActivityStackerService {
    * @returns Stack key string or null if not stackable
    */
   private getStackKey(activity: Activity): string | null {
+    // Only game-action activities can be stacked
+    // Badge-earned and level-up activities are never stacked
+    if (!isGameActionActivity(activity)) {
+      return null;
+    }
+
     const actionType = activity.sourceActionType;
 
     // Check if action type is in the stackable list
@@ -105,6 +111,11 @@ export class ActivityStackerService {
    * Extracts PR information from an activity based on its context type
    */
   private extractPRInfo(activity: Activity): PRInfo | null {
+    // Only game-action activities have PR context
+    if (!isGameActionActivity(activity)) {
+      return null;
+    }
+
     const context = activity.context;
     const actionType = activity.sourceActionType;
 
@@ -149,7 +160,7 @@ export class ActivityStackerService {
   /**
    * Gets the repository ID from a context object
    */
-  private getRepositoryId(context: Activity['context']): string | null {
+  private getRepositoryId(context: GameActionContext): string | null {
     if ('repository' in context && context.repository) {
       return context.repository.id;
     }
@@ -159,7 +170,7 @@ export class ActivityStackerService {
   /**
    * Gets the repository name from a context object
    */
-  private getRepositoryName(context: Activity['context']): string {
+  private getRepositoryName(context: GameActionContext): string {
     if ('repository' in context && context.repository) {
       return context.repository.name;
     }
@@ -168,6 +179,7 @@ export class ActivityStackerService {
 
   /**
    * Creates an ActivityStack from a group of related activities
+   * Note: Only GameActionActivity can be stacked, so we cast safely here
    */
   private createStack(stackKey: string, activities: Activity[]): ActivityStack {
     // Sort activities by createdAt ascending (oldest first for timeline display)
@@ -175,30 +187,33 @@ export class ActivityStackerService {
       (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
 
+    // Cast to GameActionActivity since only game actions can be stacked
+    const gameActivities = sortedActivities as GameActionActivity[];
+
     // Get PR info from the first activity that has it
-    const prInfo = this.extractPRInfo(sortedActivities[0]) ?? {
+    const prInfo = this.extractPRInfo(gameActivities[0]) ?? {
       number: 0,
       title: 'Unknown PR',
     };
 
     // Calculate total XP
-    const totalXp = sortedActivities.reduce(
+    const totalXp = gameActivities.reduce(
       (sum, activity) => sum + (activity.xp?.earned ?? 0),
       0
     );
 
     // Determine final state based on most recent final action
-    const finalState = this.determineFinalState(sortedActivities);
+    const finalState = this.determineFinalState(gameActivities);
 
     // Get timestamps
-    const firstActivity = sortedActivities[0];
-    const lastActivity = sortedActivities[sortedActivities.length - 1];
+    const firstActivity = gameActivities[0];
+    const lastActivity = gameActivities[gameActivities.length - 1];
 
     return {
       id: stackKey,
       type: 'stack',
       prNumber: prInfo.number,
-      prTitle: this.findBestTitle(sortedActivities) || prInfo.title,
+      prTitle: this.findBestTitle(gameActivities) || prInfo.title,
       repoName: this.getRepositoryName(firstActivity.context),
       activities: sortedActivities,
       totalXp,
@@ -211,7 +226,7 @@ export class ActivityStackerService {
   /**
    * Finds the best (most complete) PR title from the activities
    */
-  private findBestTitle(activities: Activity[]): string | null {
+  private findBestTitle(activities: GameActionActivity[]): string | null {
     for (const activity of activities) {
       const prInfo = this.extractPRInfo(activity);
       if (prInfo?.title && prInfo.title.length > 0) {
@@ -224,7 +239,7 @@ export class ActivityStackerService {
   /**
    * Determines the final state of a PR based on the activities
    */
-  private determineFinalState(activities: Activity[]): PRFinalState {
+  private determineFinalState(activities: GameActionActivity[]): PRFinalState {
     // Check from newest to oldest for final state actions
     for (let i = activities.length - 1; i >= 0; i--) {
       const actionType = activities[i].sourceActionType;

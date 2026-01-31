@@ -258,14 +258,38 @@ export class HqDataService {
   }
 
   #transformActivitiesToHighlights(activities: Activity[]): Highlight[] {
-    return activities.map((activity) => ({
-      id: activity.id,
-      type: 'activity' as const,
-      icon: this.#getIconForActionType(activity.sourceActionType),
-      message: activity.userFacingDescription,
-      xp: activity.xp?.earned,
-      timestamp: activity.createdAt,
-    }));
+    return activities.map((activity) => {
+      // Handle different activity types
+      if (activity.type === 'game-action') {
+        return {
+          id: activity.id,
+          type: 'activity' as const,
+          icon: this.#getIconForActionType(activity.sourceActionType),
+          message: activity.userFacingDescription,
+          xp: activity.xp?.earned,
+          timestamp: activity.createdAt,
+        };
+      } else if (activity.type === 'badge-earned') {
+        return {
+          id: activity.id,
+          type: 'activity' as const,
+          icon: 'award',
+          message: activity.userFacingDescription,
+          xp: undefined,
+          timestamp: activity.createdAt,
+        };
+      } else {
+        // level-up
+        return {
+          id: activity.id,
+          type: 'activity' as const,
+          icon: 'trending-up',
+          message: activity.userFacingDescription,
+          xp: undefined,
+          timestamp: activity.createdAt,
+        };
+      }
+    });
   }
 
   #getIconForActionType(actionType: string): string {

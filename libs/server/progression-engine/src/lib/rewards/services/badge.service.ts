@@ -1,98 +1,108 @@
-import { DatabaseInstance } from '@codeheroes/common';
-import { Collections } from '@codeheroes/types';
-import { FieldValue, Firestore } from 'firebase-admin/firestore';
-import { EventProcessorService } from '../../progression/events/event-processor.service';
-
-export interface Badge {
-  id: string;
-  name: string;
-  description?: string;
-  earnedAt?: string;
-  xp?: number;
-}
-
-interface BadgeContext {
-  totalActions: number;
-  actionType: string;
-  metadata?: Record<string, any>;
-}
+import { DatabaseInstance, logger } from '@codeheroes/common';
+import { Collections, UserBadge } from '@codeheroes/types';
+import { Firestore } from 'firebase-admin/firestore';
+import { getBadgeDefinition } from '../../config/badge-catalog.config';
 
 export class BadgeService {
   private db: Firestore;
-  private eventHandler: EventProcessorService;
 
-  constructor(eventHandler?: EventProcessorService) {
+  constructor() {
     this.db = DatabaseInstance.getInstance();
-    this.eventHandler = eventHandler || new EventProcessorService();
   }
 
-  async processBadges(userId: string, context: BadgeContext): Promise<Badge[]> {
-    const userRef = this.db.collection(Collections.Users).doc(userId);
-    const badgesRef = userRef.collection(Collections.Badges);
-    const badgeSnapshot = await badgesRef.get();
-    const existingBadges = new Set(badgeSnapshot.docs.map((doc) => doc.id));
-    const earnedBadges: Badge[] = [];
-
-    // Check activity-based badges
-    const activityBadges = await this.checkActivityBadges(context.actionType, context.totalActions, existingBadges);
-    earnedBadges.push(...activityBadges);
-
-    // Save earned badges
-    for (const badge of earnedBadges) {
-      await badgesRef.doc(badge.id).set({
-        ...badge,
-        earnedAt: new Date().toISOString(),
-      });
-
-      // Update user stats to reflect new badge
-      await userRef
-        .collection(Collections.Stats)
-        .doc('current')
-        .update({
-          'stats.badges.total': FieldValue.increment(1),
-          'stats.badges.lastEarned': badge.earnedAt,
-        });
+  /**
+   * Grant a badge to a user by badge ID
+   * Looks up the badge in the catalog and creates it in Firestore
+   * Returns null if badge already earned or not found in catalog
+   * Uses atomic create() to prevent race conditions with concurrent calls
+   */
+  async grantBadge(userId: string, badgeId: string): Promise<UserBadge | null> {
+    // 1. Check if badge exists in catalog
+    const badgeDefinition = getBadgeDefinition(badgeId);
+    if (!badgeDefinition) {
+      logger.warn('Badge not found in catalog', { badgeId });
+      return null;
     }
 
-    return earnedBadges;
+    // 2. Create the badge document
+    const userBadge: UserBadge = {
+      id: badgeDefinition.id,
+      name: badgeDefinition.name,
+      description: badgeDefinition.description,
+      icon: badgeDefinition.icon,
+      imageUrl: badgeDefinition.imageUrl,
+      rarity: badgeDefinition.rarity,
+      category: badgeDefinition.category,
+      earnedAt: new Date().toISOString(),
+      metadata: badgeDefinition.metadata,
+    };
+
+    // 3. Use atomic create() to ensure we only grant the badge if it doesn't exist
+    // This prevents race conditions where two concurrent calls both pass an existence check
+    // Use badgeDefinition.id consistently for document ID to prevent path/field mismatch
+    const badgeRef = this.db.collection(Collections.Users).doc(userId).collection(Collections.Badges).doc(badgeDefinition.id);
+
+    try {
+      await badgeRef.create(userBadge);
+      logger.info('Badge granted', { userId, badgeId: badgeDefinition.id, badgeName: userBadge.name });
+      return userBadge;
+    } catch (error: unknown) {
+      // If the document already exists, Firestore throws an error with code 6 (ALREADY_EXISTS)
+      const firestoreError = error as { code?: number | string };
+      if (firestoreError.code === 6 || firestoreError.code === 'ALREADY_EXISTS') {
+        logger.info('User already has badge', { userId, badgeId });
+        return null;
+      }
+      throw error;
+    }
   }
 
-  async getUserBadges(userId: string): Promise<Badge[]> {
-    const snapshot = await this.db.collection(Collections.Users).doc(userId).collection(Collections.Badges).get();
+  /**
+   * Grant multiple badges to a user
+   */
+  async grantBadges(userId: string, badgeIds: string[]): Promise<UserBadge[]> {
+    const granted: UserBadge[] = [];
 
-    return snapshot.docs.map(
-      (doc) =>
-        ({
-          ...doc.data(),
-          id: doc.id,
-        }) as Badge,
-    );
-  }
-
-  private async checkActivityBadges(
-    actionType: string,
-    totalActions: number,
-    existingBadges: Set<string>,
-  ): Promise<Badge[]> {
-    const activityBadges: Badge[] = [];
-    const milestones = [
-      { id: 'first_action', name: 'First Steps', threshold: 1, xp: 100 },
-      { id: 'ten_actions', name: 'Getting Started', threshold: 10, xp: 500 },
-      { id: 'fifty_actions', name: 'Regular Contributor', threshold: 50, xp: 2000 },
-      { id: 'hundred_actions', name: 'Dedicated Developer', threshold: 100, xp: 5000 },
-    ];
-
-    for (const milestone of milestones) {
-      if (totalActions >= milestone.threshold && !existingBadges.has(milestone.id)) {
-        activityBadges.push({
-          id: milestone.id,
-          name: milestone.name,
-          description: `Complete ${milestone.threshold} ${actionType} actions`,
-          xp: milestone.xp,
-        });
+    for (const badgeId of badgeIds) {
+      const badge = await this.grantBadge(userId, badgeId);
+      if (badge) {
+        granted.push(badge);
       }
     }
 
-    return activityBadges;
+    return granted;
+  }
+
+  /**
+   * Check if a user has a specific badge
+   */
+  async hasBadge(userId: string, badgeId: string): Promise<boolean> {
+    const badgeRef = this.db.collection(Collections.Users).doc(userId).collection(Collections.Badges).doc(badgeId);
+
+    const doc = await badgeRef.get();
+    return doc.exists;
+  }
+
+  /**
+   * Get all badges for a user
+   */
+  async getUserBadges(userId: string): Promise<UserBadge[]> {
+    const snapshot = await this.db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.Badges)
+      .orderBy('earnedAt', 'desc')
+      .get();
+
+    return snapshot.docs.map((doc) => doc.data() as UserBadge);
+  }
+
+  /**
+   * Get badge count for a user
+   */
+  async getBadgeCount(userId: string): Promise<number> {
+    const snapshot = await this.db.collection(Collections.Users).doc(userId).collection(Collections.Badges).count().get();
+
+    return snapshot.data().count;
   }
 }

@@ -1,5 +1,5 @@
 import { logger } from '@codeheroes/common';
-import { GameAction, ActionResult, Activity } from '@codeheroes/types';
+import { GameAction, ActionResult, GameActionActivity } from '@codeheroes/types';
 
 import { ProgressionRepository } from '../repositories/progression.repository';
 import { ActivityRepository } from '../repositories/activity.repository';
@@ -56,7 +56,7 @@ export class ProgressionService {
       const activity = this.activityRecorder.createFromAction(action, xpResult);
 
       // 4. Record the activity in the database
-      const recordedActivity = await this.activityRepository.recordActivity(activity);
+      const recordedActivity = await this.activityRepository.recordActivity(activity) as GameActionActivity;
 
       // 5. Update user's progression state
       const progressionUpdate: ProgressionUpdate = {
@@ -125,7 +125,7 @@ export class ProgressionService {
       }
 
       // 2. Create manual activity if needed
-      let activity: Activity | undefined;
+      let activity: GameActionActivity | undefined;
       if (update.activityType) {
         activity = this.activityRecorder.createManualActivity(userId, update);
         await this.activityRepository.recordActivity(activity);
@@ -190,11 +190,11 @@ export class ProgressionService {
    * Publish events based on progression state changes
    * @param userId User ID
    * @param updateResult Result of the state update
-   * @param activity The activity that caused the update
+   * @param activity The game action activity that caused the update
    */
-  private async publishProgressionEvents(userId: string, updateResult: any, activity: Activity) {
-    // 1. Always publish activity recorded event
-    await this.eventPublisher.emitActivityRecorded(userId, activity);
+  private async publishProgressionEvents(userId: string, updateResult: any, activity: GameActionActivity) {
+    // 1. Always publish activity recorded event (include state for milestone badge checking)
+    await this.eventPublisher.emitActivityRecorded(userId, activity, updateResult.state);
 
     // 2. Publish XP gained event
     await this.eventPublisher.emitXpGained(userId, activity, updateResult.state, updateResult.previousState);

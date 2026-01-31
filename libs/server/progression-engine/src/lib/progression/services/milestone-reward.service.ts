@@ -1,5 +1,6 @@
 import { logger } from '@codeheroes/common';
 import { GameAction, ProgressionState } from '@codeheroes/types';
+import { getMilestoneBadgeForCount } from '../../config/milestone-badges.config';
 import { LevelService } from '../../rewards/services/level.service';
 import { RewardService } from '../../rewards/services/reward.service';
 
@@ -34,7 +35,7 @@ export class MilestoneRewardService {
         newLevel: state.level,
       });
 
-      await this.handleLevelUpRewards(userId, state.level);
+      await this.handleLevelUpRewards(userId, previousState.level || 0, state.level);
       rewardsGranted = true;
     }
 
@@ -71,42 +72,56 @@ export class MilestoneRewardService {
    * Handle rewards for reaching an activity count milestone
    */
   private async handleActivityMilestone(userId: string, actionType: string, milestone: number): Promise<void> {
-    // Generate a unique ID for the reward
+    // Look up the actual badge from the catalog using activityType and count
+    const milestoneBadge = getMilestoneBadgeForCount(actionType, milestone);
+
+    if (!milestoneBadge) {
+      logger.warn('No milestone badge found in catalog', { actionType, milestone });
+      return;
+    }
+
+    // Generate a unique ID for the reward document
     const rewardId = `${actionType}_milestone_${milestone}_${Date.now()}`;
 
     await this.rewardService.grantReward(userId, {
       id: rewardId,
       type: 'BADGE',
-      name: `${actionType.replace(/_/g, ' ')} Expert`,
-      description: `Completed ${milestone} ${actionType.replace(/_/g, ' ')} actions`,
+      name: milestoneBadge.name,
+      description: milestoneBadge.description,
+      metadata: { badgeId: milestoneBadge.id },
     });
 
-    logger.info('Activity milestone reward granted', { userId, actionType, milestone });
+    logger.info('Activity milestone reward granted', { userId, actionType, milestone, badgeId: milestoneBadge.id });
   }
 
   /**
    * Handle rewards for level-up milestones
+   * Iterates through ALL levels gained to ensure no rewards are skipped
    */
-  private async handleLevelUpRewards(userId: string, newLevel: number): Promise<void> {
-    const previousLevel = newLevel - 1;
-    const levelRequirements = this.levelService.getNextLevelRequirements(previousLevel);
+  private async handleLevelUpRewards(userId: string, oldLevel: number, newLevel: number): Promise<void> {
+    // Iterate through ALL levels gained (fixes level skipping bug)
+    for (let level = oldLevel + 1; level <= newLevel; level++) {
+      const levelRequirements = this.levelService.getNextLevelRequirements(level - 1);
 
-    if (levelRequirements.rewards && levelRequirements.rewards.length > 0) {
-      logger.info('Granting level-up rewards', {
-        userId,
-        newLevel,
-        rewardCount: levelRequirements.rewards.length,
-      });
-
-      for (const reward of levelRequirements.rewards) {
-        const rewardId = `level_${newLevel}_reward_${reward.id}_${Date.now()}`;
-
-        await this.rewardService.grantReward(userId, {
-          id: rewardId,
-          type: reward.type,
-          name: reward.name,
-          amount: reward.amount,
+      if (levelRequirements?.rewards && levelRequirements.rewards.length > 0) {
+        logger.info('Granting level-up rewards', {
+          userId,
+          level,
+          rewardCount: levelRequirements.rewards.length,
         });
+
+        for (const reward of levelRequirements.rewards) {
+          const rewardId = `level_${level}_reward_${reward.id}_${Date.now()}`;
+
+          await this.rewardService.grantReward(userId, {
+            id: rewardId,
+            type: reward.type,
+            name: reward.name,
+            amount: reward.amount,
+            // For BADGE rewards, pass the catalog badge ID in metadata
+            metadata: reward.type === 'BADGE' ? { badgeId: reward.id } : undefined,
+          });
+        }
       }
     }
   }

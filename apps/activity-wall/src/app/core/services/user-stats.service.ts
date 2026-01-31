@@ -169,9 +169,17 @@ export class UserStatsService {
    */
   getUserBadges(userId: string): Observable<UserBadge[]> {
     const badgesRef = collection(this.#firestore, `users/${userId}/badges`);
-    const badgesQuery = query(badgesRef, orderBy('earnedAt', 'desc'));
-    return collectionData(badgesQuery, { idField: 'id' }).pipe(
-      map((badges) => badges as UserBadge[]),
+    // Note: removed orderBy to avoid potential index issues; badges sorted client-side
+    return collectionData(badgesRef, { idField: 'id' }).pipe(
+      map((badges) => {
+        const typedBadges = badges as UserBadge[];
+        // Sort a copy to avoid mutating the original array (important for RxJS stream immutability)
+        return [...typedBadges].sort((a, b) => {
+          const dateA = a.earnedAt ? new Date(a.earnedAt).getTime() : 0;
+          const dateB = b.earnedAt ? new Date(b.earnedAt).getTime() : 0;
+          return dateB - dateA;
+        });
+      }),
       catchError((error) => {
         console.error('Error fetching user badges:', error);
         return of([]);
