@@ -1,8 +1,14 @@
 import { Component, input, output, computed } from '@angular/core';
 
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Activity, GameActionType } from '@codeheroes/types';
-import { getActionTypeDisplay } from '../core/mappings/action-type.mapping';
+import {
+  Activity,
+  GameActionType,
+  isGameActionActivity,
+  isBadgeEarnedActivity,
+  isLevelUpActivity,
+} from '@codeheroes/types';
+import { getActivityTypeDisplay } from '../core/mappings/action-type.mapping';
 import { UserInfo } from '../core/services/user-cache.service';
 
 @Component({
@@ -24,13 +30,24 @@ import { UserInfo } from '../core/services/user-cache.service';
       <div class="flex items-center gap-3 md:gap-4 p-4 md:p-5 pb-3 md:pb-4">
         <!-- Icon on LEFT for certain types -->
         @if (iconPosition() === 'left') {
-          <div
-            class="w-10 h-10 md:w-12 md:h-12 flex-shrink-0"
-            [class]="actionDisplay().textColor"
-            [innerHTML]="sanitizedIcon()"
-            role="img"
-            [attr.aria-label]="actionDisplay().label + ' icon'"
-          ></div>
+          @if (isBadgeActivity()) {
+            <!-- Large emoji for badges -->
+            <div
+              class="w-10 h-10 md:w-12 md:h-12 flex-shrink-0 flex items-center justify-center text-3xl md:text-4xl"
+              role="img"
+              [attr.aria-label]="badgeIcon() + ' badge'"
+            >
+              {{ badgeIcon() }}
+            </div>
+          } @else {
+            <div
+              class="w-10 h-10 md:w-12 md:h-12 flex-shrink-0"
+              [class]="actionDisplay().textColor"
+              [innerHTML]="sanitizedIcon()"
+              role="img"
+              [attr.aria-label]="actionDisplay().label + ' icon'"
+            ></div>
+          }
         }
 
         <!-- Avatar on LEFT (when icon is on right) -->
@@ -108,8 +125,16 @@ import { UserInfo } from '../core/services/user-cache.service';
           class="border-t pt-2 md:pt-3 flex items-center justify-between text-xs md:text-sm font-mono"
           [style.border-color]="actionDisplay().borderColor + '33'"
         >
-          <span class="text-slate-500 truncate">{{ repoName() }}</span>
-          <span class="text-slate-400 flex-shrink-0 ml-4">+{{ xpEarned() }} XP</span>
+          @if (isBadgeActivity()) {
+            <span class="text-slate-400 truncate">{{ badgeName() }} <span class="text-slate-500">({{ badgeRarity() }})</span></span>
+          } @else if (isLevelActivity()) {
+            <span class="text-slate-400 truncate">Level {{ levelInfo() }}</span>
+          } @else {
+            <span class="text-slate-500 truncate">{{ repoName() }}</span>
+          }
+          @if (!isBadgeActivity() && !isLevelActivity()) {
+            <span class="text-slate-400 flex-shrink-0 ml-4">+{{ xpEarned() }} XP</span>
+          }
         </div>
       </div>
     </div>
@@ -169,6 +194,14 @@ import { UserInfo } from '../core/services/user-cache.service';
         0 0 8px var(--glow-color, #00f5ff),
         0 0 16px color-mix(in srgb, var(--glow-color, #00f5ff) 50%, transparent);
     }
+
+    /* Gold glow for badges */
+    :host ::ng-deep .card-glow-gold {
+      box-shadow:
+        0 0 15px rgba(251, 191, 36, 0.3),
+        0 0 30px rgba(251, 191, 36, 0.15),
+        inset 0 0 20px rgba(251, 191, 36, 0.05);
+    }
   `],
 })
 export class ActivityItemComponent {
@@ -179,18 +212,74 @@ export class ActivityItemComponent {
 
   constructor(private sanitizer: DomSanitizer) {}
 
-  actionDisplay = computed(() => getActionTypeDisplay(this.activity().sourceActionType));
+  // Check activity type
+  isBadgeActivity = computed(() => isBadgeEarnedActivity(this.activity()));
+  isLevelActivity = computed(() => isLevelUpActivity(this.activity()));
+  isGameActivity = computed(() => isGameActionActivity(this.activity()));
+
+  actionDisplay = computed(() => {
+    const activity = this.activity();
+    if (isGameActionActivity(activity)) {
+      return getActivityTypeDisplay('game-action', activity.sourceActionType);
+    }
+    return getActivityTypeDisplay(activity.type);
+  });
 
   sanitizedIcon = computed((): SafeHtml => {
     return this.sanitizer.bypassSecurityTrustHtml(this.actionDisplay().svgIcon);
   });
 
+  // Badge-specific computed properties
+  badgeIcon = computed((): string => {
+    const activity = this.activity();
+    if (isBadgeEarnedActivity(activity)) {
+      return activity.badge.icon;
+    }
+    return '';
+  });
+
+  badgeName = computed((): string => {
+    const activity = this.activity();
+    if (isBadgeEarnedActivity(activity)) {
+      return activity.badge.name;
+    }
+    return '';
+  });
+
+  badgeRarity = computed((): string => {
+    const activity = this.activity();
+    if (isBadgeEarnedActivity(activity)) {
+      return activity.badge.rarity.toLowerCase();
+    }
+    return '';
+  });
+
+  // Level-specific computed properties
+  levelInfo = computed((): string => {
+    const activity = this.activity();
+    if (isLevelUpActivity(activity)) {
+      return `${activity.level.new}`;
+    }
+    return '';
+  });
+
   // Icon position based on action type
   iconPosition = computed((): 'left' | 'right' => {
-    const actionType = this.activity().sourceActionType;
-    // Right side: push, PR created (code-related creation)
-    const rightSideTypes: GameActionType[] = ['code_push', 'pull_request_create', 'release_publish'];
-    return rightSideTypes.includes(actionType) ? 'right' : 'left';
+    const activity = this.activity();
+
+    // Badge and level-up activities always have icon on left
+    if (isBadgeEarnedActivity(activity) || isLevelUpActivity(activity)) {
+      return 'left';
+    }
+
+    if (isGameActionActivity(activity)) {
+      const actionType = activity.sourceActionType;
+      // Right side: push, PR created (code-related creation)
+      const rightSideTypes: GameActionType[] = ['code_push', 'pull_request_create', 'release_publish'];
+      return rightSideTypes.includes(actionType) ? 'right' : 'left';
+    }
+
+    return 'left';
   });
 
   userInitials = computed(() => {
@@ -242,11 +331,34 @@ export class ActivityItemComponent {
   // Plain text description (no HTML, single color)
   descriptionText = computed((): string => {
     const activity = this.activity();
-    const actionType = activity.sourceActionType;
-    return this.buildSentence(actionType, activity);
+
+    // Handle badge-earned activities
+    if (isBadgeEarnedActivity(activity)) {
+      return `earned ${activity.badge.icon} ${activity.badge.name}!`;
+    }
+
+    // Handle level-up activities
+    if (isLevelUpActivity(activity)) {
+      if (activity.level.new - activity.level.previous > 1) {
+        return `leveled up to ${activity.level.new}!`;
+      }
+      return `reached level ${activity.level.new}!`;
+    }
+
+    // Handle game action activities
+    if (isGameActionActivity(activity)) {
+      return this.buildSentence(activity.sourceActionType, activity);
+    }
+
+    // Fallback - this shouldn't happen with the current union types
+    return (activity as Activity).userFacingDescription;
   });
 
   private buildSentence(actionType: GameActionType, activity: Activity): string {
+    if (!isGameActionActivity(activity)) {
+      return activity.userFacingDescription;
+    }
+
     const desc = activity.userFacingDescription;
 
     // Extract useful info from description
@@ -343,14 +455,21 @@ export class ActivityItemComponent {
   });
 
   repoName = computed((): string => {
-    const context = this.activity().context;
-    if ('repository' in context && context.repository) {
-      return context.repository.name;
+    const activity = this.activity();
+    if (isGameActionActivity(activity)) {
+      const context = activity.context;
+      if ('repository' in context && context.repository) {
+        return context.repository.name;
+      }
     }
     return '';
   });
 
   xpEarned = computed((): number => {
-    return this.activity().xp?.earned ?? 0;
+    const activity = this.activity();
+    if (isGameActionActivity(activity)) {
+      return activity.xp?.earned ?? 0;
+    }
+    return 0;
   });
 }

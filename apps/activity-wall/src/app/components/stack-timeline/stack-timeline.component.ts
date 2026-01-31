@@ -1,6 +1,6 @@
 import { Component, input, computed, inject } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Activity } from '@codeheroes/types';
+import { Activity, GameActionActivity, isGameActionActivity } from '@codeheroes/types';
 import { getActionTypeDisplay } from '../../core/mappings/action-type.mapping';
 import { UserCacheService, UserInfo } from '../../core/services/user-cache.service';
 
@@ -12,6 +12,7 @@ interface TimelineEvent {
   sanitizedIcon: SafeHtml;
   textColor: string;
   borderColor: string;
+  xpEarned: number;
 }
 
 @Component({
@@ -50,7 +51,7 @@ interface TimelineEvent {
               @if (!last) {
                 <!-- Subtle XP badge -->
                 <span class="text-slate-600 text-xs font-mono ml-auto">
-                  +{{ event.activity.xp.earned || 0 }} XP
+                  +{{ event.xpEarned }} XP
                 </span>
               }
             </div>
@@ -68,18 +69,21 @@ export class StackTimelineComponent {
   activities = input.required<Activity[]>();
 
   timelineEvents = computed((): TimelineEvent[] => {
-    return this.activities().map((activity) => {
-      const display = getActionTypeDisplay(activity.sourceActionType);
-      return {
-        activity,
-        userInfo: this.#userCacheService.getUserInfo(activity.userId),
-        formattedTime: this.formatTime(activity.createdAt),
-        actionLabel: this.getActionLabel(activity),
-        sanitizedIcon: this.#sanitizer.bypassSecurityTrustHtml(display.svgIcon),
-        textColor: display.textColor,
-        borderColor: display.borderColor,
-      };
-    });
+    return this.activities()
+      .filter(isGameActionActivity) // Only game actions in stacks
+      .map((activity) => {
+        const display = getActionTypeDisplay(activity.sourceActionType);
+        return {
+          activity,
+          userInfo: this.#userCacheService.getUserInfo(activity.userId),
+          formattedTime: this.formatTime(activity.createdAt),
+          actionLabel: this.getActionLabel(activity),
+          sanitizedIcon: this.#sanitizer.bypassSecurityTrustHtml(display.svgIcon),
+          textColor: display.textColor,
+          borderColor: display.borderColor,
+          xpEarned: activity.xp?.earned ?? 0,
+        };
+      });
   });
 
   private formatTime(timestamp: string): string {
@@ -91,7 +95,7 @@ export class StackTimelineComponent {
     });
   }
 
-  private getActionLabel(activity: Activity): string {
+  private getActionLabel(activity: GameActionActivity): string {
     switch (activity.sourceActionType) {
       case 'pull_request_create':
         return 'opened';
@@ -112,7 +116,7 @@ export class StackTimelineComponent {
     }
   }
 
-  private getReviewLabel(activity: Activity): string {
+  private getReviewLabel(activity: GameActionActivity): string {
     const context = activity.context;
     if (context.type === 'code_review' && 'review' in context) {
       switch (context.review.state) {

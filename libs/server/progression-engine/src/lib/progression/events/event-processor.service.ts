@@ -1,10 +1,11 @@
 import { DatabaseInstance, logger } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
-import { Collections, ProgressionEvent, ProgressionEventType } from '@codeheroes/types';
+import { Collections, GameActionActivity, isGameActionActivity, ProgressionEvent, ProgressionEventType } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { BadgeService } from '../../rewards/services/badge.service';
 import { MilestoneBadgeService } from '../../rewards/services/milestone-badge.service';
 import { SpecialBadgeService } from '../../rewards/services/special-badge.service';
+import { RewardActivityService } from '../../rewards/services/reward-activity.service';
 import { getLevelRequirements } from '../../config/level-thresholds';
 
 /**
@@ -16,6 +17,7 @@ export class EventProcessorService {
   private badgeService: BadgeService;
   private milestoneBadgeService: MilestoneBadgeService;
   private specialBadgeService: SpecialBadgeService;
+  private rewardActivityService: RewardActivityService;
 
   constructor() {
     this.db = DatabaseInstance.getInstance();
@@ -23,6 +25,7 @@ export class EventProcessorService {
     this.badgeService = new BadgeService();
     this.milestoneBadgeService = new MilestoneBadgeService(this.badgeService);
     this.specialBadgeService = new SpecialBadgeService(this.badgeService);
+    this.rewardActivityService = new RewardActivityService();
   }
 
   /**
@@ -56,10 +59,14 @@ export class EventProcessorService {
     const { userId, data } = event;
     const newLevel = data.state?.level;
     const previousLevel = data.previousState?.level || 0;
+    const totalXp = data.state?.xp || 0;
 
     if (!newLevel) return;
 
     logger.info('Processing level up', { userId, previousLevel, newLevel });
+
+    // Record level-up activity in the feed
+    await this.rewardActivityService.recordLevelUp(userId, previousLevel, newLevel, totalXp);
 
     // Grant badges for ALL levels gained (handles multiple level-ups at once)
     for (let level = previousLevel + 1; level <= newLevel; level++) {
@@ -70,8 +77,14 @@ export class EventProcessorService {
 
         const grantedBadges = await this.badgeService.grantBadges(userId, levelConfig.rewards.badges);
 
-        // Send notification for each granted badge
+        // Record badge activity and send notification for each granted badge
         for (const badge of grantedBadges) {
+          // Record badge earned activity in the feed
+          await this.rewardActivityService.recordBadgeEarned(userId, badge, {
+            type: 'level-up',
+            level,
+          });
+
           await this.notificationService.createNotification(userId, {
             type: 'BADGE_EARNED',
             title: 'New Badge Earned!',
@@ -119,7 +132,14 @@ export class EventProcessorService {
       return;
     }
 
-    const activityType = activity.sourceActionType;
+    // Only process game-action activities for milestone and special badges
+    if (!isGameActionActivity(activity)) {
+      logger.debug('Skipping non-game-action activity for badge checks', { userId, type: activity.type });
+      return;
+    }
+
+    const gameActivity = activity as GameActionActivity;
+    const activityType = gameActivity.sourceActionType;
     const newCount = state.counters?.actions?.[activityType];
 
     if (newCount === undefined) {
@@ -137,6 +157,13 @@ export class EventProcessorService {
     );
 
     if (grantedMilestoneBadge) {
+      // Record badge earned activity in the feed
+      await this.rewardActivityService.recordBadgeEarned(userId, grantedMilestoneBadge, {
+        type: 'milestone',
+        activityType,
+        count: newCount,
+      });
+
       await this.notificationService.createNotification(userId, {
         type: 'BADGE_EARNED',
         title: 'Milestone Reached!',
@@ -150,9 +177,14 @@ export class EventProcessorService {
     }
 
     // Check and grant special time-based badges
-    const grantedSpecialBadges = await this.specialBadgeService.checkTimeBadges(userId, activity);
+    const grantedSpecialBadges = await this.specialBadgeService.checkTimeBadges(userId, gameActivity);
 
     for (const badge of grantedSpecialBadges) {
+      // Record badge earned activity in the feed
+      await this.rewardActivityService.recordBadgeEarned(userId, badge, {
+        type: 'special',
+      });
+
       await this.notificationService.createNotification(userId, {
         type: 'BADGE_EARNED',
         title: 'Special Badge Earned!',
@@ -164,7 +196,7 @@ export class EventProcessorService {
       });
     }
 
-    logger.info('Activity recorded event processed', { userId, activityType: activity.sourceActionType });
+    logger.info('Activity recorded event processed', { userId, activityType });
   }
 
   /**

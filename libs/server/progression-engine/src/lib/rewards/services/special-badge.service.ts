@@ -1,5 +1,5 @@
 import { DatabaseInstance, logger } from '@codeheroes/common';
-import { Activity, Collections, UserBadge } from '@codeheroes/types';
+import { GameActionActivity, Collections, UserBadge } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { BadgeService } from './badge.service';
 import {
@@ -23,12 +23,12 @@ export class SpecialBadgeService {
   }
 
   /**
-   * Check all time-based special badges for an activity
+   * Check all time-based special badges for a game action activity
    * @param userId User ID
-   * @param activity The recorded activity
+   * @param activity The recorded game action activity
    * @returns Array of granted badges
    */
-  async checkTimeBadges(userId: string, activity: Activity): Promise<UserBadge[]> {
+  async checkTimeBadges(userId: string, activity: GameActionActivity): Promise<UserBadge[]> {
     const grantedBadges: UserBadge[] = [];
     const timestamp = activity.createdAt || new Date().toISOString();
 

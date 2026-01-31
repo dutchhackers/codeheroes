@@ -28,6 +28,7 @@ export * from './lib/rewards/services/milestone-badge.service';
 export * from './lib/rewards/services/special-badge.service';
 export * from './lib/rewards/services/level.service';
 export * from './lib/rewards/services/reward.service';
+export * from './lib/rewards/services/reward-activity.service';
 
 // Constants
 export * from './lib/config/xp-values.config';

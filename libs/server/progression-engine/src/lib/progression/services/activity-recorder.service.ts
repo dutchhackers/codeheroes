@@ -1,5 +1,5 @@
 import { getCurrentTimeAsISO } from '@codeheroes/common';
-import { Activity, GameAction, GameActionType, CodePushMetrics } from '@codeheroes/types';
+import { GameActionActivity, GameAction, GameActionType, CodePushMetrics } from '@codeheroes/types';
 import { ProgressionUpdate } from '../core/progression-state.model';
 import { XpCalculationResult } from '../core/xp-calculation.model';
 
@@ -8,19 +8,19 @@ import { XpCalculationResult } from '../core/xp-calculation.model';
  */
 export class ActivityRecorderService {
   /**
-   * Create an activity record from a game action
+   * Create a game action activity record from a game action
    * @param action The game action to create activity from
    * @param xpResult XP calculation result
-   * @returns Activity record
+   * @returns Game action activity record
    */
-  createFromAction(action: GameAction, xpResult: XpCalculationResult): Activity {
+  createFromAction(action: GameAction, xpResult: XpCalculationResult): GameActionActivity {
     const now = getCurrentTimeAsISO();
 
     // Generate a unique ID
     const activityId = `act_${Date.now()}_${action.id}`;
 
     // Create the activity
-    const activity: Activity = {
+    const activity: GameActionActivity = {
       id: activityId,
       userId: action.userId,
       type: 'game-action',
@@ -70,19 +70,19 @@ export class ActivityRecorderService {
   }
 
   /**
-   * Create an activity record for a manual progression update
+   * Create a game action activity record for a manual progression update
    * @param userId User ID
    * @param update Progression update data
-   * @returns Activity record
+   * @returns Game action activity record
    */
-  createManualActivity(userId: string, update: ProgressionUpdate): Activity {
+  createManualActivity(userId: string, update: ProgressionUpdate): GameActionActivity {
     const now = getCurrentTimeAsISO();
 
     // Generate a unique ID
     const activityId = `manual_${Date.now()}_${userId}`;
 
     // Create the manual activity
-    const activity: Activity = {
+    const activity: GameActionActivity = {
       id: activityId,
       userId,
       type: 'game-action',

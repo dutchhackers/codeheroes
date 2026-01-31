@@ -1,5 +1,7 @@
 # CodeHeroes Architecture Overview
 
+> **Last updated:** 2025-01-31
+
 This document provides a high-level overview of the CodeHeroes system architecture.
 
 ## System Diagram
@@ -68,14 +70,26 @@ codeheroes/
 │   ├── github-receiver/     # GitHub webhook handler
 │   │   └── src/main.ts      # Exports: gitHubReceiver
 │   │
+│   ├── github-simulator/    # CLI for simulating GitHub webhooks
+│   │   └── src/             # Testing tool
+│   │
+│   ├── activity-wall/       # Real-time activity display (Angular)
+│   │   └── src/             # TV/public display app
+│   │
 │   └── web/                 # Angular frontend
 │       └── src/
 │           └── environments/ # Firebase config
 │
 ├── libs/                    # Shared libraries
 │   ├── server/
-│   │   └── common/          # Shared server utilities
+│   │   ├── common/          # Shared server utilities
+│   │   └── progression-engine/  # XP, levels, badges, rewards
+│   ├── types/               # Shared TypeScript types
 │   └── shared/              # Code shared between server/client
+│
+├── docs/                    # Documentation
+│   ├── architecture/        # System architecture docs
+│   └── local-development/   # Setup guides
 │
 ├── firebase.json            # Firebase configuration
 ├── .firebaserc              # Firebase project targeting
@@ -105,9 +119,15 @@ codeheroes/
 - **Region:** europe-west1
 
 ### game-engine
-- **Type:** Eventarc-triggered Function
-- **Purpose:** Processes game logic in response to Firestore events
-- **Trigger:** Firestore document changes via Eventarc
+- **Type:** Eventarc/Pub/Sub-triggered Functions
+- **Purpose:** Processes game logic in response to events
+- **Region:** us-central1 (Eventarc requirement)
+- **Functions:**
+  - `processGameAction` - Firestore trigger on gameActions collection
+  - `onActivityRecorded` - Pub/Sub trigger for activity events
+  - `onBadgeEarned` - Pub/Sub trigger for badge events
+  - `onLevelUp` - Pub/Sub trigger for level-up events
+  - `storeRawWebhook` - Stores raw webhook payloads
 
 ## Data Flow
 
@@ -152,6 +172,7 @@ codeheroes/
 | Eventarc | http://localhost:9299 | Event routing |
 | ngrok Inspector | http://localhost:4040 | Webhook debugging |
 | Web App | http://localhost:4200 | Angular dev server |
+| Activity Wall | http://localhost:4201 | Real-time activity display |
 
 ## Nx Commands Reference
 
@@ -161,6 +182,8 @@ codeheroes/
 | `npm run setup` | Generate config files from .env |
 | `nx serve firebase-app` | Start all emulators + watch mode |
 | `nx serve web` | Start Angular dev server |
+| `nx serve activity-wall` | Start activity wall display |
+| `nx serve github-simulator -- push` | Simulate GitHub push event |
 | `nx build api` | Build api functions |
 | `nx run firebase-app:killports` | Kill all emulator ports |
 | `nx run firebase-app:deploy` | Deploy to Firebase |
@@ -178,13 +201,32 @@ codeheroes/
 
 ## Shared Libraries
 
+### @codeheroes/types
+Location: `libs/types/`
+- Activity types (GameActionActivity, BadgeEarnedActivity, LevelUpActivity)
+- Game action types and contexts
+- Badge and progression types
+- Type guards for discriminated unions
+
 ### @codeheroes/common
 Location: `libs/server/common/`
-- Firebase utilities
+- Firebase utilities (DatabaseInstance, logger)
 - Constants (DEFAULT_REGION = 'europe-west1')
-- Shared types and interfaces
+- Shared server interfaces
+
+### @codeheroes/progression-engine
+Location: `libs/server/progression-engine/`
+- XP calculation and configuration
+- Level thresholds and progression
+- Badge catalog and granting services
+- Activity recording and event processing
 
 ### @codeheroes/shared
 Location: `libs/shared/`
 - Code shared between server and client
 - DTOs and models
+
+## Related Documentation
+
+- [Badge System](./badge-system.md) - How badges are earned and granted
+- [Activity Stream](./activity-stream.md) - Activity types and real-time feed

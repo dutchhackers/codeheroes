@@ -1,0 +1,438 @@
+# Activity Stream Architecture
+
+> **Last updated:** 2025-01-31
+
+This document describes the activity stream system in Code Heroes, including how activities are created, stored, and displayed in the real-time feed.
+
+## Overview
+
+The activity stream is a real-time feed of user actions, achievements, and milestones. It captures:
+- Developer activities from GitHub (pushes, PRs, reviews, etc.)
+- Badge achievements when earned
+- Level-up events
+
+Activities are stored per-user but queried globally using Firestore collection group queries for the real-time feed.
+
+## Activity Types
+
+Activities use a discriminated union pattern with three types:
+
+| Type | Description | Created By |
+|------|-------------|------------|
+| `game-action` | Developer activity from GitHub | Game Engine processing |
+| `badge-earned` | User earned a badge | RewardActivityService |
+| `level-up` | User leveled up | RewardActivityService |
+
+### Type Definitions
+
+```typescript
+// Base fields shared by all activities
+interface BaseActivity {
+  id: string;                    // Unique activity ID
+  userId: string;                // User who performed the activity
+  createdAt: string;             // ISO timestamp
+  updatedAt: string;             // ISO timestamp
+  eventId: string;               // Original event ID for deduplication
+  provider: string;              // Source system ('github', 'system')
+  userFacingDescription: string; // Human-readable description
+}
+
+// Game action activity (from GitHub)
+interface GameActionActivity extends BaseActivity {
+  type: 'game-action';
+  sourceActionType: GameActionType;  // e.g., 'code_push', 'pull_request_merge'
+  context: GameActionContext;        // Repository, PR, review details
+  metrics: GameActionMetrics;        // Commit count, file count, etc.
+  xp: {
+    earned: number;
+    breakdown: Array<{
+      type: string;
+      amount: number;
+      description: string;
+    }>;
+  };
+  processingResult?: unknown;
+}
+
+// Badge earned activity
+interface BadgeEarnedActivity extends BaseActivity {
+  type: 'badge-earned';
+  badge: {
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    rarity: BadgeRarity;
+    category: string;
+  };
+  trigger?: {
+    type: 'level-up' | 'milestone' | 'special';
+    level?: number;
+    activityType?: string;
+    count?: number;
+  };
+}
+
+// Level up activity
+interface LevelUpActivity extends BaseActivity {
+  type: 'level-up';
+  level: {
+    previous: number;
+    new: number;
+  };
+  xp: {
+    total: number;
+    toNextLevel: number;
+  };
+}
+
+// Union type
+type Activity = GameActionActivity | BadgeEarnedActivity | LevelUpActivity;
+```
+
+### Type Guards
+
+Use these functions for type-safe activity handling:
+
+```typescript
+import {
+  isGameActionActivity,
+  isBadgeEarnedActivity,
+  isLevelUpActivity
+} from '@codeheroes/types';
+
+// Example usage
+function processActivity(activity: Activity) {
+  if (isGameActionActivity(activity)) {
+    console.log(`${activity.sourceActionType}: +${activity.xp.earned} XP`);
+  } else if (isBadgeEarnedActivity(activity)) {
+    console.log(`Badge earned: ${activity.badge.name}`);
+  } else if (isLevelUpActivity(activity)) {
+    console.log(`Level up: ${activity.level.previous} → ${activity.level.new}`);
+  }
+}
+```
+
+## Firestore Storage
+
+### Collection Path
+**Path:** `users/{userId}/activities/{activityId}`
+
+Activities are stored in per-user subcollections to:
+- Keep user data isolated
+- Enable user-specific queries
+- Support Firestore security rules per user
+
+### Global Feed Query
+
+The activity wall uses a **collection group query** to fetch activities across all users:
+
+```typescript
+const activitiesRef = collectionGroup(firestore, 'activities');
+const activitiesQuery = query(
+  activitiesRef,
+  orderBy('createdAt', 'desc'),
+  limit(50)
+);
+```
+
+This requires a composite index:
+- Collection ID: `activities`
+- Fields: `createdAt` (Descending)
+
+### Activity IDs
+
+Activity IDs follow these patterns:
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| Game Action | `act_{timestamp}_{actionId}` | `act_1706745600000_ga_12345` |
+| Manual Activity | `manual_{timestamp}_{userId}` | `manual_1706745600000_user123` |
+| Badge Earned | `badge_{timestamp}_{badgeId}` | `badge_1706745600000_first_push` |
+| Level Up | `levelup_{timestamp}_{level}` | `levelup_1706745600000_10` |
+
+## Activity Creation Flow
+
+### Game Action Activities
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌───────────────────┐
+│ GitHub Webhook  │────▶│ GitHub Receiver  │────▶│ Game Action       │
+│ (push event)    │     │ Function         │     │ Document Created  │
+└─────────────────┘     └──────────────────┘     └─────────┬─────────┘
+                                                           │
+                                                           ▼
+┌─────────────────┐     ┌──────────────────┐     ┌───────────────────┐
+│ Activity        │◀────│ ProgressionService│◀────│ Firestore Trigger │
+│ Document        │     │ processGameAction │     │ onGameActionCreate│
+└─────────────────┘     └──────────────────┘     └───────────────────┘
+```
+
+1. **GitHub Receiver** validates webhook and creates a `gameAction` document
+2. **Firestore Trigger** detects new game action and invokes processing
+3. **ProgressionService** calculates XP, updates stats, creates activity
+4. **ActivityRecorderService.createFromAction()** generates the activity record
+5. Activity is saved to `users/{userId}/activities`
+
+### Badge/Level-Up Activities
+
+Created by **RewardActivityService** when:
+- User levels up → `recordLevelUp()`
+- User earns a badge → `recordBadgeEarned()`
+
+These are triggered from **EventProcessorService** after Pub/Sub events.
+
+### Manual Activities
+
+Created for system events like user registration:
+
+```typescript
+// In ProgressionService
+await this.updateProgression({
+  activityType: 'user_registration',
+  xpGained: 100,
+});
+```
+
+This creates a game-action activity with `sourceActionType: 'user_registration'`.
+
+## XP Breakdown Structure
+
+Each game action activity includes detailed XP information:
+
+```json
+{
+  "xp": {
+    "earned": 270,
+    "breakdown": [
+      {
+        "type": "base",
+        "amount": 120,
+        "description": "Base XP for code_push"
+      },
+      {
+        "type": "bonus",
+        "amount": 100,
+        "description": "Multiple commits bonus"
+      },
+      {
+        "type": "bonus",
+        "amount": 50,
+        "description": "Significant changes bonus"
+      }
+    ]
+  }
+}
+```
+
+### XP Calculation Flow
+
+```
+GameAction
+    │
+    ▼
+┌───────────────────┐
+│ XpCalculator      │
+│ Service           │
+│ - getBaseXp()     │
+│ - calculateBonus()│
+└────────┬──────────┘
+         │
+         ▼
+XpCalculationResult
+    │
+    ▼
+ActivityRecorderService
+    │
+    ▼
+Activity with XP breakdown
+```
+
+## Activity Stacking for PRs
+
+Related PR activities are grouped ("stacked") in the frontend for cleaner display:
+
+### Stackable Action Types
+- `pull_request_create`
+- `pull_request_merge`
+- `pull_request_close`
+- `code_review_submit`
+- `code_review_comment`
+- `review_comment_create`
+- `comment_create` (when targeting a PR)
+
+### Non-Stackable Activities
+- `code_push` (standalone)
+- `badge-earned` (always shown individually)
+- `level-up` (always shown individually)
+- `issue_create`, `issue_close` (standalone)
+- `release_publish` (standalone)
+
+### Stack Key Format
+Activities are grouped by: `{repositoryId}:{prNumber}`
+
+Example: All activities for PR #42 in repo `abc123` share key `abc123:42`.
+
+### Stack Display
+
+A stack shows:
+- PR title and number
+- Repository name
+- Timeline of all related activities
+- Total XP earned across all activities
+- Final state (open, merged, closed)
+
+## Frontend Display
+
+### Real-Time Feed Service
+
+**Location:** `apps/activity-wall/src/app/core/services/activity-feed.service.ts`
+
+```typescript
+// Real-time subscription
+getGlobalActivities(limit = 50): Observable<Activity[]> {
+  return collectionData(query, { idField: 'id' });
+}
+
+// Pagination
+loadMoreActivities(lastDoc, limit = 50): Promise<LoadMoreResult>
+```
+
+### Display Mapping
+
+**Location:** `apps/activity-wall/src/app/core/mappings/action-type.mapping.ts`
+
+Each activity type has visual configuration:
+
+```typescript
+interface ActionTypeDisplay {
+  label: string;        // Display name
+  color: string;        // Background color class
+  borderColor: string;  // Border color hex
+  cardGlowClass: string;// CSS glow effect class
+  textColor: string;    // Text color class
+  svgIcon: string;      // Inline SVG icon
+}
+```
+
+### Activity Type Display
+
+| Activity Type | Color | Glow |
+|---------------|-------|------|
+| `game-action` | Varies by action type | Varies |
+| `badge-earned` | Gold gradient | `card-glow-gold` |
+| `level-up` | Purple/Pink gradient | `card-glow-purple` |
+
+### Game Action Colors
+
+| Action Type | Color | Example |
+|-------------|-------|---------|
+| `code_push` | Cyan | `#00f5ff` |
+| `pull_request_create` | Purple | `#bf00ff` |
+| `pull_request_merge` | Green | `#00ff88` |
+| `code_review_submit` | Orange | `#ff6600` |
+| `release_publish` | Emerald | `#00ff88` |
+| `issue_create` | Pink | `#ff00aa` |
+
+## Key Services
+
+### ActivityRecorderService (Backend)
+**Location:** `libs/server/progression-engine/src/lib/progression/services/activity-recorder.service.ts`
+
+Creates activity records:
+- `createFromAction(action, xpResult)` - From game action
+- `createManualActivity(userId, update)` - From manual update
+
+### RewardActivityService (Backend)
+**Location:** `libs/server/progression-engine/src/lib/rewards/services/reward-activity.service.ts`
+
+Creates reward activities:
+- `recordBadgeEarned(userId, badge, trigger)` - Badge earned
+- `recordLevelUp(userId, prevLevel, newLevel, xp)` - Level up
+
+### ActivityFeedService (Frontend)
+**Location:** `apps/activity-wall/src/app/core/services/activity-feed.service.ts`
+
+Queries activities:
+- `getGlobalActivities(limit)` - Real-time subscription
+- `loadMoreActivities(lastDoc, limit)` - Pagination
+
+### ActivityStackerService (Frontend)
+**Location:** `apps/activity-wall/src/app/core/services/activity-stacker.service.ts`
+
+Groups related activities:
+- `stackActivities(activities)` - Returns stacks or singles
+- Only stacks `game-action` activities
+- Never stacks `badge-earned` or `level-up`
+
+## Configuration
+
+### Firestore Indexes
+
+Required composite indexes in `firestore.indexes.json`:
+
+```json
+{
+  "collectionGroup": "activities",
+  "queryScope": "COLLECTION_GROUP",
+  "fields": [
+    { "fieldPath": "createdAt", "order": "DESCENDING" }
+  ]
+}
+```
+
+### Security Rules
+
+Activities are readable by authenticated users and writable only by backend:
+
+```javascript
+match /users/{userId}/activities/{activityId} {
+  allow read: if request.auth != null;
+  allow write: if false; // Only backend can write
+}
+```
+
+## Adding New Activity Types
+
+To add a new activity type:
+
+1. **Update Type Definitions**
+   - Add interface in `libs/types/src/lib/activity/activity.types.ts`
+   - Add to `Activity` union type
+   - Create type guard function
+
+2. **Create Recording Logic**
+   - Add method to `RewardActivityService` or create new service
+   - Generate appropriate `userFacingDescription`
+
+3. **Update Frontend Display**
+   - Add display config in `action-type.mapping.ts`
+   - Update `getActivityTypeDisplay()` if needed
+   - Update `ActivityItemComponent` if special rendering needed
+
+4. **Update Stacker (if applicable)**
+   - Decide if new type should be stacked
+   - Update `ActivityStackerService.getStackKey()` if stackable
+
+## Debugging
+
+### View Activities in Emulator
+1. Navigate to http://localhost:4000/firestore
+2. Browse to `users/{userId}/activities`
+3. Activities are sorted by `createdAt` descending
+
+### Debug Panel
+The activity wall has a debug panel (press `D` to toggle) that shows:
+- Full activity JSON
+- Activity type
+- All fields and values
+
+### Simulating Activities
+```bash
+# Generate game action activities
+nx serve github-simulator -- push
+nx serve github-simulator -- pr open
+
+# Badge/level-up activities created automatically
+# when XP thresholds are crossed
+```
