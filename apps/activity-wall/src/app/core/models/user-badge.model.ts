@@ -3,24 +3,33 @@ import { BadgeRarity } from '@codeheroes/types';
 /**
  * UserBadge represents a badge earned by a user, as stored in Firestore
  * at users/{userId}/badges/{badgeId}
+ *
+ * New structure includes icon and rarity directly from the badge catalog.
  */
 export interface UserBadge {
   id: string;
   name: string;
   description?: string;
+  icon?: string; // Emoji icon from badge catalog
+  imageUrl?: string; // Optional image URL for future use
+  rarity?: BadgeRarity; // Rarity from badge catalog
+  category?: string; // 'level' | 'milestone' | 'special'
   earnedAt?: string; // ISO timestamp
-  xp?: number;
+  metadata?: Record<string, unknown>; // Additional badge metadata (e.g., level number)
+  xp?: number; // Legacy: XP value (kept for backwards compatibility)
 }
 
 /**
- * Derives badge rarity from XP value
- * - common: <100 XP
- * - uncommon: 100+ XP
- * - rare: 500+ XP
- * - epic: 2000+ XP
- * - legendary: 5000+ XP
+ * Gets the badge rarity - uses the stored rarity if available, otherwise derives from XP
  */
-export function getBadgeRarity(xp?: number): BadgeRarity {
+export function getBadgeRarity(badge: UserBadge): BadgeRarity {
+  // Prefer stored rarity from badge catalog
+  if (badge.rarity) {
+    return badge.rarity;
+  }
+
+  // Fallback: derive from XP for legacy badges
+  const xp = badge.xp;
   if (!xp || xp < 100) return BadgeRarity.COMMON;
   if (xp < 500) return BadgeRarity.UNCOMMON;
   if (xp < 2000) return BadgeRarity.RARE;
@@ -29,32 +38,51 @@ export function getBadgeRarity(xp?: number): BadgeRarity {
 }
 
 /**
- * Maps badge IDs to emoji icons
+ * Gets the badge emoji - uses stored icon if available, otherwise maps badge ID
  */
-export function getBadgeEmoji(badgeId: string): string {
+export function getBadgeEmoji(badge: UserBadge): string {
+  // Prefer stored icon from badge catalog
+  if (badge.icon) {
+    return badge.icon;
+  }
+
+  // Fallback: map badge ID to emoji for legacy badges
   const emojiMap: Record<string, string> = {
+    // Activity milestones (legacy)
     first_action: '🎯',
+    ten_actions: '🔟',
+    fifty_actions: '5️⃣',
+    hundred_actions: '💯',
+    // Level badges (fallback if icon not stored)
+    novice_coder: '🌱',
+    code_initiate: '🔰',
+    code_apprentice: '📚',
+    code_student: '✏️',
+    code_explorer: '🧭',
+    code_adventurer: '⚔️',
+    code_adept: '🎯',
+    code_enthusiast: '🔥',
+    code_practitioner: '🛠️',
+    code_hero: '🦸',
+    code_warrior: '⚡',
+    code_veteran: '🎖️',
+    code_specialist: '🔬',
+    code_expert: '💎',
+    code_master: '👑',
+    code_sage: '🧙',
+    code_legend: '⭐',
+    code_champion: '🏅',
+    code_oracle: '🔮',
+    code_architect: '🏆',
+    level_20_mastery: '🎓',
+    // Other legacy badges
     first_push: '🚀',
     first_pr: '📝',
     first_review: '👀',
     first_merge: '🔀',
-    level_5: '⭐',
-    level_10: '🌟',
-    level_20: '💫',
-    level_50: '🏆',
-    level_100: '👑',
-    streak_7: '🔥',
-    streak_30: '⚡',
-    streak_100: '💎',
-    pr_master: '🎖️',
-    code_reviewer: '🔍',
-    merge_machine: '⚙️',
-    early_bird: '🌅',
-    night_owl: '🦉',
-    weekend_warrior: '🛡️',
   };
 
-  return emojiMap[badgeId] ?? '🏅';
+  return emojiMap[badge.id] ?? '🏅';
 }
 
 /**

@@ -1,4 +1,4 @@
-import { Component, input, computed } from '@angular/core';
+import { Component, Input, inject, ChangeDetectorRef } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { BadgeRarity } from '@codeheroes/types';
 import {
@@ -23,14 +23,14 @@ interface BadgeDisplay {
     <section class="badges-section" aria-labelledby="badges-heading">
       <div class="section-header">
         <h3 id="badges-heading" class="section-title">Badges</h3>
-        <span class="badge-count" [attr.aria-label]="badges().length + ' badges earned'">
-          {{ badges().length }}
+        <span class="badge-count" [attr.aria-label]="badges.length + ' badges earned'">
+          {{ badges.length }}
         </span>
       </div>
 
-      @if (badgeDisplays().length > 0) {
+      @if (badgeDisplays.length > 0) {
         <div class="badges-grid" role="list">
-          @for (item of badgeDisplays(); track item.badge.id) {
+          @for (item of badgeDisplays; track item.badge.id) {
             <div
               class="badge-card"
               [class.legendary]="item.rarity === 'LEGENDARY'"
@@ -211,17 +211,29 @@ interface BadgeDisplay {
   `],
 })
 export class BadgesGridComponent {
-  badges = input<UserBadge[]>([]);
+  readonly #cdr = inject(ChangeDetectorRef);
+  private _badges: UserBadge[] = [];
 
-  badgeDisplays = computed<BadgeDisplay[]>(() => {
-    return this.badges().map((badge) => {
-      const rarity = getBadgeRarity(badge.xp);
+  @Input()
+  set badges(value: UserBadge[]) {
+    this._badges = value;
+    // Force change detection when badges are updated asynchronously
+    this.#cdr.detectChanges();
+  }
+
+  get badges(): UserBadge[] {
+    return this._badges;
+  }
+
+  get badgeDisplays(): BadgeDisplay[] {
+    return this._badges.map((badge) => {
+      const rarity = getBadgeRarity(badge);
       return {
         badge,
-        emoji: getBadgeEmoji(badge.id),
+        emoji: getBadgeEmoji(badge),
         rarity,
         color: getBadgeRarityColor(rarity),
       };
     });
-  });
+  }
 }
