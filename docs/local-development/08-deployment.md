@@ -1,10 +1,17 @@
 # Deployment Guide
 
-This guide covers deploying CodeHeroes to Firebase.
+This guide covers deploying CodeHeroes to an existing Firebase environment.
+
+> **Setting up a new environment?** See [09-firebase-environment-setup.md](./09-firebase-environment-setup.md) for complete setup instructions.
 
 ## Environments
 
-Project IDs are configured in `.firebaserc` (gitignored). Configure your own Firebase project before deploying.
+| Environment | Project ID | Deploy Config |
+|-------------|------------|---------------|
+| Test | `codeheroes-test` | `-c test` |
+| Production | `codeheroes-prod` | `-c production` |
+
+Project IDs are configured in `.firebaserc`.
 
 ## Prerequisites
 
@@ -209,12 +216,19 @@ nx run firebase-app:firebase functions:list
 
 ## Frontend Deployment
 
-**CRITICAL NOTE: Firebase Hosting for this project (`codeheroes-app-test`) is currently suspended due to a policy violation.**
+### Build and Deploy App
 
-Attempts to deploy frontend applications (e.g., `apps/frontend/web-legacy` and `apps/frontend/app`) to Firebase Hosting will appear to succeed but the deployed sites will return a 404 "Site Not Found" error.
+```bash
+# Test environment
+nx build app -c test && nx run firebase-app:firebase -c test deploy --only hosting:app
 
-To resolve this, the project owner must:
-1. Review the project for any content that violates Google Cloud's Terms of Service (e.g., phishing content) and secure the project if compromised.
-2. Follow the appeal process outlined in the emails from `google-cloud-compliance@google.com` to reinstate Firebase Hosting services.
+# Production environment
+nx build app -c production && nx run firebase-app:firebase -c production deploy --only hosting:app
+```
 
-Until the appeal is successfully processed and hosting services are restored, frontend deployments will not be publicly accessible.
+### Hosting URLs
+
+| Environment | URL |
+|-------------|-----|
+| Test | https://codeheroes-app-ui-test.web.app |
+| Production | https://codeheroes-app-ui.web.app |
