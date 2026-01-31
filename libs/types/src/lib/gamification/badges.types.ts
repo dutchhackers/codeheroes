@@ -13,6 +13,12 @@ export enum BadgeRarity {
   LEGENDARY = 'LEGENDARY',
 }
 
+export enum BadgeCategory {
+  LEVEL = 'level',
+  MILESTONE = 'milestone',
+  SPECIAL = 'special',
+}
+
 export interface Badge {
   id: string;
   type: BadgeType;
@@ -29,5 +35,20 @@ export interface Badge {
     xp?: number;
     unlocks?: string[];
   };
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Badge as stored in Firestore (users/{id}/badges/{badgeId})
+ */
+export interface UserBadge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  imageUrl?: string;
+  rarity: BadgeRarity;
+  category: BadgeCategory | string;
+  earnedAt: string;
   metadata?: Record<string, unknown>;
 }
