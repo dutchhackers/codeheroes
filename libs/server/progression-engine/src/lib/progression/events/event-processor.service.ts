@@ -1,6 +1,6 @@
 import { DatabaseInstance, logger } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
-import { Collections, GameActionActivity, isGameActionActivity, ProgressionEvent, ProgressionEventType } from '@codeheroes/types';
+import { GameActionActivity, isGameActionActivity, ProgressionEvent, ProgressionEventType } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { BadgeService } from '../../rewards/services/badge.service';
 import { MilestoneBadgeService } from '../../rewards/services/milestone-badge.service';

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Activity, GameActionActivity, GameActionType, GameActionContext, isGameActionActivity } from '@codeheroes/types';
+import { Activity, GameActionActivity, GameActionContext, isGameActionActivity } from '@codeheroes/types';
 import {
   PR_STACKABLE_ACTION_TYPES,
   PRFinalState,

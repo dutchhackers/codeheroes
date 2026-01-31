@@ -1,5 +1,5 @@
 import { logger } from '@codeheroes/common';
-import { GameAction, ActionResult, Activity, GameActionActivity } from '@codeheroes/types';
+import { GameAction, ActionResult, GameActionActivity } from '@codeheroes/types';
 
 import { ProgressionRepository } from '../repositories/progression.repository';
 import { ActivityRepository } from '../repositories/activity.repository';

@@ -55,7 +55,7 @@ export class RewardActivityService {
         description: badge.description,
         icon: badge.icon,
         rarity: badge.rarity,
-        category: typeof badge.category === 'string' ? badge.category : badge.category,
+        category: badge.category,
       },
       trigger,
       userFacingDescription: this.generateBadgeDescription(badge, trigger),
