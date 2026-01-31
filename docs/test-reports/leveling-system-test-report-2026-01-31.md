@@ -77,22 +77,22 @@ The Code Heroes leveling system was tested end-to-end using the github-simulator
 | Aspect | Expected | Actual | Status |
 |--------|----------|--------|--------|
 | Transition point | Level 20 → 21 | Level 20 → 21 | ✅ |
-| Level 21 threshold | 661,500 (1500×21²) | Calculated correctly | ✅ |
+| Level 21 threshold | 776,500 (per `level-thresholds.ts`) | Calculated correctly | ✅ |
 | No level skipping bugs | Smooth transition | Smooth transition | ✅ |
 
 ### 4. Algorithmic Levels (21-30) ✅
 
-Formula: `XP = 1500 × Level²`
+Formula: `XP = LEVEL_20_XP + 1500 × (level - 20)²` (offset from Level 20's 775,000 XP)
 
 | Level | Expected XP | Verified |
 |-------|-------------|----------|
-| 21 | 661,500 | ✅ |
-| 25 | 937,500 | ✅ |
-| 26 | 1,014,000 | ✅ |
-| 27 | 1,093,500 | ✅ |
-| 28 | 1,176,000 | ✅ |
-| 29 | 1,261,500 | ✅ |
-| 30 | 1,350,000 | ✅ |
+| 21 | 776,500 | ✅ |
+| 25 | 812,500 | ✅ |
+| 26 | 829,000 | ✅ |
+| 27 | 848,500 | ✅ |
+| 28 | 871,000 | ✅ |
+| 29 | 896,500 | ✅ |
+| 30 | 925,000 | ✅ |
 
 ### 5. Database State ✅
 
@@ -133,10 +133,10 @@ Level 1  ───────────────────────�
    │   Rapid early progression                    │                         │
    │                                              │                         │
    │                                              ├── Algorithmic (21-30) ──┤
-   │                                              │   Formula: 1500 × L²   │
+   │                                              │   Offset from L20 XP   │
    │                                              │   Infinite scaling      │
    │                                              │                         │
-   0 XP                                     775,000 XP              1,355,040 XP
+   0 XP                                     775,000 XP                925,000 XP
 ```
 
 ---
@@ -194,13 +194,17 @@ Level 1  ───────────────────────�
 | 20 | 775,000 | Code Architect |
 
 ### Algorithmic Levels (21+)
-| Level | XP (1500 × L²) | Notable Title |
-|-------|----------------|---------------|
-| 25 | 937,500 | Code Virtuoso |
-| 30 | 1,350,000 | Code Mentor |
-| 40 | 2,400,000 | Senior Code Hero |
-| 50 | 3,750,000 | Code Luminary |
-| 80 | 9,600,000 | Grandmaster Coder |
+
+Formula: `XP = 775,000 + 1500 × (level - 20)²`
+
+| Level | XP Required | Notable Title |
+|-------|-------------|---------------|
+| 21 | 776,500 | Code Hero Level 21 |
+| 25 | 812,500 | Code Virtuoso |
+| 30 | 925,000 | Code Mentor |
+| 40 | 1,375,000 | Senior Code Hero |
+| 50 | 2,125,000 | Code Luminary |
+| 80 | 6,175,000 | Grandmaster Coder |
 
 ---
 
