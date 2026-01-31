@@ -42,6 +42,7 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
   styles: [`
     .daily-progress {
       background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
       border-radius: 8px;
       padding: 1rem;
     }

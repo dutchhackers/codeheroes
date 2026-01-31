@@ -73,6 +73,7 @@ import { LeaderboardEntry } from '../../../core/services/hq-data.service';
   styles: [`
     .leaderboard-container {
       background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
       border-radius: 8px;
       padding: 1rem;
       margin: 1rem 0;
