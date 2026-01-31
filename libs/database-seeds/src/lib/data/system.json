@@ -1,0 +1,12 @@
+{
+  "system": [
+    {
+      "settings": {
+        "allowedDomains": []
+      },
+      "counters": {
+        "nextUserId": 20000000
+      }
+    }
+  ]
+}

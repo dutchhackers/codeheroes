@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { UserSeeder } from './lib/seeders/user.seeder';
 import { ConnectedAccountSeeder } from './lib/seeders/connected-account.seeder';
+import { SystemSeeder } from './lib/seeders/system.seeder';
 import { loadJsonData } from './lib/utils/file-loader';
 
 async function main() {
@@ -12,7 +13,7 @@ async function main() {
   initializeApp({
     projectId: process.env.FIREBASE_PROJECT_ID,
   });
-  
+
   const db = getFirestore();
 
   // Configure Firestore to use emulator
@@ -22,13 +23,20 @@ async function main() {
       host: process.env.FIRESTORE_EMULATOR_HOST,
       ssl: false,
     });
+  } else {
+    console.log('Using Production Firestore for project:', process.env.FIREBASE_PROJECT_ID);
   }
 
   try {
     const userSeeder = new UserSeeder();
     const connectedAccountSeeder = new ConnectedAccountSeeder();
+    const systemSeeder = new SystemSeeder();
 
-    // Seed users first
+    // Seed system settings first
+    const systemData = await loadJsonData<{ system: any[] }>('system.json');
+    await systemSeeder.seed(db, systemData.system);
+
+    // Seed users
     const userData = await loadJsonData<{ users: any[] }>('users.json');
     await userSeeder.seed(db, userData.users);
 
