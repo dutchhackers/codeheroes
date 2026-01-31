@@ -227,6 +227,34 @@ Function URL (github-receiver:gitHubReceiver(europe-west1)): https://githubrecei
 
 Update `environment.test.ts` with the API URL.
 
+### Allow Unauthenticated API Access
+
+By default, Cloud Run functions require IAM authentication. To allow the frontend to access the API without authentication tokens, grant public access:
+
+```bash
+gcloud run services add-iam-policy-binding api \
+  --region=europe-west1 \
+  --member="allUsers" \
+  --role="roles/run.invoker" \
+  --project=codeheroes-test
+```
+
+Verify the policy:
+
+```bash
+gcloud run services get-iam-policy api --region=europe-west1 --project=codeheroes-test
+```
+
+You should see:
+```
+bindings:
+- members:
+  - allUsers
+  role: roles/run.invoker
+```
+
+**Note:** Without this step, API calls (like leaderboards) will return 403 Forbidden.
+
 ## Step 11: Configure Blocking Functions
 
 After deploying auth-service functions, configure them in Firebase Console:
@@ -506,6 +534,24 @@ gh api repos/OWNER/REPO/hooks/WEBHOOK_ID/deliveries --jq '.[0].id'
 gh api repos/OWNER/REPO/hooks/WEBHOOK_ID/deliveries/DELIVERY_ID/attempts -X POST
 ```
 
+### API Returns 403 Forbidden
+
+The API Cloud Run service requires IAM authentication by default. Allow public access:
+
+```bash
+gcloud run services add-iam-policy-binding api \
+  --region=europe-west1 \
+  --member="allUsers" \
+  --role="roles/run.invoker" \
+  --project=codeheroes-test
+```
+
+### Leaderboard or Highlights Empty
+
+1. Check API is accessible (not returning 403)
+2. Verify Firestore indexes are deployed and built
+3. Check that user has activities recorded (trigger some webhook events)
+
 ## Checklist
 
 Use this checklist when setting up a new environment:
@@ -524,6 +570,7 @@ Use this checklist when setting up a new environment:
 - [ ] Deploy Firestore indexes
 - [ ] Deploy Storage rules
 - [ ] Build and deploy functions
+- [ ] Allow unauthenticated API access (gcloud IAM)
 - [ ] Configure blocking functions in Console
 - [ ] Update apiUrl in environment.ts
 - [ ] Rebuild and deploy hosting
