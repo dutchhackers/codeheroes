@@ -27,9 +27,10 @@ const ALGORITHMIC_XP_MULTIPLIER = 1500;
 
 /**
  * XP required for Level 20 (the last static level)
- * Used as the baseline for algorithmic level calculations
+ * Derived from LEVEL_DEFINITIONS to prevent drift if static thresholds are adjusted
  */
-const LEVEL_20_XP = 775000;
+const LEVEL_20_XP =
+  LEVEL_DEFINITIONS.find((c) => c.level === MAX_STATIC_LEVEL)?.xpRequired ?? 775000;
 
 /**
  * Calculate XP required for a given level using the algorithmic formula

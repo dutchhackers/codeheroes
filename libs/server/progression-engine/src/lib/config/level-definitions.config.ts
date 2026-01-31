@@ -7,8 +7,10 @@ import { LevelRequirementItem } from '@codeheroes/types';
  * - Levels 1-20: Static hand-tuned configuration (defined below)
  * - Levels 21-80+: Algorithmic (calculated in level-thresholds.ts)
  *
- * The formula for levels 21+: XP = 1500 * Level²
- * This targets Level 80 at approximately 9,600,000 XP
+ * For levels > MAX_STATIC_LEVEL, XP is calculated in level-thresholds.ts using
+ * a quadratic formula anchored at level 20's XP:
+ *   XP(level) = LEVEL_20_XP + multiplier * (level - MAX_STATIC_LEVEL)²
+ * The multiplier (1500) is tuned so that Level 80 is approximately 9,600,000 XP.
  *
  * XP values were scaled 12x to match the new XP economy.
  */
