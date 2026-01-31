@@ -256,6 +256,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
   formatMemberSince(dateString: string | undefined): string {
     if (!dateString) return '';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return '';
+    }
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 

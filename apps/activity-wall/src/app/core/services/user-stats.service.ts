@@ -212,7 +212,12 @@ export class UserStatsService {
    * Fetches the last N weeks of activity stats
    */
   getWeeklyStatsHistory(userId: string, weekCount = 4): Observable<WeeklyStatsRecord[]> {
-    const weekIds = this.#getLastNWeekIds(weekCount);
+    const weekIds = this.#getLastNWeekIds(Math.max(1, weekCount));
+
+    // Guard against empty array (forkJoin fails with empty array)
+    if (weekIds.length === 0) {
+      return of([]);
+    }
 
     // Create observables for each week's document
     const weekObservables = weekIds.map(weekId => {
