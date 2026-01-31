@@ -217,8 +217,10 @@ export class BadgesGridComponent {
   @Input()
   set badges(value: UserBadge[]) {
     this._badges = value;
-    // Force change detection when badges are updated asynchronously
-    this.#cdr.detectChanges();
+    // Mark for check when badges are updated asynchronously
+    // Using markForCheck() instead of detectChanges() to avoid potential
+    // ExpressionChangedAfterItHasBeenCheckedError and re-entrant change detection
+    this.#cdr.markForCheck();
   }
 
   get badges(): UserBadge[] {

@@ -173,8 +173,8 @@ export class UserStatsService {
     return collectionData(badgesRef, { idField: 'id' }).pipe(
       map((badges) => {
         const typedBadges = badges as UserBadge[];
-        // Sort by earnedAt descending (newest first)
-        return typedBadges.sort((a, b) => {
+        // Sort a copy to avoid mutating the original array (important for RxJS stream immutability)
+        return [...typedBadges].sort((a, b) => {
           const dateA = a.earnedAt ? new Date(a.earnedAt).getTime() : 0;
           const dateB = b.earnedAt ? new Date(b.earnedAt).getTime() : 0;
           return dateB - dateA;

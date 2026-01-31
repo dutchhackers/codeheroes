@@ -14,6 +14,7 @@ export class BadgeService {
    * Grant a badge to a user by badge ID
    * Looks up the badge in the catalog and creates it in Firestore
    * Returns null if badge already earned or not found in catalog
+   * Uses atomic create() to prevent race conditions with concurrent calls
    */
   async grantBadge(userId: string, badgeId: string): Promise<UserBadge | null> {
     // 1. Check if badge exists in catalog
@@ -23,13 +24,7 @@ export class BadgeService {
       return null;
     }
 
-    // 2. Check if user already has this badge
-    if (await this.hasBadge(userId, badgeId)) {
-      logger.info('User already has badge', { userId, badgeId });
-      return null;
-    }
-
-    // 3. Create the badge document
+    // 2. Create the badge document
     const userBadge: UserBadge = {
       id: badgeDefinition.id,
       name: badgeDefinition.name,
@@ -42,14 +37,23 @@ export class BadgeService {
       metadata: badgeDefinition.metadata,
     };
 
-    // 4. Save to Firestore
+    // 3. Use atomic create() to ensure we only grant the badge if it doesn't exist
+    // This prevents race conditions where two concurrent calls both pass an existence check
     const badgeRef = this.db.collection(Collections.Users).doc(userId).collection(Collections.Badges).doc(badgeId);
 
-    await badgeRef.set(userBadge);
-
-    logger.info('Badge granted', { userId, badgeId, badgeName: userBadge.name });
-
-    return userBadge;
+    try {
+      await badgeRef.create(userBadge);
+      logger.info('Badge granted', { userId, badgeId, badgeName: userBadge.name });
+      return userBadge;
+    } catch (error: unknown) {
+      // If the document already exists, Firestore throws an error with code 6 (ALREADY_EXISTS)
+      const firestoreError = error as { code?: number | string };
+      if (firestoreError.code === 6 || firestoreError.code === 'ALREADY_EXISTS') {
+        logger.info('User already has badge', { userId, badgeId });
+        return null;
+      }
+      throw error;
+    }
   }
 
   /**

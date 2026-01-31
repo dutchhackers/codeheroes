@@ -105,15 +105,36 @@ export function isWeekend(timestamp: Date | string): boolean {
 }
 
 /**
+ * Get ISO-8601 week year and number for a date.
+ * ISO-8601 defines week 1 as the week with the first Thursday of the year.
+ */
+function getIsoWeekYearAndNumber(date: Date): { year: number; week: number } {
+  // Convert to a UTC date stripped of time to avoid timezone/DST issues
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+
+  // ISO weekday: Monday = 1, Sunday = 7
+  const dayOfWeek = d.getUTCDay() || 7;
+
+  // Shift date to the Thursday of this week (ISO-8601 defines weeks based on Thursdays)
+  d.setUTCDate(d.getUTCDate() + 4 - dayOfWeek);
+
+  const isoYear = d.getUTCFullYear();
+  const yearStart = new Date(Date.UTC(isoYear, 0, 1));
+
+  // Calculate ISO week number: week 1 is the week with the first Thursday of the year
+  const dayOfYear = (d.getTime() - yearStart.getTime()) / 86400000 + 1;
+  const isoWeek = Math.ceil(dayOfYear / 7);
+
+  return { year: isoYear, week: isoWeek };
+}
+
+/**
  * Get the weekend identifier for a date (e.g., "2024-W05-weekend")
+ * Uses ISO-8601 week numbering (week 1 is the week with the first Thursday of the year).
  * Used to track weekend activity counts
  */
 export function getWeekendId(timestamp: Date | string): string {
   const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
-  const year = date.getFullYear();
-  // Get ISO week number
-  const firstDayOfYear = new Date(year, 0, 1);
-  const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
-  const weekNumber = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-  return `${year}-W${weekNumber.toString().padStart(2, '0')}-weekend`;
+  const { year, week } = getIsoWeekYearAndNumber(date);
+  return `${year}-W${week.toString().padStart(2, '0')}-weekend`;
 }

@@ -233,23 +233,24 @@ Auto-create progression state if missing → Update XP/counters
 
 ## XP Values Reference
 
-Base XP values and bonuses for each game action type. Config in `libs/server/progression-engine/.../xp-values.config.ts`.
+Base XP values and bonuses for each game action type. All values have been scaled 12x to support the expanded leveling system. Config in `libs/server/progression-engine/.../xp-values.config.ts`.
 
 | Game Action Type | Base XP | Possible Bonuses |
 |------------------|---------|------------------|
-| `code_push` | 120 | +250 (multiple commits) |
-| `pull_request_create` | 100 | +100 (multiple files), +200 (significant changes) |
-| `pull_request_merge` | 100 | +100 (multiple files), +200 (significant changes) |
-| `pull_request_close` | 50 | +50 (multiple files), +100 (significant changes) |
-| `code_review_submit` | 80 | +50 (approval), +100 (detailed), +50 (multiple files), +150 (thorough) |
-| `review_comment_create` | 40 | +30 (with suggestion), +20 (detailed) |
-| `comment_create` | 30 | +20 (detailed) |
-| `issue_create` | 80 | +70 (detailed description), +30 (with labels) |
-| `issue_close` | 60 | +50 (referenced in PR) |
-| `release_publish` | 200 | +150 (major), +50 (minor), +30 (with notes) |
-| `ci_success` | 30 | +50 (deployment) |
-| `discussion_create` | 60 | +40 (detailed) |
-| `discussion_comment` | 30 | +70 (accepted answer) |
+| `code_push` | 1440 | +3000 (multiple commits) |
+| `pull_request_create` | 1200 | +1200 (multiple files), +2400 (significant changes) |
+| `pull_request_merge` | 1200 | +1200 (multiple files), +2400 (significant changes) |
+| `pull_request_close` | 600 | +600 (multiple files), +1200 (significant changes) |
+| `code_review_submit` | 960 | +1200 (detailed), +600 (multiple files), +1800 (thorough) |
+| `review_comment_create` | 480 | +360 (with suggestion), +240 (detailed) |
+| `comment_create` | 360 | +240 (detailed) |
+| `issue_create` | 960 | +840 (detailed description), +360 (with labels) |
+| `issue_close` | 720 | +600 (referenced in PR) |
+| `issue_reopen` | 480 | +360 (with updates) |
+| `release_publish` | 2400 | +1800 (major), +600 (minor), +360 (with notes) |
+| `ci_success` | 360 | +600 (deployment) |
+| `discussion_create` | 720 | +480 (detailed) |
+| `discussion_comment` | 360 | +840 (accepted answer) |
 
 ### GitHub Event → Game Action Mapping
 
