@@ -31,6 +31,7 @@ export * from './lib/rewards/services/reward.service';
 export * from './lib/config/xp-values.config';
 export * from './lib/config/level-thresholds';
 export * from './lib/config/level-definitions.config';
+export * from './lib/config/badge-catalog.config';
 
 // Utilities
 export * from './lib/utils/time-periods.utils';

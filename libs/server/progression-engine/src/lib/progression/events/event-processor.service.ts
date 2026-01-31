@@ -3,6 +3,7 @@ import { NotificationService } from '@codeheroes/notifications';
 import { Collections, ProgressionEvent, ProgressionEventType } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { BadgeService } from '../../rewards/services/badge.service';
+import { getLevelRequirements } from '../../config/level-thresholds';
 
 /**
  * Service responsible for processing progression events
@@ -15,8 +16,7 @@ export class EventProcessorService {
   constructor() {
     this.db = DatabaseInstance.getInstance();
     this.notificationService = new NotificationService();
-    // Pass this instance to BadgeService to prevent circular instantiation
-    this.badgeService = new BadgeService(this);
+    this.badgeService = new BadgeService();
   }
 
   /**
@@ -43,49 +43,45 @@ export class EventProcessorService {
   }
 
   /**
-   * Handle level up events
+   * Handle level up events - grants badges for each level gained
    * @param event Level up event
    */
   private async handleLevelUp(event: ProgressionEvent): Promise<void> {
     const { userId, data } = event;
     const newLevel = data.state?.level;
+    const previousLevel = data.previousState?.level || 0;
+
     if (!newLevel) return;
 
-    await this.db.runTransaction(async (transaction) => {
-      const userRef = this.db.collection(Collections.Users).doc(userId);
-      const achievementRef = userRef.collection(Collections.Achievements);
+    logger.info('Processing level up', { userId, previousLevel, newLevel });
 
-      // Record achievement
-      await this.recordAchievement(transaction, achievementRef, {
-        id: `level_${newLevel}`,
-        name: `Level ${newLevel}`,
-        description: `Reached level ${newLevel}`,
-        timestamp: event.timestamp,
-      });
+    // Grant badges for ALL levels gained (handles multiple level-ups at once)
+    for (let level = previousLevel + 1; level <= newLevel; level++) {
+      const levelConfig = getLevelRequirements(level);
 
-      // Level-based achievements
-      if (newLevel === 5) {
-        await this.recordAchievement(transaction, achievementRef, {
-          id: 'intermediate_hero',
-          name: 'Intermediate Hero',
-          description: 'Reached level 5',
-          timestamp: event.timestamp,
-        });
-      } else if (newLevel === 10) {
-        await this.recordAchievement(transaction, achievementRef, {
-          id: 'advanced_hero',
-          name: 'Advanced Hero',
-          description: 'Reached level 10',
-          timestamp: event.timestamp,
-        });
+      if (levelConfig?.rewards?.badges) {
+        logger.info('Granting level badges', { userId, level, badges: levelConfig.rewards.badges });
+
+        const grantedBadges = await this.badgeService.grantBadges(userId, levelConfig.rewards.badges);
+
+        // Send notification for each granted badge
+        for (const badge of grantedBadges) {
+          await this.notificationService.createNotification(userId, {
+            type: 'BADGE_EARNED',
+            title: 'New Badge Earned!',
+            message: `You earned: ${badge.icon} ${badge.name}`,
+            metadata: { badgeId: badge.id, level },
+          });
+        }
       }
+    }
 
-      await this.notificationService.createNotification(userId, {
-        type: 'LEVEL_UP',
-        title: 'Level Up!',
-        message: `Congratulations! You've reached level ${newLevel}!`,
-        metadata: { level: newLevel },
-      });
+    // Send level-up notification
+    await this.notificationService.createNotification(userId, {
+      type: 'LEVEL_UP',
+      title: 'Level Up!',
+      message: `Congratulations! You've reached level ${newLevel}!`,
+      metadata: { level: newLevel, previousLevel },
     });
   }
 
@@ -98,36 +94,8 @@ export class EventProcessorService {
     const badgeId = data.badgeId;
     if (!badgeId) return;
 
-    await this.db.runTransaction(async (transaction) => {
-      const userRef = this.db.collection(Collections.Users).doc(userId);
-      const userBadges = await transaction.get(userRef.collection(Collections.Badges));
-
-      const badgeCount = userBadges.size;
-      const achievementRef = userRef.collection(Collections.Achievements);
-
-      await this.notificationService.createNotification(userId, {
-        type: 'BADGE_EARNED',
-        title: 'New Badge!',
-        message: `You've earned a new badge!`,
-        metadata: { badgeId },
-      });
-
-      if (badgeCount === 5) {
-        await this.recordAchievement(transaction, achievementRef, {
-          id: 'badge_collector',
-          name: 'Badge Collector',
-          description: 'Earned 5 different badges',
-          timestamp: event.timestamp,
-        });
-      } else if (badgeCount === 10) {
-        await this.recordAchievement(transaction, achievementRef, {
-          id: 'badge_master',
-          name: 'Badge Master',
-          description: 'Earned 10 different badges',
-          timestamp: event.timestamp,
-        });
-      }
-    });
+    // Badge already granted by BadgeService, just log
+    logger.info('Badge earned event processed', { userId, badgeId });
   }
 
   /**
@@ -139,38 +107,9 @@ export class EventProcessorService {
     const activity = data.activity;
     if (!activity) return;
 
-    try {
-      // Use sourceActionType instead of the type property
-      const actionType = activity.sourceActionType;
-      const stats = await this.getActivityStats(userId, actionType);
-      const userRef = this.db.collection(Collections.Users).doc(userId);
-      const achievementRef = userRef.collection(Collections.Achievements);
-
-      // First-time achievements
-      if (stats.total === 1) {
-        await this.recordAchievement(null, achievementRef, {
-          id: `first_${actionType}`,
-          name: `First ${actionType.replace(/_/g, ' ')}`,
-          description: `Completed your first ${actionType.replace(/_/g, ' ')}`,
-          timestamp: event.timestamp,
-        });
-      }
-
-      // Milestone achievements
-      const milestones = [10, 50, 100, 500];
-      const nextMilestone = milestones.find((m) => stats.total === m);
-      if (nextMilestone) {
-        await this.recordAchievement(null, achievementRef, {
-          id: `${actionType}_milestone_${nextMilestone}`,
-          name: `${actionType.replace(/_/g, ' ')} Master ${nextMilestone}`,
-          description: `Completed ${nextMilestone} ${actionType.replace(/_/g, ' ')}s`,
-          timestamp: event.timestamp,
-        });
-      }
-    } catch (error) {
-      logger.error('Error processing activity recorded event:', error);
-      throw error;
-    }
+    // Activity recording is handled by the progression service
+    // Future: Add activity milestone badges here (Option B)
+    logger.info('Activity recorded event processed', { userId, activityType: activity.sourceActionType });
   }
 
   /**
@@ -180,45 +119,5 @@ export class EventProcessorService {
   private async handleXpGained(event: ProgressionEvent): Promise<void> {
     // Handle XP gained events if needed
     // Most XP-related processing is handled by the progression service
-  }
-
-  /**
-   * Record an achievement
-   * @param transaction Firestore transaction or null
-   * @param achievementRef Reference to achievements collection
-   * @param achievement Achievement data to record
-   */
-  private async recordAchievement(
-    transaction: FirebaseFirestore.Transaction | null,
-    achievementRef: FirebaseFirestore.CollectionReference,
-    achievement: {
-      id: string;
-      name: string;
-      description: string;
-      timestamp: string;
-    },
-  ): Promise<void> {
-    const docRef = achievementRef.doc(achievement.id);
-
-    if (transaction) {
-      transaction.set(docRef, achievement);
-    } else {
-      await docRef.set(achievement);
-    }
-  }
-
-  /**
-   * Get activity stats for a user and activity type
-   * @param userId User ID
-   * @param activityType Activity type
-   * @returns Activity stats
-   */
-  private async getActivityStats(userId: string, activityType: string): Promise<{ total: number }> {
-    const userRef = this.db.collection(Collections.Users).doc(userId);
-    const statsDoc = await userRef.collection(Collections.Stats).doc('current').get();
-    const stats = statsDoc.data()?.activityStats || {};
-    return {
-      total: stats.byType?.[activityType] || 0,
-    };
   }
 }

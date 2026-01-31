@@ -70,10 +70,10 @@ export class RewardService {
       // Handle specific reward types
       switch (reward.type) {
         case 'BADGE':
-          await this.badgeService.processBadges(userId, {
-            actionType: 'reward_badge',
-            totalActions: 1,
-          });
+          // Grant the badge using the new catalog-based BadgeService
+          if (reward.id) {
+            await this.badgeService.grantBadge(userId, reward.id);
+          }
           break;
         case 'POINTS':
           if (reward.amount) {
