@@ -39,11 +39,12 @@ export class BadgeService {
 
     // 3. Use atomic create() to ensure we only grant the badge if it doesn't exist
     // This prevents race conditions where two concurrent calls both pass an existence check
-    const badgeRef = this.db.collection(Collections.Users).doc(userId).collection(Collections.Badges).doc(badgeId);
+    // Use badgeDefinition.id consistently for document ID to prevent path/field mismatch
+    const badgeRef = this.db.collection(Collections.Users).doc(userId).collection(Collections.Badges).doc(badgeDefinition.id);
 
     try {
       await badgeRef.create(userBadge);
-      logger.info('Badge granted', { userId, badgeId, badgeName: userBadge.name });
+      logger.info('Badge granted', { userId, badgeId: badgeDefinition.id, badgeName: userBadge.name });
       return userBadge;
     } catch (error: unknown) {
       // If the document already exists, Firestore throws an error with code 6 (ALREADY_EXISTS)

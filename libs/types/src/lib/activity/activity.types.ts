@@ -1,7 +1,7 @@
 import { GameActionType } from '../game/action.types';
 import { GameActionContext } from '../game/context.types';
 import { GameActionMetrics } from '../game/metrics.types';
-import { BadgeRarity } from '../gamification/badges.types';
+import { BadgeCategory, BadgeRarity } from '../gamification/badges.types';
 
 export interface ActivityCounters {
   // Single consistent approach for all action types
@@ -66,7 +66,7 @@ export interface BadgeEarnedActivity extends BaseActivity {
     description: string;
     icon: string;
     rarity: BadgeRarity;
-    category: string;
+    category: BadgeCategory | string;
   };
   trigger?: {
     type: 'level-up' | 'milestone' | 'special';

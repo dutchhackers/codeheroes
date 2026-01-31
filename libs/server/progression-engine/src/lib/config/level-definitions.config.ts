@@ -10,7 +10,7 @@ import { LevelRequirementItem } from '@codeheroes/types';
  * For levels > MAX_STATIC_LEVEL, XP is calculated in level-thresholds.ts using
  * a quadratic formula anchored at level 20's XP:
  *   XP(level) = LEVEL_20_XP + multiplier * (level - MAX_STATIC_LEVEL)²
- * The multiplier (1500) is tuned so that Level 80 is approximately 9,600,000 XP.
+ * The multiplier (1500) results in Level 80 requiring approximately 6,175,000 XP.
  *
  * XP values were scaled 12x to match the new XP economy.
  */

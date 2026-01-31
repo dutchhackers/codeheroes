@@ -399,21 +399,15 @@ const VISIBLE_BADGES_COUNT = 5;
 export class BadgesGridComponent {
   readonly #cdr = inject(ChangeDetectorRef);
   private _badges: UserBadge[] = [];
+  private _badgeDisplays: BadgeDisplay[] = [];
 
   isModalOpen = signal(false);
 
   @Input()
   set badges(value: UserBadge[]) {
     this._badges = value;
-    this.#cdr.markForCheck();
-  }
-
-  get badges(): UserBadge[] {
-    return this._badges;
-  }
-
-  get badgeDisplays(): BadgeDisplay[] {
-    return this._badges.map((badge) => {
+    // Compute badgeDisplays once in setter to avoid repeated allocations with OnPush
+    this._badgeDisplays = value.map((badge) => {
       const rarity = getBadgeRarity(badge);
       return {
         badge,
@@ -422,23 +416,30 @@ export class BadgesGridComponent {
         color: getBadgeRarityColor(rarity),
       };
     });
+    this.#cdr.markForCheck();
+  }
+
+  get badges(): UserBadge[] {
+    return this._badges;
+  }
+
+  get badgeDisplays(): BadgeDisplay[] {
+    return this._badgeDisplays;
   }
 
   get visibleBadges(): BadgeDisplay[] {
-    const displays = this.badgeDisplays;
-    if (displays.length <= VISIBLE_BADGES_COUNT + 1) {
+    if (this._badgeDisplays.length <= VISIBLE_BADGES_COUNT + 1) {
       // Show all if only 1 more than limit (no point showing "+1")
-      return displays;
+      return this._badgeDisplays;
     }
-    return displays.slice(0, VISIBLE_BADGES_COUNT);
+    return this._badgeDisplays.slice(0, VISIBLE_BADGES_COUNT);
   }
 
   get hiddenCount(): number {
-    const total = this.badgeDisplays.length;
-    if (total <= VISIBLE_BADGES_COUNT + 1) {
+    if (this._badgeDisplays.length <= VISIBLE_BADGES_COUNT + 1) {
       return 0;
     }
-    return total - VISIBLE_BADGES_COUNT;
+    return this._badgeDisplays.length - VISIBLE_BADGES_COUNT;
   }
 
   openModal(): void {

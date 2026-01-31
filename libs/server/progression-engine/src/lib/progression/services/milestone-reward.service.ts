@@ -1,5 +1,6 @@
 import { logger } from '@codeheroes/common';
 import { GameAction, ProgressionState } from '@codeheroes/types';
+import { getMilestoneBadgeForCount } from '../../config/milestone-badges.config';
 import { LevelService } from '../../rewards/services/level.service';
 import { RewardService } from '../../rewards/services/reward.service';
 
@@ -71,20 +72,26 @@ export class MilestoneRewardService {
    * Handle rewards for reaching an activity count milestone
    */
   private async handleActivityMilestone(userId: string, actionType: string, milestone: number): Promise<void> {
+    // Look up the actual badge from the catalog using activityType and count
+    const milestoneBadge = getMilestoneBadgeForCount(actionType, milestone);
+
+    if (!milestoneBadge) {
+      logger.warn('No milestone badge found in catalog', { actionType, milestone });
+      return;
+    }
+
     // Generate a unique ID for the reward document
     const rewardId = `${actionType}_milestone_${milestone}_${Date.now()}`;
-    // The catalog badge ID follows a different format
-    const badgeId = `${actionType}_${milestone}`;
 
     await this.rewardService.grantReward(userId, {
       id: rewardId,
       type: 'BADGE',
-      name: `${actionType.replace(/_/g, ' ')} Expert`,
-      description: `Completed ${milestone} ${actionType.replace(/_/g, ' ')} actions`,
-      metadata: { badgeId },
+      name: milestoneBadge.name,
+      description: milestoneBadge.description,
+      metadata: { badgeId: milestoneBadge.id },
     });
 
-    logger.info('Activity milestone reward granted', { userId, actionType, milestone });
+    logger.info('Activity milestone reward granted', { userId, actionType, milestone, badgeId: milestoneBadge.id });
   }
 
   /**
