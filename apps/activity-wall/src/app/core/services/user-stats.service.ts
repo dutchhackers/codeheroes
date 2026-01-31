@@ -5,6 +5,7 @@ import {
   doc,
   docData,
   Firestore,
+  getDoc,
   limit as firestoreLimit,
   orderBy,
   query,
@@ -12,7 +13,7 @@ import {
   where,
 } from '@angular/fire/firestore';
 import { Auth, user } from '@angular/fire/auth';
-import { Observable, of, switchMap, map, catchError } from 'rxjs';
+import { Observable, of, switchMap, map, catchError, from, forkJoin } from 'rxjs';
 import { Activity, UserDto, UserStats } from '@codeheroes/types';
 import { UserBadge } from '../models/user-badge.model';
 
@@ -20,6 +21,14 @@ export interface CurrentUserProfile {
   user: UserDto | null;
   stats: UserStats | null;
 }
+
+export interface WeeklyStatsRecord {
+  weekId: string;
+  data: Record<string, unknown> | undefined;
+}
+
+/** Milliseconds in one day (24 * 60 * 60 * 1000) */
+const MS_PER_DAY = 86400000;
 
 @Injectable({
   providedIn: 'root',
@@ -199,5 +208,79 @@ export class UserStatsService {
         return this.getUserBadges(userDoc.id);
       })
     );
+  }
+
+  /**
+   * Get weekly stats history for a user
+   * Fetches the last N weeks of activity stats
+   */
+  getWeeklyStatsHistory(userId: string, weekCount = 4): Observable<WeeklyStatsRecord[]> {
+    const weekIds = this.#getLastNWeekIds(Math.max(1, weekCount));
+
+    // Guard against empty array (forkJoin fails with empty array)
+    if (weekIds.length === 0) {
+      return of([]);
+    }
+
+    // Create observables for each week's document
+    const weekObservables = weekIds.map(weekId => {
+      const weekDocRef = doc(
+        this.#firestore,
+        `users/${userId}/activityStats/weekly/records/${weekId}`
+      );
+      return from(getDoc(weekDocRef)).pipe(
+        map(snapshot => ({
+          weekId,
+          data: snapshot.exists() ? snapshot.data() as Record<string, unknown> : undefined,
+        })),
+        catchError(() => of({ weekId, data: undefined }))
+      );
+    });
+
+    return forkJoin(weekObservables);
+  }
+
+  /**
+   * Get the current user's weekly stats history
+   */
+  getCurrentUserWeeklyHistory(weekCount = 4): Observable<WeeklyStatsRecord[]> {
+    return this.getCurrentUserDoc().pipe(
+      switchMap((userDoc) => {
+        if (!userDoc) {
+          return of([]);
+        }
+        return this.getWeeklyStatsHistory(userDoc.id, weekCount);
+      })
+    );
+  }
+
+  /**
+   * Calculate ISO week ID for a given date
+   * Returns format: YYYY-WXX (e.g., "2026-W05")
+   */
+  #getWeekIdForDate(date: Date): string {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    // Set to Thursday of the current week (ISO week starts Monday)
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    const weekNumber = Math.ceil(((d.getTime() - yearStart.getTime()) / MS_PER_DAY + 1) / 7);
+    return `${d.getFullYear()}-W${weekNumber.toString().padStart(2, '0')}`;
+  }
+
+  /**
+   * Get the last N week IDs including the current week
+   */
+  #getLastNWeekIds(count: number): string[] {
+    const weekIds: string[] = [];
+    const today = new Date();
+
+    for (let i = 0; i < count; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i * 7);
+      weekIds.push(this.#getWeekIdForDate(date));
+    }
+
+    return weekIds;
   }
 }

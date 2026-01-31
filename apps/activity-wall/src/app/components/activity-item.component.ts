@@ -132,7 +132,7 @@ import { UserInfo } from '../core/services/user-cache.service';
           } @else {
             <span class="text-slate-500 truncate">{{ repoName() }}</span>
           }
-          @if (!isBadgeActivity() && !isLevelActivity()) {
+          @if (!isBadgeActivity() && !isLevelActivity() && xpEarned() > 0) {
             <span class="text-slate-400 flex-shrink-0 ml-4">+{{ xpEarned() }} XP</span>
           }
         </div>
@@ -351,7 +351,7 @@ export class ActivityItemComponent {
     }
 
     // Fallback - this shouldn't happen with the current union types
-    return (activity as Activity).userFacingDescription;
+    return (activity as Activity).userFacingDescription || 'performed an action';
   });
 
   private buildSentence(actionType: GameActionType, activity: Activity): string {

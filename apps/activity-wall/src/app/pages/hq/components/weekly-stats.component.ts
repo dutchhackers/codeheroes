@@ -56,6 +56,7 @@ interface StatItem {
 
     .stat-card {
       background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
       border: 2px solid var(--stat-color);
       border-radius: 8px;
       padding: 1rem 0.75rem;

@@ -23,7 +23,7 @@ import { Highlight } from '../../../core/services/hq-data.service';
                 {{ getIconEmoji(highlight.icon) }}
               </div>
               <div class="highlight-content">
-                <span class="highlight-message">{{ highlight.message }}</span>
+                <span class="highlight-message">{{ highlight.message || 'Activity recorded' }}</span>
                 @if (highlight.xp) {
                   <span class="highlight-xp">(+{{ highlight.xp }} XP)</span>
                 }
@@ -38,6 +38,7 @@ import { Highlight } from '../../../core/services/hq-data.service';
   styles: [`
     .highlights-container {
       background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
       border-radius: 8px;
       padding: 1rem;
       margin: 1rem 0;

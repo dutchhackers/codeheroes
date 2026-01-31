@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { Auth, signOut } from '@angular/fire/auth';
 import { Subscription } from 'rxjs';
 import { Activity, UserDto, UserStats } from '@codeheroes/types';
-import { UserStatsService } from '../../core/services/user-stats.service';
+import { UserStatsService, WeeklyStatsRecord } from '../../core/services/user-stats.service';
 import { UserCacheService } from '../../core/services/user-cache.service';
 import { UserBadge } from '../../core/models/user-badge.model';
 import { ProfileAvatarComponent } from './components/profile-avatar.component';
@@ -11,6 +11,7 @@ import { StatsGridComponent } from './components/stats-grid.component';
 import { BadgesGridComponent } from './components/badges-grid.component';
 import { ActivityItemComponent } from '../../components/activity-item.component';
 import { ProfileEditModalComponent } from './components/profile-edit-modal.component';
+import { MyStatsComponent } from './components/my-stats.component';
 
 @Component({
   selector: 'app-profile',
@@ -22,6 +23,7 @@ import { ProfileEditModalComponent } from './components/profile-edit-modal.compo
     BadgesGridComponent,
     ActivityItemComponent,
     ProfileEditModalComponent,
+    MyStatsComponent,
   ],
   template: `
     <!-- Header -->
@@ -92,6 +94,11 @@ import { ProfileEditModalComponent } from './components/profile-edit-modal.compo
             <p class="text-sm md:text-base text-purple-400 font-mono mt-1" aria-label="Current level {{ stats()?.level ?? 1 }}">
               Level {{ stats()?.level ?? 1 }}
             </p>
+            @if (user()?.createdAt) {
+              <p class="text-xs text-slate-500 font-mono mt-1">
+                Hero Since {{ formatMemberSince(user()?.createdAt) }}
+              </p>
+            }
           </div>
 
           <!-- XP Progress -->
@@ -99,6 +106,9 @@ import { ProfileEditModalComponent } from './components/profile-edit-modal.compo
 
           <!-- Stats Grid -->
           <app-stats-grid [stats]="stats()" />
+
+          <!-- Weekly Trends -->
+          <app-my-stats [weeklyHistory]="weeklyHistory()" />
 
           <!-- Badges -->
           <app-badges-grid [badges]="badges()" />
@@ -172,11 +182,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
   #profileSubscription: Subscription | null = null;
   #activitiesSubscription: Subscription | null = null;
   #badgesSubscription: Subscription | null = null;
+  #weeklyHistorySubscription: Subscription | null = null;
 
   user = signal<UserDto | null>(null);
   stats = signal<UserStats | null>(null);
   activities = signal<Activity[]>([]);
   badges = signal<UserBadge[]>([]);
+  weeklyHistory = signal<WeeklyStatsRecord[]>([]);
   isLoading = signal(true);
   showEditModal = signal(false);
   isSavingProfile = signal(false);
@@ -190,6 +202,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.#profileSubscription?.unsubscribe();
     this.#activitiesSubscription?.unsubscribe();
     this.#badgesSubscription?.unsubscribe();
+    this.#weeklyHistorySubscription?.unsubscribe();
   }
 
   async #loadProfile() {
@@ -228,6 +241,25 @@ export class ProfileComponent implements OnInit, OnDestroy {
         console.error('Failed to load badges:', error);
       },
     });
+
+    // Subscribe to weekly stats history
+    this.#weeklyHistorySubscription = this.#userStatsService.getCurrentUserWeeklyHistory(4).subscribe({
+      next: (history) => {
+        this.weeklyHistory.set(history);
+      },
+      error: (error) => {
+        console.error('Failed to load weekly history:', error);
+      },
+    });
+  }
+
+  formatMemberSince(dateString: string | undefined): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return '';
+    }
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 
   formatDisplayName(name: string): string {
