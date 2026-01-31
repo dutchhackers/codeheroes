@@ -10,27 +10,43 @@ import {
  * HYBRID LEVEL SYSTEM
  *
  * Levels 1-20: Use static LEVEL_DEFINITIONS array (hand-tuned onboarding)
- * Levels 21+: Use algorithmic formula: XP = 1500 * Level²
+ * Levels 21+: Use algorithmic formula starting from Level 20's XP threshold
  *
  * This approach:
  * - Provides carefully tuned early progression
  * - Eliminates maintenance burden for 80+ levels
  * - Supports infinite scaling without "hard cap" bugs
- * - Targets Level 80 at ~9,600,000 XP
+ * - Ensures monotonic XP progression (each level requires more XP)
  */
 
 /**
  * XP multiplier for algorithmic levels (21+)
- * Formula: XP = ALGORITHMIC_XP_MULTIPLIER * Level²
+ * Formula: XP = LEVEL_20_XP + (ALGORITHMIC_XP_MULTIPLIER * levelsAbove20²)
  */
 const ALGORITHMIC_XP_MULTIPLIER = 1500;
 
 /**
+ * XP required for Level 20 (the last static level)
+ * Used as the baseline for algorithmic level calculations
+ */
+const LEVEL_20_XP = 775000;
+
+/**
  * Calculate XP required for a given level using the algorithmic formula
  * Used for levels beyond MAX_STATIC_LEVEL
+ *
+ * Formula: LEVEL_20_XP + (MULTIPLIER × levelsAbove20²)
+ * This ensures monotonic progression from Level 20's endpoint
+ *
+ * Examples:
+ * - Level 21: 775,000 + 1,500 × 1² = 776,500 XP
+ * - Level 22: 775,000 + 1,500 × 2² = 781,000 XP
+ * - Level 25: 775,000 + 1,500 × 5² = 812,500 XP
+ * - Level 30: 775,000 + 1,500 × 10² = 925,000 XP
  */
 function calculateAlgorithmicXp(level: number): number {
-  return ALGORITHMIC_XP_MULTIPLIER * level * level;
+  const levelsAbove20 = level - MAX_STATIC_LEVEL;
+  return LEVEL_20_XP + ALGORITHMIC_XP_MULTIPLIER * levelsAbove20 * levelsAbove20;
 }
 
 /**
@@ -64,10 +80,15 @@ export function getLevelFromXp(totalXp: number): number {
 
       // If at max static level, check if we've exceeded into algorithmic territory
       if (staticLevel === MAX_STATIC_LEVEL) {
-        // Check algorithmic levels
-        const algorithmicLevel = Math.floor(Math.sqrt(totalXp / ALGORITHMIC_XP_MULTIPLIER));
-        if (algorithmicLevel > MAX_STATIC_LEVEL) {
-          return algorithmicLevel;
+        // Check if XP exceeds Level 21's threshold
+        const level21Xp = calculateAlgorithmicXp(MAX_STATIC_LEVEL + 1);
+        if (totalXp >= level21Xp) {
+          // Inverse of: xp = LEVEL_20_XP + MULTIPLIER × levelsAbove20²
+          // levelsAbove20 = sqrt((xp - LEVEL_20_XP) / MULTIPLIER)
+          const levelsAbove20 = Math.floor(
+            Math.sqrt((totalXp - LEVEL_20_XP) / ALGORITHMIC_XP_MULTIPLIER)
+          );
+          return MAX_STATIC_LEVEL + levelsAbove20;
         }
       }
 
@@ -110,13 +131,15 @@ export function getLevelRequirements(level: number): LevelDefinition | undefined
   }
 
   // Generate dynamic config for algorithmic levels
-  const algorithmicTitle = ALGORITHMIC_LEVEL_TITLES[level];
+  // Only milestone levels (25, 30, 35...) have badges defined in ALGORITHMIC_LEVEL_TITLES
+  // Non-milestone levels return empty badges array to avoid silent failures
+  const milestoneConfig = ALGORITHMIC_LEVEL_TITLES[level];
   return {
     level,
     xpRequired: calculateAlgorithmicXp(level),
     rewards: {
-      title: algorithmicTitle?.title ?? getDefaultAlgorithmicTitle(level),
-      badges: algorithmicTitle ? [algorithmicTitle.badge] : [`level_${level}_badge`],
+      title: milestoneConfig?.title ?? getDefaultAlgorithmicTitle(level),
+      badges: milestoneConfig ? [milestoneConfig.badge] : [],
     },
   };
 }
