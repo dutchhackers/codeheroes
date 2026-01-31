@@ -24,7 +24,7 @@ async function main() {
       ssl: false,
     });
   } else {
-    console.log('Using Production Firestore for project:', process.env.FIREBASE_PROJECT_ID);
+    console.log('Using remote Firestore project:', process.env.FIREBASE_PROJECT_ID);
   }
 
   try {

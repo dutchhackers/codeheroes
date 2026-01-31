@@ -17,6 +17,11 @@ interface SystemData {
 
 export class SystemSeeder implements Seeder<SystemData> {
   async seed(db: Firestore, data: SystemData[]): Promise<void> {
+    if (!data || data.length === 0) {
+      console.log('No system data to seed - skipping');
+      return;
+    }
+
     const systemData = data[0]; // Expect single object with settings and counters
     const batch = db.batch();
 
