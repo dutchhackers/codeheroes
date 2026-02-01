@@ -89,13 +89,13 @@ mcp__devtools-mcp__new_page  url="http://localhost:4201"
 
 Dit opent:
 1. **Emulator UI**: http://localhost:4000
-2. **Activity Wall**: http://localhost:4201
+2. **App**: http://localhost:4201
 
 ---
 
-## Programmatisch inloggen in Activity Wall (zonder popup)
+## Programmatisch inloggen in App (zonder popup)
 
-Om in te loggen in de Activity Wall zonder door de Google popup te klikken, gebruik DevTools MCP om de volgende JavaScript uit te voeren op http://localhost:4201:
+Om in te loggen in de App zonder door de Google popup te klikken, gebruik DevTools MCP om de volgende JavaScript uit te voeren op http://localhost:4201:
 
 **API key**: Haal de `FIREBASE_API_KEY` uit CLAUDE.local.md.
 
@@ -208,7 +208,7 @@ De gebruiker is nu ingelogd zonder popup interactie.
 | Auth Emulator API | http://localhost:9099 |
 | Firestore Emulator | http://localhost:8080 |
 | Functions | http://localhost:5001 |
-| Activity Wall | http://localhost:4201 |
+| App | http://localhost:4201 |
 
 ## Troubleshooting
 

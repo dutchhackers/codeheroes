@@ -6,6 +6,38 @@ CodeHeroes is a gamification platform that tracks developer activity via GitHub 
 
 **Naming convention:** The product name is "Code Heroes" (two words) in user-facing text, but "CodeHeroes" (one word) in code identifiers, file names, and technical references.
 
+## CRITICAL: No Sensitive Data in Public Repo
+
+**This is a PUBLIC repository.** Before committing or creating PRs, ALWAYS verify no sensitive data is included:
+
+### Prohibited in Committed Files
+| Type | Pattern Examples | Where It Belongs |
+|------|------------------|------------------|
+| Firebase API keys | `AIzaSy...` | `.claude/CLAUDE.local.md`, environment files |
+| Private keys | `-----BEGIN PRIVATE KEY-----` | `.local/` directory, never committed |
+| GitHub tokens | `ghp_...`, `github_pat_...` | Environment variables only |
+| Service account JSON | `"private_key": "..."` | `.local/sa/` directory |
+| Passwords/secrets | `password=`, `secret=` | Environment variables, `.env` |
+| Webhook secrets | `whsec_...` | Environment variables only |
+
+### Pre-Commit Checklist
+1. **No API keys** in `.claude/commands/`, docs, or any `.md` files
+2. **No hardcoded credentials** - use placeholders like `YOUR_API_KEY` with reference to `.claude/CLAUDE.local.md`
+3. **No real user data** - use anonymized test data only
+4. **Check git diff** before committing for any sensitive patterns
+
+### Safe Locations (gitignored)
+- `.claude/CLAUDE.local.md` - Local URLs, API keys, secrets documentation
+- `.claude/*.local.json` - Personal config
+- `.local/` - Service accounts, certificates
+- `.env` - Environment variables
+
+### If Sensitive Data Was Committed
+1. Remove from file immediately
+2. Commit the fix
+3. Consider regenerating the exposed credential
+4. API keys in git history: add restrictions in Google Cloud Console
+
 ## Repository Structure
 
 ```
@@ -63,7 +95,7 @@ Do NOT try to start individual functions separately.
 | Storage | http://localhost:9199 | 9199 |
 | Eventarc | http://localhost:9299 | 9299 |
 | Web App | http://localhost:4200 | 4200 |
-| Activity Wall | http://localhost:4201 | 4201 |
+| App (Main PWA) | http://localhost:4201 | 4201 |
 | ngrok Inspector | http://localhost:4040 | 4040 |
 
 ### Verify Emulators Running
@@ -671,7 +703,7 @@ mcp__devtools-mcp__fill                    # Fill input field
 mcp__devtools-mcp__press_key               # Press keyboard key (Home, End, Enter, etc.)
 ```
 
-### Example: Verify Activity Wall
+### Example: Verify App
 
 ```
 1. mcp__devtools-mcp__navigate_page url="http://localhost:4201"
@@ -682,9 +714,9 @@ mcp__devtools-mcp__press_key               # Press keyboard key (Home, End, Ente
 
 ---
 
-## Programmatic Login to Activity Wall (Auth Emulator)
+## Programmatic Login to App (Auth Emulator)
 
-When testing the Activity Wall locally, you can log in programmatically without clicking through the Google Sign-In popup. This is useful for automated testing and CI/CD.
+When testing the App locally, you can log in programmatically without clicking through the Google Sign-In popup. This is useful for automated testing and CI/CD.
 
 ### How It Works
 

@@ -11,7 +11,7 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
 - [firebase-app](apps/firebase-app) - Main Firebase application
 - [game-engine](apps/game-engine) - Game engine Firebase function
 - [github-receiver](apps/github-receiver) - GitHub webhooks receiver Firebase function
-- [app](apps/frontend/app) - Main PWA application (Activity Wall)
+- [app](apps/frontend/app) - Main PWA application
 - [web-legacy](apps/frontend/web-legacy) - Legacy web application
 
 ### Libraries
