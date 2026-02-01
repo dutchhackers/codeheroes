@@ -300,7 +300,7 @@ Run `npm run setup` after editing `.env` to regenerate config files.
 
 ## Node.js Version
 
-Requires Node.js 20 (see `.nvmrc`). Use `nvm use` to switch.
+Requires Node.js 24 (see `.nvmrc`). Use `nvm use` to switch.
 
 ---
 

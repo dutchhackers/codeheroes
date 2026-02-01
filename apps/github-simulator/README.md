@@ -13,7 +13,7 @@ Instead of setting up ngrok tunnels and triggering real GitHub events:
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 24+
 - Firebase emulators running (`nx serve firebase-app`)
 - Config file at `.claude/config.local.json`
 

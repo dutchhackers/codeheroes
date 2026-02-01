@@ -42,7 +42,7 @@
     {
       "codebase": "api",
       "source": "dist/apps/api",
-      "runtime": "nodejs22",
+      "runtime": "nodejs24",
       "ignore": [
         "*.local"
       ]
@@ -50,7 +50,7 @@
     {
       "codebase": "auth-service",
       "source": "dist/apps/auth-service",
-      "runtime": "nodejs22",
+      "runtime": "nodejs24",
       "ignore": [
         "*.local"
       ]
@@ -58,7 +58,7 @@
     {
       "codebase": "game-engine",
       "source": "dist/apps/game-engine",
-      "runtime": "nodejs22",
+      "runtime": "nodejs24",
       "ignore": [
         "*.local"
       ]
@@ -66,7 +66,7 @@
     {
       "codebase": "github-receiver",
       "source": "dist/apps/github-receiver",
-      "runtime": "nodejs22",
+      "runtime": "nodejs24",
       "ignore": [
         "*.local"
       ]

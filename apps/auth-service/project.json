@@ -25,7 +25,7 @@
         "bundle": true,
         "thirdParty": false,
         "dependenciesFieldType": "dependencies",
-        "target": "node22",
+        "target": "node24",
         "format": ["esm"],
         "esbuildOptions": {
           "logLevel": "info"
