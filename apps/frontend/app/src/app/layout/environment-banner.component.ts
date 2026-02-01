@@ -2,10 +2,8 @@ import { Component } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
 import { environment } from '../../environments/environment';
 
-type EnvironmentName = 'local' | 'test' | 'production';
-
 /** Whether to show environment indicators (banner, etc.) - true for non-production */
-export const showEnvironmentIndicator = (environment.name as EnvironmentName) !== 'production';
+export const showEnvironmentIndicator = environment.name !== 'production';
 
 @Component({
   selector: 'app-environment-banner',

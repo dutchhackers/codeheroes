@@ -1,5 +1,7 @@
-export const environment = {
-  name: 'local' as const,
+import { Environment } from './environment.interface';
+
+export const environment: Environment = {
+  name: 'local',
   useEmulators: true,
   apiUrl: 'http://localhost:5001/${FIREBASE_PROJECT_ID}/europe-west1/api',
   firebase: {
