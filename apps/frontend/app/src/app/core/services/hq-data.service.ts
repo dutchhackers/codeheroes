@@ -206,9 +206,34 @@ export class HqDataService {
     currentUserRank: number | null;
     currentUserId: string | null;
   }> {
+    return this.#getLeaderboard('week', limitCount);
+  }
+
+  /**
+   * Get the daily leaderboard with current user's rank
+   */
+  getDailyLeaderboard(limitCount = 10): Observable<{
+    entries: LeaderboardEntry[];
+    currentUserRank: number | null;
+    currentUserId: string | null;
+  }> {
+    return this.#getLeaderboard('day', limitCount);
+  }
+
+  /**
+   * Internal method to fetch leaderboard data for a given period
+   */
+  #getLeaderboard(
+    period: 'week' | 'day',
+    limitCount: number,
+  ): Observable<{
+    entries: LeaderboardEntry[];
+    currentUserRank: number | null;
+    currentUserId: string | null;
+  }> {
     return combineLatest([
       this.#getCurrentUserDoc(),
-      this.#http.get<LeaderboardEntry[]>(`${environment.apiUrl}/leaderboards/week`),
+      this.#http.get<LeaderboardEntry[]>(`${environment.apiUrl}/leaderboards/${period}`),
     ]).pipe(
       map(([userDoc, leaderboard]) => {
         // Add rank to each entry
@@ -223,13 +248,13 @@ export class HqDataService {
           : null;
 
         return {
-          entries: rankedEntries.slice(0, limitCount),
+          entries: limitCount > 0 ? rankedEntries.slice(0, limitCount) : rankedEntries,
           currentUserRank,
           currentUserId,
         };
       }),
       catchError((error) => {
-        console.error('Error fetching leaderboard:', error);
+        console.error(`Error fetching ${period} leaderboard:`, error);
         return of({ entries: [], currentUserRank: null, currentUserId: null });
       }),
     );

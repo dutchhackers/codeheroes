@@ -10,12 +10,19 @@ import {
 import { DailyProgressComponent } from './components/daily-progress.component';
 import { WeeklyStatsComponent } from './components/weekly-stats.component';
 import { LeaderboardPreviewComponent } from './components/leaderboard-preview.component';
+import { LeaderboardModalComponent } from './components/leaderboard-modal.component';
 import { HighlightsComponent } from './components/highlights.component';
 
 @Component({
   selector: 'app-hq',
   standalone: true,
-  imports: [DailyProgressComponent, WeeklyStatsComponent, LeaderboardPreviewComponent, HighlightsComponent],
+  imports: [
+    DailyProgressComponent,
+    WeeklyStatsComponent,
+    LeaderboardPreviewComponent,
+    LeaderboardModalComponent,
+    HighlightsComponent,
+  ],
   template: `
     <!-- Header -->
     <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-4 py-4 md:px-6 lg:px-8 md:py-5">
@@ -46,6 +53,7 @@ import { HighlightsComponent } from './components/highlights.component';
             [currentUserRank]="currentUserRank()"
             [currentUserId]="currentUserId()"
             [isLoading]="leaderboardLoading()"
+            (viewAll)="showLeaderboardModal.set(true)"
           />
 
           <!-- Recent Highlights -->
@@ -53,6 +61,11 @@ import { HighlightsComponent } from './components/highlights.component';
         </div>
       }
     </main>
+
+    <!-- Leaderboard Modal -->
+    @if (showLeaderboardModal()) {
+      <app-leaderboard-modal (dismiss)="showLeaderboardModal.set(false)" />
+    }
   `,
   styles: [
     `
@@ -78,6 +91,7 @@ export class HqComponent implements OnInit, OnDestroy {
   currentUserRank = signal<number | null>(null);
   currentUserId = signal<string | null>(null);
   highlights = signal<Highlight[]>([]);
+  showLeaderboardModal = signal(false);
 
   ngOnInit() {
     this.#loadData();
