@@ -63,10 +63,11 @@ firebase-export*
 # Session handoff (temporary)
 HANDOFF.md
 
-# Claude local config (personal data)
+# Claude config (may contain sensitive data)
 .claude/*.local.json
 .claude/*.local.md
 .claude/plans/
+CLAUDE.md
 
 # MCP server config (local)
 .mcp.json
