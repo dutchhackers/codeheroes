@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { LeaderboardEntry } from '../../../core/services/hq-data.service';
 
 @Component({
@@ -6,10 +6,21 @@ import { LeaderboardEntry } from '../../../core/services/hq-data.service';
   standalone: true,
   template: `
     <div class="leaderboard-container card-glow-yellow">
-      <h3 class="section-title">
-        <span class="trophy">🏆</span>
-        WEEKLY LEADERBOARD
-      </h3>
+      <div class="section-header">
+        <h3 class="section-title">
+          <span class="trophy">🏆</span>
+          WEEKLY LEADERBOARD
+        </h3>
+        <button
+          type="button"
+          class="see-all-button"
+          (click)="onViewAll()"
+          aria-label="View full leaderboard"
+        >
+          See all
+          <span class="arrow">→</span>
+        </button>
+      </div>
 
       @if (isLoading()) {
         <div class="skeleton-loader" role="status" aria-live="polite" aria-label="Loading leaderboard">
@@ -74,12 +85,19 @@ import { LeaderboardEntry } from '../../../core/services/hq-data.service';
         margin: 1rem 0;
       }
 
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
       .section-title {
         font-size: 0.75rem;
         color: rgba(255, 255, 255, 0.6);
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        margin-bottom: 1rem;
+        margin: 0;
         font-weight: 600;
         display: flex;
         align-items: center;
@@ -88,6 +106,34 @@ import { LeaderboardEntry } from '../../../core/services/hq-data.service';
 
       .trophy {
         font-size: 1rem;
+      }
+
+      .see-all-button {
+        background: transparent;
+        border: none;
+        color: var(--neon-yellow);
+        font-size: 0.75rem;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .see-all-button:hover {
+        background: rgba(255, 221, 0, 0.1);
+        text-shadow: 0 0 8px var(--neon-yellow);
+      }
+
+      .see-all-button .arrow {
+        transition: transform 0.2s;
+      }
+
+      .see-all-button:hover .arrow {
+        transform: translateX(2px);
       }
 
       .empty-state {
@@ -257,6 +303,12 @@ export class LeaderboardPreviewComponent {
   currentUserRank = input<number | null>(null);
   currentUserId = input<string | null>(null);
   isLoading = input<boolean>(false);
+
+  viewAll = output<void>();
+
+  onViewAll() {
+    this.viewAll.emit();
+  }
 
   getInitials(name: string): string {
     return name
