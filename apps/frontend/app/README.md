@@ -25,6 +25,16 @@ Real-time activity feed display for TV/public screens. Shows developer activitie
 
 Output: `dist/apps/frontend/app/browser/`
 
+### Bundle Size
+
+Current production bundle size: ~720kb initial bundle (~192kb transferred)
+
+**Budget Configuration** (in `project.json`):
+- Initial bundle: Warning 2.8mb, Error 3mb
+- Component styles: Warning 4kb, Error 8kb
+
+**Note:** Route components (hq, profile, activity-wall) are lazy-loaded and not included in the initial bundle.
+
 ## Deployment
 
 Code Heroes App is deployed to Firebase Hosting as a separate site.
