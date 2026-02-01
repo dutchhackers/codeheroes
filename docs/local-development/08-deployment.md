@@ -190,7 +190,7 @@ https://console.firebase.google.com/project/YOUR_PROJECT_ID/functions/logs
 Trigger an event in the test repository (e.g., create an issue) and check:
 
 1. **GitHub webhook deliveries:**
-   https://github.com/mschilling/codeheroes-support/settings/hooks
+   `https://github.com/OWNER/REPO/settings/hooks`
    Click on the webhook → "Recent Deliveries"
 
 2. **Firebase function logs:**
