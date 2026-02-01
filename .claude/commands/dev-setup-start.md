@@ -55,10 +55,12 @@ Test users om aan te maken:
 | Guido | guido.van.vilsteren@framna.com | guido-google-id | 1000004 |
 | Nick | nick.ratering@framna.com | nick-google-id | 1000005 |
 
-Voor elke user, gebruik `python3` om de URL-encoded id_token te genereren, en `curl` direct daarna:
+Voor elke user, gebruik `python3` om de URL-encoded id_token te genereren, en `curl` direct daarna.
+
+**Haal de API key uit CLAUDE.local.md** (sectie "GitHub Actions Secrets" → test environment → FIREBASE_API_KEY).
 
 ```bash
-curl -s -X POST "http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=AIzaSyAivW24kx9tKnO8yxjEv51bKF2fPHipjlw" \
+curl -s -X POST "http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=YOUR_FIREBASE_API_KEY" \
   -H "Content-Type: application/json" \
   -d "{\"requestUri\": \"http://localhost:9099/emulator/auth/handler?providerId=google.com&id_token=$(python3 -c "import urllib.parse, json; print(urllib.parse.quote(json.dumps({'sub': 'USER_GOOGLE_SUB_ID', 'email': 'USER_EMAIL', 'name': 'DISPLAY_NAME', 'picture': 'https://github.com/USERNAME.png?size=200', 'email_verified': True, 'iss': '', 'aud': '', 'exp': 0, 'iat': 0})))")\", \"sessionId\": \"ValueNotUsedByAuthEmulator\", \"returnSecureToken\": true, \"returnIdpCredential\": true}"
 ```
@@ -95,9 +97,11 @@ Dit opent:
 
 Om in te loggen in de Activity Wall zonder door de Google popup te klikken, gebruik DevTools MCP om de volgende JavaScript uit te voeren op http://localhost:4201:
 
+**API key**: Haal de `FIREBASE_API_KEY` uit CLAUDE.local.md.
+
 ```javascript
 async () => {
-  const apiKey = 'AIzaSyAivW24kx9tKnO8yxjEv51bKF2fPHipjlw';
+  const apiKey = 'YOUR_FIREBASE_API_KEY'; // Uit CLAUDE.local.md
 
   // User gegevens - pas aan voor andere users
   const user = {
