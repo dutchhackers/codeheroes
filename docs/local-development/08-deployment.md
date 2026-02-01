@@ -275,3 +275,111 @@ nx build app -c production && nx run firebase-app:firebase -c production deploy 
 |-------------|-----|
 | Test | https://codeheroes-app-ui-test.web.app |
 | Production | https://codeheroes-app-ui.web.app |
+
+---
+
+## GitHub Actions Deployment (CI/CD)
+
+Automated deployment is available via GitHub Actions using the `deploy.yml` workflow.
+
+### Workflow Location
+
+`.github/workflows/deploy.yml`
+
+### Triggering a Deployment
+
+1. Go to **Actions** tab in GitHub
+2. Select **Deploy** workflow
+3. Click **Run workflow**
+4. Select options:
+   - **Environment**: `test` or `production`
+   - **Deploy target**: `all`, `frontend`, or `backend`
+   - **Deploy rules**: Check to include Firestore/Storage rules
+
+### Workflow Parameters
+
+| Input | Options | Default | Description |
+|-------|---------|---------|-------------|
+| `environment` | test, production | test | Target Firebase project |
+| `deploy_target` | all, frontend, backend | all | What to deploy |
+| `deploy_rules` | true/false | false | Include Firestore/Storage rules |
+
+### GitHub Environments
+
+The workflow uses [GitHub Environments](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment) for secret management. Each environment has its own set of secrets that are automatically selected based on the `environment` input.
+
+**Environments:**
+- `test` - Deploys to `codeheroes-test` Firebase project
+- `production` - Deploys to `codeheroes-prod` Firebase project
+
+### Required Secrets
+
+Each environment requires these secrets:
+
+| Secret | Description |
+|--------|-------------|
+| `FIREBASE_API_KEY` | Firebase SDK API key |
+| `FIREBASE_AUTH_DOMAIN` | Firebase auth domain |
+| `FIREBASE_PROJECT_ID` | Firebase project ID |
+| `FIREBASE_STORAGE_BUCKET` | Firebase storage bucket |
+| `FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID |
+| `FIREBASE_APP_ID` | Firebase app ID |
+| `FIREBASE_SERVICE_ACCOUNT` | Service account JSON for deployment |
+
+### Setting Up a New Environment
+
+1. **Create the environment** in GitHub:
+   - Go to repository **Settings** → **Environments** → **New environment**
+   - Name it `test` or `production`
+
+2. **Add secrets** via GitHub UI or CLI:
+   ```bash
+   # List current secrets
+   gh secret list --env production
+
+   # Set a secret
+   gh secret set FIREBASE_API_KEY --env production --body "your-api-key"
+
+   # Set service account from file
+   gh secret set FIREBASE_SERVICE_ACCOUNT --env production < path/to/service-account.json
+   ```
+
+3. **Get secret values from:**
+   - Firebase config: `apps/frontend/app/src/environments/environment.{test,prod}.ts`
+   - Service account: Firebase Console → Project Settings → Service accounts → Generate new private key
+
+### Workflow Jobs
+
+The workflow runs two jobs:
+
+1. **build** - Builds frontend and/or backend based on `deploy_target`
+   - Creates `.env` file from secrets
+   - Runs `npm run setup` to generate configs
+   - Uploads build artifacts
+
+2. **deploy** - Deploys to Firebase
+   - Downloads build artifacts
+   - Authenticates with `FIREBASE_SERVICE_ACCOUNT`
+   - Deploys hosting, functions, and/or rules based on inputs
+
+### Example: Deploy Frontend to Test
+
+```
+Environment: test
+Deploy target: frontend
+Deploy rules: unchecked
+```
+
+### Example: Full Production Deploy
+
+```
+Environment: production
+Deploy target: all
+Deploy rules: checked
+```
+
+### Monitoring Deployments
+
+- **GitHub Actions**: Check the workflow run for build/deploy logs
+- **Firebase Console**: Verify deployed functions and hosting
+- **Function logs**: `firebase --project=PROJECT_ID functions:log`

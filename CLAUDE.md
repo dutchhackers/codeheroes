@@ -290,6 +290,8 @@ Run `npm run setup` after editing `.env` to regenerate config files.
 
 - **Local Development:** `docs/local-development/`
 - **Architecture:** `docs/architecture/overview.md`
+- **Deployment:** `docs/local-development/08-deployment.md`
+- **Local Secrets & URLs:** `.claude/CLAUDE.local.md` (not committed - contains environment URLs, secret setup commands, webhook IDs)
 
 ## Function Endpoints (Local)
 
