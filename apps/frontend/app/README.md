@@ -27,11 +27,11 @@ Output: `dist/apps/frontend/app/browser/`
 
 ### Bundle Size
 
-Current production bundle size: ~2.6 MB initial bundle
+Current production bundle size: ~2.6mb initial bundle
 
 **Budget Configuration** (in `project.json`):
-- Warning: 2 MB
-- Error: 3 MB
+- Warning: 2mb
+- Error: 3mb
 
 **Future Optimization Opportunities:**
 - Implement lazy loading for feature modules (profile, HQ, activity wall)
