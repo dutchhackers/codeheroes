@@ -139,6 +139,32 @@ jobs:
         with:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
+      - name: Create .firebaserc
+        run: |
+          cat > .firebaserc << 'EOF'
+          {
+            "projects": {
+              "default": "codeheroes-test",
+              "test": "codeheroes-test",
+              "production": "codeheroes-prod"
+            },
+            "targets": {
+              "codeheroes-test": {
+                "hosting": {
+                  "web-legacy": ["codeheroes-test"],
+                  "app": ["codeheroes-app-ui-test"]
+                }
+              },
+              "codeheroes-prod": {
+                "hosting": {
+                  "web-legacy": ["codeheroes-prod"],
+                  "app": ["codeheroes-app-ui"]
+                }
+              }
+            }
+          }
+          EOF
+
       - name: Deploy hosting
         if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
         run: npx nx run firebase-app:firebase --configuration=${{ inputs.environment }} deploy --only hosting:app
