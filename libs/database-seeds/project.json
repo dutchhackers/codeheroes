@@ -25,6 +25,20 @@
           "FIREBASE_AUTH_EMULATOR_HOST": "localhost:9099"
         }
       },
+      "configurations": {
+        "test": {
+          "command": "node dist/libs/database-seeds/src/main.js",
+          "env": {
+            "FIREBASE_PROJECT_ID": "codeheroes-test"
+          }
+        },
+        "production": {
+          "command": "node dist/libs/database-seeds/src/main.js",
+          "env": {
+            "FIREBASE_PROJECT_ID": "codeheroes-prod"
+          }
+        }
+      },
       "dependsOn": [
         {
           "target": "build"

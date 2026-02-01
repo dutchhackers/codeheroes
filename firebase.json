@@ -7,7 +7,11 @@
     {
       "target": "web-legacy",
       "public": "dist/apps/frontend/web-legacy/browser",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
       "rewrites": [
         {
           "source": "**",
@@ -18,7 +22,11 @@
     {
       "target": "app",
       "public": "dist/apps/frontend/app/browser",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
       "rewrites": [
         {
           "source": "**",
@@ -35,25 +43,33 @@
       "codebase": "api",
       "source": "dist/apps/api",
       "runtime": "nodejs22",
-      "ignore": ["*.local"]
+      "ignore": [
+        "*.local"
+      ]
     },
     {
       "codebase": "auth-service",
       "source": "dist/apps/auth-service",
       "runtime": "nodejs22",
-      "ignore": ["*.local"]
+      "ignore": [
+        "*.local"
+      ]
     },
     {
       "codebase": "game-engine",
       "source": "dist/apps/game-engine",
       "runtime": "nodejs22",
-      "ignore": ["*.local"]
+      "ignore": [
+        "*.local"
+      ]
     },
     {
       "codebase": "github-receiver",
       "source": "dist/apps/github-receiver",
       "runtime": "nodejs22",
-      "ignore": ["*.local"]
+      "ignore": [
+        "*.local"
+      ]
     }
   ],
   "emulators": {

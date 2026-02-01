@@ -34,7 +34,8 @@ ngrok http 5001
 | [05-debugging-guide.md](./05-debugging-guide.md) | Debugging tools and techniques |
 | [06-troubleshooting.md](./06-troubleshooting.md) | Common issues and solutions |
 | [07-database-seeding.md](./07-database-seeding.md) | Detailed seeding and data flow |
-| [08-deployment.md](./08-deployment.md) | Deploying to test environment |
+| [08-deployment.md](./08-deployment.md) | Deploying to existing environment |
+| [09-firebase-environment-setup.md](./09-firebase-environment-setup.md) | Setting up a new Firebase environment |
 
 ## Architecture Overview
 

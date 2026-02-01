@@ -110,9 +110,7 @@ git commit -m "fix: address bot review feedback (PR #NUMBER)
 
 - <summary of fix 1>
 - <summary of fix 2>
-...
-
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+..."
 
 git push origin <branch>
 ```

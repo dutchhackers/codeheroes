@@ -1,11 +1,15 @@
 require('dotenv').config();
 const fs = require('fs');
 
-// Generate .firebaserc file
+// Generate .firebaserc file (multi-project setup)
 const firebasercTemplate = fs.readFileSync('.firebaserc.template', 'utf8');
+const testProjectId = process.env.FIREBASE_TEST_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+const prodProjectId = process.env.FIREBASE_PROD_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
 const firebasercConfig = firebasercTemplate
-  .replaceAll('${FIREBASE_PROJECT_ID}', process.env.FIREBASE_PROJECT_ID)
-  .replace('${FIREBASE_ACTIVITY_WALL_SITE}', process.env.FIREBASE_ACTIVITY_WALL_SITE || `${process.env.FIREBASE_PROJECT_ID}-activity-wall`);
+  .replaceAll('${FIREBASE_TEST_PROJECT_ID}', testProjectId)
+  .replaceAll('${FIREBASE_PROD_PROJECT_ID}', prodProjectId)
+  .replace('${FIREBASE_TEST_APP_SITE}', process.env.FIREBASE_TEST_APP_SITE || `${testProjectId}-app`)
+  .replace('${FIREBASE_PROD_APP_SITE}', process.env.FIREBASE_PROD_APP_SITE || 'codeheroes-app-ui');
 fs.writeFileSync('.firebaserc', firebasercConfig);
 
 // Generate web-legacy environment.{local,prod}.ts file
