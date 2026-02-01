@@ -36,12 +36,15 @@ const MS_PER_DAY = 86400000;
 export class UserStatsService {
   readonly #firestore = inject(Firestore);
   readonly #auth = inject(Auth);
+  
+  // Initialize user observable in injection context to avoid warnings
+  readonly #authUser$ = user(this.#auth);
 
   /**
    * Get the current authenticated user's Firestore user document
    */
   getCurrentUserDoc(): Observable<UserDto | null> {
-    return user(this.#auth).pipe(
+    return this.#authUser$.pipe(
       switchMap((authUser) => {
         if (!authUser?.uid) {
           return of(null);

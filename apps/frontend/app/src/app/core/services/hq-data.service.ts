@@ -66,11 +66,14 @@ export class HqDataService {
 
   readonly #DEFAULT_DAILY_GOAL = 8000;
 
+  // Initialize user observable in injection context to avoid warnings
+  readonly #authUser$ = user(this.#auth);
+
   /**
    * Get the current authenticated user's Firestore user document
    */
   #getCurrentUserDoc(): Observable<UserDto | null> {
-    return user(this.#auth).pipe(
+    return this.#authUser$.pipe(
       switchMap((authUser) => {
         if (!authUser?.uid) {
           return of(null);
