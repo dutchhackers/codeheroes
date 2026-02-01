@@ -1,5 +1,7 @@
-export const environment = {
-  name: 'production' as const,
+import { Environment } from './environment.interface';
+
+export const environment: Environment = {
+  name: 'production',
   useEmulators: false,
   apiUrl: 'https://europe-west1-${FIREBASE_PROD_PROJECT_ID}.cloudfunctions.net/api',
   firebase: {
