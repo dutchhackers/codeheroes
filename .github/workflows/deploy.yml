@@ -73,6 +73,18 @@ jobs:
         if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
         run: npx nx run-many --target=build --projects=api,auth-service,game-engine,github-receiver
 
+      - name: Regenerate function package-lock files
+        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
+        run: |
+          for dir in dist/apps/api dist/apps/auth-service dist/apps/game-engine dist/apps/github-receiver; do
+            if [ -d "$dir" ]; then
+              echo "Regenerating package-lock.json for $dir"
+              cd "$dir"
+              npm install --package-lock-only
+              cd -
+            fi
+          done
+
       - name: Upload frontend artifact
         if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
         uses: actions/upload-artifact@v4
