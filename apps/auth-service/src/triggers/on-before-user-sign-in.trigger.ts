@@ -23,7 +23,7 @@ export const onBeforeUserSignIn = beforeUserSignedIn(
         const userService = new UserService();
         const existingUser = await userService.findUserByEmail(user.email);
 
-        if (existingUser && existingUser.uid !== user.uid) {
+        if (existingUser && (!existingUser.uid || existingUser.uid !== user.uid)) {
           logger.info('Syncing uid for existing user:', {
             email: user.email,
             userId: existingUser.id,

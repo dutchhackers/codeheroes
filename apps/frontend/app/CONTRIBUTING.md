@@ -55,13 +55,13 @@ export class MyService {
 | Promise-based (one-time) | `getDocs`, `getDoc`, `setDoc`, `addDoc` | No* |
 | Field initializer | `readonly x$ = user(auth)` | No |
 
-*Promise-based functions may show warnings but don't require wrapping and work correctly without it.
+*Promise-based functions do not show injection context warnings and do not require wrapping with `runInInjectionContext`.
 
 **Pattern used in this codebase:**
 
 1. Inject `Injector` in the service
 2. Initialize `user()` observable as a field (called at construction time)
-3. Wrap all `collectionData`, `docData`, `getDocs` calls in `runInInjectionContext`
+3. Wrap all `collectionData` and `docData` calls in `runInInjectionContext`
 
 ### Realtime vs One-time Queries
 
