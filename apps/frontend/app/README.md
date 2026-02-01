@@ -27,19 +27,13 @@ Output: `dist/apps/frontend/app/browser/`
 
 ### Bundle Size
 
-Current production bundle size: ~2.6mb initial bundle
+Current production bundle size: ~720kb initial bundle (~192kb transferred)
 
 **Budget Configuration** (in `project.json`):
-- Warning: 2mb
-- Error: 3mb
+- Initial bundle: Warning 2.8mb, Error 3mb
+- Component styles: Warning 4kb, Error 8kb
 
-**Future Optimization Opportunities:**
-- Analyze bundle composition to identify large or duplicate dependencies
-- Implement dynamic imports for Firebase SDK modules to reduce initial bundle size
-- Optimize component-level imports and shared modules to avoid pulling in unused code
-- Code splitting for large libraries
-- Tree shaking unused dependencies
-- Consider using Angular PWA optimizations for caching
+**Note:** Route components (hq, profile, activity-wall) are lazy-loaded and not included in the initial bundle.
 
 ## Deployment
 
