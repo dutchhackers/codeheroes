@@ -37,7 +37,7 @@ Start met `run_in_background: true`.
 ### 4. Seed de database
 
 ```bash
-FIREBASE_PROJECT_ID=codeheroes-app-test nx seed database-seeds
+FIREBASE_PROJECT_ID=codeheroes-test nx seed database-seeds
 ```
 
 ### 5. Maak test logins aan in Auth emulator
@@ -58,7 +58,7 @@ Test users om aan te maken:
 Voor elke user, gebruik `python3` om de URL-encoded id_token te genereren, en `curl` direct daarna:
 
 ```bash
-curl -s -X POST "http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=AIzaSyD5itLlGIFn652bgBi6HOveUuS_4qxnWdE" \
+curl -s -X POST "http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=AIzaSyAivW24kx9tKnO8yxjEv51bKF2fPHipjlw" \
   -H "Content-Type: application/json" \
   -d "{\"requestUri\": \"http://localhost:9099/emulator/auth/handler?providerId=google.com&id_token=$(python3 -c "import urllib.parse, json; print(urllib.parse.quote(json.dumps({'sub': 'USER_GOOGLE_SUB_ID', 'email': 'USER_EMAIL', 'name': 'DISPLAY_NAME', 'picture': 'https://github.com/USERNAME.png?size=200', 'email_verified': True, 'iss': '', 'aud': '', 'exp': 0, 'iat': 0})))")\", \"sessionId\": \"ValueNotUsedByAuthEmulator\", \"returnSecureToken\": true, \"returnIdpCredential\": true}"
 ```
@@ -70,7 +70,7 @@ Het `localId` in de response is de Firebase Auth UID. Bewaar deze voor stap 6.
 Update elk user document met het Firebase Auth UID. Begin direct met `curl`:
 
 ```bash
-curl -s -X PATCH "http://localhost:8080/v1/projects/codeheroes-app-test/databases/(default)/documents/users/USER_DOC_ID?updateMask.fieldPaths=uid" \
+curl -s -X PATCH "http://localhost:8080/v1/projects/codeheroes-test/databases/(default)/documents/users/USER_DOC_ID?updateMask.fieldPaths=uid" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer owner" \
   -d '{"fields": {"uid": {"stringValue": "FIREBASE_AUTH_UID"}}}'
@@ -97,7 +97,7 @@ Om in te loggen in de Activity Wall zonder door de Google popup te klikken, gebr
 
 ```javascript
 async () => {
-  const apiKey = 'AIzaSyD5itLlGIFn652bgBi6HOveUuS_4qxnWdE';
+  const apiKey = 'AIzaSyAivW24kx9tKnO8yxjEv51bKF2fPHipjlw';
 
   // User gegevens - pas aan voor andere users
   const user = {

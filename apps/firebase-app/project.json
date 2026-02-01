@@ -77,6 +77,48 @@
       "options": {
         "command": "nx run firebase-app:firebase deploy"
       }
+    },
+    "deploy-functions": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run firebase-app:firebase deploy --only functions"
+      },
+      "configurations": {
+        "test": {
+          "command": "nx run firebase-app:firebase --configuration=test deploy --only functions"
+        },
+        "production": {
+          "command": "nx run firebase-app:firebase --configuration=production deploy --only functions"
+        }
+      }
+    },
+    "deploy-rules": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run firebase-app:firebase deploy --only firestore:rules,firestore:indexes,storage"
+      },
+      "configurations": {
+        "test": {
+          "command": "nx run firebase-app:firebase --configuration=test deploy --only firestore:rules,firestore:indexes,storage"
+        },
+        "production": {
+          "command": "nx run firebase-app:firebase --configuration=production deploy --only firestore:rules,firestore:indexes,storage"
+        }
+      }
+    },
+    "deploy-frontend": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run firebase-app:firebase deploy --only hosting:app"
+      },
+      "configurations": {
+        "test": {
+          "command": "nx run firebase-app:firebase --configuration=test deploy --only hosting:app"
+        },
+        "production": {
+          "command": "nx run firebase-app:firebase --configuration=production deploy --only hosting:app"
+        }
+      }
     }
   }
 }
