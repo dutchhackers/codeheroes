@@ -12,7 +12,7 @@ import { LeaderboardEntry } from '../../../core/services/hq-data.service';
       </h3>
 
       @if (isLoading()) {
-        <div class="skeleton-loader">
+        <div class="skeleton-loader" role="status" aria-live="polite" aria-label="Loading leaderboard">
           @for (i of [1,2,3,4,5]; track i) {
             <div class="skeleton-row"></div>
           }
@@ -238,6 +238,15 @@ import { LeaderboardEntry } from '../../../core/services/hq-data.service';
         }
         100% {
           background-position: -200% 0;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .skeleton-row {
+          animation: none;
+        }
+        .current-marker {
+          animation: none;
         }
       }
     `,
