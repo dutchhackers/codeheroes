@@ -2,8 +2,7 @@ import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Auth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, Unsubscribe } from '@angular/fire/auth';
 import { BottomNavComponent } from './bottom-nav.component';
-import { EnvironmentBannerComponent } from './environment-banner.component';
-import { environment } from '../../environments/environment';
+import { EnvironmentBannerComponent, showEnvironmentIndicator } from './environment-banner.component';
 
 @Component({
   selector: 'app-shell',
@@ -11,7 +10,7 @@ import { environment } from '../../environments/environment';
   imports: [RouterOutlet, BottomNavComponent, EnvironmentBannerComponent],
   template: `
     <app-environment-banner />
-    <div class="min-h-screen cyber-grid-bg text-white relative" [class.pt-8]="showBanner">
+    <div class="min-h-screen cyber-grid-bg text-white relative" [class.pt-6]="showBanner">
       @if (!isAuthenticated() && !isLoading()) {
         <!-- Login screen -->
         <div class="flex flex-col items-center justify-center min-h-screen px-6">
@@ -79,7 +78,7 @@ import { environment } from '../../environments/environment';
 })
 export class ShellComponent implements OnInit, OnDestroy {
   readonly #auth = inject(Auth);
-  readonly showBanner = (environment.name as string) !== 'production';
+  readonly showBanner = showEnvironmentIndicator;
 
   #authUnsubscribe: Unsubscribe | null = null;
 

@@ -72,7 +72,8 @@
             },
             {
               "glob": "manifest.webmanifest",
-              "input": "apps/frontend/app/public/test-assets"
+              "input": "apps/frontend/app/public/test-assets",
+              "output": ""
             }
           ]
         },
