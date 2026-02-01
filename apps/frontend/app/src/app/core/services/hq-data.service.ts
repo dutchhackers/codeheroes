@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
   collection,
   collectionData,
@@ -63,6 +63,7 @@ export class HqDataService {
   readonly #firestore = inject(Firestore);
   readonly #auth = inject(Auth);
   readonly #http = inject(HttpClient);
+  readonly #injector = inject(Injector);
 
   readonly #DEFAULT_DAILY_GOAL = 8000;
 
@@ -80,7 +81,10 @@ export class HqDataService {
         }
         const usersRef = collection(this.#firestore, 'users');
         const usersQuery = query(usersRef, where('uid', '==', authUser.uid));
-        return collectionData(usersQuery, { idField: 'id' }).pipe(
+        // Use runInInjectionContext to avoid Firebase injection warnings
+        return runInInjectionContext(this.#injector, () =>
+          collectionData(usersQuery, { idField: 'id' }),
+        ).pipe(
           map((users) => {
             const matchingUser = (users as UserDto[])[0];
             return matchingUser ?? null;
@@ -127,7 +131,8 @@ export class HqDataService {
         const dayId = this.#getCurrentDayId();
         const statsRef = doc(this.#firestore, `users/${userDoc.id}/activityStats/daily/records/${dayId}`);
 
-        return docData(statsRef).pipe(
+        // Use runInInjectionContext to avoid Firebase injection warnings
+        return runInInjectionContext(this.#injector, () => docData(statsRef)).pipe(
           map((data) => {
             const stats = data as TimeBasedActivityStats | undefined;
             const counters = stats?.counters?.actions ?? {};
@@ -165,7 +170,8 @@ export class HqDataService {
         const weekId = this.#getCurrentWeekId();
         const statsRef = doc(this.#firestore, `users/${userDoc.id}/activityStats/weekly/records/${weekId}`);
 
-        return docData(statsRef).pipe(
+        // Use runInInjectionContext to avoid Firebase injection warnings
+        return runInInjectionContext(this.#injector, () => docData(statsRef)).pipe(
           map((data) => {
             const stats = data as TimeBasedActivityStats | undefined;
             const actions = stats?.counters?.actions ?? {};
@@ -242,7 +248,10 @@ export class HqDataService {
         const activitiesRef = collection(this.#firestore, `users/${userDoc.id}/activities`);
         const activitiesQuery = query(activitiesRef, orderBy('createdAt', 'desc'), firestoreLimit(limitCount));
 
-        return collectionData(activitiesQuery, { idField: 'id' }).pipe(
+        // Use runInInjectionContext to avoid Firebase injection warnings
+        return runInInjectionContext(this.#injector, () =>
+          collectionData(activitiesQuery, { idField: 'id' }),
+        ).pipe(
           map((activities) => this.#transformActivitiesToHighlights(activities as Activity[])),
           catchError(() => of([])),
         );

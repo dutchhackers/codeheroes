@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
   collectionGroup,
   Firestore,
@@ -25,6 +25,7 @@ export interface LoadMoreResult {
 })
 export class ActivityFeedService {
   readonly #firestore = inject(Firestore);
+  readonly #injector = inject(Injector);
 
   /**
    * Real-time listener for the most recent activities
@@ -32,7 +33,10 @@ export class ActivityFeedService {
   getGlobalActivities(limit = 50): Observable<Activity[]> {
     const activitiesRef = collectionGroup(this.#firestore, 'activities');
     const activitiesQuery = query(activitiesRef, orderBy('createdAt', 'desc'), firestoreLimit(limit));
-    return collectionData(activitiesQuery, { idField: 'id' }) as Observable<Activity[]>;
+    // Use runInInjectionContext to avoid Firebase injection warnings
+    return runInInjectionContext(this.#injector, () =>
+      collectionData(activitiesQuery, { idField: 'id' }),
+    ) as Observable<Activity[]>;
   }
 
   /**
