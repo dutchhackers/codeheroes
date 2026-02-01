@@ -151,7 +151,7 @@ To:
 Search for and update any documentation that references Node.js 22:
 
 ```bash
-grep -r "Node.js 22\|nodejs22\|Node.js 20" --include="*.md" .
+grep -r "Node.js 22\|nodejs22\|node22" --include="*.md" .
 ```
 
 Common files to update:
