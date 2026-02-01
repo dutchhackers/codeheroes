@@ -156,9 +156,9 @@ jobs:
           # Generate .firebaserc using project ID from secrets
           PROJECT_ID="${{ secrets.FIREBASE_PROJECT_ID }}"
           if [ "${{ inputs.environment }}" = "production" ]; then
-            HOSTING_SITE="codeheroes-app-ui"
+            HOSTING_SITE="${{ secrets.FIREBASE_PROD_APP_SITE }}"
           else
-            HOSTING_SITE="codeheroes-app-ui-test"
+            HOSTING_SITE="${{ secrets.FIREBASE_TEST_APP_SITE }}"
           fi
           cat > .firebaserc << EOF
           {
