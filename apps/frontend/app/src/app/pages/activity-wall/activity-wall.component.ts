@@ -16,16 +16,8 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
   template: `
     <!-- Header -->
     <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-4 py-4 md:px-8 md:py-5">
-      <div class="flex items-center justify-between relative z-10">
+      <div class="relative z-10">
         <h1 class="text-2xl md:text-4xl font-bold italic text-white">Activity Wall</h1>
-        <div
-          class="flex items-center gap-2 px-3 py-1.5 rounded border border-green-500/30 bg-black/50"
-          role="status"
-          aria-label="Real-time updates active"
-        >
-          <span class="w-2.5 h-2.5 rounded-full bg-green-400 live-indicator"></span>
-          <span class="text-sm md:text-base text-green-400 font-mono">LIVE</span>
-        </div>
       </div>
     </header>
 

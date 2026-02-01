@@ -30,16 +30,7 @@ import { MyStatsComponent } from './components/my-stats.component';
     <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-4 py-4 md:px-6 lg:px-8 md:py-5">
       <div class="flex items-center justify-between relative z-10">
         <h1 class="text-2xl md:text-4xl font-bold italic text-white">Profile</h1>
-        <div class="flex items-center gap-3">
-          <div
-            class="card-glow-green flex items-center gap-2 px-3 py-1.5 rounded bg-black/50"
-            role="status"
-            aria-label="Real-time updates active"
-          >
-            <span class="w-2.5 h-2.5 rounded-full live-indicator" style="background-color: var(--neon-green)"></span>
-            <span class="text-sm md:text-base font-mono" style="color: var(--neon-green)">LIVE</span>
-          </div>
-          <button
+        <button
             type="button"
             (click)="logout()"
             aria-label="Sign out"
@@ -54,7 +45,6 @@ import { MyStatsComponent } from './components/my-stats.component';
               />
             </svg>
           </button>
-        </div>
       </div>
     </header>
 
