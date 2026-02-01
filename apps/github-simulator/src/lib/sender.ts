@@ -3,7 +3,7 @@ import * as crypto from 'crypto';
 
 const WEBHOOK_HOST = 'localhost';
 const WEBHOOK_PORT = 5001;
-const WEBHOOK_PATH = '/codeheroes-app-test/europe-west1/gitHubReceiver';
+const WEBHOOK_PATH = '/codeheroes-test/europe-west1/gitHubReceiver';
 
 export interface SendResult {
   success: boolean;
