@@ -11,7 +11,13 @@ import { LeaderboardEntry } from '../../../core/services/hq-data.service';
         WEEKLY LEADERBOARD
       </h3>
 
-      @if (entries().length === 0) {
+      @if (isLoading()) {
+        <div class="skeleton-loader">
+          @for (i of [1,2,3,4,5]; track i) {
+            <div class="skeleton-row"></div>
+          }
+        </div>
+      } @else if (entries().length === 0) {
         <div class="empty-state">No activity this week yet. Be the first!</div>
       } @else {
         <div class="leaderboard-list">
@@ -211,6 +217,29 @@ import { LeaderboardEntry } from '../../../core/services/hq-data.service';
         color: var(--neon-cyan);
         font-weight: bold;
       }
+
+      .skeleton-loader {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .skeleton-row {
+        height: 48px;
+        background: linear-gradient(90deg, #1a1a2e 25%, #2a2a4e 50%, #1a1a2e 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 6px;
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
     `,
   ],
 })
@@ -218,6 +247,7 @@ export class LeaderboardPreviewComponent {
   entries = input<LeaderboardEntry[]>([]);
   currentUserRank = input<number | null>(null);
   currentUserId = input<string | null>(null);
+  isLoading = input<boolean>(false);
 
   getInitials(name: string): string {
     return name
