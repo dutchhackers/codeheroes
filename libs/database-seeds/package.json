@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "tslib": "^2.3.0",
-    "firebase-admin": "^11.10.1"
+    "firebase-admin": "^13.0.2"
   },
   "type": "commonjs",
   "main": "./src/index.js",
