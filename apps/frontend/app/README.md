@@ -49,3 +49,11 @@ nx run firebase-app:firebase deploy --only hosting
 - Avatar and user display
 - Activity type badges (push, PR, review, etc.)
 - Responsive layout for various screen sizes
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for developer guidelines, including:
+
+- Firebase AngularFire best practices (avoiding injection context warnings)
+- Service and component patterns
+- Code style conventions
