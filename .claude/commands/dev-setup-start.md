@@ -37,7 +37,7 @@ Start met `run_in_background: true`.
 ### 4. Seed de database
 
 ```bash
-FIREBASE_PROJECT_ID=codeheroes-test nx seed database-seeds
+FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID nx seed database-seeds
 ```
 
 ### 5. Maak test logins aan in Auth emulator
@@ -72,7 +72,7 @@ Het `localId` in de response is de Firebase Auth UID. Bewaar deze voor stap 6.
 Update elk user document met het Firebase Auth UID. Begin direct met `curl`:
 
 ```bash
-curl -s -X PATCH "http://localhost:8080/v1/projects/codeheroes-test/databases/(default)/documents/users/USER_DOC_ID?updateMask.fieldPaths=uid" \
+curl -s -X PATCH "http://localhost:8080/v1/projects/$FIREBASE_PROJECT_ID/databases/(default)/documents/users/USER_DOC_ID?updateMask.fieldPaths=uid" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer owner" \
   -d '{"fields": {"uid": {"stringValue": "FIREBASE_AUTH_UID"}}}'

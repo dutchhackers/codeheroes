@@ -9,7 +9,7 @@ Seeds Firestore with test data for local development and testing.
 FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds
 
 # Seed test environment (use with caution!)
-FIREBASE_PROJECT_ID=codeheroes-test nx seed database-seeds
+FIREBASE_PROJECT_ID=your-test-project-id nx seed database-seeds
 ```
 
 ## Data Files

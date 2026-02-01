@@ -27,16 +27,10 @@
       },
       "configurations": {
         "test": {
-          "command": "node dist/libs/database-seeds/src/main.js",
-          "env": {
-            "FIREBASE_PROJECT_ID": "codeheroes-test"
-          }
+          "command": "node dist/libs/database-seeds/src/main.js"
         },
         "production": {
-          "command": "node dist/libs/database-seeds/src/main.js",
-          "env": {
-            "FIREBASE_PROJECT_ID": "codeheroes-prod"
-          }
+          "command": "node dist/libs/database-seeds/src/main.js"
         }
       },
       "dependsOn": [
