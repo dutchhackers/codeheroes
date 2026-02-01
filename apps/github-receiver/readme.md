@@ -77,7 +77,7 @@ The application implements a robust error handling system:
 ## Development
 
 ### Prerequisites
-- Node.js 20
+- Node.js 24
 - Firebase CLI
 - NX workspace tools
 

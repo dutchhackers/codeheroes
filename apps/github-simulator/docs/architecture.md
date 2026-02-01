@@ -460,7 +460,7 @@ export function create<CommandName>Command(
 
 | Component | Technology |
 |-----------|-----------|
-| Language | TypeScript (Node.js 20) |
+| Language | TypeScript (Node.js 24) |
 | CLI Framework | Commander.js v12.0.0 |
 | HTTP | Node.js `http` module (built-in) |
 | Config | JSON file |

@@ -6,7 +6,7 @@ This guide lists all tools, versions, and accounts needed to run CodeHeroes loca
 
 ### Node.js
 
-Node.js 20 is required (specified in `.nvmrc`).
+Node.js 24 is required (specified in `.nvmrc`).
 
 ```bash
 # Check your version
