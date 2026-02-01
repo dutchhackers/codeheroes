@@ -13,7 +13,7 @@ CodeHeroes is a gamification platform that tracks developer activity via GitHub 
 ### Prohibited in Committed Files
 | Type | Pattern Examples | Where It Belongs |
 |------|------------------|------------------|
-| Firebase project IDs | `codeheroes-test`, `codeheroes-prod` | `.env`, secrets, `$FIREBASE_PROJECT_ID` |
+| Firebase project IDs | `your-project-id` | `.env`, secrets, `$FIREBASE_PROJECT_ID` |
 | Firebase API keys | `AIzaSy...` | `.claude/CLAUDE.local.md`, environment files |
 | Private keys | `-----BEGIN PRIVATE KEY-----` | `.local/` directory, never committed |
 | GitHub tokens | `ghp_...`, `github_pat_...` | Environment variables only |
