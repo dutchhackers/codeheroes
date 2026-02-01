@@ -57,8 +57,14 @@ Cloud Functions require a billing account.
 1. Go to **Authentication** → **Sign-in method**
 2. Enable **Google** provider
 3. Configure OAuth consent screen if prompted
-4. Go to **Settings** → **Authorized domains**
-5. Add your hosting domain (e.g., `codeheroes-app-ui-test.web.app`)
+4. **Upgrade to Identity Platform** (required for blocking functions):
+   - Look for "Upgrade to Identity Platform" banner or go to **Settings**
+   - Click upgrade and accept terms
+   - This enables blocking functions for custom auth logic
+5. Go to **Settings** → **Authorized domains**
+6. Add your hosting domain (e.g., `codeheroes-app-ui-test.web.app`)
+
+**Important:** Without Identity Platform upgrade, the `auth-service` functions (onBeforeUserCreated, onBeforeUserSignIn) will fail to deploy.
 
 ## Step 5: Enable Firestore
 
@@ -71,12 +77,14 @@ Cloud Functions require a billing account.
 
 ## Step 6: Enable Storage
 
-Storage must be initialized via Console before CLI deployment.
+**Important:** Storage must be initialized via Console before CLI deployment. This cannot be done via CLI.
 
 1. Go to **Storage**
 2. Click "Get Started"
 3. Select security rules (test mode is fine, we'll deploy proper rules)
 4. Choose location (recommend same region as Firestore)
+
+Without this step, `firebase deploy --only storage` will fail.
 
 ## Step 7: Create Hosting Sites
 
@@ -424,6 +432,134 @@ firebase firestore:indexes --project=codeheroes-test
 2. Check webhook delivery status: `gh api repos/OWNER/REPO/hooks/WEBHOOK_ID/deliveries`
 3. Verify XP was awarded in user's profile or Firestore
 
+## Step 16: Configure Custom Domains (Optional)
+
+Map custom domains to Cloud Run services and Firebase Hosting.
+
+### Prerequisites
+
+- Domain registered and DNS access available
+- gcloud CLI installed and authenticated
+
+### Cloud Run Services (API & Webhooks)
+
+Custom domain mappings persist across deployments (tied to service name, not revision).
+
+#### 1. Verify domain ownership
+
+```bash
+gcloud domains verify YOUR_DOMAIN --project=PROJECT_ID
+```
+
+#### 2. Map custom domain to API service
+
+```bash
+# Production
+gcloud run domain-mappings create \
+  --service=api \
+  --domain=api.codeheroes.app \
+  --region=europe-west1 \
+  --project=codeheroes-prod
+
+# Test
+gcloud run domain-mappings create \
+  --service=api \
+  --domain=api-test.codeheroes.app \
+  --region=europe-west1 \
+  --project=codeheroes-test
+```
+
+#### 3. Map custom domain to GitHub Receiver
+
+```bash
+# Production
+gcloud run domain-mappings create \
+  --service=githubreceiver \
+  --domain=webhooks.codeheroes.app \
+  --region=europe-west1 \
+  --project=codeheroes-prod
+
+# Test
+gcloud run domain-mappings create \
+  --service=githubreceiver \
+  --domain=webhooks-test.codeheroes.app \
+  --region=europe-west1 \
+  --project=codeheroes-test
+```
+
+#### 4. Configure DNS
+
+After creating mappings, gcloud will display DNS records to add:
+
+```
+DNS_RECORD_TYPE  DNS_RECORD_NAME                 DNS_RECORD_VALUE
+CNAME            api.codeheroes.app              ghs.googlehosted.com.
+```
+
+Add these records at your DNS provider.
+
+#### 5. Verify mapping status
+
+```bash
+gcloud run domain-mappings list --region=europe-west1 --project=PROJECT_ID
+```
+
+### Firebase Hosting (App)
+
+#### 1. Add custom domain in Firebase Console
+
+1. Go to **Hosting** → **Add custom domain**
+2. Enter domain (e.g., `codeheroes.app`)
+3. Follow DNS verification steps
+4. Add the provided DNS records
+
+#### 2. Or via CLI
+
+```bash
+firebase hosting:channel:deploy production --project=codeheroes-prod
+```
+
+**Note:** Firebase Hosting custom domains are easier to configure via Console as they require DNS verification steps.
+
+### Verify Custom Domains
+
+**Via CLI:**
+
+```bash
+# Check Cloud Run mappings
+gcloud beta run domain-mappings list --region=europe-west1 --project=PROJECT_ID
+
+# Test endpoints
+curl -I https://api.yourdomain.com
+curl -I https://webhooks.yourdomain.com
+```
+
+**Via Google Cloud Console:**
+
+| View | URL |
+|------|-----|
+| All domain mappings | `https://console.cloud.google.com/run/domains?project=PROJECT_ID` |
+| Specific service | `https://console.cloud.google.com/run/detail/europe-west1/SERVICE_NAME/domainmappings?project=PROJECT_ID` |
+
+Replace `PROJECT_ID` with your Firebase project ID and `SERVICE_NAME` with `api` or `githubreceiver`.
+
+### Update Webhook URLs
+
+After custom domains are active, update GitHub webhooks to use the new URLs:
+
+```bash
+gh api repos/OWNER/REPO/hooks/WEBHOOK_ID \
+  -X PATCH \
+  --input - << 'EOF'
+{
+  "config": {
+    "url": "https://webhooks.codeheroes.app",
+    "content_type": "json"
+  }
+}
+EOF
+```
+
 ## Quick Reference Commands
 
 ### Test Environment
@@ -560,8 +696,9 @@ Use this checklist when setting up a new environment:
 - [ ] Enable billing (Blaze plan)
 - [ ] Create web app and note config values
 - [ ] Enable Google Authentication
+- [ ] Upgrade to Identity Platform (for blocking functions)
 - [ ] Create Firestore database
-- [ ] Initialize Storage via Console
+- [ ] Initialize Storage via Console (required before CLI deploy)
 - [ ] Create hosting site
 - [ ] Update `.firebaserc` with project
 - [ ] Update `.env` with credentials
@@ -580,3 +717,12 @@ Use this checklist when setting up a new environment:
 - [ ] Configure GitHub webhooks
 - [ ] Test login and profile
 - [ ] Verify webhook processing and XP awards
+
+### Optional: Custom Domains
+
+- [ ] Verify domain ownership with gcloud
+- [ ] Map custom domain to API service
+- [ ] Map custom domain to GitHub Receiver service
+- [ ] Configure DNS records
+- [ ] Add custom domain to Firebase Hosting
+- [ ] Update webhook URLs to use custom domain
