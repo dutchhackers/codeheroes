@@ -1,0 +1,160 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - test
+          - production
+        default: test
+      deploy_target:
+        description: 'What to deploy'
+        required: true
+        type: choice
+        options:
+          - all
+          - frontend
+          - backend
+        default: all
+      deploy_rules:
+        description: 'Deploy Firestore/Storage rules'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.2.0
+        with:
+          node-version: 24
+
+      - name: Cache node modules
+        uses: actions/cache@v5
+        id: node-cache
+        with:
+          path: '**/node_modules'
+          key: ubuntu-latest-node-modules-24-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Create env file
+        run: |
+          echo "FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}" >> .env
+          echo "FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env
+          echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}" >> .env
+          echo "FIREBASE_VAPID_KEY=${{ secrets.FIREBASE_VAPID_KEY }}" >> .env
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_VAPID_KEY: ${{ secrets.FIREBASE_VAPID_KEY }}
+
+      - name: Generate config files
+        run: npm run setup
+
+      - name: Build frontend
+        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
+        run: npx nx build app --configuration=${{ inputs.environment }}
+
+      - name: Build backend
+        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
+        run: npx nx run-many --target=build --projects=api,auth-service,game-engine,github-receiver
+
+      - name: Upload frontend artifact
+        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: dist/apps/frontend/app
+          retention-days: 1
+
+      - name: Upload backend artifact
+        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build
+          path: |
+            dist/apps/api
+            dist/apps/auth-service
+            dist/apps/game-engine
+            dist/apps/github-receiver
+          retention-days: 1
+
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    needs: build
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.2.0
+        with:
+          node-version: 24
+
+      - name: Cache node modules
+        uses: actions/cache@v5
+        id: node-cache
+        with:
+          path: '**/node_modules'
+          key: ubuntu-latest-node-modules-24-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Download frontend artifact
+        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: dist/apps/frontend/app
+
+      - name: Download backend artifact
+        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-build
+          path: dist/apps
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Deploy hosting
+        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
+        run: npx nx run firebase-app:firebase --configuration=${{ inputs.environment }} deploy --only hosting:app
+
+      - name: Deploy functions
+        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
+        run: npx nx run firebase-app:firebase --configuration=${{ inputs.environment }} deploy --only functions
+
+      - name: Deploy rules
+        if: inputs.deploy_rules == true
+        run: npx nx run firebase-app:firebase --configuration=${{ inputs.environment }} deploy --only firestore:rules,firestore:indexes,storage
