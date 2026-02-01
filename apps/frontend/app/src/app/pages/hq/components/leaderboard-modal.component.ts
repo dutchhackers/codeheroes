@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HqDataService, LeaderboardEntry } from '../../../core/services/hq-data.service';
+import * as LeaderboardUtils from '../utils/leaderboard.utils';
 
 export type LeaderboardPeriod = 'weekly' | 'daily';
 
@@ -110,12 +111,12 @@ export type LeaderboardPeriod = 'weekly' | 'daily';
                       <img [src]="entry.photoUrl" [alt]="entry.displayName" class="avatar" loading="lazy" />
                     } @else {
                       <div class="avatar-placeholder">
-                        {{ getInitials(entry.displayName) }}
+                        {{ LeaderboardUtils.getInitials(entry.displayName) }}
                       </div>
                     }
-                    <span class="name">{{ formatName(entry.displayName) }}</span>
+                    <span class="name">{{ LeaderboardUtils.formatName(entry.displayName, 18, 15) }}</span>
                   </div>
-                  <span class="xp-gained">+{{ formatXp(entry.xpGained) }}</span>
+                  <span class="xp-gained">+{{ LeaderboardUtils.formatXp(entry.xpGained) }}</span>
                   @if (entry.userId === currentUserId()) {
                     <span class="current-marker" aria-label="This is you">←</span>
                   }
@@ -460,6 +461,9 @@ export class LeaderboardModalComponent implements OnInit, OnDestroy, AfterViewIn
 
   readonly modalContent = viewChild<ElementRef<HTMLElement>>('modalContent');
 
+  // Expose utility functions to template
+  readonly LeaderboardUtils = LeaderboardUtils;
+
   @HostListener('document:keydown.escape')
   handleEscapeKey() {
     this.onClose();
@@ -509,31 +513,6 @@ export class LeaderboardModalComponent implements OnInit, OnDestroy, AfterViewIn
       event.preventDefault();
       this.onClose();
     }
-  }
-
-  getInitials(name: string): string {
-    return name
-      .split(/\s+/)
-      .map((part) => part.charAt(0))
-      .join('')
-      .slice(0, 2)
-      .toUpperCase();
-  }
-
-  formatName(name: string): string {
-    if (name.length <= 18) return name;
-    const parts = name.split(/\s+/);
-    if (parts.length >= 2) {
-      return `${parts[0]} ${parts[1].charAt(0)}.`;
-    }
-    return name.slice(0, 15) + '...';
-  }
-
-  formatXp(xp: number): string {
-    if (xp >= 1000) {
-      return `${(xp / 1000).toFixed(1)}K XP`;
-    }
-    return `${xp} XP`;
   }
 
   #loadLeaderboard() {
