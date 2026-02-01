@@ -34,7 +34,9 @@ Current production bundle size: ~2.6mb initial bundle
 - Error: 3mb
 
 **Future Optimization Opportunities:**
-- Implement lazy loading for feature modules (profile, HQ, activity wall)
+- Analyze bundle composition to identify large or duplicate dependencies
+- Implement dynamic imports for Firebase SDK modules to reduce initial bundle size
+- Optimize component-level imports and shared modules to avoid pulling in unused code
 - Code splitting for large libraries
 - Tree shaking unused dependencies
 - Consider using Angular PWA optimizations for caching
