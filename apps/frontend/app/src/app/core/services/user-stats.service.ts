@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
   collection,
   collectionData,
@@ -36,12 +36,16 @@ const MS_PER_DAY = 86400000;
 export class UserStatsService {
   readonly #firestore = inject(Firestore);
   readonly #auth = inject(Auth);
+  readonly #injector = inject(Injector);
+
+  // Initialize user observable in injection context to avoid warnings
+  readonly #authUser$ = user(this.#auth);
 
   /**
    * Get the current authenticated user's Firestore user document
    */
   getCurrentUserDoc(): Observable<UserDto | null> {
-    return user(this.#auth).pipe(
+    return this.#authUser$.pipe(
       switchMap((authUser) => {
         if (!authUser?.uid) {
           return of(null);
@@ -49,7 +53,10 @@ export class UserStatsService {
         // Query users collection where uid matches the auth user's UID
         const usersRef = collection(this.#firestore, 'users');
         const usersQuery = query(usersRef, where('uid', '==', authUser.uid));
-        return collectionData(usersQuery, { idField: 'id' }).pipe(
+        // Use runInInjectionContext to avoid Firebase injection warnings
+        return runInInjectionContext(this.#injector, () =>
+          collectionData(usersQuery, { idField: 'id' }),
+        ).pipe(
           map((users) => {
             const matchingUser = (users as UserDto[])[0];
             return matchingUser ?? null;
@@ -68,7 +75,7 @@ export class UserStatsService {
    */
   getUserStats(userId: string): Observable<UserStats | null> {
     const statsDocRef = doc(this.#firestore, `users/${userId}/stats/current`);
-    return docData(statsDocRef).pipe(
+    return runInInjectionContext(this.#injector, () => docData(statsDocRef)).pipe(
       map((data) => this.#transformStats(data)),
       catchError((error) => {
         console.error('Error fetching user stats:', error);
@@ -114,7 +121,9 @@ export class UserStatsService {
   getUserActivities(userId: string, limitCount = 10): Observable<Activity[]> {
     const activitiesRef = collection(this.#firestore, `users/${userId}/activities`);
     const activitiesQuery = query(activitiesRef, orderBy('createdAt', 'desc'), firestoreLimit(limitCount));
-    return collectionData(activitiesQuery, { idField: 'id' }).pipe(
+    return runInInjectionContext(this.#injector, () =>
+      collectionData(activitiesQuery, { idField: 'id' }),
+    ).pipe(
       map((activities) => activities as Activity[]),
       catchError((error) => {
         console.error('Error fetching user activities:', error);
@@ -173,7 +182,9 @@ export class UserStatsService {
   getUserBadges(userId: string): Observable<UserBadge[]> {
     const badgesRef = collection(this.#firestore, `users/${userId}/badges`);
     // Note: removed orderBy to avoid potential index issues; badges sorted client-side
-    return collectionData(badgesRef, { idField: 'id' }).pipe(
+    return runInInjectionContext(this.#injector, () =>
+      collectionData(badgesRef, { idField: 'id' }),
+    ).pipe(
       map((badges) => {
         const typedBadges = badges as UserBadge[];
         // Sort a copy to avoid mutating the original array (important for RxJS stream immutability)

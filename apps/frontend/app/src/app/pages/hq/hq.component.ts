@@ -53,6 +53,7 @@ import { HighlightsComponent } from './components/highlights.component';
             [entries]="leaderboardEntries()"
             [currentUserRank]="currentUserRank()"
             [currentUserId]="currentUserId()"
+            [isLoading]="leaderboardLoading()"
           />
 
           <!-- Recent Highlights -->
@@ -81,6 +82,7 @@ export class HqComponent implements OnInit, OnDestroy {
   dailyProgress = signal<DailyProgress | null>(null);
   weeklyStats = signal<WeeklyStats | null>(null);
   leaderboardEntries = signal<LeaderboardEntry[]>([]);
+  leaderboardLoading = signal(true);
   currentUserRank = signal<number | null>(null);
   currentUserId = signal<string | null>(null);
   highlights = signal<Highlight[]>([]);
@@ -127,10 +129,12 @@ export class HqComponent implements OnInit, OnDestroy {
         this.leaderboardEntries.set(entries);
         this.currentUserRank.set(currentUserRank);
         this.currentUserId.set(currentUserId);
+        this.leaderboardLoading.set(false);
         this.#checkLoadingComplete();
       },
       error: (error) => {
         console.error('Failed to load leaderboard:', error);
+        this.leaderboardLoading.set(false);
         this.#checkLoadingComplete();
       },
     });

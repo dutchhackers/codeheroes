@@ -365,6 +365,38 @@ mcp__firebase__firestore_query_collection
 - Has project ID caching bug
 - Use Emulator UI or DevTools MCP instead
 
+### Deploying Firebase Functions
+
+**Standard deployment:**
+```bash
+nx run firebase-app:firebase deploy --only functions
+```
+
+**Deploying a single codebase:**
+```bash
+nx run firebase-app:firebase deploy --only functions:auth-service
+```
+
+**Common deployment issues and solutions:**
+
+| Issue | Symptom | Solution |
+|-------|---------|----------|
+| "No changes detected" | Function skipped despite code changes | 1. Delete `dist/apps/<function>` folder<br>2. Rebuild with `nx build <function> --skip-nx-cache`<br>3. Redeploy |
+| npm ci fails with missing packages | `Missing: <package> from lock file` | 1. `cd dist/apps/<function>`<br>2. `npm install --package-lock-only`<br>3. Redeploy |
+| Changes not taking effect | Function logs show old behavior | Check the `firebase-functions-hash` in deploy output - if unchanged, the new code wasn't deployed |
+
+**Troubleshooting deployment:**
+1. Check if changes are in source: `grep "your-change" apps/<function>/src/**/*.ts`
+2. Check if changes are in build: `grep "your-change" dist/apps/<function>/main.js`
+3. If in build but not deploying: regenerate package-lock.json (see above)
+4. Force deploy: `nx run firebase-app:firebase deploy --only functions:<codebase> --force`
+
+**Verifying deployment via logs:**
+```bash
+# Use Firebase MCP to check function logs
+mcp__firebase__functions_get_logs with function_names: ["functionName"]
+```
+
 ### Verifying Game Action Processing
 
 After sending a simulated event, check if it was processed:
