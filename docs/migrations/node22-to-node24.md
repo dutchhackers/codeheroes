@@ -7,13 +7,13 @@ This guide documents the migration of CodeHeroes Firebase Functions from Node.js
 | Item | Before | After |
 |------|--------|-------|
 | Node.js Runtime | 22 | 24 |
-| firebase-tools | ^13.30.0 | ^14.25.0 |
+| firebase-tools | ^13.30.0 | ^15.5.1 |
 | @types/node | ~22.13.10 | ^24.0.0 |
 
 ## Prerequisites
 
 - Node.js 24 installed locally (`nvm install 24`)
-- Firebase CLI 14.25.0+ (required for Node.js 24 support)
+- Firebase CLI 15.5.1+ (required for Node.js 24 support)
 - Access to deploy Firebase Functions
 
 ## Migration Steps
