@@ -1,3 +1,7 @@
+---
+description: "Automatically fixes and resolves review comments from bot reviewers (Copilot, GitHub Actions, Dependabot, etc.) on a pull request."
+---
+
 # Fix Bot Reviews
 
 Automatically fixes and resolves review comments from bot reviewers (Copilot, GitHub Actions, Dependabot, etc.) on a pull request.
@@ -148,7 +152,7 @@ Display a summary:
 ### Fixed (N comments)
 | File | Issue | Status |
 |------|-------|--------|
-| path/to/file.ts:42 | Description | ✅ Fixed |
+| path/to/file.ts:42 | Description | Fixed |
 
 ### Needs Manual Review (N comments)
 | File | Issue | Reason |
