@@ -178,7 +178,7 @@ The test repo has webhooks pre-configured for local (ngrok) and production.
 1. Start emulators: `nx serve firebase-app`
 2. Start ngrok: `ngrok http 5001`
 3. Update webhook URL if ngrok changed
-4. Trigger event in codeheroes-support repo
+4. Trigger event in test repo (see CLAUDE.local.md for URL)
 5. Verify in ngrok inspector and Firestore UI
 
 ### Checking Webhook Deliveries (Programmatic)
@@ -249,21 +249,18 @@ The system uses a two-tier data model:
 
 **Webhook flow:**
 ```
-GitHub webhook (sender.id: 7045335)
+GitHub webhook (sender.id: <github-user-id>)
     ↓
-Lookup: connectedAccounts where externalUserId == "7045335"
+Lookup: connectedAccounts where externalUserId == "<github-user-id>"
     ↓
-Found: users/1000002 (mschilling)
+Found: users/<user-doc-id> (<username>)
     ↓
 Create gameAction → Firestore trigger → processGameAction
     ↓
 Auto-create progression state if missing → Update XP/counters
 ```
 
-**Test user mapping:**
-| User | User ID | GitHub ID |
-|------|---------|-----------|
-| Nightcrawler (mschilling) | 1000002 | 7045335 |
+**Test user mapping:** See CLAUDE.local.md for actual GitHub ID → User ID mappings.
 
 ## XP Values Reference
 
@@ -531,11 +528,7 @@ for r in json.load(sys.stdin).get('requests',[])[:5]:
 
 #### Test User Reference
 
-| User | User ID | GitHub ID | GitHub Username |
-|------|---------|-----------|-----------------|
-| Nightcrawler | 1000002 | 7045335 | mschilling |
-
-The seeded user maps GitHub ID `7045335` to CodeHeroes user `1000002`. All webhooks from this GitHub account will be attributed to this user.
+See CLAUDE.local.md for the full test user mapping table (GitHub ID → User ID → Username).
 
 ---
 
@@ -668,18 +661,7 @@ curl -X POST "http://localhost:5001/YOUR_PROJECT_ID/europe-west1/gitHubReceiver"
 
 **User ID Reference (from seed data):**
 
-| Display Name | User ID | GitHub ID | GitHub Username |
-|--------------|---------|-----------|-----------------|
-| Nightcrawler | 1000002 | 7045335 | mschilling |
-| Cassshh | 1000003 | 10263056 | cassshh |
-| Guido | 1000004 | 80984882 | guidovanvilsteren |
-| Nick | 1000005 | 89972776 | nratering |
-| Aalt | 1000006 | 35026618 | aaltw |
-| Jesper | 1000007 | 10846244 | jstrating |
-| Arwin | 1000008 | 30255086 | ArwinStrating |
-| Ronan | 1000009 | 4209748 | rsuper |
-
-Full list in `libs/database-seeds/src/lib/data/connected-accounts.local.json`.
+See CLAUDE.local.md for the full user mapping table. Data files are in `libs/database-seeds/src/lib/data/connected-accounts.local.json`.
 
 ---
 
