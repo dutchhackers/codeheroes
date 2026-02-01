@@ -1,4 +1,15 @@
-import { Component, HostListener, inject, output, signal, OnInit, OnDestroy } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  inject,
+  OnDestroy,
+  OnInit,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HqDataService, LeaderboardEntry } from '../../../core/services/hq-data.service';
 
@@ -11,14 +22,13 @@ export type LeaderboardPeriod = 'weekly' | 'daily';
     <div
       class="modal-backdrop"
       (click)="onBackdropClick($event)"
-      (keydown.escape)="onClose()"
       (keydown)="onBackdropKeydown($event)"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
       tabindex="-1"
     >
-      <div class="modal-content">
+      <div class="modal-content" #modalContent tabindex="-1">
         <div class="modal-header">
           <h2 id="modal-title" class="modal-title">
             <span class="trophy">🏆</span>
@@ -36,9 +46,11 @@ export type LeaderboardPeriod = 'weekly' | 'daily';
           <button
             type="button"
             role="tab"
+            id="tab-weekly"
             class="toggle-button"
             [class.active]="activePeriod() === 'weekly'"
             [attr.aria-selected]="activePeriod() === 'weekly'"
+            aria-controls="leaderboard-tabpanel"
             (click)="switchPeriod('weekly')"
           >
             WEEKLY
@@ -46,9 +58,11 @@ export type LeaderboardPeriod = 'weekly' | 'daily';
           <button
             type="button"
             role="tab"
+            id="tab-daily"
             class="toggle-button"
             [class.active]="activePeriod() === 'daily'"
             [attr.aria-selected]="activePeriod() === 'daily'"
+            aria-controls="leaderboard-tabpanel"
             (click)="switchPeriod('daily')"
           >
             DAILY
@@ -56,7 +70,12 @@ export type LeaderboardPeriod = 'weekly' | 'daily';
         </div>
 
         <!-- Leaderboard Content -->
-        <div class="modal-body" role="tabpanel">
+        <div
+          class="modal-body"
+          role="tabpanel"
+          id="leaderboard-tabpanel"
+          [attr.aria-labelledby]="activePeriod() === 'weekly' ? 'tab-weekly' : 'tab-daily'"
+        >
           @if (isLoading()) {
             <div class="skeleton-loader" role="status" aria-live="polite" aria-label="Loading leaderboard">
               @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
@@ -434,10 +453,12 @@ export type LeaderboardPeriod = 'weekly' | 'daily';
     `,
   ],
 })
-export class LeaderboardModalComponent implements OnInit, OnDestroy {
+export class LeaderboardModalComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly #hqDataService = inject(HqDataService);
 
   dismiss = output<void>();
+
+  readonly modalContent = viewChild<ElementRef<HTMLElement>>('modalContent');
 
   @HostListener('document:keydown.escape')
   handleEscapeKey() {
@@ -454,6 +475,11 @@ export class LeaderboardModalComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.#loadLeaderboard();
+  }
+
+  ngAfterViewInit() {
+    // Focus the modal content for keyboard accessibility
+    this.modalContent()?.nativeElement?.focus();
   }
 
   ngOnDestroy() {
@@ -477,9 +503,12 @@ export class LeaderboardModalComponent implements OnInit, OnDestroy {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onBackdropKeydown(_event: Event) {
-    // Satisfies accessibility lint rule for keyboard handlers alongside click handlers
+  onBackdropKeydown(event: KeyboardEvent) {
+    // Handle Enter/Space on backdrop as equivalent to click (accessibility)
+    if ((event.key === 'Enter' || event.key === ' ') && event.target === event.currentTarget) {
+      event.preventDefault();
+      this.onClose();
+    }
   }
 
   getInitials(name: string): string {
