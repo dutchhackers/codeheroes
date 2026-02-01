@@ -1,4 +1,5 @@
 export const environment = {
+  name: 'local' as const,
   useEmulators: false,
   apiUrl: '',
   firebase: {

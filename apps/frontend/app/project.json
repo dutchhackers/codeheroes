@@ -58,6 +58,22 @@
               "replace": "apps/frontend/app/src/environments/environment.ts",
               "with": "apps/frontend/app/src/environments/environment.test.ts"
             }
+          ],
+          "assets": [
+            {
+              "glob": "**/*",
+              "input": "apps/frontend/app/public",
+              "ignore": ["app-icons/**", "app-icons-test/**", "test-assets/**", "manifest.webmanifest"]
+            },
+            {
+              "glob": "**/*",
+              "input": "apps/frontend/app/public/app-icons-test",
+              "output": "app-icons"
+            },
+            {
+              "glob": "manifest.webmanifest",
+              "input": "apps/frontend/app/public/test-assets"
+            }
           ]
         },
         "development": {

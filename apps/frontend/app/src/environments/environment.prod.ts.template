@@ -1,4 +1,5 @@
 export const environment = {
+  name: 'production' as const,
   useEmulators: false,
   apiUrl: 'https://europe-west1-${FIREBASE_PROD_PROJECT_ID}.cloudfunctions.net/api',
   firebase: {
