@@ -38,7 +38,7 @@ Update the following dependencies:
 ```json
 {
   "devDependencies": {
-    "firebase-tools": "^14.25.0",
+    "firebase-tools": "^15.5.1",
     "@types/node": "^24.0.0"
   }
 }
