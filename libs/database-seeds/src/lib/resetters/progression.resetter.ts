@@ -4,18 +4,17 @@ import { DocumentReference, Firestore } from 'firebase-admin/firestore';
  * Resets progression data while preserving user accounts.
  *
  * Clears:
- * - gameActions collection
- * - events collection
- * - users/{id}/activities subcollections
- * - users/{id}/activityStats subcollections (including nested daily/weekly records)
- * - users/{id}/stats subcollections
- * - users/{id}/badges subcollections
- * - users/{id}/notifications subcollections
- * - users/{id}/weekendActivity subcollections
+ * - Top-level: gameActions, events, fcmTokens
+ * - User subcollections: activities, activityStats (including nested daily/weekly records),
+ *   stats, badges, notifications, achievements, rewards, weekendActivity
  *
  * Preserves:
+ * - system collection
  * - users collection (user profiles)
  * - users/{id}/connectedAccounts subcollections (GitHub/Strava links)
+ *
+ * To discover the current schema, run:
+ *   nx run database-seeds:discover-schema -c test
  */
 export class ProgressionResetter {
   private batchSize = 500;
@@ -23,9 +22,10 @@ export class ProgressionResetter {
   async reset(db: Firestore): Promise<void> {
     console.log('Starting progression data reset...\n');
 
-    // Clear top-level collections
+    // Clear top-level collections (preserves: system, users)
     await this.deleteCollection(db, 'gameActions');
     await this.deleteCollection(db, 'events');
+    await this.deleteCollection(db, 'fcmTokens');
 
     // Clear user subcollections (preserving users and connectedAccounts)
     await this.clearUserProgressionData(db);
@@ -92,11 +92,20 @@ export class ProgressionResetter {
 
     console.log(`  Processing ${usersSnapshot.size} users...`);
 
-    const subcollectionsToDelete = ['activities', 'stats', 'badges', 'notifications', 'weekendActivity'];
+    const subcollectionsToDelete = [
+      'activities',
+      'activityStats',
+      'stats',
+      'badges',
+      'notifications',
+      'achievements',
+      'rewards',
+      'weekendActivity',
+    ];
     let totalDeleted = 0;
 
     for (const userDoc of usersSnapshot.docs) {
-      // Delete simple subcollections
+      // Delete all progression subcollections (recursively handles nested structures)
       for (const subcollection of subcollectionsToDelete) {
         const subcollectionRef = userDoc.ref.collection(subcollection);
         const subcollectionSnapshot = await subcollectionRef.get();
@@ -108,7 +117,8 @@ export class ProgressionResetter {
         }
       }
 
-      // Delete activityStats with nested structure: activityStats/{periodType}/records/{recordId}
+      // Handle activityStats nested structure: activityStats/{periodType}/records/{recordId}
+      // These may have "virtual" parent docs that don't appear in queries
       totalDeleted += await this.deleteActivityStats(userDoc.ref);
     }
 
