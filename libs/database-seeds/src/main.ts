@@ -24,9 +24,9 @@ Environment Variables:
   FIRESTORE_EMULATOR_HOST   Optional. If set, uses local emulator (e.g., localhost:8080)
 
 Examples:
-  FIREBASE_PROJECT_ID=codeheroes-test nx seed database-seeds
-  FIREBASE_PROJECT_ID=codeheroes-test nx run database-seeds:reset-progression
-  FIREBASE_PROJECT_ID=codeheroes-test nx run database-seeds:discover-schema
+  nx seed database-seeds                              # Uses emulator (default)
+  nx run database-seeds:reset-progression -c test     # Uses codeheroes-test
+  nx run database-seeds:discover-schema -c test       # Uses codeheroes-test
 `);
 }
 

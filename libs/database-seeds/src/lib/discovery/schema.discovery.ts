@@ -29,31 +29,41 @@ export class SchemaDiscovery {
     const usersSnapshot = await this.db.collection('users').get();
     const allSubcollections = new Map<string, number>();
 
-    for (const userDoc of usersSnapshot.docs) {
-      const subcollections = await userDoc.ref.listCollections();
-      for (const sub of subcollections) {
-        const count = allSubcollections.get(sub.id) || 0;
-        allSubcollections.set(sub.id, count + 1);
+    if (usersSnapshot.empty) {
+      console.log('  (no users found)');
+    } else {
+      for (const userDoc of usersSnapshot.docs) {
+        const subcollections = await userDoc.ref.listCollections();
+        for (const sub of subcollections) {
+          const count = allSubcollections.get(sub.id) || 0;
+          allSubcollections.set(sub.id, count + 1);
+        }
+      }
+
+      for (const [name, count] of [...allSubcollections.entries()].sort()) {
+        console.log(`  users/{id}/${name} (found in ${count} users)`);
       }
     }
 
-    for (const [name, count] of [...allSubcollections.entries()].sort()) {
-      console.log(`  users/{id}/${name} (found in ${count} users)`);
-    }
-
     // Discover nested subcollections
-    console.log('\nNESTED SUBCOLLECTIONS:\n');
-    const nestedPaths = new Set<string>();
+    // Note: Samples first 10 users with limited depth to control Firestore read costs
+    console.log('\nNESTED SUBCOLLECTIONS (sampling first 10 users):\n');
 
-    for (const userDoc of usersSnapshot.docs.slice(0, 10)) {
-      await this.discoverNestedCollections(userDoc.ref, 'users/{id}', nestedPaths, 3);
-    }
-
-    if (nestedPaths.size === 0) {
-      console.log('  (none found)');
+    if (usersSnapshot.empty) {
+      console.log('  (no users to sample)');
     } else {
-      for (const path of [...nestedPaths].sort()) {
-        console.log(`  ${path}`);
+      const nestedPaths = new Set<string>();
+
+      for (const userDoc of usersSnapshot.docs.slice(0, 10)) {
+        await this.discoverNestedCollections(userDoc.ref, 'users/{id}', nestedPaths, 3);
+      }
+
+      if (nestedPaths.size === 0) {
+        console.log('  (none found)');
+      } else {
+        for (const path of [...nestedPaths].sort()) {
+          console.log(`  ${path}`);
+        }
       }
     }
 
@@ -77,6 +87,10 @@ export class SchemaDiscovery {
     }
   }
 
+  /**
+   * Recursively discovers nested subcollections.
+   * Uses shallow limits (5 docs per collection, 2 for nested) to control Firestore read costs.
+   */
   private async discoverNestedCollections(
     docRef: DocumentReference,
     pathPrefix: string,

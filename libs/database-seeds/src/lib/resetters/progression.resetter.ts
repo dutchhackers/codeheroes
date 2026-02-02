@@ -92,9 +92,9 @@ export class ProgressionResetter {
 
     console.log(`  Processing ${usersSnapshot.size} users...`);
 
+    // Note: activityStats is handled separately by deleteActivityStats() to handle nested structure
     const subcollectionsToDelete = [
       'activities',
-      'activityStats',
       'stats',
       'badges',
       'notifications',
@@ -127,18 +127,18 @@ export class ProgressionResetter {
   }
 
   /**
-   * Deletes activityStats subcollection with its nested daily/weekly records
+   * Deletes activityStats subcollection with its nested period/records structure.
+   * Dynamically discovers period types (daily, weekly, etc.) rather than hardcoding.
    */
   private async deleteActivityStats(userRef: DocumentReference): Promise<number> {
     let deleted = 0;
-    const periodTypes = ['daily', 'weekly'];
 
-    for (const periodType of periodTypes) {
-      const recordsRef = userRef
-        .collection('activityStats')
-        .doc(periodType)
-        .collection('records');
+    // Dynamically discover all period type documents (daily, weekly, monthly, etc.)
+    const periodTypeDocs = await userRef.collection('activityStats').listDocuments();
 
+    for (const periodDoc of periodTypeDocs) {
+      const periodType = periodDoc.id;
+      const recordsRef = periodDoc.collection('records');
       const recordsSnapshot = await recordsRef.get();
 
       for (const doc of recordsSnapshot.docs) {
@@ -147,7 +147,6 @@ export class ProgressionResetter {
       }
 
       // Also delete the period type document itself if it exists
-      const periodDoc = userRef.collection('activityStats').doc(periodType);
       const periodSnapshot = await periodDoc.get();
       if (periodSnapshot.exists) {
         await periodDoc.delete();
