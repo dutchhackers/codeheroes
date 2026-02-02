@@ -36,10 +36,10 @@
       },
       "configurations": {
         "test": {
-          "command": "firebase --config=firebase.json --project=${FIREBASE_TEST_PROJECT_ID:-your-test-project}"
+          "command": "firebase --config=firebase.json --project=codeheroes-test"
         },
         "production": {
-          "command": "firebase --config=firebase.json --project=${FIREBASE_PROD_PROJECT_ID:-your-prod-project}"
+          "command": "firebase --config=firebase.json --project=codeheroes-prod"
         }
       }
     },
