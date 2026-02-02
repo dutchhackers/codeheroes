@@ -10,9 +10,10 @@ import { LevelRequirementItem } from '@codeheroes/types';
  * For levels > MAX_STATIC_LEVEL, XP is calculated in level-thresholds.ts using
  * a quadratic formula anchored at level 20's XP:
  *   XP(level) = LEVEL_20_XP + multiplier * (level - MAX_STATIC_LEVEL)²
- * The multiplier (1500) results in Level 80 requiring approximately 6,175,000 XP.
+ * The multiplier (2500) results in Level 80 requiring approximately 10,400,000 XP.
  *
- * XP values were scaled 12x to match the new XP economy.
+ * Rebalanced (2024): Increased thresholds ~1.5-2x for levels 10+ to slow progression.
+ * Target: Level 80 achievable in ~3 years of typical active development.
  */
 export interface LevelDefinition {
   level: number;
@@ -27,7 +28,12 @@ export interface LevelDefinition {
 
 /**
  * Static level definitions for levels 1-20 (onboarding phase)
- * Hand-tuned for rapid early progression and smooth transition to algorithmic levels
+ * Hand-tuned for progression with smooth transition to algorithmic levels
+ *
+ * Target progression times (active developer):
+ * - Levels 1-9 (COMMON): 1-2 weeks
+ * - Levels 10-14 (UNCOMMON): 1-2 months
+ * - Levels 15-20 (RARE): 3-6 months
  */
 export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   {
@@ -64,7 +70,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 5,
-    xpRequired: 25000,
+    xpRequired: 30000,
     rewards: {
       title: 'Code Explorer',
       badges: ['code_explorer'],
@@ -72,7 +78,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 6,
-    xpRequired: 40000,
+    xpRequired: 50000,
     rewards: {
       title: 'Code Adventurer',
       badges: ['code_adventurer'],
@@ -80,7 +86,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 7,
-    xpRequired: 60000,
+    xpRequired: 80000,
     rewards: {
       title: 'Code Adept',
       badges: ['code_adept'],
@@ -88,7 +94,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 8,
-    xpRequired: 85000,
+    xpRequired: 115000,
     rewards: {
       title: 'Code Enthusiast',
       badges: ['code_enthusiast'],
@@ -96,7 +102,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 9,
-    xpRequired: 115000,
+    xpRequired: 150000,
     rewards: {
       title: 'Code Practitioner',
       badges: ['code_practitioner'],
@@ -104,7 +110,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 10,
-    xpRequired: 150000,
+    xpRequired: 200000,
     rewards: {
       title: 'Code Hero',
       badges: ['code_hero'],
@@ -112,7 +118,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 11,
-    xpRequired: 190000,
+    xpRequired: 270000,
     rewards: {
       title: 'Code Warrior',
       badges: ['code_warrior'],
@@ -120,7 +126,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 12,
-    xpRequired: 235000,
+    xpRequired: 350000,
     rewards: {
       title: 'Code Veteran',
       badges: ['code_veteran'],
@@ -128,7 +134,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 13,
-    xpRequired: 285000,
+    xpRequired: 420000,
     rewards: {
       title: 'Code Specialist',
       badges: ['code_specialist'],
@@ -136,7 +142,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 14,
-    xpRequired: 340000,
+    xpRequired: 500000,
     rewards: {
       title: 'Code Expert',
       badges: ['code_expert'],
@@ -144,7 +150,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 15,
-    xpRequired: 400000,
+    xpRequired: 600000,
     rewards: {
       title: 'Code Master',
       badges: ['code_master'],
@@ -152,7 +158,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 16,
-    xpRequired: 465000,
+    xpRequired: 720000,
     rewards: {
       title: 'Code Sage',
       badges: ['code_sage'],
@@ -160,7 +166,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 17,
-    xpRequired: 535000,
+    xpRequired: 860000,
     rewards: {
       title: 'Code Legend',
       badges: ['code_legend'],
@@ -168,7 +174,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 18,
-    xpRequired: 610000,
+    xpRequired: 1020000,
     rewards: {
       title: 'Code Champion',
       badges: ['code_champion'],
@@ -176,7 +182,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 19,
-    xpRequired: 690000,
+    xpRequired: 1200000,
     rewards: {
       title: 'Code Oracle',
       badges: ['code_oracle'],
@@ -184,7 +190,7 @@ export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   },
   {
     level: 20,
-    xpRequired: 775000,
+    xpRequired: 1400000,
     rewards: {
       title: 'Code Architect',
       badges: ['code_architect', 'level_20_mastery'],
