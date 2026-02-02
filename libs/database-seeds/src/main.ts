@@ -4,9 +4,10 @@ import { UserSeeder } from './lib/seeders/user.seeder';
 import { ConnectedAccountSeeder } from './lib/seeders/connected-account.seeder';
 import { SystemSeeder } from './lib/seeders/system.seeder';
 import { ProgressionResetter } from './lib/resetters/progression.resetter';
+import { SchemaDiscovery } from './lib/discovery/schema.discovery';
 import { loadJsonData } from './lib/utils/file-loader';
 
-const VALID_COMMANDS = ['seed', 'reset-progression'] as const;
+const VALID_COMMANDS = ['seed', 'reset-progression', 'discover-schema'] as const;
 type Command = (typeof VALID_COMMANDS)[number];
 
 function printUsage() {
@@ -16,14 +17,16 @@ Usage: node main.js <command>
 Commands:
   seed               Seed the database with initial data (users, accounts, system)
   reset-progression  Reset all progression data (XP, levels, badges) while preserving users
+  discover-schema    Discover and report the current Firestore schema
 
 Environment Variables:
   FIREBASE_PROJECT_ID       Required. Firebase project ID (e.g., codeheroes-test)
   FIRESTORE_EMULATOR_HOST   Optional. If set, uses local emulator (e.g., localhost:8080)
 
 Examples:
-  FIREBASE_PROJECT_ID=codeheroes-test nx seed database-seeds
-  FIREBASE_PROJECT_ID=codeheroes-test nx run database-seeds:reset-progression
+  nx seed database-seeds                              # Uses emulator (default)
+  nx run database-seeds:reset-progression -c test     # Uses codeheroes-test
+  nx run database-seeds:discover-schema -c test       # Uses codeheroes-test
 `);
 }
 
@@ -50,6 +53,11 @@ async function runSeed(db: FirebaseFirestore.Firestore) {
 async function runResetProgression(db: FirebaseFirestore.Firestore) {
   const resetter = new ProgressionResetter();
   await resetter.reset(db);
+}
+
+async function runDiscoverSchema(db: FirebaseFirestore.Firestore) {
+  const discovery = new SchemaDiscovery(db);
+  await discovery.discover();
 }
 
 async function main() {
@@ -96,6 +104,9 @@ async function main() {
         break;
       case 'reset-progression':
         await runResetProgression(db);
+        break;
+      case 'discover-schema':
+        await runDiscoverSchema(db);
         break;
     }
     process.exit(0);

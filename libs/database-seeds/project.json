@@ -66,6 +66,28 @@
           "target": "build"
         }
       ]
+    },
+    "discover-schema": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node dist/libs/database-seeds/src/main.js discover-schema",
+        "env": {
+          "FIRESTORE_EMULATOR_HOST": "localhost:8080"
+        }
+      },
+      "configurations": {
+        "test": {
+          "command": "node dist/libs/database-seeds/src/main.js discover-schema",
+          "env": {
+            "FIREBASE_PROJECT_ID": "codeheroes-test"
+          }
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build"
+        }
+      ]
     }
   }
 }

@@ -1,21 +1,20 @@
-import { Firestore } from 'firebase-admin/firestore';
+import { CollectionReference, DocumentReference, Firestore } from 'firebase-admin/firestore';
 
 /**
  * Resets progression data while preserving user accounts.
  *
  * Clears:
- * - gameActions collection
- * - events collection
- * - users/{id}/activities subcollections
- * - users/{id}/activityStats subcollections
- * - users/{id}/stats subcollections
- * - users/{id}/badges subcollections
- * - users/{id}/notifications subcollections
- * - users/{id}/weekendActivity subcollections
+ * - Top-level: gameActions, events, fcmTokens
+ * - User subcollections: activities, activityStats (including nested daily/weekly records),
+ *   stats, badges, notifications, achievements, rewards, weekendActivity
  *
  * Preserves:
+ * - system collection
  * - users collection (user profiles)
  * - users/{id}/connectedAccounts subcollections (GitHub/Strava links)
+ *
+ * To discover the current schema, run:
+ *   nx run database-seeds:discover-schema -c test
  */
 export class ProgressionResetter {
   private batchSize = 500;
@@ -23,9 +22,10 @@ export class ProgressionResetter {
   async reset(db: Firestore): Promise<void> {
     console.log('Starting progression data reset...\n');
 
-    // Clear top-level collections
+    // Clear top-level collections (preserves: system, users)
     await this.deleteCollection(db, 'gameActions');
     await this.deleteCollection(db, 'events');
+    await this.deleteCollection(db, 'fcmTokens');
 
     // Clear user subcollections (preserving users and connectedAccounts)
     await this.clearUserProgressionData(db);
@@ -33,20 +33,31 @@ export class ProgressionResetter {
     console.log('\n✅ Progression reset completed');
   }
 
+  /**
+   * Deletes all documents in a collection using batched pagination.
+   */
   private async deleteCollection(db: Firestore, collectionPath: string): Promise<void> {
     const collectionRef = db.collection(collectionPath);
-    const query = collectionRef.limit(this.batchSize);
+    const deleted = await this.deleteCollectionBatched(collectionRef);
+    console.log(`  Deleted ${deleted} documents from '${collectionPath}'`);
+  }
 
+  /**
+   * Deletes all documents in a collection using batched pagination.
+   * Handles large collections safely by processing in batches.
+   */
+  private async deleteCollectionBatched(collectionRef: CollectionReference): Promise<number> {
     let deleted = 0;
+    let query = collectionRef.limit(this.batchSize);
     let snapshot = await query.get();
 
     while (!snapshot.empty) {
-      const batch = db.batch();
-      snapshot.docs.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
-      await batch.commit();
-      deleted += snapshot.size;
+      for (const doc of snapshot.docs) {
+        // Recursively delete any nested subcollections first
+        deleted += await this.deleteDocumentRecursively(doc.ref);
+        await doc.ref.delete();
+        deleted++;
+      }
 
       if (snapshot.size < this.batchSize) {
         break;
@@ -54,7 +65,24 @@ export class ProgressionResetter {
       snapshot = await query.get();
     }
 
-    console.log(`  Deleted ${deleted} documents from '${collectionPath}'`);
+    return deleted;
+  }
+
+  /**
+   * Recursively deletes all subcollections of a document.
+   * Uses pagination to handle large subcollections safely.
+   */
+  private async deleteDocumentRecursively(docRef: DocumentReference): Promise<number> {
+    let deleted = 0;
+
+    // Get all subcollections of this document
+    const subcollections = await docRef.listCollections();
+
+    for (const subcollection of subcollections) {
+      deleted += await this.deleteCollectionBatched(subcollection);
+    }
+
+    return deleted;
   }
 
   private async clearUserProgressionData(db: Firestore): Promise<void> {
@@ -68,28 +96,58 @@ export class ProgressionResetter {
 
     console.log(`  Processing ${usersSnapshot.size} users...`);
 
-    const subcollectionsToDelete = ['activities', 'activityStats', 'stats', 'badges', 'notifications', 'weekendActivity'];
+    // Note: activityStats is handled separately by deleteActivityStats() to handle nested structure
+    const subcollectionsToDelete = [
+      'activities',
+      'stats',
+      'badges',
+      'notifications',
+      'achievements',
+      'rewards',
+      'weekendActivity',
+    ];
     let totalDeleted = 0;
 
     for (const userDoc of usersSnapshot.docs) {
-      const userId = userDoc.id;
-
+      // Delete all progression subcollections using batched deletion
       for (const subcollection of subcollectionsToDelete) {
         const subcollectionRef = userDoc.ref.collection(subcollection);
-        const subcollectionSnapshot = await subcollectionRef.get();
-
-        if (!subcollectionSnapshot.empty) {
-          const batch = db.batch();
-          subcollectionSnapshot.docs.forEach((doc) => {
-            batch.delete(doc.ref);
-          });
-          await batch.commit();
-          totalDeleted += subcollectionSnapshot.size;
-        }
+        totalDeleted += await this.deleteCollectionBatched(subcollectionRef);
       }
+
+      // Handle activityStats nested structure: activityStats/{periodType}/records/{recordId}
+      // These may have "virtual" parent docs that don't appear in queries
+      totalDeleted += await this.deleteActivityStats(userDoc.ref);
     }
 
     console.log(`  Deleted ${totalDeleted} documents from user subcollections`);
     console.log(`  Preserved ${usersSnapshot.size} users and their connectedAccounts`);
+  }
+
+  /**
+   * Deletes activityStats subcollection with its nested period/records structure.
+   * Dynamically discovers period types (daily, weekly, etc.) rather than hardcoding.
+   * Uses batched deletion for records to handle large datasets safely.
+   */
+  private async deleteActivityStats(userRef: DocumentReference): Promise<number> {
+    let deleted = 0;
+
+    // Dynamically discover all period type documents (daily, weekly, monthly, etc.)
+    const periodTypeDocs = await userRef.collection('activityStats').listDocuments();
+
+    for (const periodDoc of periodTypeDocs) {
+      // Delete records using batched deletion (handles large record sets)
+      const recordsRef = periodDoc.collection('records');
+      deleted += await this.deleteCollectionBatched(recordsRef);
+
+      // Also delete the period type document itself if it exists
+      const periodSnapshot = await periodDoc.get();
+      if (periodSnapshot.exists) {
+        await periodDoc.delete();
+        deleted++;
+      }
+    }
+
+    return deleted;
   }
 }
