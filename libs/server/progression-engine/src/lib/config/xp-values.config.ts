@@ -13,9 +13,9 @@
  */
 export const XP_VALUES = {
   CODE_PUSH: {
-    BASE: 720,
+    BASE: 480,
     BONUSES: {
-      MULTIPLE_COMMITS: 720,
+      MULTIPLE_COMMITS: 480,
     },
   },
   PULL_REQUEST: {
