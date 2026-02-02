@@ -22,15 +22,18 @@ import {
 /**
  * XP multiplier for algorithmic levels (21+)
  * Formula: XP = LEVEL_20_XP + (ALGORITHMIC_XP_MULTIPLIER * levelsAbove20²)
+ *
+ * Rebalanced (2024): Increased from 1500 to 2500 to slow progression at higher levels.
+ * With Level 20 at 1,400,000 XP, Level 80 now requires ~10,400,000 XP.
  */
-const ALGORITHMIC_XP_MULTIPLIER = 1500;
+const ALGORITHMIC_XP_MULTIPLIER = 2500;
 
 /**
  * XP required for Level 20 (the last static level)
  * Derived from LEVEL_DEFINITIONS to prevent drift if static thresholds are adjusted
  */
 const LEVEL_20_XP =
-  LEVEL_DEFINITIONS.find((c) => c.level === MAX_STATIC_LEVEL)?.xpRequired ?? 775000;
+  LEVEL_DEFINITIONS.find((c) => c.level === MAX_STATIC_LEVEL)?.xpRequired ?? 1400000;
 
 /**
  * Calculate XP required for a given level using the algorithmic formula
@@ -39,11 +42,12 @@ const LEVEL_20_XP =
  * Formula: LEVEL_20_XP + (MULTIPLIER × levelsAbove20²)
  * This ensures monotonic progression from Level 20's endpoint
  *
- * Examples:
- * - Level 21: 775,000 + 1,500 × 1² = 776,500 XP
- * - Level 22: 775,000 + 1,500 × 2² = 781,000 XP
- * - Level 25: 775,000 + 1,500 × 5² = 812,500 XP
- * - Level 30: 775,000 + 1,500 × 10² = 925,000 XP
+ * Examples (with rebalanced values):
+ * - Level 21: 1,400,000 + 2,500 × 1² = 1,402,500 XP
+ * - Level 22: 1,400,000 + 2,500 × 4  = 1,410,000 XP
+ * - Level 25: 1,400,000 + 2,500 × 25 = 1,462,500 XP
+ * - Level 30: 1,400,000 + 2,500 × 100 = 1,650,000 XP
+ * - Level 80: 1,400,000 + 2,500 × 3600 = 10,400,000 XP
  */
 function calculateAlgorithmicXp(level: number): number {
   const levelsAbove20 = level - MAX_STATIC_LEVEL;

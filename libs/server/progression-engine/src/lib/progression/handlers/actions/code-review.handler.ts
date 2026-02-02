@@ -33,14 +33,14 @@ export class CodeReviewSubmitHandler extends AbstractActionHandler {
     const bonuses: Record<string, number> = {};
     let totalBonus = 0;
 
-    // Detailed review bonus (if there are significant comments)
-    if (metrics && 'commentsCount' in metrics && metrics.commentsCount >= 3) {
+    // Detailed review bonus (requires >=5 comments to trigger)
+    if (metrics && 'commentsCount' in metrics && metrics.commentsCount >= 5) {
       bonuses.detailedReview = XP_VALUES.CODE_REVIEW.BONUSES.DETAILED_REVIEW;
       totalBonus += bonuses.detailedReview;
     }
 
-    // Multiple files bonus
-    if (metrics && 'filesReviewed' in metrics && metrics.filesReviewed > 3) {
+    // Multiple files bonus (requires >8 files to trigger)
+    if (metrics && 'filesReviewed' in metrics && metrics.filesReviewed > 8) {
       bonuses.multipleFiles = XP_VALUES.CODE_REVIEW.BONUSES.MULTIPLE_FILES;
       totalBonus += bonuses.multipleFiles;
     }

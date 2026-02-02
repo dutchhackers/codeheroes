@@ -58,16 +58,16 @@ export class PullRequestCreateHandler extends AbstractActionHandler {
       xpValues = XP_VALUES.PULL_REQUEST.CLOSE;
     }
 
-    // Multiple files bonus
-    if (metrics && 'changedFiles' in metrics && metrics.changedFiles > 3) {
+    // Multiple files bonus (requires >10 files to trigger)
+    if (metrics && 'changedFiles' in metrics && metrics.changedFiles > 10) {
       bonuses.multipleFiles = xpValues.BONUSES.MULTIPLE_FILES;
       totalBonus += bonuses.multipleFiles;
     }
 
-    // Significant changes bonus
+    // Significant changes bonus (requires >500 total changes to trigger)
     if (metrics && 'additions' in metrics && 'deletions' in metrics) {
       const totalChanges = metrics.additions + metrics.deletions;
-      if (totalChanges > 100) {
+      if (totalChanges > 500) {
         bonuses.significantChanges = xpValues.BONUSES.SIGNIFICANT_CHANGES;
         totalBonus += bonuses.significantChanges;
       }

@@ -1,40 +1,43 @@
 /**
  * XP Values Configuration
  *
- * All values have been multiplied by 12x to support the expanded 80-level system.
- * This makes Level 80 achievable in approximately 3 years of active development.
+ * Balanced for 80-level system with Level 80 achievable in ~3 years of active development.
  *
- * Previous values (for reference):
- * - CODE_PUSH.BASE was 120, now 1440
- * - PULL_REQUEST.CREATE.BASE was 100, now 1200
+ * Rebalanced (2024): Reduced XP values ~50% and made bonuses harder to trigger.
+ * Previous system was ~50x faster than intended due to 12x multiplier + easy bonuses.
+ *
+ * Target progression:
+ * - Level 15: ~2 weeks of active development
+ * - Level 20: ~1 month
+ * - Level 80: ~3 years
  */
 export const XP_VALUES = {
   CODE_PUSH: {
-    BASE: 1440,
+    BASE: 720,
     BONUSES: {
-      MULTIPLE_COMMITS: 3000,
+      MULTIPLE_COMMITS: 720,
     },
   },
   PULL_REQUEST: {
     CREATE: {
-      BASE: 1200,
+      BASE: 600,
       BONUSES: {
-        MULTIPLE_FILES: 1200,
-        SIGNIFICANT_CHANGES: 2400,
+        MULTIPLE_FILES: 300,
+        SIGNIFICANT_CHANGES: 600,
       },
     },
     MERGE: {
-      BASE: 1200,
+      BASE: 600,
       BONUSES: {
-        MULTIPLE_FILES: 1200,
-        SIGNIFICANT_CHANGES: 2400,
+        MULTIPLE_FILES: 300,
+        SIGNIFICANT_CHANGES: 600,
       },
     },
     CLOSE: {
-      BASE: 600,
+      BASE: 300,
       BONUSES: {
-        MULTIPLE_FILES: 600,
-        SIGNIFICANT_CHANGES: 1200,
+        MULTIPLE_FILES: 150,
+        SIGNIFICANT_CHANGES: 300,
       },
     },
   },
@@ -60,11 +63,11 @@ export const XP_VALUES = {
     },
   },
   CODE_REVIEW: {
-    BASE: 960,
+    BASE: 800,
     BONUSES: {
-      DETAILED_REVIEW: 1200, // For reviews with substantial comments
-      MULTIPLE_FILES: 600, // For reviewing changes across multiple files
-      THOROUGH_REVIEW: 1800, // For reviews that include suggestions and code samples
+      DETAILED_REVIEW: 600, // For reviews with substantial comments
+      MULTIPLE_FILES: 400, // For reviewing changes across multiple files
+      THOROUGH_REVIEW: 800, // For reviews that include suggestions and code samples
     },
   },
   COMMENT: {
@@ -90,9 +93,9 @@ export const XP_VALUES = {
   },
   WORKFLOW: {
     SUCCESS: {
-      BASE: 360, // CI success
+      BASE: 240, // CI success
       BONUSES: {
-        DEPLOYMENT: 600, // Workflow name contains 'deploy'
+        DEPLOYMENT: 400, // Workflow name contains 'deploy'
       },
     },
   },

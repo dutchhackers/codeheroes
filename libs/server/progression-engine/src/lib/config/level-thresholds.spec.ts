@@ -14,15 +14,15 @@ describe('Level Thresholds', () => {
     });
 
     it('should return correct XP for static levels', () => {
-      expect(calculateXpForLevel(10)).toBe(150000);
-      expect(calculateXpForLevel(20)).toBe(775000);
+      expect(calculateXpForLevel(10)).toBe(200000);
+      expect(calculateXpForLevel(20)).toBe(1400000);
     });
 
     it('should require more XP than Level 20 for Level 21', () => {
       const level20Xp = calculateXpForLevel(20);
       const level21Xp = calculateXpForLevel(21);
       expect(level21Xp).toBeGreaterThan(level20Xp);
-      expect(level21Xp).toBe(776500); // 775000 + 1500 * 1^2
+      expect(level21Xp).toBe(1402500); // 1400000 + 2500 * 1^2
     });
 
     it('should have monotonic XP progression for levels 1-50', () => {
@@ -35,14 +35,14 @@ describe('Level Thresholds', () => {
     });
 
     it('should calculate correct XP for algorithmic levels', () => {
-      // Level 21: 775000 + 1500 * 1^2 = 776500
-      expect(calculateXpForLevel(21)).toBe(776500);
-      // Level 22: 775000 + 1500 * 2^2 = 781000
-      expect(calculateXpForLevel(22)).toBe(781000);
-      // Level 25: 775000 + 1500 * 5^2 = 812500
-      expect(calculateXpForLevel(25)).toBe(812500);
-      // Level 30: 775000 + 1500 * 10^2 = 925000
-      expect(calculateXpForLevel(30)).toBe(925000);
+      // Level 21: 1400000 + 2500 * 1^2 = 1402500
+      expect(calculateXpForLevel(21)).toBe(1402500);
+      // Level 22: 1400000 + 2500 * 2^2 = 1410000
+      expect(calculateXpForLevel(22)).toBe(1410000);
+      // Level 25: 1400000 + 2500 * 5^2 = 1462500
+      expect(calculateXpForLevel(25)).toBe(1462500);
+      // Level 30: 1400000 + 2500 * 10^2 = 1650000
+      expect(calculateXpForLevel(30)).toBe(1650000);
     });
 
     it('should return 0 for level 0 or negative', () => {
@@ -64,9 +64,9 @@ describe('Level Thresholds', () => {
       expect(getLevelFromXp(0)).toBe(1);
       expect(getLevelFromXp(2999)).toBe(1);
       expect(getLevelFromXp(3000)).toBe(2);
-      expect(getLevelFromXp(150000)).toBe(10);
-      expect(getLevelFromXp(774999)).toBe(19);
-      expect(getLevelFromXp(775000)).toBe(20);
+      expect(getLevelFromXp(200000)).toBe(10);
+      expect(getLevelFromXp(1399999)).toBe(19);
+      expect(getLevelFromXp(1400000)).toBe(20);
     });
 
     it('should not skip levels at Level 20 boundary', () => {
@@ -90,16 +90,16 @@ describe('Level Thresholds', () => {
     });
 
     it('should return correct algorithmic levels', () => {
-      expect(getLevelFromXp(776500)).toBe(21);
-      expect(getLevelFromXp(781000)).toBe(22);
-      expect(getLevelFromXp(812500)).toBe(25);
-      expect(getLevelFromXp(925000)).toBe(30);
+      expect(getLevelFromXp(1402500)).toBe(21);
+      expect(getLevelFromXp(1410000)).toBe(22);
+      expect(getLevelFromXp(1462500)).toBe(25);
+      expect(getLevelFromXp(1650000)).toBe(30);
     });
 
     it('should handle XP between algorithmic levels correctly', () => {
-      // Between Level 21 (776500) and Level 22 (781000)
-      expect(getLevelFromXp(778000)).toBe(21);
-      expect(getLevelFromXp(780999)).toBe(21);
+      // Between Level 21 (1402500) and Level 22 (1410000)
+      expect(getLevelFromXp(1405000)).toBe(21);
+      expect(getLevelFromXp(1409999)).toBe(21);
     });
   });
 
@@ -108,7 +108,7 @@ describe('Level Thresholds', () => {
       const level10 = getLevelRequirements(10);
       expect(level10).toBeDefined();
       expect(level10?.level).toBe(10);
-      expect(level10?.xpRequired).toBe(150000);
+      expect(level10?.xpRequired).toBe(200000);
       expect(level10?.rewards?.title).toBe('Code Hero');
       expect(level10?.rewards?.badges).toContain('code_hero');
     });
@@ -117,7 +117,7 @@ describe('Level Thresholds', () => {
       const level25 = getLevelRequirements(25);
       expect(level25).toBeDefined();
       expect(level25?.level).toBe(25);
-      expect(level25?.xpRequired).toBe(812500);
+      expect(level25?.xpRequired).toBe(1462500);
       expect(level25?.rewards?.title).toBe('Code Virtuoso');
       expect(level25?.rewards?.badges).toContain('code_virtuoso');
     });
@@ -140,21 +140,21 @@ describe('Level Thresholds', () => {
 
   describe('getXpProgress', () => {
     it('should calculate correct progress at level start', () => {
-      const progress = getXpProgress(150000); // Exactly level 10
+      const progress = getXpProgress(200000); // Exactly level 10
       expect(progress.currentLevel).toBe(10);
       expect(progress.currentLevelXp).toBe(0);
     });
 
     it('should calculate correct progress mid-level', () => {
-      const progress = getXpProgress(160000); // 10,000 XP into level 10
+      const progress = getXpProgress(210000); // 10,000 XP into level 10
       expect(progress.currentLevel).toBe(10);
       expect(progress.currentLevelXp).toBe(10000);
     });
 
     it('should calculate correct XP to next level', () => {
-      const progress = getXpProgress(770000); // Near end of level 19
+      const progress = getXpProgress(1380000); // Near end of level 19
       expect(progress.currentLevel).toBe(19);
-      expect(progress.xpToNextLevel).toBe(5000); // 775000 - 770000
+      expect(progress.xpToNextLevel).toBe(20000); // 1400000 - 1380000
     });
   });
 
@@ -188,9 +188,10 @@ describe('Level Thresholds', () => {
         // Delta should be positive (monotonic)
         expect(delta).toBeGreaterThanOrEqual(0);
 
-        // Delta shouldn't be unreasonably large (< 100k per level up to 50)
+        // Delta shouldn't be unreasonably large (<= 200k per level up to 50)
+        // After rebalancing, static levels have larger gaps (e.g., Level 19->20 = 200k)
         if (level > 1) {
-          expect(delta).toBeLessThan(100000);
+          expect(delta).toBeLessThanOrEqual(200000);
         }
 
         prevXp = xp;
@@ -202,8 +203,8 @@ describe('Level Thresholds', () => {
       const level20Delta = calculateXpForLevel(21) - calculateXpForLevel(20);
 
       // The transition should be smooth - level 21 delta shouldn't be drastically different
-      // Level 19->20 delta: 775000 - 690000 = 85000
-      // Level 20->21 delta: 776500 - 775000 = 1500
+      // Level 19->20 delta: 1400000 - 1200000 = 200000
+      // Level 20->21 delta: 1402500 - 1400000 = 2500
       // The delta is smaller which is intentional for the quadratic formula starting fresh
       expect(level20Delta).toBeGreaterThan(0);
       expect(level19Delta).toBeGreaterThan(0);
