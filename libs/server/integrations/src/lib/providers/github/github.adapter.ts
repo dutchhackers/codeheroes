@@ -222,6 +222,28 @@ export class GitHubAdapter implements ProviderAdapter {
   }
 
   private mapPullRequestEvent(event: PullRequestEvent, userId: string): Partial<GameAction> {
+    // Determine action type - only track specific actions for XP
+    const type = (() => {
+      if (event.action === 'closed' && event.pull_request.merged) {
+        return 'pull_request_merge';
+      }
+      if (event.action === 'closed') {
+        return 'pull_request_close';
+      }
+      if (event.action === 'opened') {
+        return 'pull_request_create';
+      }
+      // Skip synchronize, edited, reopened, etc. - no XP for these
+      return null;
+    })();
+
+    // Skip actions we don't track for XP
+    if (!type) {
+      return {
+        skipReason: `Pull request action '${event.action}' not tracked for XP gains`,
+      } as Partial<GameAction>;
+    }
+
     const context: PullRequestContext = {
       type: 'pull_request',
       provider: 'github',
@@ -252,13 +274,6 @@ export class GitHubAdapter implements ProviderAdapter {
         ? this.calculateTimeDifference(event.pull_request.created_at, event.pull_request.merged_at)
         : 0,
     };
-
-    const type =
-      event.action === 'closed' && event.pull_request.merged
-        ? 'pull_request_merge'
-        : event.action === 'closed'
-          ? 'pull_request_close'
-          : 'pull_request_create';
 
     return {
       userId,
