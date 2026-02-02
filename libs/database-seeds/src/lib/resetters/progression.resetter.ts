@@ -7,8 +7,11 @@ import { Firestore } from 'firebase-admin/firestore';
  * - gameActions collection
  * - events collection
  * - users/{id}/activities subcollections
+ * - users/{id}/activityStats subcollections
  * - users/{id}/stats subcollections
  * - users/{id}/badges subcollections
+ * - users/{id}/notifications subcollections
+ * - users/{id}/weekendActivity subcollections
  *
  * Preserves:
  * - users collection (user profiles)
@@ -65,7 +68,7 @@ export class ProgressionResetter {
 
     console.log(`  Processing ${usersSnapshot.size} users...`);
 
-    const subcollectionsToDelete = ['activities', 'stats', 'badges'];
+    const subcollectionsToDelete = ['activities', 'activityStats', 'stats', 'badges', 'notifications', 'weekendActivity'];
     let totalDeleted = 0;
 
     for (const userDoc of usersSnapshot.docs) {
@@ -86,7 +89,7 @@ export class ProgressionResetter {
       }
     }
 
-    console.log(`  Deleted ${totalDeleted} documents from user subcollections (activities, stats, badges)`);
+    console.log(`  Deleted ${totalDeleted} documents from user subcollections`);
     console.log(`  Preserved ${usersSnapshot.size} users and their connectedAccounts`);
   }
 }
