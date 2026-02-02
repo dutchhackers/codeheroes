@@ -134,14 +134,14 @@ jobs:
 
       - name: Download frontend artifact
         if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: frontend-build
           path: dist/apps/frontend/app
 
       - name: Download backend artifact
         if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: backend-build
           path: dist/apps
