@@ -153,24 +153,24 @@ jobs:
 
       - name: Create .firebaserc
         run: |
-          # Generate .firebaserc using project ID from secrets
-          PROJECT_ID="${{ secrets.FIREBASE_PROJECT_ID }}"
-          if [ "${{ inputs.environment }}" = "production" ]; then
-            HOSTING_SITE="${{ secrets.FIREBASE_PROD_APP_SITE }}"
-          else
-            HOSTING_SITE="${{ secrets.FIREBASE_TEST_APP_SITE }}"
-          fi
-          cat > .firebaserc << EOF
+          cat > .firebaserc << 'EOF'
           {
             "projects": {
-              "default": "${PROJECT_ID}",
-              "${{ inputs.environment }}": "${PROJECT_ID}"
+              "default": "codeheroes-test",
+              "test": "codeheroes-test",
+              "production": "codeheroes-prod"
             },
             "targets": {
-              "${PROJECT_ID}": {
+              "codeheroes-test": {
                 "hosting": {
-                  "web-legacy": ["${PROJECT_ID}"],
-                  "app": ["${HOSTING_SITE}"]
+                  "web-legacy": ["codeheroes-test"],
+                  "app": ["codeheroes-app-ui-test"]
+                }
+              },
+              "codeheroes-prod": {
+                "hosting": {
+                  "web-legacy": ["codeheroes-prod"],
+                  "app": ["codeheroes-app-ui"]
                 }
               }
             }
@@ -179,12 +179,12 @@ jobs:
 
       - name: Deploy hosting
         if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
-        run: firebase deploy --only hosting:app --project=${{ secrets.FIREBASE_PROJECT_ID }}
+        run: npx nx run firebase-app:firebase --configuration=${{ inputs.environment }} deploy --only hosting:app
 
       - name: Deploy functions
         if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
-        run: firebase deploy --only functions --project=${{ secrets.FIREBASE_PROJECT_ID }}
+        run: npx nx run firebase-app:firebase --configuration=${{ inputs.environment }} deploy --only functions
 
       - name: Deploy rules
         if: inputs.deploy_rules == true
-        run: firebase deploy --only firestore:rules,firestore:indexes,storage --project=${{ secrets.FIREBASE_PROJECT_ID }}
+        run: npx nx run firebase-app:firebase --configuration=${{ inputs.environment }} deploy --only firestore:rules,firestore:indexes,storage
