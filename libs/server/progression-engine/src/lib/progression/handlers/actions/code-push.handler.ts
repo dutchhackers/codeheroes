@@ -36,8 +36,8 @@ export class CodePushHandler extends AbstractActionHandler {
     // Extract commit count from metrics if available
     const commitCount = metrics && 'commitCount' in metrics ? metrics.commitCount : 1;
 
-    // Multiple commits bonus
-    if (commitCount > 1) {
+    // Multiple commits bonus (requires >=5 commits to trigger)
+    if (commitCount >= 5) {
       bonuses.multipleCommits = XP_VALUES.CODE_PUSH.BONUSES.MULTIPLE_COMMITS;
       totalBonus += bonuses.multipleCommits;
     }
