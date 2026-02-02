@@ -87,7 +87,7 @@ jobs:
 
       - name: Upload frontend artifact
         if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: frontend-build
           path: dist/apps/frontend/app
@@ -95,7 +95,7 @@ jobs:
 
       - name: Upload backend artifact
         if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: backend-build
           path: |
