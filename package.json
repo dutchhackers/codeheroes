@@ -30,7 +30,7 @@
     "postcss": "^8.5.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "~7.8.2",
-    "serializr": "^3.0.3",
+    "serializr": "^3.0.5",
     "tailwindcss": "^4.0.14",
     "zone.js": "0.16.0"
   },
