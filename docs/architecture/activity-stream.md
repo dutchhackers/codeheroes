@@ -1,6 +1,6 @@
 # Activity Stream Architecture
 
-> **Last updated:** 2025-01-31
+> **Last updated:** 2026-02-02
 
 This document describes the activity stream system in Code Heroes, including how activities are created, stored, and displayed in the real-time feed.
 
@@ -12,6 +12,28 @@ The activity stream is a real-time feed of user actions, achievements, and miles
 - Level-up events
 
 Activities are stored per-user but queried globally using Firestore collection group queries for the real-time feed.
+
+## Data Architecture
+
+XP data flows through two Firestore collections with distinct purposes:
+
+| Collection | Purpose | XP Data |
+|------------|---------|---------|
+| `gameActions` | Transient processing queue | ❌ None (by design) |
+| `users/{userId}/activities` | Persistent user-facing records | ✅ `xp.earned`, `xp.breakdown` |
+
+### Why Two Collections?
+
+- **`gameActions`**: Serves as a temporary queue for incoming GitHub events. Documents here trigger the `processGameAction` function and are marked as `processed` once complete. **XP is not stored here.**
+
+- **`users/{userId}/activities`**: Permanent activity records with full XP data. Created by `ActivityRecorderService` after XP calculation. This is what the frontend reads.
+
+### Debugging XP Issues
+
+When verifying XP was calculated correctly:
+1. Check `gameActions/{id}` for `status: "processed"` (confirms the action was processed)
+2. Check `users/{userId}/activities/{id}` for actual XP values (`xp.earned`, `xp.breakdown`)
+3. Check `users/{userId}/stats/current` for cumulative XP totals
 
 ## Activity Types
 
