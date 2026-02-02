@@ -3,6 +3,9 @@ import { DocumentReference, Firestore } from 'firebase-admin/firestore';
 /**
  * Discovers and reports the Firestore database schema.
  *
+ * This is a sampling tool - it limits queries to avoid high read costs.
+ * It samples up to 10 documents per collection to discover the schema structure.
+ *
  * Usage:
  *   nx run database-seeds:discover-schema -c test
  *
@@ -10,23 +13,30 @@ import { DocumentReference, Firestore } from 'firebase-admin/firestore';
  * handled by the progression resetter.
  */
 export class SchemaDiscovery {
+  // Limit for sampling queries to control Firestore read costs
+  private readonly sampleLimit = 10;
+
   constructor(private db: Firestore) {}
 
   async discover(): Promise<void> {
     console.log('=== FIRESTORE SCHEMA DISCOVERY ===\n');
+    console.log(`(Sampling up to ${this.sampleLimit} documents per collection)\n`);
 
     // Get all root collections
     const rootCollections = await this.db.listCollections();
 
     console.log('TOP-LEVEL COLLECTIONS:\n');
     for (const col of rootCollections) {
-      const snapshot = await col.get();
-      console.log(`  ${col.id}: ${snapshot.size} documents`);
+      // Use limit to avoid loading entire collections
+      const snapshot = await col.limit(this.sampleLimit + 1).get();
+      const hasMore = snapshot.size > this.sampleLimit;
+      const displayCount = hasMore ? `${this.sampleLimit}+` : snapshot.size.toString();
+      console.log(`  ${col.id}: ${displayCount} documents`);
     }
 
-    // Discover user subcollections
+    // Discover user subcollections (sample first 10 users)
     console.log('\nUSER SUBCOLLECTIONS:\n');
-    const usersSnapshot = await this.db.collection('users').get();
+    const usersSnapshot = await this.db.collection('users').limit(this.sampleLimit).get();
     const allSubcollections = new Map<string, number>();
 
     if (usersSnapshot.empty) {
@@ -41,20 +51,19 @@ export class SchemaDiscovery {
       }
 
       for (const [name, count] of [...allSubcollections.entries()].sort()) {
-        console.log(`  users/{id}/${name} (found in ${count} users)`);
+        console.log(`  users/{id}/${name} (found in ${count}/${usersSnapshot.size} sampled users)`);
       }
     }
 
     // Discover nested subcollections
-    // Note: Samples first 10 users with limited depth to control Firestore read costs
-    console.log('\nNESTED SUBCOLLECTIONS (sampling first 10 users):\n');
+    console.log(`\nNESTED SUBCOLLECTIONS (sampling ${this.sampleLimit} users):\n`);
 
     if (usersSnapshot.empty) {
       console.log('  (no users to sample)');
     } else {
       const nestedPaths = new Set<string>();
 
-      for (const userDoc of usersSnapshot.docs.slice(0, 10)) {
+      for (const userDoc of usersSnapshot.docs) {
         await this.discoverNestedCollections(userDoc.ref, 'users/{id}', nestedPaths, 3);
       }
 
@@ -89,7 +98,9 @@ export class SchemaDiscovery {
 
   /**
    * Recursively discovers nested subcollections.
-   * Uses shallow limits (5 docs per collection, 2 for nested) to control Firestore read costs.
+   * Uses shallow limits to control Firestore read costs:
+   * - Samples up to sampleLimit docs per collection
+   * - Limits recursion depth
    */
   private async discoverNestedCollections(
     docRef: DocumentReference,
@@ -103,7 +114,8 @@ export class SchemaDiscovery {
 
     for (const subcol of subcollections) {
       const subcolPath = `${pathPrefix}/${subcol.id}`;
-      const snapshot = await subcol.limit(5).get();
+      // Limit to sampleLimit docs to control read costs
+      const snapshot = await subcol.limit(this.sampleLimit).get();
 
       for (const doc of snapshot.docs) {
         const nestedCols = await doc.ref.listCollections();
@@ -112,7 +124,7 @@ export class SchemaDiscovery {
           const nestedPath = `${subcolPath}/{docId}/${nested.id}`;
           foundPaths.add(nestedPath);
 
-          // Recurse deeper
+          // Recurse deeper with limited sampling
           const nestedDocs = await nested.limit(2).get();
           for (const nestedDoc of nestedDocs.docs) {
             await this.discoverNestedCollections(

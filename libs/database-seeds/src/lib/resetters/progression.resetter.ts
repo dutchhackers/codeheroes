@@ -1,4 +1,4 @@
-import { DocumentReference, Firestore } from 'firebase-admin/firestore';
+import { CollectionReference, DocumentReference, Firestore } from 'firebase-admin/firestore';
 
 /**
  * Resets progression data while preserving user accounts.
@@ -33,20 +33,31 @@ export class ProgressionResetter {
     console.log('\n✅ Progression reset completed');
   }
 
+  /**
+   * Deletes all documents in a collection using batched pagination.
+   */
   private async deleteCollection(db: Firestore, collectionPath: string): Promise<void> {
     const collectionRef = db.collection(collectionPath);
-    const query = collectionRef.limit(this.batchSize);
+    const deleted = await this.deleteCollectionBatched(collectionRef);
+    console.log(`  Deleted ${deleted} documents from '${collectionPath}'`);
+  }
 
+  /**
+   * Deletes all documents in a collection using batched pagination.
+   * Handles large collections safely by processing in batches.
+   */
+  private async deleteCollectionBatched(collectionRef: CollectionReference): Promise<number> {
     let deleted = 0;
+    let query = collectionRef.limit(this.batchSize);
     let snapshot = await query.get();
 
     while (!snapshot.empty) {
-      const batch = db.batch();
-      snapshot.docs.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
-      await batch.commit();
-      deleted += snapshot.size;
+      for (const doc of snapshot.docs) {
+        // Recursively delete any nested subcollections first
+        deleted += await this.deleteDocumentRecursively(doc.ref);
+        await doc.ref.delete();
+        deleted++;
+      }
 
       if (snapshot.size < this.batchSize) {
         break;
@@ -54,11 +65,12 @@ export class ProgressionResetter {
       snapshot = await query.get();
     }
 
-    console.log(`  Deleted ${deleted} documents from '${collectionPath}'`);
+    return deleted;
   }
 
   /**
-   * Recursively deletes a document and all its subcollections
+   * Recursively deletes all subcollections of a document.
+   * Uses pagination to handle large subcollections safely.
    */
   private async deleteDocumentRecursively(docRef: DocumentReference): Promise<number> {
     let deleted = 0;
@@ -67,15 +79,7 @@ export class ProgressionResetter {
     const subcollections = await docRef.listCollections();
 
     for (const subcollection of subcollections) {
-      const snapshot = await subcollection.get();
-
-      for (const doc of snapshot.docs) {
-        // Recursively delete nested subcollections first
-        deleted += await this.deleteDocumentRecursively(doc.ref);
-        // Then delete the document itself
-        await doc.ref.delete();
-        deleted++;
-      }
+      deleted += await this.deleteCollectionBatched(subcollection);
     }
 
     return deleted;
@@ -105,16 +109,10 @@ export class ProgressionResetter {
     let totalDeleted = 0;
 
     for (const userDoc of usersSnapshot.docs) {
-      // Delete all progression subcollections (recursively handles nested structures)
+      // Delete all progression subcollections using batched deletion
       for (const subcollection of subcollectionsToDelete) {
         const subcollectionRef = userDoc.ref.collection(subcollection);
-        const subcollectionSnapshot = await subcollectionRef.get();
-
-        for (const doc of subcollectionSnapshot.docs) {
-          totalDeleted += await this.deleteDocumentRecursively(doc.ref);
-          await doc.ref.delete();
-          totalDeleted++;
-        }
+        totalDeleted += await this.deleteCollectionBatched(subcollectionRef);
       }
 
       // Handle activityStats nested structure: activityStats/{periodType}/records/{recordId}
@@ -129,6 +127,7 @@ export class ProgressionResetter {
   /**
    * Deletes activityStats subcollection with its nested period/records structure.
    * Dynamically discovers period types (daily, weekly, etc.) rather than hardcoding.
+   * Uses batched deletion for records to handle large datasets safely.
    */
   private async deleteActivityStats(userRef: DocumentReference): Promise<number> {
     let deleted = 0;
@@ -137,14 +136,9 @@ export class ProgressionResetter {
     const periodTypeDocs = await userRef.collection('activityStats').listDocuments();
 
     for (const periodDoc of periodTypeDocs) {
-      const periodType = periodDoc.id;
+      // Delete records using batched deletion (handles large record sets)
       const recordsRef = periodDoc.collection('records');
-      const recordsSnapshot = await recordsRef.get();
-
-      for (const doc of recordsSnapshot.docs) {
-        await doc.ref.delete();
-        deleted++;
-      }
+      deleted += await this.deleteCollectionBatched(recordsRef);
 
       // Also delete the period type document itself if it exists
       const periodSnapshot = await periodDoc.get();
