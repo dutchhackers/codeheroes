@@ -19,7 +19,7 @@
     "seed": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node dist/libs/database-seeds/src/main.js",
+        "command": "node dist/libs/database-seeds/src/main.js seed",
         "env": {
           "FIRESTORE_EMULATOR_HOST": "localhost:8080",
           "FIREBASE_AUTH_EMULATOR_HOST": "localhost:9099"
@@ -27,15 +27,37 @@
       },
       "configurations": {
         "test": {
-          "command": "node dist/libs/database-seeds/src/main.js",
+          "command": "node dist/libs/database-seeds/src/main.js seed",
           "env": {
             "FIREBASE_PROJECT_ID": "codeheroes-test"
           }
         },
         "production": {
-          "command": "node dist/libs/database-seeds/src/main.js",
+          "command": "node dist/libs/database-seeds/src/main.js seed",
           "env": {
             "FIREBASE_PROJECT_ID": "codeheroes-prod"
+          }
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build"
+        }
+      ]
+    },
+    "reset-progression": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node dist/libs/database-seeds/src/main.js reset-progression",
+        "env": {
+          "FIRESTORE_EMULATOR_HOST": "localhost:8080"
+        }
+      },
+      "configurations": {
+        "test": {
+          "command": "node dist/libs/database-seeds/src/main.js reset-progression",
+          "env": {
+            "FIREBASE_PROJECT_ID": "codeheroes-test"
           }
         }
       },
