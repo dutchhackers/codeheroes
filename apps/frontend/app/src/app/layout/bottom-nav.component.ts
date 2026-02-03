@@ -14,6 +14,14 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </svg>
         <span class="nav-label">HQ</span>
       </a>
+      <a routerLink="/projects" routerLinkActive="active" class="nav-item" aria-label="Active projects">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+          <line x1="12" y1="22.08" x2="12" y2="12" />
+        </svg>
+        <span class="nav-label">PROJECTS</span>
+      </a>
       <a routerLink="/activity" routerLinkActive="active" class="nav-item" aria-label="Activity feed">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
@@ -54,7 +62,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         align-items: center;
         justify-content: center;
         gap: 0.25rem;
-        padding: 0.5rem 1.5rem;
+        padding: 0.5rem 1rem;
         min-height: 44px;
         min-width: 64px;
         color: rgba(255, 255, 255, 0.5);

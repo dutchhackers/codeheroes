@@ -19,6 +19,10 @@ export const appRoutes: Routes = [
     loadComponent: () => import('./pages/profile/profile.component').then((m) => m.ProfileComponent),
   },
   {
+    path: 'projects',
+    loadComponent: () => import('./pages/projects/projects.component').then((m) => m.ProjectsComponent),
+  },
+  {
     path: '**',
     redirectTo: 'hq',
   },
