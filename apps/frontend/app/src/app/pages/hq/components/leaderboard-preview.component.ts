@@ -1,6 +1,8 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, computed } from '@angular/core';
 import { LeaderboardEntry } from '../../../core/services/hq-data.service';
 import * as LeaderboardUtils from '../utils/leaderboard.utils';
+
+export type LeaderboardPeriod = 'day' | 'week';
 
 @Component({
   selector: 'app-leaderboard-preview',
@@ -10,7 +12,7 @@ import * as LeaderboardUtils from '../utils/leaderboard.utils';
       <div class="section-header">
         <h3 class="section-title">
           <span class="trophy">🏆</span>
-          WEEKLY LEADERBOARD
+          {{ leaderboardTitle() }}
         </h3>
         <button
           type="button"
@@ -300,6 +302,7 @@ import * as LeaderboardUtils from '../utils/leaderboard.utils';
   ],
 })
 export class LeaderboardPreviewComponent {
+  period = input<LeaderboardPeriod>('week');
   entries = input<LeaderboardEntry[]>([]);
   currentUserRank = input<number | null>(null);
   currentUserId = input<string | null>(null);
@@ -309,6 +312,10 @@ export class LeaderboardPreviewComponent {
 
   // Expose utility functions to template
   readonly LeaderboardUtils = LeaderboardUtils;
+
+  leaderboardTitle = computed(() => {
+    return this.period() === 'day' ? 'DAILY LEADERBOARD' : 'WEEKLY LEADERBOARD';
+  });
 
   onViewAll() {
     this.viewAll.emit();

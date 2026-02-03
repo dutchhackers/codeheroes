@@ -15,6 +15,7 @@ import { Observable, of, switchMap, map, catchError, combineLatest } from 'rxjs'
 import { Activity, TimeBasedActivityStats, UserDto } from '@codeheroes/types';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { UserBadge } from '../models/user-badge.model';
 
 export interface DailyProgress {
   xpEarned: number;
@@ -330,5 +331,36 @@ export class HqDataService {
       issue_close: 'check-circle',
     };
     return iconMap[actionType] ?? 'activity';
+  }
+
+  /**
+   * Get badges for the current user
+   */
+  getUserBadges(): Observable<UserBadge[]> {
+    return this.#getCurrentUserDoc().pipe(
+      switchMap((userDoc) => {
+        if (!userDoc) {
+          return of([]);
+        }
+
+        const badgesRef = collection(this.#firestore, `users/${userDoc.id}/badges`);
+
+        // Use runInInjectionContext to avoid Firebase injection warnings
+        return runInInjectionContext(this.#injector, () =>
+          collectionData(badgesRef, { idField: 'id' }),
+        ).pipe(
+          map((badges) => {
+            const typedBadges = badges as UserBadge[];
+            // Sort by earnedAt (most recent first)
+            return typedBadges.sort((a, b) => {
+              if (!a.earnedAt) return 1;
+              if (!b.earnedAt) return -1;
+              return new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime();
+            });
+          }),
+          catchError(() => of([])),
+        );
+      }),
+    );
   }
 }

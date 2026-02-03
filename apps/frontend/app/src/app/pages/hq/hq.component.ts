@@ -7,27 +7,33 @@ import {
   LeaderboardEntry,
   Highlight,
 } from '../../core/services/hq-data.service';
-import { DailyProgressComponent } from './components/daily-progress.component';
-import { WeeklyStatsComponent } from './components/weekly-stats.component';
+import { UserBadge } from '../../core/models/user-badge.model';
+import { PeriodToggleComponent, Period } from './components/period-toggle.component';
+import { PeriodProgressComponent } from './components/period-progress.component';
+import { PeriodStatsComponent } from './components/period-stats.component';
 import { LeaderboardPreviewComponent } from './components/leaderboard-preview.component';
 import { LeaderboardModalComponent } from './components/leaderboard-modal.component';
 import { HighlightsComponent } from './components/highlights.component';
+import { AchievementsSectionComponent } from './components/achievements-section.component';
 
 @Component({
   selector: 'app-hq',
   standalone: true,
   imports: [
-    DailyProgressComponent,
-    WeeklyStatsComponent,
+    PeriodToggleComponent,
+    PeriodProgressComponent,
+    PeriodStatsComponent,
     LeaderboardPreviewComponent,
     LeaderboardModalComponent,
     HighlightsComponent,
+    AchievementsSectionComponent,
   ],
   template: `
     <!-- Header -->
     <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-4 py-4 md:px-6 lg:px-8 md:py-5">
-      <div class="relative z-10">
+      <div class="relative z-10 flex items-center justify-between">
         <h1 class="text-2xl md:text-4xl font-bold italic text-white">HQ</h1>
+        <app-period-toggle [selectedPeriod]="selectedPeriod()" (periodChange)="onPeriodChange($event)" />
       </div>
     </header>
 
@@ -40,15 +46,28 @@ import { HighlightsComponent } from './components/highlights.component';
           </div>
         </div>
       } @else {
-        <div class="max-w-2xl mx-auto py-6">
-          <!-- Daily Progress -->
-          <app-daily-progress [progress]="dailyProgress()" />
+        <div class="max-w-2xl mx-auto py-6 space-y-6">
+          <!-- Period Progress (Day/Week) -->
+          <app-period-progress
+            [period]="selectedPeriod()"
+            [dailyProgress]="dailyProgress()"
+            [weeklyStats]="weeklyStats()"
+          />
 
-          <!-- Weekly Stats -->
-          <app-weekly-stats [stats]="weeklyStats()" />
+          <!-- Activity Stats -->
+          <app-period-stats
+            [period]="selectedPeriod()"
+            [weeklyStats]="selectedPeriod() === 'day' ? dailyStatsAsWeekly() : weeklyStats()"
+          />
+
+          <!-- Achievements Section -->
+          @if (badges().length > 0) {
+            <app-achievements-section [badges]="badges()" [maxDisplay]="3" />
+          }
 
           <!-- Leaderboard Preview -->
           <app-leaderboard-preview
+            [period]="selectedPeriod()"
             [entries]="leaderboardEntries()"
             [currentUserRank]="currentUserRank()"
             [currentUserId]="currentUserId()"
@@ -72,6 +91,10 @@ import { HighlightsComponent } from './components/highlights.component';
       :host {
         display: block;
       }
+
+      .space-y-6 > * + * {
+        margin-top: 1.5rem;
+      }
     `,
   ],
 })
@@ -80,18 +103,31 @@ export class HqComponent implements OnInit, OnDestroy {
 
   #dailyProgressSub: Subscription | null = null;
   #weeklyStatsSub: Subscription | null = null;
-  #leaderboardSub: Subscription | null = null;
+  #dailyLeaderboardSub: Subscription | null = null;
+  #weeklyLeaderboardSub: Subscription | null = null;
   #highlightsSub: Subscription | null = null;
+  #badgesSub: Subscription | null = null;
 
   isLoading = signal(true);
+  selectedPeriod = signal<Period>('week');
+  
   dailyProgress = signal<DailyProgress | null>(null);
   weeklyStats = signal<WeeklyStats | null>(null);
-  leaderboardEntries = signal<LeaderboardEntry[]>([]);
+  
+  dailyLeaderboard = signal<LeaderboardEntry[]>([]);
+  weeklyLeaderboard = signal<LeaderboardEntry[]>([]);
+  dailyUserRank = signal<number | null>(null);
+  weeklyUserRank = signal<number | null>(null);
+  
   leaderboardLoading = signal(true);
-  currentUserRank = signal<number | null>(null);
   currentUserId = signal<string | null>(null);
   highlights = signal<Highlight[]>([]);
+  badges = signal<UserBadge[]>([]);
   showLeaderboardModal = signal(false);
+
+  // Computed values for the current period
+  leaderboardEntries = signal<LeaderboardEntry[]>([]);
+  currentUserRank = signal<number | null>(null);
 
   ngOnInit() {
     this.#loadData();
@@ -100,9 +136,41 @@ export class HqComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.#dailyProgressSub?.unsubscribe();
     this.#weeklyStatsSub?.unsubscribe();
-    this.#leaderboardSub?.unsubscribe();
+    this.#dailyLeaderboardSub?.unsubscribe();
+    this.#weeklyLeaderboardSub?.unsubscribe();
     this.#highlightsSub?.unsubscribe();
+    this.#badgesSub?.unsubscribe();
   }
+
+  onPeriodChange(period: Period) {
+    this.selectedPeriod.set(period);
+    this.#updateLeaderboardForPeriod();
+  }
+
+  #updateLeaderboardForPeriod() {
+    if (this.selectedPeriod() === 'day') {
+      this.leaderboardEntries.set(this.dailyLeaderboard());
+      this.currentUserRank.set(this.dailyUserRank());
+    } else {
+      this.leaderboardEntries.set(this.weeklyLeaderboard());
+      this.currentUserRank.set(this.weeklyUserRank());
+    }
+  }
+
+  dailyStatsAsWeekly = (): WeeklyStats | null => {
+    const daily = this.dailyProgress();
+    if (!daily) return null;
+    
+    // For daily view, we don't have detailed action counts from DailyProgress
+    // Return a basic structure
+    return {
+      xpGained: daily.xpEarned,
+      prsCreated: 0,
+      prsMerged: 0,
+      reviewsSubmitted: 0,
+      codePushes: 0,
+    };
+  };
 
   #loadData() {
     // Load daily progress
@@ -129,17 +197,37 @@ export class HqComponent implements OnInit, OnDestroy {
       },
     });
 
-    // Load leaderboard
-    this.#leaderboardSub = this.#hqDataService.getWeeklyLeaderboard(5).subscribe({
+    // Load daily leaderboard
+    this.#dailyLeaderboardSub = this.#hqDataService.getDailyLeaderboard(5).subscribe({
       next: ({ entries, currentUserRank, currentUserId }) => {
-        this.leaderboardEntries.set(entries);
-        this.currentUserRank.set(currentUserRank);
-        this.currentUserId.set(currentUserId);
+        this.dailyLeaderboard.set(entries);
+        this.dailyUserRank.set(currentUserRank);
+        if (!this.currentUserId()) {
+          this.currentUserId.set(currentUserId);
+        }
+        this.#updateLeaderboardForPeriod();
+        this.#checkLoadingComplete();
+      },
+      error: (error) => {
+        console.error('Failed to load daily leaderboard:', error);
+        this.#checkLoadingComplete();
+      },
+    });
+
+    // Load weekly leaderboard
+    this.#weeklyLeaderboardSub = this.#hqDataService.getWeeklyLeaderboard(5).subscribe({
+      next: ({ entries, currentUserRank, currentUserId }) => {
+        this.weeklyLeaderboard.set(entries);
+        this.weeklyUserRank.set(currentUserRank);
+        if (!this.currentUserId()) {
+          this.currentUserId.set(currentUserId);
+        }
+        this.#updateLeaderboardForPeriod();
         this.leaderboardLoading.set(false);
         this.#checkLoadingComplete();
       },
       error: (error) => {
-        console.error('Failed to load leaderboard:', error);
+        console.error('Failed to load weekly leaderboard:', error);
         this.leaderboardLoading.set(false);
         this.#checkLoadingComplete();
       },
@@ -156,14 +244,26 @@ export class HqComponent implements OnInit, OnDestroy {
         this.#checkLoadingComplete();
       },
     });
+
+    // Load badges
+    this.#badgesSub = this.#hqDataService.getUserBadges().subscribe({
+      next: (badges) => {
+        this.badges.set(badges);
+        this.#checkLoadingComplete();
+      },
+      error: (error) => {
+        console.error('Failed to load badges:', error);
+        this.#checkLoadingComplete();
+      },
+    });
   }
 
   #loadCount = 0;
 
   #checkLoadingComplete() {
     this.#loadCount++;
-    // All 4 data sources have responded
-    if (this.#loadCount >= 4) {
+    // All 6 data sources have responded
+    if (this.#loadCount >= 6) {
       this.isLoading.set(false);
     }
   }
