@@ -26,7 +26,7 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
             />
           </svg>
           <div class="progress-content">
-            <span class="progress-percent">{{ Math.round(progressPercent()) }}%</span>
+            <span class="progress-percent">{{ roundedPercent() }}%</span>
           </div>
         </div>
 
@@ -205,6 +205,8 @@ export class DailyProgressComponent {
     if (!p || !p.goal) return 0;
     return Math.min(100, (p.xpEarned / p.goal) * 100);
   });
+
+  roundedPercent = computed(() => Math.round(this.progressPercent()));
 
   getStrokeDashoffset = computed(() => {
     const circumference = 2 * Math.PI * 52;

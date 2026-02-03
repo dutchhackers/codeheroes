@@ -31,11 +31,11 @@ import { UserInfo } from '../core/services/user-cache.service';
         <!-- Icon on LEFT for certain types -->
         @if (iconPosition() === 'left') {
           @if (isBadgeActivity()) {
-            <div class="activity-icon-large" role="img" [attr.aria-label]="badgeIcon() + ' badge'">
+            <div class="activity-icon-large" role="img" [attr.aria-label]="badgeIcon() + ' badge icon'">
               {{ badgeIcon() }}
             </div>
           } @else {
-            <div class="activity-icon" [class]="actionDisplay().textColor" [innerHTML]="sanitizedIcon()" role="img"></div>
+            <div class="activity-icon" [class]="actionDisplay().textColor" [innerHTML]="sanitizedIcon()" role="img" [attr.aria-label]="actionDisplay().label + ' icon'"></div>
           }
         }
 
@@ -90,7 +90,7 @@ import { UserInfo } from '../core/services/user-cache.service';
 
         <!-- Icon on RIGHT for certain types -->
         @if (iconPosition() === 'right') {
-          <div class="activity-icon" [class]="actionDisplay().textColor" [innerHTML]="sanitizedIcon()" role="img"></div>
+          <div class="activity-icon" [class]="actionDisplay().textColor" [innerHTML]="sanitizedIcon()" role="img" [attr.aria-label]="actionDisplay().label + ' icon'"></div>
         }
       </div>
 

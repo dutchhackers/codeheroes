@@ -37,13 +37,13 @@ import * as LeaderboardUtils from '../utils/leaderboard.utils';
             <div class="leaderboard-item" [class.current-user]="entry.userId === currentUserId()">
               <div class="rank-badge" [class.top-three]="i < 3">
                 @if (i === 0) {
-                  <span class="medal gold">🥇</span>
+                  <span class="medal gold" aria-label="First place">🥇</span>
                 } @else if (i === 1) {
-                  <span class="medal silver">🥈</span>
+                  <span class="medal silver" aria-label="Second place">🥈</span>
                 } @else if (i === 2) {
-                  <span class="medal bronze">🥉</span>
+                  <span class="medal bronze" aria-label="Third place">🥉</span>
                 } @else {
-                  <span class="rank-number">#{{ i + 1 }}</span>
+                  <span class="rank-number" [attr.aria-label]="'Rank ' + (i + 1)">#{{ i + 1 }}</span>
                 }
               </div>
               <div class="user-profile">

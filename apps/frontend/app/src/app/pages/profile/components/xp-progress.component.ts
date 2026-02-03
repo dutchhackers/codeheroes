@@ -23,6 +23,7 @@ import { UserStats } from '@codeheroes/types';
           [attr.aria-valuenow]="progressPercent()"
           aria-valuemin="0"
           aria-valuemax="100"
+          [attr.aria-label]="'Level progress: ' + progressPercent().toFixed(0) + ' percent to level ' + ((stats()?.level ?? 0) + 1)"
         >
           <div class="progress-bar" [style.width.%]="progressPercent()"></div>
         </div>

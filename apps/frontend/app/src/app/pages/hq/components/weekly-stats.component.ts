@@ -16,7 +16,7 @@ interface StatItem {
       <h3 class="section-title">This Week</h3>
       <div class="stats-grid">
         @for (stat of statsItems(); track stat.label) {
-          <div class="stat-card" [style.--accent-color]="stat.color">
+          <div class="stat-card" [style.--accent-color]="stat.color" role="group" [attr.aria-label]="stat.value + ' ' + stat.label">
             <div class="stat-icon" [innerHTML]="stat.icon"></div>
             <div class="stat-content">
               <span class="stat-value">{{ stat.value }}</span>
