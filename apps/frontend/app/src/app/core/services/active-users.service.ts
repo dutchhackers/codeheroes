@@ -84,18 +84,4 @@ export class ActiveUsersService {
       }),
     );
   }
-
-  /**
-   * Enhanced version that also fetches user details
-   * This joins activity data with user data for a complete view
-   */
-  getActiveUsersWithDetails(limit = 10): Observable<UserLastActivity[]> {
-    return this.getActiveUsers(limit).pipe(
-      map((activeUsers) => {
-        // In a real implementation, we would fetch user details here
-        // For now, we'll let the component use the user cache service
-        return activeUsers;
-      }),
-    );
-  }
 }
