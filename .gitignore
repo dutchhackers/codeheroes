@@ -4,6 +4,11 @@
 .prompts
 .repomix
 
+# Environment files with secrets (use templates instead)
+apps/frontend/app/src/environments/environment.local.ts
+apps/frontend/app/src/environments/environment.prod.ts
+apps/frontend/app/src/environments/environment.test.ts
+
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
