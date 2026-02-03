@@ -12,6 +12,7 @@ import { WeeklyStatsComponent } from './components/weekly-stats.component';
 import { LeaderboardPreviewComponent } from './components/leaderboard-preview.component';
 import { LeaderboardModalComponent } from './components/leaderboard-modal.component';
 import { HighlightsComponent } from './components/highlights.component';
+import { ActiveUsersFeedComponent } from './components/active-users-feed.component';
 
 @Component({
   selector: 'app-hq',
@@ -22,6 +23,7 @@ import { HighlightsComponent } from './components/highlights.component';
     LeaderboardPreviewComponent,
     LeaderboardModalComponent,
     HighlightsComponent,
+    ActiveUsersFeedComponent,
   ],
   template: `
     <!-- Header -->
@@ -46,6 +48,9 @@ import { HighlightsComponent } from './components/highlights.component';
 
           <!-- Weekly Stats -->
           <app-weekly-stats [stats]="weeklyStats()" />
+
+          <!-- Active Users Feed -->
+          <app-active-users-feed />
 
           <!-- Leaderboard Preview -->
           <app-leaderboard-preview
