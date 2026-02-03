@@ -57,7 +57,7 @@ import { AchievementsSectionComponent } from './components/achievements-section.
           <!-- Activity Stats -->
           <app-period-stats
             [period]="selectedPeriod()"
-            [weeklyStats]="selectedPeriod() === 'day' ? dailyStatsAsWeekly() : weeklyStats()"
+            [weeklyStats]="selectedPeriod() === 'day' ? dailyStats() : weeklyStats()"
           />
 
           <!-- Achievements Section -->
@@ -101,7 +101,11 @@ import { AchievementsSectionComponent } from './components/achievements-section.
 export class HqComponent implements OnInit, OnDestroy {
   readonly #hqDataService = inject(HqDataService);
 
+  // Number of data sources we're waiting for before showing content
+  readonly #EXPECTED_DATA_SOURCES = 7;
+
   #dailyProgressSub: Subscription | null = null;
+  #dailyStatsSub: Subscription | null = null;
   #weeklyStatsSub: Subscription | null = null;
   #dailyLeaderboardSub: Subscription | null = null;
   #weeklyLeaderboardSub: Subscription | null = null;
@@ -112,6 +116,7 @@ export class HqComponent implements OnInit, OnDestroy {
   selectedPeriod = signal<Period>('week');
   
   dailyProgress = signal<DailyProgress | null>(null);
+  dailyStats = signal<WeeklyStats | null>(null);
   weeklyStats = signal<WeeklyStats | null>(null);
   
   dailyLeaderboard = signal<LeaderboardEntry[]>([]);
@@ -135,6 +140,7 @@ export class HqComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.#dailyProgressSub?.unsubscribe();
+    this.#dailyStatsSub?.unsubscribe();
     this.#weeklyStatsSub?.unsubscribe();
     this.#dailyLeaderboardSub?.unsubscribe();
     this.#weeklyLeaderboardSub?.unsubscribe();
@@ -157,21 +163,6 @@ export class HqComponent implements OnInit, OnDestroy {
     }
   }
 
-  dailyStatsAsWeekly = (): WeeklyStats | null => {
-    const daily = this.dailyProgress();
-    if (!daily) return null;
-    
-    // For daily view, we don't have detailed action counts from DailyProgress
-    // Return a basic structure
-    return {
-      xpGained: daily.xpEarned,
-      prsCreated: 0,
-      prsMerged: 0,
-      reviewsSubmitted: 0,
-      codePushes: 0,
-    };
-  };
-
   #loadData() {
     // Load daily progress
     this.#dailyProgressSub = this.#hqDataService.getDailyProgress().subscribe({
@@ -181,6 +172,18 @@ export class HqComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Failed to load daily progress:', error);
+        this.#checkLoadingComplete();
+      },
+    });
+
+    // Load daily stats
+    this.#dailyStatsSub = this.#hqDataService.getDailyStats().subscribe({
+      next: (stats) => {
+        this.dailyStats.set(stats);
+        this.#checkLoadingComplete();
+      },
+      error: (error) => {
+        console.error('Failed to load daily stats:', error);
         this.#checkLoadingComplete();
       },
     });
@@ -262,8 +265,8 @@ export class HqComponent implements OnInit, OnDestroy {
 
   #checkLoadingComplete() {
     this.#loadCount++;
-    // All 6 data sources have responded
-    if (this.#loadCount >= 6) {
+    // All data sources have responded
+    if (this.#loadCount >= this.#EXPECTED_DATA_SOURCES) {
       this.isLoading.set(false);
     }
   }

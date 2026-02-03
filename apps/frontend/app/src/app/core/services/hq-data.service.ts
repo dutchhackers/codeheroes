@@ -200,6 +200,53 @@ export class HqDataService {
   }
 
   /**
+   * Get today's stats for the current user
+   */
+  getDailyStats(): Observable<WeeklyStats> {
+    return this.#getCurrentUserDoc().pipe(
+      switchMap((userDoc) => {
+        if (!userDoc) {
+          return of({
+            xpGained: 0,
+            prsCreated: 0,
+            prsMerged: 0,
+            reviewsSubmitted: 0,
+            codePushes: 0,
+          });
+        }
+
+        const dayId = this.#getCurrentDayId();
+        const statsRef = doc(this.#firestore, `users/${userDoc.id}/activityStats/daily/records/${dayId}`);
+
+        // Use runInInjectionContext to avoid Firebase injection warnings
+        return runInInjectionContext(this.#injector, () => docData(statsRef)).pipe(
+          map((data) => {
+            const stats = data as TimeBasedActivityStats | undefined;
+            const actions = stats?.counters?.actions ?? {};
+
+            return {
+              xpGained: stats?.xpGained ?? 0,
+              prsCreated: actions['pull_request_create'] ?? 0,
+              prsMerged: actions['pull_request_merge'] ?? 0,
+              reviewsSubmitted: actions['code_review_submit'] ?? 0,
+              codePushes: actions['code_push'] ?? 0,
+            };
+          }),
+          catchError(() =>
+            of({
+              xpGained: 0,
+              prsCreated: 0,
+              prsMerged: 0,
+              reviewsSubmitted: 0,
+              codePushes: 0,
+            }),
+          ),
+        );
+      }),
+    );
+  }
+
+  /**
    * Get the weekly leaderboard with current user's rank
    */
   getWeeklyLeaderboard(limitCount = 10): Observable<{
