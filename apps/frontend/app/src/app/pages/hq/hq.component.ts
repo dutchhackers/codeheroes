@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {
   HqDataService,
@@ -131,8 +131,13 @@ export class HqComponent implements OnInit, OnDestroy {
   showLeaderboardModal = signal(false);
 
   // Computed values for the current period
-  leaderboardEntries = signal<LeaderboardEntry[]>([]);
-  currentUserRank = signal<number | null>(null);
+  leaderboardEntries = computed(() => {
+    return this.selectedPeriod() === 'day' ? this.dailyLeaderboard() : this.weeklyLeaderboard();
+  });
+  
+  currentUserRank = computed(() => {
+    return this.selectedPeriod() === 'day' ? this.dailyUserRank() : this.weeklyUserRank();
+  });
 
   ngOnInit() {
     this.#loadData();
@@ -150,17 +155,6 @@ export class HqComponent implements OnInit, OnDestroy {
 
   onPeriodChange(period: Period) {
     this.selectedPeriod.set(period);
-    this.#updateLeaderboardForPeriod();
-  }
-
-  #updateLeaderboardForPeriod() {
-    if (this.selectedPeriod() === 'day') {
-      this.leaderboardEntries.set(this.dailyLeaderboard());
-      this.currentUserRank.set(this.dailyUserRank());
-    } else {
-      this.leaderboardEntries.set(this.weeklyLeaderboard());
-      this.currentUserRank.set(this.weeklyUserRank());
-    }
   }
 
   #loadData() {
@@ -208,7 +202,6 @@ export class HqComponent implements OnInit, OnDestroy {
         if (!this.currentUserId()) {
           this.currentUserId.set(currentUserId);
         }
-        this.#updateLeaderboardForPeriod();
         this.#checkLoadingComplete();
       },
       error: (error) => {
@@ -225,7 +218,6 @@ export class HqComponent implements OnInit, OnDestroy {
         if (!this.currentUserId()) {
           this.currentUserId.set(currentUserId);
         }
-        this.#updateLeaderboardForPeriod();
         this.leaderboardLoading.set(false);
         this.#checkLoadingComplete();
       },
