@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { ActiveProject } from '../../core/models/active-project.model';
+import { ActiveProject } from '../core/models/active-project.model';
 
 @Component({
   selector: 'app-project-card',

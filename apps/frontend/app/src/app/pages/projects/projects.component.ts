@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ActiveProject } from '../../core/models/active-project.model';
 import { ActiveProjectsService } from '../../core/services/active-projects.service';
@@ -196,8 +196,17 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   projects = signal<ActiveProject[]>([]);
 
   // Computed values for stats
-  totalContributors = signal(0);
-  totalActivities = signal(0);
+  totalContributors = computed(() => {
+    const uniqueContributors = new Set<string>();
+    for (const project of this.projects()) {
+      project.contributors.forEach((contributor) => uniqueContributors.add(contributor));
+    }
+    return uniqueContributors.size;
+  });
+
+  totalActivities = computed(() => {
+    return this.projects().reduce((sum, project) => sum + project.activityCount, 0);
+  });
 
   ngOnInit() {
     this.#loadProjects();
@@ -218,7 +227,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (projects) => {
           this.projects.set(projects);
-          this.#calculateTotals(projects);
           this.isLoading.set(false);
         },
         error: (error) => {
@@ -226,18 +234,5 @@ export class ProjectsComponent implements OnInit, OnDestroy {
           this.isLoading.set(false);
         },
       });
-  }
-
-  #calculateTotals(projects: ActiveProject[]) {
-    const uniqueContributors = new Set<string>();
-    let totalActivities = 0;
-
-    for (const project of projects) {
-      project.contributors.forEach((contributor) => uniqueContributors.add(contributor));
-      totalActivities += project.activityCount;
-    }
-
-    this.totalContributors.set(uniqueContributors.size);
-    this.totalActivities.set(totalActivities);
   }
 }

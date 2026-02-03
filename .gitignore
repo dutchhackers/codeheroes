@@ -69,3 +69,4 @@ CLAUDE.md
 
 # MCP server config (local)
 .mcp.json
+apps/frontend/app/src/environments/environment.local.ts

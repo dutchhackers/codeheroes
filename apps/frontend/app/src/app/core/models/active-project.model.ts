@@ -49,6 +49,7 @@ export interface ActiveProject {
 export function formatProjectDisplayName(repoName: string): string {
   return repoName
     .split(/[-_]/)
+    .filter(word => word.length > 0)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 }
