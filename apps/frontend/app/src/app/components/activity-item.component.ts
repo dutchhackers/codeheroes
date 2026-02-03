@@ -17,7 +17,7 @@ import { UserInfo } from '../core/services/user-cache.service';
   imports: [],
   template: `
     <div
-      class="rounded-lg bg-black/70 cursor-pointer transition-all duration-300 hover:bg-black/90 overflow-hidden focus:outline-none focus:ring-2 focus:ring-white/50"
+      class="activity-card"
       [class]="actionDisplay().cardGlowClass"
       [class.activity-item-enter]="isNew()"
       tabindex="0"
@@ -27,80 +27,61 @@ import { UserInfo } from '../core/services/user-cache.service';
       (keydown.space)="$event.preventDefault(); selectActivity.emit(activity())"
     >
       <!-- Main content area -->
-      <div class="flex items-center gap-3 md:gap-4 p-4 md:p-5 pb-3 md:pb-4">
+      <div class="activity-content">
         <!-- Icon on LEFT for certain types -->
         @if (iconPosition() === 'left') {
           @if (isBadgeActivity()) {
-            <!-- Large emoji for badges -->
-            <div
-              class="w-10 h-10 md:w-12 md:h-12 flex-shrink-0 flex items-center justify-center text-3xl md:text-4xl"
-              role="img"
-              [attr.aria-label]="badgeIcon() + ' badge'"
-            >
+            <div class="activity-icon-large" role="img" [attr.aria-label]="badgeIcon() + ' badge'">
               {{ badgeIcon() }}
             </div>
           } @else {
-            <div
-              class="w-10 h-10 md:w-12 md:h-12 flex-shrink-0"
-              [class]="actionDisplay().textColor"
-              [innerHTML]="sanitizedIcon()"
-              role="img"
-              [attr.aria-label]="actionDisplay().label + ' icon'"
-            ></div>
+            <div class="activity-icon" [class]="actionDisplay().textColor" [innerHTML]="sanitizedIcon()" role="img"></div>
           }
         }
 
         <!-- Avatar on LEFT (when icon is on right) -->
         @if (iconPosition() === 'right') {
-          <div class="flex-shrink-0">
+          <div class="activity-avatar-wrapper">
             @if (userInfo()?.photoUrl) {
-              <div class="cyber-avatar-wrapper" [style.--glow-color]="actionDisplay().borderColor">
+              <div class="activity-avatar-container" [style.--border-color]="actionDisplay().borderColor">
                 <img
                   [src]="userInfo()!.photoUrl"
                   [alt]="userInfo()!.displayName"
-                  class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover cyber-avatar"
+                  class="activity-avatar-img"
                   referrerpolicy="no-referrer"
                 />
-                <div class="cyber-avatar-tint"></div>
               </div>
             } @else {
-              <div
-                class="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base font-bold cyber-avatar-placeholder"
-                [class]="actionDisplay().textColor"
-                [style.--glow-color]="actionDisplay().borderColor"
-              >
+              <div class="activity-avatar-placeholder" [class]="actionDisplay().textColor">
                 {{ userInitials() }}
               </div>
             }
           </div>
         }
 
-        <!-- Main content - single color text -->
-        <div class="flex-1 min-w-0" [class]="actionDisplay().textColor">
-          <p class="text-base md:text-xl leading-relaxed font-medium description-text">
-            [{{ formattedTime() }}] {{ techUsername() }} {{ descriptionText() }}
+        <!-- Main content text -->
+        <div class="activity-text" [class]="actionDisplay().textColor">
+          <p class="activity-description">
+            <span class="activity-time">[{{ formattedTime() }}]</span>
+            <span class="activity-user">{{ techUsername() }}</span>
+            <span>{{ descriptionText() }}</span>
           </p>
         </div>
 
         <!-- Avatar on RIGHT (when icon is on left) -->
         @if (iconPosition() === 'left') {
-          <div class="flex-shrink-0">
+          <div class="activity-avatar-wrapper">
             @if (userInfo()?.photoUrl) {
-              <div class="cyber-avatar-wrapper" [style.--glow-color]="actionDisplay().borderColor">
+              <div class="activity-avatar-container" [style.--border-color]="actionDisplay().borderColor">
                 <img
                   [src]="userInfo()!.photoUrl"
                   [alt]="userInfo()!.displayName"
-                  class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover cyber-avatar"
+                  class="activity-avatar-img"
                   referrerpolicy="no-referrer"
                 />
-                <div class="cyber-avatar-tint"></div>
               </div>
             } @else {
-              <div
-                class="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base font-bold cyber-avatar-placeholder"
-                [class]="actionDisplay().textColor"
-                [style.--glow-color]="actionDisplay().borderColor"
-              >
+              <div class="activity-avatar-placeholder" [class]="actionDisplay().textColor">
                 {{ userInitials() }}
               </div>
             }
@@ -109,101 +90,194 @@ import { UserInfo } from '../core/services/user-cache.service';
 
         <!-- Icon on RIGHT for certain types -->
         @if (iconPosition() === 'right') {
-          <div
-            class="w-10 h-10 md:w-14 md:h-14 flex-shrink-0"
-            [class]="actionDisplay().textColor"
-            [innerHTML]="sanitizedIcon()"
-            role="img"
-            [attr.aria-label]="actionDisplay().label + ' icon'"
-          ></div>
+          <div class="activity-icon" [class]="actionDisplay().textColor" [innerHTML]="sanitizedIcon()" role="img"></div>
         }
       </div>
 
-      <!-- Footer with separator -->
-      <div class="px-4 md:px-5 pb-3 md:pb-4">
-        <div
-          class="border-t pt-2 md:pt-3 flex items-center justify-between text-xs md:text-sm font-mono"
-          [style.border-color]="actionDisplay().borderColor + '33'"
-        >
-          @if (isBadgeActivity()) {
-            <span class="text-slate-400 truncate"
-              >{{ badgeName() }} <span class="text-slate-500">({{ badgeRarity() }})</span></span
-            >
-          } @else if (isLevelActivity()) {
-            <span class="text-slate-400 truncate">Level {{ levelInfo() }}</span>
-          } @else {
-            <span class="text-slate-500 truncate">{{ repoName() }}</span>
-          }
-          @if (!isBadgeActivity() && !isLevelActivity() && xpEarned() > 0) {
-            <span class="text-slate-400 flex-shrink-0 ml-4">+{{ xpEarned() }} XP</span>
-          }
-        </div>
+      <!-- Footer with metadata -->
+      <div class="activity-footer" [style.border-color]="actionDisplay().borderColor + '20'">
+        @if (isBadgeActivity()) {
+          <span class="footer-text">{{ badgeName() }} <span class="footer-rarity">({{ badgeRarity() }})</span></span>
+        } @else if (isLevelActivity()) {
+          <span class="footer-text">Level {{ levelInfo() }}</span>
+        } @else {
+          <span class="footer-text">{{ repoName() }}</span>
+        }
+        @if (!isBadgeActivity() && !isLevelActivity() && xpEarned() > 0) {
+          <span class="footer-xp">+{{ xpEarned() }} XP</span>
+        }
       </div>
     </div>
   `,
   styles: [
     `
-      /* Line clamp for long descriptions */
-      .description-text {
+      .activity-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .activity-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      }
+
+      .activity-card:focus {
+        outline: 2px solid rgba(255, 255, 255, 0.3);
+        outline-offset: 2px;
+      }
+
+      .activity-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem 0.875rem;
+      }
+
+      .activity-icon {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .activity-icon-large {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+      }
+
+      .activity-avatar-wrapper {
+        flex-shrink: 0;
+      }
+
+      .activity-avatar-container {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid var(--border-color, rgba(255, 255, 255, 0.2));
+        overflow: hidden;
+      }
+
+      .activity-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .activity-avatar-placeholder {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+
+      .activity-text {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .activity-description {
+        font-size: 0.9375rem;
+        line-height: 1.5;
+        margin: 0;
+        font-weight: 500;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
       }
 
-      /* Avatar wrapper for color tint effect */
-      .cyber-avatar-wrapper {
-        position: relative;
-        display: inline-block;
-        border-radius: 50%;
-        border: 2px solid var(--glow-color, #00f5ff);
-        box-shadow:
-          0 0 8px var(--glow-color, #00f5ff),
-          0 0 16px color-mix(in srgb, var(--glow-color, #00f5ff) 50%, transparent);
+      .activity-time {
+        color: rgba(255, 255, 255, 0.5);
+        margin-right: 0.5rem;
+        font-size: 0.875rem;
       }
 
-      /* Cyber-styled avatar with grayscale */
-      .cyber-avatar {
-        display: block;
-        filter: grayscale(100%) contrast(1.2) brightness(1.1);
-        transition: filter 0.3s ease;
+      .activity-user {
+        font-weight: 600;
+        margin-right: 0.5rem;
       }
 
-      /* Color tint overlay */
-      .cyber-avatar-tint {
-        position: absolute;
-        inset: 0;
-        border-radius: 50%;
-        background: var(--glow-color, #00f5ff);
-        mix-blend-mode: color;
-        opacity: 0.6;
-        pointer-events: none;
-        transition: opacity 0.3s ease;
+      .activity-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1.25rem;
+        border-top: 1px solid;
+        font-size: 0.8125rem;
       }
 
-      .cyber-avatar-wrapper:hover .cyber-avatar {
-        filter: grayscale(50%) contrast(1.1) brightness(1.05);
+      .footer-text {
+        color: rgba(255, 255, 255, 0.6);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
       }
 
-      .cyber-avatar-wrapper:hover .cyber-avatar-tint {
-        opacity: 0.3;
+      .footer-rarity {
+        color: rgba(255, 255, 255, 0.4);
       }
 
-      /* Placeholder avatar with glow */
-      .cyber-avatar-placeholder {
-        background: rgba(0, 0, 0, 0.8);
-        border: 2px solid var(--glow-color, #00f5ff);
-        box-shadow:
-          0 0 8px var(--glow-color, #00f5ff),
-          0 0 16px color-mix(in srgb, var(--glow-color, #00f5ff) 50%, transparent);
+      .footer-xp {
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 600;
+        flex-shrink: 0;
+        margin-left: 1rem;
       }
 
-      /* Gold glow for badges */
-      :host ::ng-deep .card-glow-gold {
-        box-shadow:
-          0 0 15px rgba(251, 191, 36, 0.3),
-          0 0 30px rgba(251, 191, 36, 0.15),
-          inset 0 0 20px rgba(251, 191, 36, 0.05);
+      @media (min-width: 768px) {
+        .activity-content {
+          gap: 1.25rem;
+          padding: 1.25rem 1.5rem 1rem;
+        }
+
+        .activity-icon {
+          width: 48px;
+          height: 48px;
+        }
+
+        .activity-icon-large {
+          width: 56px;
+          height: 56px;
+          font-size: 2.5rem;
+        }
+
+        .activity-avatar-container,
+        .activity-avatar-placeholder {
+          width: 48px;
+          height: 48px;
+        }
+
+        .activity-description {
+          font-size: 1.0625rem;
+        }
+
+        .activity-footer {
+          padding: 0.875rem 1.5rem;
+          font-size: 0.875rem;
+        }
       }
     `,
   ],
