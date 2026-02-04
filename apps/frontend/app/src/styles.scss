@@ -20,6 +20,9 @@ body {
   padding: 0;
   font-family: 'JetBrains Mono', 'Courier New', Consolas, monospace;
   background: #000;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Subtle Tron Perspective Grid Background */

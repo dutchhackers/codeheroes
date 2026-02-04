@@ -34,7 +34,7 @@ import { MyStatsComponent } from './components/my-stats.component';
             type="button"
             (click)="logout()"
             aria-label="Sign out"
-            class="p-2 rounded bg-black/50 border border-white/20 text-slate-400 hover:text-white hover:border-white/40 transition-colors"
+            class="logout-button rounded bg-black/50 border border-white/20 text-slate-400 hover:text-white hover:border-white/40 transition-colors"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path
@@ -148,11 +148,22 @@ import { MyStatsComponent } from './components/my-stats.component';
         display: block;
       }
 
+      .logout-button {
+        padding: 0.625rem;
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
       .edit-button {
         background: transparent;
         border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 6px;
-        padding: 0.375rem;
+        padding: 0.625rem;
+        min-width: 44px;
+        min-height: 44px;
         color: rgba(255, 255, 255, 0.5);
         cursor: pointer;
         transition: all 0.2s;
