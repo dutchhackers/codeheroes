@@ -289,7 +289,20 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
       const { currentLevel: recalculatedLevel, currentLevelXp, xpToNextLevel } = getXpProgress(recalculatedXp);
       const actualLeveledUp = recalculatedLevel > freshLevel;
 
+      // Recalculate counters using fresh data to prevent race conditions
+      const freshCounters = (freshData?.counters as ActivityCounters | undefined) || this.getInitialCounters();
+      const activityType = plan.update?.activityType;
+      const recalculatedCounters: ActivityCounters = {
+        actions: { ...freshCounters.actions },
+      };
+      if (activityType && recalculatedCounters.actions[activityType] !== undefined) {
+        recalculatedCounters.actions[activityType]++;
+      } else if (activityType) {
+        recalculatedCounters.actions[activityType] = 1;
+      }
+
       // Build the corrected stats data using recalculated values
+      const now = getCurrentTimeAsISO();
       const correctedStatsData = plan.writes?.stats?.data
         ? {
             ...plan.writes.stats.data,
@@ -297,6 +310,9 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
             level: recalculatedLevel,
             currentLevelXp,
             xpToNextLevel,
+            counters: recalculatedCounters,
+            countersLastUpdated: now,
+            lastActivityDate: new Date().toISOString().split('T')[0],
           }
         : null;
 
@@ -323,11 +339,11 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
         }
       }
 
-      // Record activity if provided
-      if (plan.writes?.activity && plan.activity) {
+      // Record activity if provided (activity.id is required, no fallback to prevent duplicates)
+      if (plan.writes?.activity && plan.activity?.id) {
         const activityRef = refs.userRef
           .collection(Collections.Activities)
-          .doc(plan.activity.id || `activity_${Date.now()}`);
+          .doc(plan.activity.id);
         transaction.set(activityRef, plan.writes.activity.data);
       }
 
@@ -341,11 +357,19 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
           level: recalculatedLevel,
           currentLevelXp,
           xpToNextLevel,
+          counters: recalculatedCounters,
+          countersLastUpdated: now,
+          lastActivityDate: new Date().toISOString().split('T')[0],
         },
         previousState: {
+          // previousState reflects the actual pre-transaction document state
           ...plan.result!.previousState,
           xp: freshXp,
           level: freshLevel,
+          counters: freshCounters,
+          lastActivityDate: freshData?.lastActivityDate ?? plan.result!.previousState.lastActivityDate,
+          countersLastUpdated: freshData?.countersLastUpdated ?? plan.result!.previousState.countersLastUpdated,
+          achievements: freshData?.achievements ?? plan.result!.previousState.achievements,
         },
       };
     });
