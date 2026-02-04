@@ -1,4 +1,4 @@
-import { Component, HostListener, input, output } from '@angular/core';
+import { Component, HostListener, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { BadgeRarity } from '@codeheroes/types';
 import { UserBadge, getBadgeRarity, getBadgeEmoji, getBadgeRarityColor } from '../../../core/models/user-badge.model';
@@ -25,10 +25,19 @@ interface BadgeDisplay {
     >
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2 id="badges-modal-title" class="modal-title">
-            <span class="title-icon">🏅</span>
-            All Badges
-          </h2>
+          @if (selectedBadge()) {
+            <button type="button" class="back-button" (click)="clearSelection()" aria-label="Back to all badges">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+              All Badges
+            </button>
+          } @else {
+            <h2 id="badges-modal-title" class="modal-title">
+              <span class="title-icon">🏅</span>
+              All Badges
+            </h2>
+          }
           <button type="button" class="close-button" (click)="onClose()" aria-label="Close dialog">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -37,25 +46,48 @@ interface BadgeDisplay {
         </div>
 
         <div class="modal-body">
-          <div class="badges-grid" role="list">
-            @for (item of badgeDisplays; track item.badge.id) {
-              <div
-                class="badge-card"
-                [class.legendary]="item.rarity === 'LEGENDARY'"
-                [style.--badge-color]="item.color"
-                role="listitem"
-              >
-                <span class="badge-emoji" aria-hidden="true">{{ item.emoji }}</span>
-                <span class="badge-name">{{ item.badge.name }}</span>
-                @if (item.badge.earnedAt) {
-                  <span class="badge-date">{{ item.badge.earnedAt | date: 'MMM yyyy' }}</span>
-                }
-                @if (item.badge.xp) {
-                  <span class="badge-xp">+{{ item.badge.xp }} XP</span>
-                }
-              </div>
-            }
-          </div>
+          @if (selectedBadge(); as selected) {
+            <div class="badge-detail" [style.--badge-color]="selected.color">
+              <div class="detail-emoji">{{ selected.emoji }}</div>
+              <h3 class="detail-name">{{ selected.badge.name }}</h3>
+              <span class="detail-rarity">{{ selected.rarity }}</span>
+              @if (selected.badge.description) {
+                <p class="detail-description">{{ selected.badge.description }}</p>
+              }
+              @if (selected.badge.earnedAt) {
+                <div class="detail-earned">
+                  <span class="detail-label">Earned</span>
+                  <span class="detail-value">{{ selected.badge.earnedAt | date: 'MMMM yyyy' }}</span>
+                </div>
+              }
+              @if (selected.badge.xp) {
+                <div class="detail-xp">+{{ selected.badge.xp }} XP</div>
+              }
+            </div>
+          } @else {
+            <div class="badges-grid" role="list">
+              @for (item of badgeDisplays; track item.badge.id) {
+                <button
+                  type="button"
+                  class="badge-card"
+                  [class.legendary]="item.rarity === 'LEGENDARY'"
+                  [style.--badge-color]="item.color"
+                  role="listitem"
+                  (click)="selectBadge(item)"
+                  [attr.aria-label]="item.badge.name + ', ' + item.rarity.toLowerCase() + ' badge. Tap for details'"
+                >
+                  <span class="badge-emoji" aria-hidden="true">{{ item.emoji }}</span>
+                  <span class="badge-name">{{ item.badge.name }}</span>
+                  @if (item.badge.earnedAt) {
+                    <span class="badge-date">{{ item.badge.earnedAt | date: 'MMM yyyy' }}</span>
+                  }
+                  @if (item.badge.xp) {
+                    <span class="badge-xp">+{{ item.badge.xp }} XP</span>
+                  }
+                </button>
+              }
+            </div>
+          }
         </div>
       </div>
     </div>
@@ -203,10 +235,15 @@ interface BadgeDisplay {
         align-items: center;
         gap: 0.25rem;
         transition: all 0.2s ease;
+        cursor: pointer;
         box-shadow:
           0 0 8px var(--badge-color),
           0 0 16px color-mix(in srgb, var(--badge-color) 30%, transparent),
           inset 0 0 12px color-mix(in srgb, var(--badge-color) 5%, transparent);
+      }
+
+      .badge-card:active {
+        transform: scale(0.96);
       }
 
       .badge-card.legendary {
@@ -255,6 +292,99 @@ interface BadgeDisplay {
         text-shadow: 0 0 8px color-mix(in srgb, var(--badge-color) 50%, transparent);
       }
 
+      /* Back button */
+      .back-button {
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        padding: 0.375rem 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: color 0.2s;
+        border-radius: 6px;
+      }
+
+      .back-button:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      /* Badge detail view */
+      .badge-detail {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.5rem 1rem;
+        gap: 0.75rem;
+      }
+
+      .detail-emoji {
+        font-size: 3.5rem;
+        line-height: 1;
+        filter: drop-shadow(0 0 12px var(--badge-color));
+      }
+
+      .detail-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0;
+      }
+
+      .detail-rarity {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--badge-color);
+        background: color-mix(in srgb, var(--badge-color) 15%, transparent);
+        border: 1px solid color-mix(in srgb, var(--badge-color) 40%, transparent);
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+      }
+
+      .detail-description {
+        font-size: 0.9375rem;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.5;
+        margin: 0.5rem 0 0;
+        max-width: 300px;
+      }
+
+      .detail-earned {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+        margin-top: 0.5rem;
+      }
+
+      .detail-label {
+        font-size: 0.625rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: rgba(255, 255, 255, 0.4);
+      }
+
+      .detail-value {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .detail-xp {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--badge-color);
+        text-shadow: 0 0 12px color-mix(in srgb, var(--badge-color) 50%, transparent);
+        margin-top: 0.25rem;
+      }
+
       @media (prefers-reduced-motion: reduce) {
         .modal-content {
           animation: none;
@@ -269,6 +399,7 @@ interface BadgeDisplay {
 export class BadgesModalComponent {
   badges = input<UserBadge[]>([]);
   dismiss = output<void>();
+  selectedBadge = signal<BadgeDisplay | null>(null);
 
   get badgeDisplays(): BadgeDisplay[] {
     return this.badges().map((badge) => {
@@ -284,7 +415,19 @@ export class BadgesModalComponent {
 
   @HostListener('document:keydown.escape')
   handleEscapeKey() {
-    this.onClose();
+    if (this.selectedBadge()) {
+      this.clearSelection();
+    } else {
+      this.onClose();
+    }
+  }
+
+  selectBadge(item: BadgeDisplay) {
+    this.selectedBadge.set(item);
+  }
+
+  clearSelection() {
+    this.selectedBadge.set(null);
   }
 
   onClose() {
