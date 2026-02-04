@@ -45,16 +45,16 @@ import { Highlight } from '../../../core/services/hq-data.service';
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 16px;
-        padding: 1.5rem;
-        margin: 2rem 0;
+        padding: 1.25rem;
+        margin: 1.25rem 0;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
       }
 
       .section-title {
-        font-size: 1rem;
+        font-size: 0.875rem;
         font-weight: 600;
         color: rgba(255, 255, 255, 0.9);
-        margin: 0 0 1.25rem 0;
+        margin: 0 0 0.875rem 0;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -62,7 +62,7 @@ import { Highlight } from '../../../core/services/hq-data.service';
       }
 
       .title-icon {
-        font-size: 1.25rem;
+        font-size: 1.125rem;
       }
 
       .empty-state {
@@ -85,17 +85,17 @@ import { Highlight } from '../../../core/services/hq-data.service';
       .highlights-list {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 0.5rem;
       }
 
       .highlight-card {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        padding: 1rem;
+        gap: 0.75rem;
+        padding: 0.625rem 0.75rem;
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 12px;
+        border-radius: 10px;
         transition: all 0.2s;
       }
 
@@ -105,14 +105,14 @@ import { Highlight } from '../../../core/services/hq-data.service';
       }
 
       .highlight-icon-badge {
-        width: 40px;
-        height: 40px;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
         background: rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        font-size: 1.25rem;
+        border-radius: 8px;
+        font-size: 1rem;
         flex-shrink: 0;
       }
 
@@ -121,27 +121,27 @@ import { Highlight } from '../../../core/services/hq-data.service';
         min-width: 0;
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.125rem;
       }
 
       .highlight-text {
-        font-size: 0.9375rem;
+        font-size: 0.8125rem;
         color: rgba(255, 255, 255, 0.85);
         margin: 0;
         line-height: 1.4;
       }
 
       .highlight-timestamp {
-        font-size: 0.8125rem;
+        font-size: 0.75rem;
         color: rgba(255, 255, 255, 0.4);
       }
 
       .xp-tag {
         background: color-mix(in srgb, var(--neon-green) 15%, transparent);
         border: 1px solid color-mix(in srgb, var(--neon-green) 30%, transparent);
-        border-radius: 8px;
-        padding: 0.375rem 0.75rem;
-        font-size: 0.875rem;
+        border-radius: 6px;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
         font-weight: 600;
         color: var(--neon-green);
         white-space: nowrap;

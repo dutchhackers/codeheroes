@@ -30,26 +30,27 @@ interface StatItem {
   styles: [
     `
       .weekly-stats-section {
-        margin: 2rem 0;
+        margin: 1.25rem 0;
       }
 
       .section-title {
-        font-size: 1rem;
+        font-size: 0.875rem;
         font-weight: 600;
         color: rgba(255, 255, 255, 0.9);
-        margin: 0 0 1rem 0;
+        margin: 0 0 0.75rem 0;
         letter-spacing: -0.02em;
       }
 
       .stats-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
+        gap: 0.625rem;
       }
 
       @media (min-width: 640px) {
         .stats-grid {
           grid-template-columns: repeat(4, 1fr);
+          gap: 1rem;
         }
       }
 
@@ -58,11 +59,11 @@ interface StatItem {
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
-        padding: 1.25rem 1rem;
+        padding: 0.875rem 0.75rem;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.5rem;
         transition: all 0.2s ease;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       }
@@ -75,15 +76,15 @@ interface StatItem {
       }
 
       .stat-icon {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 8px;
         background: color-mix(in srgb, var(--accent-color) 15%, transparent);
         color: var(--accent-color);
-        font-size: 1.25rem;
+        font-size: 1.125rem;
       }
 
       .stat-content {
@@ -95,21 +96,32 @@ interface StatItem {
       }
 
       .stat-value {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         font-weight: 700;
         color: rgba(255, 255, 255, 0.95);
         line-height: 1;
       }
 
       .stat-label {
-        font-size: 0.75rem;
+        font-size: 0.6875rem;
         color: rgba(255, 255, 255, 0.5);
         text-transform: uppercase;
         letter-spacing: 0.05em;
         font-weight: 500;
       }
 
-      @media (min-width: 768px) {
+      @media (min-width: 640px) {
+        .stat-card {
+          padding: 1.25rem 1rem;
+          gap: 0.75rem;
+        }
+
+        .stat-icon {
+          width: 32px;
+          height: 32px;
+          font-size: 1.25rem;
+        }
+
         .stat-value {
           font-size: 1.75rem;
         }

@@ -40,7 +40,7 @@ import { HighlightsComponent } from './components/highlights.component';
           </div>
         </div>
       } @else {
-        <div class="max-w-2xl mx-auto py-6">
+        <div class="max-w-2xl mx-auto py-2 md:py-6">
           <!-- Daily Progress -->
           <app-daily-progress [progress]="dailyProgress()" />
 

@@ -80,8 +80,8 @@ import * as LeaderboardUtils from '../utils/leaderboard.utils';
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 16px;
-        padding: 1.5rem;
-        margin: 2rem 0;
+        padding: 1.25rem;
+        margin: 1.25rem 0;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
       }
 
@@ -89,11 +89,11 @@ import * as LeaderboardUtils from '../utils/leaderboard.utils';
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.25rem;
+        margin-bottom: 0.875rem;
       }
 
       .section-title {
-        font-size: 1rem;
+        font-size: 0.875rem;
         font-weight: 600;
         color: rgba(255, 255, 255, 0.9);
         margin: 0;
@@ -104,7 +104,7 @@ import * as LeaderboardUtils from '../utils/leaderboard.utils';
       }
 
       .trophy-icon {
-        font-size: 1.25rem;
+        font-size: 1.125rem;
       }
 
       .view-all-btn {
@@ -112,8 +112,8 @@ import * as LeaderboardUtils from '../utils/leaderboard.utils';
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
         color: rgba(255, 255, 255, 0.7);
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
+        padding: 0.375rem 0.625rem;
+        font-size: 0.8125rem;
         cursor: pointer;
         transition: all 0.2s;
         display: flex;
@@ -135,7 +135,7 @@ import * as LeaderboardUtils from '../utils/leaderboard.utils';
       }
 
       .skeleton-item {
-        height: 64px;
+        height: 48px;
         background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.05) 75%);
         background-size: 200% 100%;
         animation: shimmer 1.5s infinite;
@@ -171,17 +171,17 @@ import * as LeaderboardUtils from '../utils/leaderboard.utils';
       .leaderboard-list {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 0.5rem;
       }
 
       .leaderboard-item {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        padding: 0.875rem 1rem;
+        gap: 0.75rem;
+        padding: 0.625rem 0.75rem;
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 12px;
+        border-radius: 10px;
         transition: all 0.2s;
       }
 
@@ -196,52 +196,52 @@ import * as LeaderboardUtils from '../utils/leaderboard.utils';
       }
 
       .rank-badge {
-        min-width: 36px;
+        min-width: 28px;
         text-align: center;
         font-weight: 600;
       }
 
       .medal {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
       }
 
       .rank-number {
-        font-size: 1rem;
+        font-size: 0.875rem;
         color: rgba(255, 255, 255, 0.5);
       }
 
       .user-profile {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.5rem;
         flex: 1;
         min-width: 0;
       }
 
       .user-avatar {
-        width: 40px;
-        height: 40px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         object-fit: cover;
         border: 2px solid rgba(255, 255, 255, 0.1);
       }
 
       .user-avatar-placeholder {
-        width: 40px;
-        height: 40px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         background: rgba(255, 255, 255, 0.1);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.875rem;
+        font-size: 0.75rem;
         font-weight: 600;
         color: rgba(255, 255, 255, 0.7);
         border: 2px solid rgba(255, 255, 255, 0.1);
       }
 
       .user-name {
-        font-size: 0.9375rem;
+        font-size: 0.875rem;
         font-weight: 500;
         color: rgba(255, 255, 255, 0.9);
         white-space: nowrap;
@@ -257,13 +257,13 @@ import * as LeaderboardUtils from '../utils/leaderboard.utils';
       }
 
       .xp-value {
-        font-size: 1rem;
+        font-size: 0.875rem;
         font-weight: 700;
         color: var(--neon-green);
       }
 
       .xp-label {
-        font-size: 0.625rem;
+        font-size: 0.5625rem;
         color: rgba(255, 255, 255, 0.4);
         text-transform: uppercase;
         letter-spacing: 0.05em;

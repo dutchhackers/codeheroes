@@ -51,7 +51,7 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 16px;
-        padding: 1.5rem;
+        padding: 1.25rem;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
       }
 
@@ -59,11 +59,11 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
       }
 
       .card-title {
-        font-size: 1rem;
+        font-size: 0.875rem;
         font-weight: 600;
         color: rgba(255, 255, 255, 0.9);
         margin: 0;
@@ -71,10 +71,10 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
       }
 
       .activities-badge {
-        font-size: 0.75rem;
+        font-size: 0.6875rem;
         color: rgba(255, 255, 255, 0.5);
         background: rgba(255, 255, 255, 0.05);
-        padding: 0.25rem 0.75rem;
+        padding: 0.2rem 0.625rem;
         border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.1);
       }
@@ -82,13 +82,13 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
       .progress-container {
         display: flex;
         align-items: center;
-        gap: 2rem;
+        gap: 1.25rem;
       }
 
       .circular-progress {
         position: relative;
-        width: 120px;
-        height: 120px;
+        width: 100px;
+        height: 100px;
         flex-shrink: 0;
       }
 
@@ -126,7 +126,7 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
       }
 
       .progress-percent {
-        font-size: 1.75rem;
+        font-size: 1.375rem;
         font-weight: 700;
         color: rgba(255, 255, 255, 0.95);
         line-height: 1;
@@ -140,30 +140,30 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
       .xp-display {
         display: flex;
         align-items: baseline;
-        gap: 0.5rem;
+        gap: 0.375rem;
         flex-wrap: wrap;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
       }
 
       .xp-current {
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-weight: 700;
         color: var(--neon-cyan);
         line-height: 1;
       }
 
       .xp-separator {
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
         color: rgba(255, 255, 255, 0.4);
       }
 
       .xp-goal {
-        font-size: 1rem;
+        font-size: 0.875rem;
         color: rgba(255, 255, 255, 0.6);
       }
 
       .motivational-text {
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
         color: rgba(255, 255, 255, 0.6);
         margin: 0;
         font-style: normal;
@@ -174,23 +174,22 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
         color: var(--neon-green);
       }
 
-      @media (max-width: 640px) {
-        .progress-container {
-          flex-direction: column;
-          gap: 1.5rem;
+      @media (min-width: 640px) {
+        .daily-progress-card {
+          padding: 1.5rem;
         }
 
         .circular-progress {
-          width: 140px;
-          height: 140px;
+          width: 120px;
+          height: 120px;
         }
 
-        .progress-stats {
-          text-align: center;
+        .progress-percent {
+          font-size: 1.75rem;
         }
 
-        .xp-display {
-          justify-content: center;
+        .xp-current {
+          font-size: 2rem;
         }
       }
     `,
