@@ -150,21 +150,25 @@ body {
   animation: slideInGlow 0.5s ease-out forwards;
 }
 
-/* Scrollbar styling for dark theme */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+/* Scrollbar styling for dark theme - desktop only.
+   On mobile, native overlay scrollbars are preferred to avoid
+   consuming layout space and causing asymmetric padding. */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(138, 43, 226, 0.5);
-  border-radius: 3px;
-}
+  ::-webkit-scrollbar-thumb {
+    background: rgba(138, 43, 226, 0.5);
+    border-radius: 3px;
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(138, 43, 226, 0.7);
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(138, 43, 226, 0.7);
+  }
 }

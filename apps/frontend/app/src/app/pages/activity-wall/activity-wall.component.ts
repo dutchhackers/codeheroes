@@ -14,15 +14,15 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
   standalone: true,
   imports: [ActivityItemComponent, ActivityStackComponent, DebugPanelComponent],
   template: `
-    <!-- Header -->
-    <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-4 py-4 md:px-8 md:py-5">
+    <!-- Header (desktop only - bottom nav identifies the tab on mobile) -->
+    <header class="hidden md:block sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-8 py-5">
       <div class="relative z-10">
-        <h1 class="text-2xl md:text-4xl font-bold italic text-white">Activity Wall</h1>
+        <h1 class="text-4xl font-bold italic text-white">Activity Wall</h1>
       </div>
     </header>
 
     <!-- Main Content -->
-    <main class="relative z-10 px-3 md:px-6 lg:px-8 pb-24">
+    <main class="relative z-10 px-3 pt-4 md:px-6 md:pt-0 lg:px-8 pb-24">
       @if (isLoading()) {
         <div class="flex items-center justify-center py-20 md:py-32">
           <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse" role="status" aria-live="polite">
