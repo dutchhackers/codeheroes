@@ -5,17 +5,24 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Get commits from the last N days
- * @param {number} days - Number of days to look back
+ * Get commits from the last N days or a specific date range
+ * @param {number|Object} daysOrRange - Number of days to look back or {since, until} object
  * @returns {Array} Array of commit objects
  */
-function getCommits(days = 30) {
-  const since = `${days} days ago`;
+function getCommits(daysOrRange = 30) {
+  let gitCommand;
+  
+  if (typeof daysOrRange === 'object' && daysOrRange.since && daysOrRange.until) {
+    // Use specific date range
+    gitCommand = `git log --since="${daysOrRange.since}" --until="${daysOrRange.until}" --pretty=format:"%H|%an|%aI|%s" --no-merges`;
+  } else {
+    // Use days ago
+    const since = `${daysOrRange} days ago`;
+    gitCommand = `git log --since="${since}" --pretty=format:"%H|%an|%aI|%s" --no-merges`;
+  }
+  
   try {
-    const output = execSync(
-      `git log --since="${since}" --pretty=format:"%H|%an|%aI|%s" --no-merges`,
-      { encoding: 'utf-8' }
-    );
+    const output = execSync(gitCommand, { encoding: 'utf-8' });
     
     if (!output.trim()) {
       console.log('No commits found in the specified time period.');
@@ -279,12 +286,76 @@ function generateStoryMarkdown(weeks) {
  * Main function
  */
 function main() {
-  console.log('🔍 Scanning commits from the last 30 days...\n');
+  // Parse command-line arguments
+  const args = process.argv.slice(2);
+  let month = null;
+  let year = null;
   
-  const commits = getCommits(30);
+  // Check for month and year arguments
+  if (args.length >= 2) {
+    month = args[0].toLowerCase();
+    year = parseInt(args[1]);
+  } else if (args.length === 1) {
+    // Try to parse as month name
+    month = args[0].toLowerCase();
+    year = new Date().getFullYear();
+  }
+  
+  const monthNames = [
+    'january', 'february', 'march', 'april', 'may', 'june',
+    'july', 'august', 'september', 'october', 'november', 'december'
+  ];
+  
+  let commits;
+  let targetMonth = null;
+  let targetYear = null;
+  
+  if (month && monthNames.includes(month)) {
+    // Get commits for specific month
+    const monthIndex = monthNames.indexOf(month);
+    targetMonth = month;
+    targetYear = year;
+    
+    const startDate = new Date(year, monthIndex, 1);
+    const endDate = new Date(year, monthIndex + 1, 0, 23, 59, 59);
+    
+    console.log(`🔍 Scanning commits for ${month.charAt(0).toUpperCase() + month.slice(1)} ${year}...\n`);
+    console.log(`   Date range: ${startDate.toISOString().split('T')[0]} to ${endDate.toISOString().split('T')[0]}\n`);
+    
+    commits = getCommits({
+      since: startDate.toISOString(),
+      until: endDate.toISOString()
+    });
+  } else {
+    // Default behavior: last 30 days
+    console.log('🔍 Scanning commits from the last 30 days...\n');
+    commits = getCommits(30);
+  }
   
   if (commits.length === 0) {
-    console.log('No commits found. The story file will not be created.');
+    if (targetMonth && targetYear) {
+      console.log(`No commits found for ${targetMonth.charAt(0).toUpperCase() + targetMonth.slice(1)} ${targetYear}.`);
+      console.log('Creating an empty story file...\n');
+      
+      // Create empty story
+      const title = `${targetMonth.charAt(0).toUpperCase() + targetMonth.slice(1)} ${targetYear}: A Quiet Month`;
+      let markdown = `# ${title}\n\n`;
+      markdown += `## Overview\n\n`;
+      markdown += `No commits were made during ${targetMonth.charAt(0).toUpperCase() + targetMonth.slice(1)} ${targetYear}. `;
+      markdown += `The repository was quiet this month.\n`;
+      
+      const filename = `${targetMonth}-${targetYear}-story.md`;
+      const filepath = path.join(process.cwd(), filename);
+      fs.writeFileSync(filepath, markdown);
+      
+      console.log(`✅ Story saved to: ${filename}\n`);
+      console.log('Preview:');
+      console.log('─'.repeat(60));
+      console.log(markdown);
+      console.log('─'.repeat(60));
+    } else {
+      console.log('No commits found. The story file will not be created.');
+    }
     return;
   }
   
@@ -296,26 +367,29 @@ function main() {
   console.log('✍️  Generating story...\n');
   const markdown = generateStoryMarkdown(weeks);
   
-  // Determine output filename based on the latest commit date
-  const weekNumbers = Object.keys(weeks).sort((a, b) => a - b);
-  let latestDate = new Date();
-  
-  if (weekNumbers.length > 0) {
-    weekNumbers.forEach(weekNum => {
-      const week = weeks[weekNum];
-      if (!latestDate || week.endDate > latestDate) {
-        latestDate = week.endDate;
-      }
-    });
+  // Determine output filename
+  let filename;
+  if (targetMonth && targetYear) {
+    filename = `${targetMonth}-${targetYear}-story.md`;
+  } else {
+    // Determine output filename based on the latest commit date
+    const weekNumbers = Object.keys(weeks).sort((a, b) => a - b);
+    let latestDate = new Date();
+    
+    if (weekNumbers.length > 0) {
+      weekNumbers.forEach(weekNum => {
+        const week = weeks[weekNum];
+        if (!latestDate || week.endDate > latestDate) {
+          latestDate = week.endDate;
+        }
+      });
+    }
+    
+    const month = monthNames[latestDate.getMonth()];
+    const year = latestDate.getFullYear();
+    filename = `${month}-${year}-story.md`;
   }
   
-  const monthNames = [
-    'january', 'february', 'march', 'april', 'may', 'june',
-    'july', 'august', 'september', 'october', 'november', 'december'
-  ];
-  const month = monthNames[latestDate.getMonth()];
-  const year = latestDate.getFullYear();
-  const filename = `${month}-${year}-story.md`;
   const filepath = path.join(process.cwd(), filename);
   
   // Write to file

@@ -1,27 +1,40 @@
 # Commit Story Generator
 
-This script analyzes Git commit history from the last 30 days and generates a narrative story summarizing the development activity.
+This script analyzes Git commit history and generates a narrative story summarizing the development activity.
 
 ## Features
 
-- 📊 Scans all commits from the last month
+- 📊 Scans commits from the last 30 days or a specific month
 - 📅 Groups commits by week
 - ✍️ Generates 1-2 paragraph stories for each week
 - 📝 Categorizes commits (features, fixes, dependencies, etc.)
 - 📄 Outputs a formatted Markdown file
+- 🗓️ Supports custom month/year selection
 
 ## Usage
 
-Run the script using npm:
+### Generate story for the last 30 days
 
 ```bash
 npm run story
 ```
 
-Or directly with Node.js:
+Or:
 
 ```bash
 node scripts/generate-commit-story.js
+```
+
+### Generate story for a specific month
+
+```bash
+node scripts/generate-commit-story.js january 2026
+```
+
+Or just the month (defaults to current year):
+
+```bash
+node scripts/generate-commit-story.js january
 ```
 
 ## Output
@@ -35,7 +48,11 @@ The script generates a file named `{month}-{year}-story.md` in the root director
   - Narrative stories (1-2 paragraphs each)
   - Detailed commit lists with authors
 
+If no commits are found for a specific month, it creates a simple "quiet month" story.
+
 ## Example Output
+
+### With Commits
 
 ```markdown
 # February 2026: A Month of Progress
@@ -55,9 +72,19 @@ This week brought 5 commits to the codebase, with contributions from Alice and B
 ...
 ```
 
+### Without Commits
+
+```markdown
+# January 2026: A Quiet Month
+
+## Overview
+
+No commits were made during January 2026. The repository was quiet this month.
+```
+
 ## How It Works
 
-1. **Fetch Commits**: Uses `git log` to retrieve commits from the last 30 days
+1. **Fetch Commits**: Uses `git log` to retrieve commits from specified date range
 2. **Group by Week**: Organizes commits into weekly buckets
 3. **Analyze**: Categorizes commits by type (features, fixes, dependencies, etc.)
 4. **Generate Story**: Creates narrative summaries based on commit patterns
