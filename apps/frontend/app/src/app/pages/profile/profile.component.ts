@@ -52,14 +52,14 @@ import { MyStatsComponent } from './components/my-stats.component';
     <main class="relative z-10 px-4 md:px-6 lg:px-8 pb-24">
       @if (isLoading()) {
         <div class="flex items-center justify-center py-20">
-          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse font-mono" role="status" aria-live="polite">
+          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse" role="status" aria-live="polite">
             Loading...
           </div>
         </div>
       } @else if (!user()) {
         <div class="flex flex-col items-center justify-center py-20">
-          <p class="text-lg md:text-2xl text-slate-500 font-mono text-center">Profile not found</p>
-          <p class="text-sm md:text-base mt-3 text-slate-600 font-mono text-center">
+          <p class="text-lg md:text-2xl text-slate-500 text-center">Profile not found</p>
+          <p class="text-sm md:text-base mt-3 text-slate-600 text-center">
             Your user profile hasn't been set up yet.
           </p>
         </div>
@@ -86,13 +86,13 @@ import { MyStatsComponent } from './components/my-stats.component';
               </button>
             </div>
             <p
-              class="text-sm md:text-base text-purple-400 font-mono mt-1"
+              class="text-sm md:text-base text-purple-400 mt-1"
               aria-label="Current level {{ stats()?.level ?? 1 }}"
             >
               Level {{ stats()?.level ?? 1 }}
             </p>
             @if (user()?.createdAt) {
-              <p class="text-xs text-slate-500 font-mono mt-1">Hero Since {{ formatMemberSince(user()?.createdAt) }}</p>
+              <p class="text-xs text-slate-500 mt-1">Hero Since {{ formatMemberSince(user()?.createdAt) }}</p>
             }
           </div>
 
@@ -110,7 +110,7 @@ import { MyStatsComponent } from './components/my-stats.component';
 
           <!-- Recent Activity -->
           <div class="mt-8">
-            <h3 class="text-xs md:text-sm uppercase tracking-wider mb-4 font-mono text-cyan-400">Recent Activity</h3>
+            <h3 class="text-xs md:text-sm uppercase tracking-wider mb-4 text-cyan-400">Recent Activity</h3>
             @if (activities().length > 0) {
               <div class="flex flex-col gap-4">
                 @for (activity of activities(); track activity.id) {
@@ -122,7 +122,7 @@ import { MyStatsComponent } from './components/my-stats.component';
                 }
               </div>
             } @else {
-              <div class="text-center py-8 text-slate-600 font-mono text-sm">
+              <div class="text-center py-8 text-slate-600 text-sm">
                 No recent activity yet. Keep building!
               </div>
             }

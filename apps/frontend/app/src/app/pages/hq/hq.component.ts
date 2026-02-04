@@ -35,7 +35,7 @@ import { HighlightsComponent } from './components/highlights.component';
     <main class="relative z-10 px-4 md:px-6 lg:px-8 pb-24">
       @if (isLoading()) {
         <div class="flex items-center justify-center py-20">
-          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse font-mono" role="status" aria-live="polite">
+          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse" role="status" aria-live="polite">
             Loading...
           </div>
         </div>

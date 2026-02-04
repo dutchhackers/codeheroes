@@ -25,14 +25,14 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
     <main class="relative z-10 px-3 md:px-6 lg:px-8 pb-24">
       @if (isLoading()) {
         <div class="flex items-center justify-center py-20 md:py-32">
-          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse font-mono" role="status" aria-live="polite">
+          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse" role="status" aria-live="polite">
             Loading...
           </div>
         </div>
       } @else if (feedItems().length === 0) {
         <div class="flex flex-col items-center justify-center py-20 md:py-32">
-          <p class="text-lg md:text-2xl text-slate-500 font-mono">No activities yet</p>
-          <p class="text-sm md:text-lg mt-3 text-slate-600 font-mono">Awaiting activity stream...</p>
+          <p class="text-lg md:text-2xl text-slate-500">No activities yet</p>
+          <p class="text-sm md:text-lg mt-3 text-slate-600">Awaiting activity stream...</p>
         </div>
       } @else {
         <div class="py-6 flex flex-col gap-6 md:gap-8 lg:gap-10">

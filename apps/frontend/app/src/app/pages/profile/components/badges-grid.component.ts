@@ -126,14 +126,14 @@ const VISIBLE_BADGES_COUNT = 5;
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        font-family: monospace;
+        font-family: inherit;
         color: var(--neon-cyan);
         margin: 0;
       }
 
       .badge-count {
         font-size: 0.875rem;
-        font-family: monospace;
+        font-family: inherit;
         color: rgba(255, 255, 255, 0.5);
         background: rgba(0, 0, 0, 0.4);
         padding: 0.25rem 0.5rem;
@@ -223,13 +223,13 @@ const VISIBLE_BADGES_COUNT = 5;
       .badge-date {
         font-size: 0.625rem;
         color: rgba(255, 255, 255, 0.4);
-        font-family: monospace;
+        font-family: inherit;
       }
 
       .badge-xp {
         font-size: 0.625rem;
         color: var(--badge-color);
-        font-family: monospace;
+        font-family: inherit;
         font-weight: 600;
         text-shadow: 0 0 8px color-mix(in srgb, var(--badge-color) 50%, transparent);
       }
@@ -251,7 +251,7 @@ const VISIBLE_BADGES_COUNT = 5;
         font-size: 1.75rem;
         font-weight: 700;
         color: var(--neon-cyan, #00ffff);
-        font-family: monospace;
+        font-family: inherit;
         line-height: 1;
         text-shadow: 0 0 10px var(--neon-cyan, #00ffff);
       }
@@ -267,7 +267,7 @@ const VISIBLE_BADGES_COUNT = 5;
       .more-hint {
         font-size: 0.625rem;
         color: rgba(255, 255, 255, 0.4);
-        font-family: monospace;
+        font-family: inherit;
       }
 
       /* Modal styles */
@@ -332,7 +332,7 @@ const VISIBLE_BADGES_COUNT = 5;
         font-size: 1rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        font-family: monospace;
+        font-family: inherit;
         color: var(--neon-cyan, #00ffff);
         margin: 0;
         text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
@@ -400,7 +400,7 @@ const VISIBLE_BADGES_COUNT = 5;
       .empty-hint {
         font-size: 0.75rem;
         color: rgba(255, 255, 255, 0.3);
-        font-family: monospace;
+        font-family: inherit;
         margin: 0;
       }
     `,
