@@ -1,7 +1,7 @@
 import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import {
-  collection,
   collectionData,
+  collectionGroup,
   Firestore,
   query,
   where,
@@ -29,10 +29,11 @@ export class ActiveProjectsService {
     cutoffDate.setDate(cutoffDate.getDate() - daysBack);
     const cutoffTimestamp = cutoffDate.toISOString();
 
-    // Query activities from the top-level gameActions collection
-    const gameActionsRef = collection(this.#firestore, 'gameActions');
+    // Query activities across all users via collection group query
+    const activitiesRef = collectionGroup(this.#firestore, 'activities');
     const gameActionsQuery = query(
-      gameActionsRef,
+      activitiesRef,
+      where('type', '==', 'game-action'),
       where('createdAt', '>=', cutoffTimestamp),
       orderBy('createdAt', 'desc'),
       firestoreLimit(maxActivities)
@@ -63,9 +64,10 @@ export class ActiveProjectsService {
     cutoffDate.setDate(cutoffDate.getDate() - daysBack);
     const cutoffTimestamp = cutoffDate.toISOString();
 
-    const gameActionsRef = collection(this.#firestore, 'gameActions');
+    const activitiesRef = collectionGroup(this.#firestore, 'activities');
     const gameActionsQuery = query(
-      gameActionsRef,
+      activitiesRef,
+      where('type', '==', 'game-action'),
       where('userId', '==', userId),
       where('createdAt', '>=', cutoffTimestamp),
       orderBy('createdAt', 'desc'),
