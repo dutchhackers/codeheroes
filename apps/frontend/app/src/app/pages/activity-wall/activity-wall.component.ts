@@ -35,7 +35,7 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
           <p class="text-sm md:text-lg mt-3 text-slate-600">Awaiting activity stream...</p>
         </div>
       } @else {
-        <div class="py-6 flex flex-col gap-6 md:gap-8 lg:gap-10">
+        <div class="max-w-2xl mx-auto py-6 flex flex-col gap-6 md:gap-8 lg:gap-10">
           @for (item of feedItems(); track trackFeedItem(item); let i = $index) {
             @if (isStack(item)) {
               <app-activity-stack [stack]="item" [isNew]="i === 0" (selectActivity)="onSelectActivity($event)" />
