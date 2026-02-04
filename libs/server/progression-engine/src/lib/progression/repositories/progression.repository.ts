@@ -242,6 +242,8 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
 
     return {
       needsInitialization: false,
+      update, // Store update for recalculation inside transaction
+      activity,
       writes,
       result: {
         state: newState,
@@ -274,17 +276,33 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
       // Read all documents again to verify they haven't changed
       const freshStatsDoc = await transaction.get(refs.statsRef);
 
-      // Recalculate leveledUp based on fresh data to prevent race conditions
-      // Multiple concurrent transactions may all think they're causing a level-up
-      // when only the first one actually does
+      // Recalculate state based on fresh data to prevent race conditions
+      // Multiple concurrent transactions may read stale data outside the transaction,
+      // so we must recalculate XP and level using the fresh state
       const freshData = freshStatsDoc.data();
+      const freshXp = freshData?.xp || 0;
       const freshLevel = freshData?.level || 1;
-      const newLevel = plan.writes?.stats?.data?.level || freshLevel;
-      const actualLeveledUp = newLevel > freshLevel;
 
-      // Apply stats update
-      if (plan.writes?.stats) {
-        transaction.set(refs.statsRef, plan.writes.stats.data, { merge: true });
+      // Recalculate new XP and level using fresh data + the XP gain from the update
+      const xpGained = plan.update?.xpGained || 0;
+      const recalculatedXp = freshXp + xpGained;
+      const { currentLevel: recalculatedLevel, currentLevelXp, xpToNextLevel } = getXpProgress(recalculatedXp);
+      const actualLeveledUp = recalculatedLevel > freshLevel;
+
+      // Build the corrected stats data using recalculated values
+      const correctedStatsData = plan.writes?.stats?.data
+        ? {
+            ...plan.writes.stats.data,
+            xp: recalculatedXp,
+            level: recalculatedLevel,
+            currentLevelXp,
+            xpToNextLevel,
+          }
+        : null;
+
+      // Apply stats update with corrected values
+      if (correctedStatsData) {
+        transaction.set(refs.statsRef, correctedStatsData, { merge: true });
       }
 
       // Apply daily stats update
@@ -313,12 +331,20 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
         transaction.set(activityRef, plan.writes.activity.data);
       }
 
-      // Return result with corrected leveledUp based on fresh data
+      // Return result with corrected values based on fresh data
       return {
         ...plan.result!,
         leveledUp: actualLeveledUp,
+        state: {
+          ...plan.result!.state,
+          xp: recalculatedXp,
+          level: recalculatedLevel,
+          currentLevelXp,
+          xpToNextLevel,
+        },
         previousState: {
           ...plan.result!.previousState,
+          xp: freshXp,
           level: freshLevel,
         },
       };
