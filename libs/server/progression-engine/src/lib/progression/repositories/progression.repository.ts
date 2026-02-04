@@ -274,6 +274,14 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
       // Read all documents again to verify they haven't changed
       const freshStatsDoc = await transaction.get(refs.statsRef);
 
+      // Recalculate leveledUp based on fresh data to prevent race conditions
+      // Multiple concurrent transactions may all think they're causing a level-up
+      // when only the first one actually does
+      const freshData = freshStatsDoc.data();
+      const freshLevel = freshData?.level || 1;
+      const newLevel = plan.writes?.stats?.data?.level || freshLevel;
+      const actualLeveledUp = newLevel > freshLevel;
+
       // Apply stats update
       if (plan.writes?.stats) {
         transaction.set(refs.statsRef, plan.writes.stats.data, { merge: true });
@@ -305,7 +313,15 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
         transaction.set(activityRef, plan.writes.activity.data);
       }
 
-      return plan.result!;
+      // Return result with corrected leveledUp based on fresh data
+      return {
+        ...plan.result!,
+        leveledUp: actualLeveledUp,
+        previousState: {
+          ...plan.result!.previousState,
+          level: freshLevel,
+        },
+      };
     });
   }
 
