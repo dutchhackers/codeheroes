@@ -35,7 +35,7 @@ interface BadgeDisplay {
           } @else {
             <h2 id="badges-modal-title" class="modal-title">
               <span class="title-icon">🏅</span>
-              All Badges
+              All Badges ({{ badges().length }})
             </h2>
           }
           <button type="button" class="close-button" (click)="onClose()" aria-label="Close dialog">
