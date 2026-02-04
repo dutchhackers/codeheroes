@@ -194,6 +194,8 @@ interface BadgeDisplay {
         justify-content: center;
         transition: color 0.2s;
         border-radius: 6px;
+        min-width: 2.75rem;
+        min-height: 2.75rem;
       }
 
       .close-button:hover {
@@ -306,6 +308,8 @@ interface BadgeDisplay {
         font-weight: 500;
         transition: color 0.2s;
         border-radius: 6px;
+        min-width: 2.75rem;
+        min-height: 2.75rem;
       }
 
       .back-button:hover {

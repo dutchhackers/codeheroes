@@ -197,7 +197,6 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
 })
 export class DailyProgressComponent {
   progress = input<DailyProgress | null>(null);
-  readonly Math = Math;
 
   progressPercent = computed(() => {
     const p = this.progress();

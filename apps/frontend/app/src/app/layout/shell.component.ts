@@ -86,7 +86,7 @@ import { EnvironmentBannerComponent, showEnvironmentIndicator } from './environm
 
       .update-banner {
         position: fixed;
-        bottom: 5rem;
+        bottom: calc(5rem + env(safe-area-inset-bottom));
         left: 1rem;
         right: 1rem;
         z-index: 100;
@@ -115,6 +115,7 @@ import { EnvironmentBannerComponent, showEnvironmentIndicator } from './environm
         border-radius: 6px;
         cursor: pointer;
         transition: opacity 0.2s;
+        min-height: 2.75rem;
       }
 
       .update-banner button:hover {
@@ -156,7 +157,7 @@ export class ShellComponent implements OnInit, OnDestroy {
   }
 
   applyUpdate(): void {
-    document.location.reload();
+    location.reload();
   }
 
   async signInWithGoogle() {
