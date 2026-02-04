@@ -284,6 +284,70 @@ import * as LeaderboardUtils from '../utils/leaderboard.utils';
         margin-left: 0.25rem;
       }
 
+      @media (min-width: 640px) {
+        .leaderboard-section {
+          padding: 1.5rem;
+        }
+
+        .section-header {
+          margin-bottom: 1.25rem;
+        }
+
+        .section-title {
+          font-size: 1rem;
+        }
+
+        .leaderboard-list {
+          gap: 0.75rem;
+        }
+
+        .leaderboard-item {
+          gap: 1rem;
+          padding: 0.875rem 1rem;
+          border-radius: 12px;
+        }
+
+        .rank-badge {
+          min-width: 36px;
+        }
+
+        .medal {
+          font-size: 1.5rem;
+        }
+
+        .rank-number {
+          font-size: 1rem;
+        }
+
+        .user-profile {
+          gap: 0.75rem;
+        }
+
+        .user-avatar {
+          width: 40px;
+          height: 40px;
+        }
+
+        .user-avatar-placeholder {
+          width: 40px;
+          height: 40px;
+          font-size: 0.875rem;
+        }
+
+        .user-name {
+          font-size: 0.9375rem;
+        }
+
+        .xp-value {
+          font-size: 1rem;
+        }
+
+        .view-all-btn {
+          padding: 0.5rem 0.75rem;
+          font-size: 0.875rem;
+        }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         .skeleton-item {
           animation: none;

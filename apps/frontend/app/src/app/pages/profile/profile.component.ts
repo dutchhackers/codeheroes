@@ -11,6 +11,7 @@ import { StatsGridComponent } from './components/stats-grid.component';
 import { BadgesGridComponent } from './components/badges-grid.component';
 import { ActivityItemComponent } from '../../components/activity-item.component';
 import { ProfileEditModalComponent } from './components/profile-edit-modal.component';
+import { BadgesModalComponent } from './components/badges-modal.component';
 import { MyStatsComponent } from './components/my-stats.component';
 
 @Component({
@@ -23,6 +24,7 @@ import { MyStatsComponent } from './components/my-stats.component';
     BadgesGridComponent,
     ActivityItemComponent,
     ProfileEditModalComponent,
+    BadgesModalComponent,
     MyStatsComponent,
   ],
   template: `
@@ -106,7 +108,7 @@ import { MyStatsComponent } from './components/my-stats.component';
           <app-my-stats [weeklyHistory]="weeklyHistory()" />
 
           <!-- Badges -->
-          <app-badges-grid [badges]="badges()" />
+          <app-badges-grid [badges]="badges()" (viewAll)="showBadgesModal.set(true)" />
 
           <!-- Recent Activity -->
           <div class="mt-8">
@@ -130,6 +132,11 @@ import { MyStatsComponent } from './components/my-stats.component';
         </div>
       }
     </main>
+
+    <!-- Badges Modal -->
+    @if (showBadgesModal()) {
+      <app-badges-modal [badges]="badges()" (dismiss)="showBadgesModal.set(false)" />
+    }
 
     <!-- Edit Profile Modal -->
     @if (showEditModal()) {
@@ -197,6 +204,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   weeklyHistory = signal<WeeklyStatsRecord[]>([]);
   isLoading = signal(true);
   showEditModal = signal(false);
+  showBadgesModal = signal(false);
   isSavingProfile = signal(false);
   profileSaveError = signal<string | null>(null);
 
