@@ -294,7 +294,13 @@ function main() {
   // Check for month and year arguments
   if (args.length >= 2) {
     month = args[0].toLowerCase();
-    year = parseInt(args[1]);
+    year = parseInt(args[1], 10);
+    
+    // Validate year
+    if (isNaN(year) || year < 1900 || year > 2100) {
+      console.error(`Error: Invalid year "${args[1]}". Please provide a valid year (1900-2100).`);
+      process.exit(1);
+    }
   } else if (args.length === 1) {
     // Try to parse as month name
     month = args[0].toLowerCase();
