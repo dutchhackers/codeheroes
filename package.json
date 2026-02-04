@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "setup": "node scripts/setup-firebase.js"
+    "setup": "node scripts/setup-firebase.js",
+    "story": "node scripts/generate-commit-story.js"
   },
   "private": true,
   "dependencies": {
