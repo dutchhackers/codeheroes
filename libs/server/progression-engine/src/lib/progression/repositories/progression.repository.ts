@@ -242,6 +242,8 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
 
     return {
       needsInitialization: false,
+      update, // Store update for recalculation inside transaction
+      activity,
       writes,
       result: {
         state: newState,
@@ -274,9 +276,51 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
       // Read all documents again to verify they haven't changed
       const freshStatsDoc = await transaction.get(refs.statsRef);
 
-      // Apply stats update
-      if (plan.writes?.stats) {
-        transaction.set(refs.statsRef, plan.writes.stats.data, { merge: true });
+      // Recalculate state based on fresh data to prevent race conditions
+      // Multiple concurrent transactions may read stale data outside the transaction,
+      // so we must recalculate XP and level using the fresh state
+      const freshData = freshStatsDoc.data();
+      const freshXp = freshData?.xp || 0;
+      const freshLevel = freshData?.level || 1;
+
+      // Recalculate new XP and level using fresh data + the XP gain from the update
+      const xpGained = plan.update?.xpGained || 0;
+      const recalculatedXp = freshXp + xpGained;
+      const { currentLevel: recalculatedLevel, currentLevelXp, xpToNextLevel } = getXpProgress(recalculatedXp);
+      const actualLeveledUp = recalculatedLevel > freshLevel;
+
+      // Recalculate counters using fresh data to prevent race conditions
+      const freshCounters = (freshData?.counters as ActivityCounters | undefined) || this.getInitialCounters();
+      const activityType = plan.update?.activityType;
+      const recalculatedCounters: ActivityCounters = {
+        actions: { ...freshCounters.actions },
+      };
+      if (activityType && recalculatedCounters.actions[activityType] !== undefined) {
+        recalculatedCounters.actions[activityType]++;
+      } else if (activityType) {
+        recalculatedCounters.actions[activityType] = 1;
+      }
+
+      // Build the corrected stats data using recalculated values
+      const now = getCurrentTimeAsISO();
+      const freshAchievements = freshData?.achievements ?? plan.writes?.stats?.data?.achievements ?? [];
+      const correctedStatsData = plan.writes?.stats?.data
+        ? {
+            ...plan.writes.stats.data,
+            xp: recalculatedXp,
+            level: recalculatedLevel,
+            currentLevelXp,
+            xpToNextLevel,
+            counters: recalculatedCounters,
+            countersLastUpdated: now,
+            lastActivityDate: new Date().toISOString().split('T')[0],
+            achievements: freshAchievements,
+          }
+        : null;
+
+      // Apply stats update with corrected values
+      if (correctedStatsData) {
+        transaction.set(refs.statsRef, correctedStatsData, { merge: true });
       }
 
       // Apply daily stats update
@@ -297,15 +341,40 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
         }
       }
 
-      // Record activity if provided
-      if (plan.writes?.activity && plan.activity) {
+      // Record activity if provided (activity.id is required, no fallback to prevent duplicates)
+      if (plan.writes?.activity && plan.activity?.id) {
         const activityRef = refs.userRef
           .collection(Collections.Activities)
-          .doc(plan.activity.id || `activity_${Date.now()}`);
+          .doc(plan.activity.id);
         transaction.set(activityRef, plan.writes.activity.data);
       }
 
-      return plan.result!;
+      // Return result with corrected values based on fresh data
+      return {
+        ...plan.result!,
+        leveledUp: actualLeveledUp,
+        state: {
+          ...plan.result!.state,
+          xp: recalculatedXp,
+          level: recalculatedLevel,
+          currentLevelXp,
+          xpToNextLevel,
+          counters: recalculatedCounters,
+          countersLastUpdated: now,
+          lastActivityDate: new Date().toISOString().split('T')[0],
+          achievements: freshAchievements,
+        },
+        previousState: {
+          // previousState reflects the actual pre-transaction document state
+          ...plan.result!.previousState,
+          xp: freshXp,
+          level: freshLevel,
+          counters: freshCounters,
+          lastActivityDate: freshData?.lastActivityDate ?? plan.result!.previousState.lastActivityDate,
+          countersLastUpdated: freshData?.countersLastUpdated ?? plan.result!.previousState.countersLastUpdated,
+          achievements: freshData?.achievements ?? plan.result!.previousState.achievements,
+        },
+      };
     });
   }
 

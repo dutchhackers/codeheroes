@@ -91,7 +91,9 @@ export class RewardActivityService {
     totalXp: number
   ): Promise<LevelUpActivity> {
     const now = getCurrentTimeAsISO();
-    const activityId = `levelup_${Date.now()}_${newLevel}`;
+    // Use deterministic ID based on userId and level to ensure idempotency
+    // This prevents duplicate activities if multiple events are processed for the same level-up
+    const activityId = `levelup_${userId}_${newLevel}`;
 
     const xpProgress = getXpProgress(totalXp);
 
