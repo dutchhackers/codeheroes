@@ -116,7 +116,7 @@ function generateWeekStory(commits) {
       categories.features.push(commit);
     } else if (msg.includes('fix') || msg.includes('bug') || msg.includes('resolve')) {
       categories.fixes.push(commit);
-    } else if (msg.includes('deps') || msg.includes('bump') || msg.includes('update') && msg.includes('dependabot')) {
+    } else if (msg.includes('deps') || msg.includes('bump') || (msg.includes('update') && msg.includes('dependabot'))) {
       categories.dependencies.push(commit);
     } else if (msg.includes('refactor') || msg.includes('clean') || msg.includes('improve')) {
       categories.refactoring.push(commit);
@@ -296,14 +296,25 @@ function main() {
   console.log('✍️  Generating story...\n');
   const markdown = generateStoryMarkdown(weeks);
   
-  // Determine output filename
-  const now = new Date();
+  // Determine output filename based on the latest commit date
+  const weekNumbers = Object.keys(weeks).sort((a, b) => a - b);
+  let latestDate = new Date();
+  
+  if (weekNumbers.length > 0) {
+    weekNumbers.forEach(weekNum => {
+      const week = weeks[weekNum];
+      if (!latestDate || week.endDate > latestDate) {
+        latestDate = week.endDate;
+      }
+    });
+  }
+  
   const monthNames = [
     'january', 'february', 'march', 'april', 'may', 'june',
     'july', 'august', 'september', 'october', 'november', 'december'
   ];
-  const month = monthNames[now.getMonth()];
-  const year = now.getFullYear();
+  const month = monthNames[latestDate.getMonth()];
+  const year = latestDate.getFullYear();
   const filename = `${month}-${year}-story.md`;
   const filepath = path.join(process.cwd(), filename);
   
