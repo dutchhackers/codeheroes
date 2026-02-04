@@ -5,28 +5,33 @@ import { Highlight } from '../../../core/services/hq-data.service';
   selector: 'app-highlights',
   standalone: true,
   template: `
-    <div class="highlights-container card-glow-purple">
+    <div class="highlights-section">
       <h3 class="section-title">
-        <span class="icon">⚡</span>
-        RECENT HIGHLIGHTS
+        <span class="title-icon">⚡</span>
+        Recent Activity
       </h3>
 
       @if (highlights().length === 0) {
-        <div class="empty-state">No recent activity. Time to code!</div>
+        <div class="empty-state">
+          <p>No recent highlights</p>
+          <span>Start coding to see your achievements!</span>
+        </div>
       } @else {
         <div class="highlights-list">
           @for (highlight of highlights(); track highlight.id) {
-            <div class="highlight-item">
-              <div class="highlight-icon">
+            <div class="highlight-card">
+              <div class="highlight-icon-badge">
                 {{ getIconEmoji(highlight.icon) }}
               </div>
-              <div class="highlight-content">
-                <span class="highlight-message">{{ highlight.message || 'Activity recorded' }}</span>
-                @if (highlight.xp) {
-                  <span class="highlight-xp">(+{{ highlight.xp }} XP)</span>
-                }
+              <div class="highlight-body">
+                <p class="highlight-text">{{ highlight.message || 'Activity recorded' }}</p>
+                <span class="highlight-timestamp">{{ formatTime(highlight.timestamp) }}</span>
               </div>
-              <span class="highlight-time">{{ formatTime(highlight.timestamp) }}</span>
+              @if (highlight.xp) {
+                <div class="xp-tag">
+                  <span>+{{ highlight.xp }}</span>
+                </div>
+              }
             </div>
           }
         </div>
@@ -35,88 +40,111 @@ import { Highlight } from '../../../core/services/hq-data.service';
   `,
   styles: [
     `
-      .highlights-container {
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(8px);
-        border-radius: 8px;
-        padding: 1rem;
-        margin: 1rem 0;
+      .highlights-section {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin: 1.25rem 0;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
       }
 
       .section-title {
-        font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.6);
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin-bottom: 1rem;
+        font-size: 0.875rem;
         font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0 0 0.875rem 0;
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        letter-spacing: -0.02em;
       }
 
-      .icon {
-        font-size: 1rem;
+      .title-icon {
+        font-size: 1.125rem;
       }
 
       .empty-state {
         text-align: center;
-        padding: 1.5rem;
-        color: rgba(255, 255, 255, 0.4);
-        font-size: 0.85rem;
+        padding: 3rem 1rem;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .empty-state p {
+        font-size: 1rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 500;
+      }
+
+      .empty-state span {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.35);
       }
 
       .highlights-list {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 0.5rem;
       }
 
-      .highlight-item {
+      .highlight-card {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         gap: 0.75rem;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 0.625rem 0.75rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        transition: all 0.2s;
       }
 
-      .highlight-item:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
+      .highlight-card:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.1);
       }
 
-      .highlight-icon {
-        font-size: 1.1rem;
-        line-height: 1;
+      .highlight-icon-badge {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        font-size: 1rem;
         flex-shrink: 0;
-        width: 1.5rem;
-        text-align: center;
       }
 
-      .highlight-content {
+      .highlight-body {
         flex: 1;
         min-width: 0;
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+      }
+
+      .highlight-text {
+        font-size: 0.8125rem;
+        color: rgba(255, 255, 255, 0.85);
+        margin: 0;
         line-height: 1.4;
       }
 
-      .highlight-message {
-        display: inline;
+      .highlight-timestamp {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.4);
       }
 
-      .highlight-xp {
-        color: var(--neon-green);
+      .xp-tag {
+        background: color-mix(in srgb, var(--neon-green) 15%, transparent);
+        border: 1px solid color-mix(in srgb, var(--neon-green) 30%, transparent);
+        border-radius: 6px;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
         font-weight: 600;
-        margin-left: 0.25rem;
+        color: var(--neon-green);
         white-space: nowrap;
-      }
-
-      .highlight-time {
-        font-size: 0.7rem;
-        color: rgba(255, 255, 255, 0.3);
-        white-space: nowrap;
-        flex-shrink: 0;
       }
     `,
   ],

@@ -1,6 +1,8 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { Auth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, Unsubscribe } from '@angular/fire/auth';
+import { Subscription, filter } from 'rxjs';
 import { BottomNavComponent } from './bottom-nav.component';
 import { EnvironmentBannerComponent, showEnvironmentIndicator } from './environment-banner.component';
 
@@ -66,6 +68,14 @@ import { EnvironmentBannerComponent, showEnvironmentIndicator } from './environm
         <router-outlet />
         <app-bottom-nav />
       }
+
+      <!-- Update available banner -->
+      @if (updateAvailable()) {
+        <div class="update-banner" role="alert">
+          <span>A new version is available</span>
+          <button type="button" (click)="applyUpdate()">Update now</button>
+        </div>
+      }
     </div>
   `,
   styles: [
@@ -73,29 +83,81 @@ import { EnvironmentBannerComponent, showEnvironmentIndicator } from './environm
       :host {
         display: block;
       }
+
+      .update-banner {
+        position: fixed;
+        bottom: calc(5rem + env(safe-area-inset-bottom));
+        left: 1rem;
+        right: 1rem;
+        z-index: 110; /* Above modals (z-index: 100) */
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.875rem 1.25rem;
+        background: rgba(0, 245, 255, 0.1);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 245, 255, 0.3);
+        border-radius: 12px;
+        color: white;
+        font-size: 0.875rem;
+        box-shadow: 0 0 16px rgba(0, 245, 255, 0.15);
+      }
+
+      .update-banner button {
+        flex-shrink: 0;
+        padding: 0.375rem 1rem;
+        background: var(--neon-cyan, #00f5ff);
+        color: black;
+        font-weight: 600;
+        font-size: 0.8125rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        min-height: 2.75rem;
+      }
+
+      .update-banner button:hover {
+        opacity: 0.85;
+      }
     `,
   ],
 })
 export class ShellComponent implements OnInit, OnDestroy {
   readonly #auth = inject(Auth);
+  readonly #swUpdate = inject(SwUpdate);
   readonly showBanner = showEnvironmentIndicator;
 
   #authUnsubscribe: Unsubscribe | null = null;
+  #updateSubscription: Subscription | null = null;
 
   isAuthenticated = signal(false);
   isLoading = signal(true);
+  updateAvailable = signal(false);
 
   ngOnInit() {
     this.#authUnsubscribe = onAuthStateChanged(this.#auth, (user) => {
       this.isAuthenticated.set(!!user);
       this.isLoading.set(false);
     });
+
+    if (this.#swUpdate.isEnabled) {
+      this.#updateSubscription = this.#swUpdate.versionUpdates
+        .pipe(filter((event): event is VersionReadyEvent => event.type === 'VERSION_READY'))
+        .subscribe(() => this.updateAvailable.set(true));
+    }
   }
 
   ngOnDestroy() {
     if (this.#authUnsubscribe) {
       this.#authUnsubscribe();
     }
+    this.#updateSubscription?.unsubscribe();
+  }
+
+  applyUpdate(): void {
+    location.reload();
   }
 
   async signInWithGoogle() {
