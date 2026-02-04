@@ -13,8 +13,15 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
 
       <div class="progress-container">
         <!-- Circular Progress -->
-        <div class="circular-progress">
-          <svg class="progress-ring" viewBox="0 0 120 120">
+        <div
+          class="circular-progress"
+          role="progressbar"
+          [attr.aria-valuenow]="roundedPercent()"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-label]="'Daily progress: ' + roundedPercent() + '% of goal'"
+        >
+          <svg class="progress-ring" viewBox="0 0 120 120" aria-hidden="true">
             <circle class="progress-ring-bg" cx="60" cy="60" r="52" />
             <circle
               class="progress-ring-fill"
@@ -109,6 +116,7 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
         stroke: var(--neon-cyan);
         stroke-width: 8;
         stroke-linecap: round;
+        /* Circumference = 2 * π * r = 2 * 3.14159 * 52 ≈ 326.73 */
         stroke-dasharray: 326.73;
         transition: stroke-dashoffset 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
       }

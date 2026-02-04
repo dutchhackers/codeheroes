@@ -50,7 +50,7 @@ const VISIBLE_BADGES_COUNT = 5;
           @if (hiddenCount > 0) {
             <button
               class="badge-card more-card"
-              (click)="openModal()"
+              (click)="onViewAllClick()"
               [attr.aria-label]="'View ' + hiddenCount + ' more badges'"
             >
               <span class="more-count">+{{ hiddenCount }}</span>
@@ -307,7 +307,7 @@ export class BadgesGridComponent {
     return this._badgeDisplays.length - VISIBLE_BADGES_COUNT;
   }
 
-  openModal(): void {
+  onViewAllClick(): void {
     this.viewAll.emit();
   }
 }

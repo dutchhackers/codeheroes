@@ -89,7 +89,7 @@ import { EnvironmentBannerComponent, showEnvironmentIndicator } from './environm
         bottom: calc(5rem + env(safe-area-inset-bottom));
         left: 1rem;
         right: 1rem;
-        z-index: 100;
+        z-index: 110; /* Above modals (z-index: 100) */
         display: flex;
         align-items: center;
         justify-content: space-between;
