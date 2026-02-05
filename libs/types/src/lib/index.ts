@@ -16,6 +16,8 @@ export * from './activity/time-based-activity.types';
 
 export * from './gamification';
 
+export * from './project/project.types';
+
 export * from './game/action.types';
 export * from './game/context.types';
 export * from './game/metrics.types';
