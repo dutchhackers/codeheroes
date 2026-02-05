@@ -23,6 +23,14 @@ export const appRoutes: Routes = [
     loadComponent: () => import('./pages/projects/projects.component').then((m) => m.ProjectsComponent),
   },
   {
+    path: 'search',
+    loadComponent: () => import('./pages/user-search/user-search.component').then((m) => m.UserSearchComponent),
+  },
+  {
+    path: 'users/:id',
+    loadComponent: () => import('./pages/user-profile/user-profile.component').then((m) => m.UserProfileComponent),
+  },
+  {
     path: '**',
     redirectTo: 'hq',
   },

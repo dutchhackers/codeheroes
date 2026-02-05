@@ -5,63 +5,108 @@ import { UserStats } from '@codeheroes/types';
   selector: 'app-xp-progress',
   standalone: true,
   template: `
-    <div class="xp-container card-glow-cyan">
+    <div class="xp-progress-card">
       <div class="xp-header">
-        <span class="xp-label">XP</span>
-        <span class="xp-total">{{ formatNumber(stats()?.xp ?? 0) }}</span>
+        <div class="xp-info">
+          <span class="xp-label">Total Experience</span>
+          <span class="xp-total">{{ formatNumber(stats()?.xp ?? 0) }} XP</span>
+        </div>
+        <div class="level-badge">
+          <span class="level-label">Level</span>
+          <span class="level-number">{{ stats()?.level ?? 1 }}</span>
+        </div>
       </div>
-      <div
-        class="progress-bar-container"
-        role="progressbar"
-        [attr.aria-valuenow]="progressPercent()"
-        aria-valuemin="0"
-        aria-valuemax="100"
-        [attr.aria-label]="'Experience progress: ' + progressPercent() + ' percent'"
-      >
-        <div class="progress-bar" [style.width.%]="progressPercent()"></div>
-      </div>
-      <div class="xp-footer">
-        <span class="xp-current">{{ stats()?.currentLevelXp ?? 0 }}</span>
-        <span class="xp-divider">/</span>
-        <span class="xp-needed">{{ stats()?.xpToNextLevel ?? 0 }}</span>
-        <span class="xp-suffix">to Level {{ (stats()?.level ?? 0) + 1 }}</span>
+      <div class="progress-section">
+        <div
+          class="progress-bar-container"
+          role="progressbar"
+          [attr.aria-valuenow]="progressPercent()"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-label]="'Level progress: ' + progressPercent().toFixed(0) + ' percent to level ' + ((stats()?.level ?? 0) + 1)"
+        >
+          <div class="progress-bar" [style.width.%]="progressPercent()"></div>
+        </div>
+        <div class="progress-info">
+          <span class="progress-text">{{ stats()?.currentLevelXp ?? 0 }} / {{ stats()?.xpToNextLevel ?? 0 }} XP</span>
+          <span class="next-level-text">{{ remainingXp() }} to Level {{ (stats()?.level ?? 0) + 1 }}</span>
+        </div>
       </div>
     </div>
   `,
   styles: [
     `
-      .xp-container {
-        background: rgba(0, 0, 0, 0.6);
-        border-radius: 8px;
-        padding: 1rem;
-        margin: 1rem 0;
+      .xp-progress-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
       }
 
       .xp-header {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.5rem;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+      }
+
+      .xp-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
       }
 
       .xp-label {
-        font-size: 0.75rem;
+        font-size: 0.875rem;
         color: rgba(255, 255, 255, 0.6);
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
+        font-weight: 500;
       }
 
       .xp-total {
-        font-size: 1.25rem;
-        font-weight: bold;
+        font-size: 1.75rem;
+        font-weight: 700;
         color: var(--neon-cyan);
-        text-shadow: 0 0 10px color-mix(in srgb, var(--neon-cyan) 50%, transparent);
+        line-height: 1;
+      }
+
+      .level-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        background: color-mix(in srgb, var(--neon-purple) 15%, transparent);
+        border: 1px solid color-mix(in srgb, var(--neon-purple) 30%, transparent);
+        border-radius: 12px;
+        padding: 0.5rem 1rem;
+      }
+
+      .level-label {
+        font-size: 0.625rem;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .level-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--neon-purple);
+        line-height: 1;
+      }
+
+      .progress-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
       }
 
       .progress-bar-container {
-        height: 8px;
+        height: 10px;
         background: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
+        border-radius: 8px;
         overflow: hidden;
         position: relative;
       }
@@ -69,36 +114,37 @@ import { UserStats } from '@codeheroes/types';
       .progress-bar {
         height: 100%;
         background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
-        border-radius: 4px;
-        transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        will-change: width;
-        box-shadow: 0 0 10px var(--neon-cyan);
+        border-radius: 8px;
+        transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 0 12px var(--neon-cyan);
+        position: relative;
       }
 
-      .xp-footer {
+      .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent);
+        border-radius: 8px 8px 0 0;
+      }
+
+      .progress-info {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 0.25rem;
-        margin-top: 0.5rem;
-        font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.875rem;
       }
 
-      .xp-current {
-        color: var(--neon-cyan);
-      }
-
-      .xp-divider {
-        color: rgba(255, 255, 255, 0.3);
-      }
-
-      .xp-needed {
+      .progress-text {
         color: rgba(255, 255, 255, 0.7);
+        font-weight: 500;
       }
 
-      .xp-suffix {
-        margin-left: 0.5rem;
-        color: rgba(255, 255, 255, 0.4);
+      .next-level-text {
+        color: rgba(255, 255, 255, 0.5);
       }
     `,
   ],
@@ -110,6 +156,12 @@ export class XpProgressComponent {
     const s = this.stats();
     if (!s || !s.xpToNextLevel) return 0;
     return Math.min(100, (s.currentLevelXp / s.xpToNextLevel) * 100);
+  });
+
+  remainingXp = computed(() => {
+    const s = this.stats();
+    if (!s) return 0;
+    return (s.xpToNextLevel ?? 0) - (s.currentLevelXp ?? 0);
   });
 
   formatNumber(num: number): string {

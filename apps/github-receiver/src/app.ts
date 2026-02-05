@@ -57,9 +57,23 @@ export const App = async (req: Request, res: Response): Promise<void> => {
       provider: providerName,
     };
 
-    // Process the event
+    // Process the event - this includes duplicate check
     const processor = new EventProcessor(eventData);
     const result = await processor.process();
+
+    // Check for duplicate or failed event processing BEFORE creating game action
+    // This prevents duplicate game actions from being created when webhooks are redelivered
+    if (!result.success) {
+      if (result.error) {
+        throw result.error;
+      }
+      logger.info('Event already processed or skipped, not creating game action', {
+        eventId,
+        message: result.message,
+      });
+      ResponseHandler.success(res, result.message);
+      return;
+    }
 
     // Lookup internal user ID
     const databaseService = new DatabaseService();
@@ -80,21 +94,15 @@ export const App = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Create game action from webhook payload
+    // Only reached if event was not a duplicate
     const gameActionService = new GameActionService();
     await gameActionService.generateGameActionFromWebhook({
       payload: eventData.payload,
       provider: eventData.provider,
       eventType: eventData.eventType,
       userId,
+      eventId, // Pass eventId for deterministic game action ID
     });
-
-    if (!result.success) {
-      if (result.error) {
-        throw result.error;
-      }
-      ResponseHandler.success(res, result.message);
-      return;
-    }
 
     ResponseHandler.success(res, MESSAGES.EVENT_PROCESSED);
   } catch (error) {

@@ -1,4 +1,4 @@
-import { Component, Input, inject, ChangeDetectorRef, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, Input, inject, output, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { BadgeRarity } from '@codeheroes/types';
 import { UserBadge, getBadgeRarity, getBadgeEmoji, getBadgeRarityColor } from '../../../core/models/user-badge.model';
@@ -50,7 +50,7 @@ const VISIBLE_BADGES_COUNT = 5;
           @if (hiddenCount > 0) {
             <button
               class="badge-card more-card"
-              (click)="openModal()"
+              (click)="onViewAllClick()"
               [attr.aria-label]="'View ' + hiddenCount + ' more badges'"
             >
               <span class="more-count">+{{ hiddenCount }}</span>
@@ -68,46 +68,6 @@ const VISIBLE_BADGES_COUNT = 5;
       }
     </section>
 
-    <!-- Modal Overlay -->
-    @if (isModalOpen()) {
-      <div
-        class="modal-overlay"
-        (click)="closeModal()"
-        (keydown.escape)="closeModal()"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-        tabindex="-1"
-      >
-        <div class="modal-content" (click)="$event.stopPropagation()">
-          <div class="modal-header">
-            <h2 id="modal-title" class="modal-title">All Badges</h2>
-            <button class="modal-close" (click)="closeModal()" aria-label="Close" autofocus>✕</button>
-          </div>
-          <div class="modal-body">
-            <div class="modal-badges-grid" role="list">
-              @for (item of badgeDisplays; track item.badge.id) {
-                <div
-                  class="badge-card"
-                  [class.legendary]="item.rarity === 'LEGENDARY'"
-                  [style.--badge-color]="item.color"
-                  role="listitem"
-                >
-                  <span class="badge-emoji" aria-hidden="true">{{ item.emoji }}</span>
-                  <span class="badge-name">{{ item.badge.name }}</span>
-                  @if (item.badge.earnedAt) {
-                    <span class="badge-date">{{ item.badge.earnedAt | date: 'MMM yyyy' }}</span>
-                  }
-                  @if (item.badge.xp) {
-                    <span class="badge-xp">+{{ item.badge.xp }} XP</span>
-                  }
-                </div>
-              }
-            </div>
-          </div>
-        </div>
-      </div>
-    }
   `,
   styles: [
     `
@@ -126,14 +86,14 @@ const VISIBLE_BADGES_COUNT = 5;
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        font-family: monospace;
+        font-family: inherit;
         color: var(--neon-cyan);
         margin: 0;
       }
 
       .badge-count {
         font-size: 0.875rem;
-        font-family: monospace;
+        font-family: inherit;
         color: rgba(255, 255, 255, 0.5);
         background: rgba(0, 0, 0, 0.4);
         padding: 0.25rem 0.5rem;
@@ -223,13 +183,13 @@ const VISIBLE_BADGES_COUNT = 5;
       .badge-date {
         font-size: 0.625rem;
         color: rgba(255, 255, 255, 0.4);
-        font-family: monospace;
+        font-family: inherit;
       }
 
       .badge-xp {
         font-size: 0.625rem;
         color: var(--badge-color);
-        font-family: monospace;
+        font-family: inherit;
         font-weight: 600;
         text-shadow: 0 0 8px color-mix(in srgb, var(--badge-color) 50%, transparent);
       }
@@ -251,7 +211,7 @@ const VISIBLE_BADGES_COUNT = 5;
         font-size: 1.75rem;
         font-weight: 700;
         color: var(--neon-cyan, #00ffff);
-        font-family: monospace;
+        font-family: inherit;
         line-height: 1;
         text-shadow: 0 0 10px var(--neon-cyan, #00ffff);
       }
@@ -267,114 +227,9 @@ const VISIBLE_BADGES_COUNT = 5;
       .more-hint {
         font-size: 0.625rem;
         color: rgba(255, 255, 255, 0.4);
-        font-family: monospace;
+        font-family: inherit;
       }
 
-      /* Modal styles */
-      .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.85);
-        backdrop-filter: blur(4px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        padding: 1rem;
-        animation: fadeIn 0.2s ease;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-
-      .modal-content {
-        background: linear-gradient(180deg, rgba(20, 20, 40, 0.98) 0%, rgba(10, 10, 25, 0.98) 100%);
-        border: 2px solid var(--neon-cyan, #00ffff);
-        border-radius: 12px;
-        max-width: 600px;
-        width: 100%;
-        max-height: 80vh;
-        display: flex;
-        flex-direction: column;
-        box-shadow:
-          0 0 20px rgba(0, 255, 255, 0.3),
-          0 0 40px rgba(0, 255, 255, 0.1),
-          inset 0 0 30px rgba(0, 255, 255, 0.05);
-        animation: slideUp 0.3s ease;
-      }
-
-      @keyframes slideUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .modal-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-      }
-
-      .modal-title {
-        font-size: 1rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        font-family: monospace;
-        color: var(--neon-cyan, #00ffff);
-        margin: 0;
-        text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-      }
-
-      .modal-close {
-        background: none;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: rgba(255, 255, 255, 0.6);
-        width: 32px;
-        height: 32px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-      }
-
-      .modal-close:hover {
-        border-color: var(--neon-cyan, #00ffff);
-        color: var(--neon-cyan, #00ffff);
-        box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-      }
-
-      .modal-body {
-        padding: 1.25rem;
-        overflow-y: auto;
-      }
-
-      .modal-badges-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-      }
-
-      @media (min-width: 480px) {
-        .modal-badges-grid {
-          grid-template-columns: repeat(3, 1fr);
-        }
-      }
 
       .empty-state {
         text-align: center;
@@ -400,7 +255,7 @@ const VISIBLE_BADGES_COUNT = 5;
       .empty-hint {
         font-size: 0.75rem;
         color: rgba(255, 255, 255, 0.3);
-        font-family: monospace;
+        font-family: inherit;
         margin: 0;
       }
     `,
@@ -411,7 +266,7 @@ export class BadgesGridComponent {
   private _badges: UserBadge[] = [];
   private _badgeDisplays: BadgeDisplay[] = [];
 
-  isModalOpen = signal(false);
+  viewAll = output<void>();
 
   @Input()
   set badges(value: UserBadge[]) {
@@ -452,11 +307,7 @@ export class BadgesGridComponent {
     return this._badgeDisplays.length - VISIBLE_BADGES_COUNT;
   }
 
-  openModal(): void {
-    this.isModalOpen.set(true);
-  }
-
-  closeModal(): void {
-    this.isModalOpen.set(false);
+  onViewAllClick(): void {
+    this.viewAll.emit();
   }
 }

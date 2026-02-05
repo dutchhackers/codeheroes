@@ -9,6 +9,9 @@ import {
 import { Firestore } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../config/level-thresholds';
 
+// Firestore error code for ALREADY_EXISTS
+const ALREADY_EXISTS_ERROR_CODE = 6;
+
 /**
  * Trigger information for badge activities
  */
@@ -31,7 +34,39 @@ export class RewardActivityService {
   }
 
   /**
+   * Generates a deterministic activity ID for badge earned events.
+   * The ID format depends on the trigger type to ensure uniqueness:
+   * - Level-up badges: badge_{userId}_{badgeId}_level{level}
+   * - Milestone badges: badge_{userId}_{badgeId}_count{count}
+   * - Special/one-time badges: badge_{userId}_{badgeId}
+   *
+   * @param userId User ID
+   * @param badgeId Badge ID
+   * @param trigger Optional trigger information
+   * @returns Deterministic activity ID
+   */
+  private generateBadgeActivityId(userId: string, badgeId: string, trigger?: BadgeTrigger): string {
+    const baseId = `badge_${userId}_${badgeId}`;
+
+    if (!trigger) {
+      return baseId;
+    }
+
+    switch (trigger.type) {
+      case 'level-up':
+        return `${baseId}_level${trigger.level}`;
+      case 'milestone':
+        return `${baseId}_count${trigger.count}`;
+      case 'special':
+      default:
+        return baseId;
+    }
+  }
+
+  /**
    * Record a badge earned activity in the user's activity feed
+   * Uses deterministic IDs to ensure idempotency and prevent duplicates.
+   *
    * @param userId User ID
    * @param badge The badge that was earned
    * @param trigger Optional information about what triggered the badge
@@ -43,7 +78,8 @@ export class RewardActivityService {
     trigger?: BadgeTrigger
   ): Promise<BadgeEarnedActivity> {
     const now = getCurrentTimeAsISO();
-    const activityId = `badge_${Date.now()}_${badge.id}`;
+    // Use deterministic ID based on userId, badgeId, and trigger to ensure idempotency
+    const activityId = this.generateBadgeActivityId(userId, badge.id, trigger);
 
     const activity: BadgeEarnedActivity = {
       id: activityId,
@@ -65,19 +101,29 @@ export class RewardActivityService {
       provider: 'system',
     };
 
-    await this.saveActivity(userId, activity);
+    const saved = await this.saveActivityIdempotent(userId, activity);
 
-    logger.info('Badge earned activity recorded', {
-      userId,
-      badgeId: badge.id,
-      activityId,
-    });
+    if (saved) {
+      logger.info('Badge earned activity recorded', {
+        userId,
+        badgeId: badge.id,
+        activityId,
+      });
+    } else {
+      logger.info('Badge earned activity already exists, skipping', {
+        userId,
+        badgeId: badge.id,
+        activityId,
+      });
+    }
 
     return activity;
   }
 
   /**
    * Record a level up activity in the user's activity feed
+   * Uses deterministic IDs to ensure idempotency and prevent duplicates.
+   *
    * @param userId User ID
    * @param previousLevel The level before leveling up
    * @param newLevel The new level achieved
@@ -91,7 +137,9 @@ export class RewardActivityService {
     totalXp: number
   ): Promise<LevelUpActivity> {
     const now = getCurrentTimeAsISO();
-    const activityId = `levelup_${Date.now()}_${newLevel}`;
+    // Use deterministic ID based on userId and level to ensure idempotency
+    // This prevents duplicate activities if multiple events are processed for the same level-up
+    const activityId = `levelup_${userId}_${newLevel}`;
 
     const xpProgress = getXpProgress(totalXp);
 
@@ -114,20 +162,58 @@ export class RewardActivityService {
       provider: 'system',
     };
 
-    await this.saveActivity(userId, activity);
+    const saved = await this.saveActivityIdempotent(userId, activity);
 
-    logger.info('Level up activity recorded', {
-      userId,
-      previousLevel,
-      newLevel,
-      activityId,
-    });
+    if (saved) {
+      logger.info('Level up activity recorded', {
+        userId,
+        previousLevel,
+        newLevel,
+        activityId,
+      });
+    } else {
+      logger.info('Level up activity already exists, skipping', {
+        userId,
+        newLevel,
+        activityId,
+      });
+    }
 
     return activity;
   }
 
   /**
-   * Save an activity to Firestore
+   * Save an activity to Firestore with idempotency guarantee.
+   * Uses atomic create() to prevent duplicates from concurrent calls.
+   *
+   * @param userId User ID
+   * @param activity Activity to save
+   * @returns true if activity was created, false if it already existed
+   */
+  private async saveActivityIdempotent(userId: string, activity: Activity): Promise<boolean> {
+    const activityRef = this.db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.Activities)
+      .doc(activity.id);
+
+    try {
+      // Use create() which atomically fails if document already exists
+      await activityRef.create(activity);
+      return true;
+    } catch (error: unknown) {
+      // Check if this is an ALREADY_EXISTS error
+      const firestoreError = error as { code?: number | string };
+      if (firestoreError.code === ALREADY_EXISTS_ERROR_CODE || firestoreError.code === 'ALREADY_EXISTS') {
+        return false; // Already exists, not an error
+      }
+      throw error; // Rethrow other errors
+    }
+  }
+
+  /**
+   * @deprecated Use saveActivityIdempotent instead
+   * Legacy save method for backwards compatibility
    */
   private async saveActivity(userId: string, activity: Activity): Promise<void> {
     const activityRef = this.db

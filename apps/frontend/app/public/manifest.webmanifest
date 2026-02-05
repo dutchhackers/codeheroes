@@ -1,10 +1,13 @@
 {
   "name": "Code Heroes",
   "short_name": "Code Heroes",
+  "description": "Level up your code game - gamification for developers",
   "theme_color": "#000000",
   "background_color": "#000000",
   "display": "standalone",
-  "display-overrides": ["standalone"],
+  "display_override": ["standalone"],
+  "orientation": "portrait",
+  "id": "/",
   "scope": "./",
   "start_url": "./",
   "icons": [

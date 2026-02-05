@@ -52,7 +52,7 @@ const STACK_ICONS = {
       @if (!isExpanded()) {
         <div class="px-4 md:px-5 pb-3 md:pb-4">
           <div
-            class="border-t pt-2 md:pt-3 flex items-center justify-between text-xs md:text-sm font-mono"
+            class="border-t pt-2 md:pt-3 flex items-center justify-between text-xs md:text-sm"
             [style.border-color]="stateBorderColor() + '33'"
           >
             <span class="text-slate-500 truncate">
@@ -71,7 +71,7 @@ const STACK_ICONS = {
           </div>
           <!-- Footer at bottom when expanded -->
           <div
-            class="border-t mt-4 pt-2 md:pt-3 flex items-center justify-between text-xs md:text-sm font-mono"
+            class="border-t mt-4 pt-2 md:pt-3 flex items-center justify-between text-xs md:text-sm"
             [style.border-color]="stateBorderColor() + '33'"
           >
             <span class="text-slate-500 truncate">
