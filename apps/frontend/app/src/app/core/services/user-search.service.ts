@@ -10,7 +10,7 @@ import {
   startAt,
   endAt,
 } from '@angular/fire/firestore';
-import { Observable, of, catchError } from 'rxjs';
+import { Observable, of, catchError, map } from 'rxjs';
 import { UserDto } from '@codeheroes/types';
 
 @Injectable({
@@ -45,11 +45,12 @@ export class UserSearchService {
     return runInInjectionContext(this.#injector, () =>
       collectionData(searchQuery, { idField: 'id' })
     ).pipe(
+      map((data) => data as UserDto[]),
       catchError((error) => {
         console.error('Error searching users:', error);
         return of([]);
       })
-    ) as Observable<UserDto[]>;
+    );
   }
 
   /**
@@ -67,10 +68,11 @@ export class UserSearchService {
     return runInInjectionContext(this.#injector, () =>
       collectionData(usersQuery, { idField: 'id' })
     ).pipe(
+      map((data) => data as UserDto[]),
       catchError((error) => {
         console.error('Error fetching users:', error);
         return of([]);
       })
-    ) as Observable<UserDto[]>;
+    );
   }
 }
