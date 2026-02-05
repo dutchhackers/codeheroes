@@ -118,6 +118,8 @@ import { WeeklyStatsRecord } from '../../../core/services/user-stats.service';
         flex-direction: column;
         gap: 0.125rem;
         min-width: 0;
+        flex: 1;
+        overflow: hidden;
       }
 
       .trend-value {
@@ -132,9 +134,8 @@ import { WeeklyStatsRecord } from '../../../core/services/user-stats.service';
         color: rgba(255, 255, 255, 0.5);
         text-transform: uppercase;
         letter-spacing: 0.03em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        overflow-wrap: break-word;
+        line-height: 1.2;
       }
 
       @media (min-width: 768px) {
