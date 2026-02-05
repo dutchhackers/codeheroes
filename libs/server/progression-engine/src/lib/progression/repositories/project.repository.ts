@@ -41,7 +41,6 @@ export class ProjectRepository extends BaseRepository<Project> {
     id: string,
     data: {
       name?: string;
-      slug?: string;
       description?: string;
       repositories?: Project['repositories'];
     },
@@ -65,11 +64,18 @@ export class ProjectRepository extends BaseRepository<Project> {
   }
 
   async deleteProject(id: string): Promise<void> {
-    // Clean up repo mappings first
-    const project = await this.findById(id);
-    if (project) {
-      await this.deleteRepoMappings(project.repositories);
+    // Clean up all repo mappings for this project by projectId
+    const mappingsSnapshot = await this.db
+      .collection(Collections.RepoProjectMap)
+      .where('projectId', '==', id)
+      .get();
+
+    if (!mappingsSnapshot.empty) {
+      const batch = this.db.batch();
+      mappingsSnapshot.forEach((doc) => batch.delete(doc.ref));
+      await batch.commit();
     }
+
     await this.delete(id);
   }
 
@@ -92,7 +98,7 @@ export class ProjectRepository extends BaseRepository<Project> {
         return null;
       }
 
-      return { id: doc.id, ...doc.data() } as unknown as RepoProjectMapping;
+      return doc.data() as RepoProjectMapping;
     } catch (error) {
       logger.error('Error resolving project for repo', { owner, repoName, error });
       throw error;
@@ -165,48 +171,14 @@ export class ProjectRepository extends BaseRepository<Project> {
     }
 
     // 2. Daily stats
-    if (dailyDoc.exists) {
-      batch.update(dailyStatsRef, {
-        xpGained: FieldValue.increment(xpGained),
-        activeMembers: FieldValue.arrayUnion(userId),
-        activeRepos: FieldValue.arrayUnion(repoFullName),
-        [`counters.actions.${actionType}`]: FieldValue.increment(1),
-        lastActivity,
-        updatedAt: now,
-      });
-    } else {
-      const initialDaily: ProjectTimeBasedStats = {
-        timeframeId: timeFrames.daily,
-        xpGained,
-        counters: this.createCountersWithAction(actionType),
-        activeMembers: [userId],
-        activeRepos: [repoFullName],
-        lastActivity,
-      };
-      batch.set(dailyStatsRef, { ...initialDaily, createdAt: now, updatedAt: now });
-    }
+    this.batchTimeBasedStats(batch, dailyDoc, dailyStatsRef, timeFrames.daily, {
+      xpGained, actionType, userId, repoFullName, lastActivity, now,
+    });
 
     // 3. Weekly stats
-    if (weeklyDoc.exists) {
-      batch.update(weeklyStatsRef, {
-        xpGained: FieldValue.increment(xpGained),
-        activeMembers: FieldValue.arrayUnion(userId),
-        activeRepos: FieldValue.arrayUnion(repoFullName),
-        [`counters.actions.${actionType}`]: FieldValue.increment(1),
-        lastActivity,
-        updatedAt: now,
-      });
-    } else {
-      const initialWeekly: ProjectTimeBasedStats = {
-        timeframeId: timeFrames.weekly,
-        xpGained,
-        counters: this.createCountersWithAction(actionType),
-        activeMembers: [userId],
-        activeRepos: [repoFullName],
-        lastActivity,
-      };
-      batch.set(weeklyStatsRef, { ...initialWeekly, createdAt: now, updatedAt: now });
-    }
+    this.batchTimeBasedStats(batch, weeklyDoc, weeklyStatsRef, timeFrames.weekly, {
+      xpGained, actionType, userId, repoFullName, lastActivity, now,
+    });
 
     await batch.commit();
   }
@@ -283,16 +255,41 @@ export class ProjectRepository extends BaseRepository<Project> {
     await batch.commit();
   }
 
-  private async deleteRepoMappings(
-    repositories: Project['repositories'],
-  ): Promise<void> {
-    const batch = this.db.batch();
-    for (const repo of repositories) {
-      const docId = `${repo.provider}_${repo.owner}_${repo.name}`;
-      const ref = this.db.collection(Collections.RepoProjectMap).doc(docId);
-      batch.delete(ref);
+  private batchTimeBasedStats(
+    batch: FirebaseFirestore.WriteBatch,
+    doc: FirebaseFirestore.DocumentSnapshot,
+    ref: FirebaseFirestore.DocumentReference,
+    timeframeId: string,
+    params: {
+      xpGained: number;
+      actionType: GameActionType;
+      userId: string;
+      repoFullName: string;
+      lastActivity: { type: GameActionType; timestamp: string; userId: string };
+      now: string;
+    },
+  ): void {
+    const { xpGained, actionType, userId, repoFullName, lastActivity, now } = params;
+    if (doc.exists) {
+      batch.update(ref, {
+        xpGained: FieldValue.increment(xpGained),
+        activeMembers: FieldValue.arrayUnion(userId),
+        activeRepos: FieldValue.arrayUnion(repoFullName),
+        [`counters.actions.${actionType}`]: FieldValue.increment(1),
+        lastActivity,
+        updatedAt: now,
+      });
+    } else {
+      const initialStats: ProjectTimeBasedStats = {
+        timeframeId,
+        xpGained,
+        counters: this.createCountersWithAction(actionType),
+        activeMembers: [userId],
+        activeRepos: [repoFullName],
+        lastActivity,
+      };
+      batch.set(ref, { ...initialStats, createdAt: now, updatedAt: now });
     }
-    await batch.commit();
   }
 
   private createCountersWithAction(actionType: GameActionType): ActivityCounters {

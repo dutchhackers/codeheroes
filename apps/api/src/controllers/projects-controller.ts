@@ -1,10 +1,13 @@
 import { DatabaseInstance, logger } from '@codeheroes/common';
 import { ProjectRepository } from '@codeheroes/progression-engine';
-import { ProjectDetailDto, ProjectSummaryDto } from '@codeheroes/types';
+import { ConnectedAccountProvider, ProjectDetailDto, ProjectSummaryDto } from '@codeheroes/types';
 import * as express from 'express';
 import { getTimePeriodIds } from '@codeheroes/progression-engine';
 
 const router = express.Router();
+
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const VALID_PROVIDERS: ConnectedAccountProvider[] = ['github', 'strava', 'azure', 'bitbucket', 'system'];
 
 function getProjectRepository(): ProjectRepository {
   return new ProjectRepository(DatabaseInstance.getInstance());
@@ -75,13 +78,44 @@ router.post('/', async (req, res) => {
   try {
     const { name, slug, description, repositories = [] } = req.body;
 
-    if (!name || !slug) {
+    if (!name?.trim() || !slug) {
       res.status(400).json({ error: 'name and slug are required' });
       return;
     }
 
+    if (!SLUG_PATTERN.test(slug)) {
+      res.status(400).json({ error: 'slug must be lowercase alphanumeric with hyphens (e.g., "my-project")' });
+      return;
+    }
+
+    // Validate repositories
+    for (const r of repositories) {
+      if (!r.provider || !r.owner || !r.name) {
+        res.status(400).json({ error: 'Each repository must have provider, owner, and name' });
+        return;
+      }
+      if (!VALID_PROVIDERS.includes(r.provider)) {
+        res.status(400).json({ error: `Invalid provider "${r.provider}". Must be one of: ${VALID_PROVIDERS.join(', ')}` });
+        return;
+      }
+      r.fullName = `${r.owner}/${r.name}`;
+    }
+
     const repo = getProjectRepository();
-    const project = await repo.createProject({ name, slug, description, repositories });
+
+    // Check for duplicate slug
+    const existing = await repo.getProject(slug);
+    if (existing) {
+      res.status(409).json({ error: `Project with slug "${slug}" already exists` });
+      return;
+    }
+
+    const project = await repo.createProject({
+      name: name.trim(),
+      slug,
+      description: description?.trim(),
+      repositories,
+    });
 
     res.status(201).json(project);
   } catch (error) {
@@ -95,6 +129,29 @@ router.put('/:id', async (req, res) => {
   logger.debug('PUT /projects/:id', { id: req.params.id, body: req.body });
 
   try {
+    const { slug, repositories, name, description, ...rest } = req.body;
+
+    // Slug cannot be changed (it is the document ID)
+    if (slug !== undefined) {
+      res.status(400).json({ error: 'slug cannot be updated (it is the document ID)' });
+      return;
+    }
+
+    // Validate repositories if provided
+    if (repositories) {
+      for (const r of repositories) {
+        if (!r.provider || !r.owner || !r.name) {
+          res.status(400).json({ error: 'Each repository must have provider, owner, and name' });
+          return;
+        }
+        if (!VALID_PROVIDERS.includes(r.provider)) {
+          res.status(400).json({ error: `Invalid provider "${r.provider}". Must be one of: ${VALID_PROVIDERS.join(', ')}` });
+          return;
+        }
+        r.fullName = `${r.owner}/${r.name}`;
+      }
+    }
+
     const repo = getProjectRepository();
     const existing = await repo.getProject(req.params.id);
 
@@ -103,7 +160,12 @@ router.put('/:id', async (req, res) => {
       return;
     }
 
-    await repo.updateProject(req.params.id, req.body);
+    const updateData: Record<string, unknown> = {};
+    if (name !== undefined) updateData.name = name.trim();
+    if (description !== undefined) updateData.description = description?.trim();
+    if (repositories !== undefined) updateData.repositories = repositories;
+
+    await repo.updateProject(req.params.id, updateData);
     const updated = await repo.getProject(req.params.id);
 
     res.json(updated);
