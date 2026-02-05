@@ -46,14 +46,12 @@ This command builds the function and deploys it to Firebase with the name `azure
 
 ## Azure DevOps Event Support
 
-The function handles various Azure DevOps webhook event types:
-- Work item updates (creation, modification, state changes)
-- Git push events (commits, branches)
-- Pull request events (created, updated, completed)
-- Build completion events
-- Release deployment events
+The function currently handles the following Azure DevOps webhook event types:
+- **Git push events** (`git.push`) - Tracks code commits pushed to repositories
+- **Pull request created** (`git.pullrequest.created`) - Tracks new pull requests
+- **Pull request merged** (`git.pullrequest.merged`) - Tracks completed/merged pull requests
 
-Each event type is processed and mapped to the corresponding CodeHeroes event structure.
+Each event type is processed and mapped to the corresponding CodeHeroes event structure for XP calculation and game progression.
 
 ## Development
 
