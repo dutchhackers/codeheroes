@@ -71,6 +71,20 @@ export class UserStatsService {
   }
 
   /**
+   * Get a specific user by ID
+   */
+  getUserById(userId: string): Observable<UserDto | null> {
+    const userDocRef = doc(this.#firestore, `users/${userId}`);
+    return runInInjectionContext(this.#injector, () => docData(userDocRef, { idField: 'id' })).pipe(
+      map((data) => (data as UserDto) ?? null),
+      catchError((error) => {
+        console.error('Error fetching user by ID:', error);
+        return of(null);
+      }),
+    );
+  }
+
+  /**
    * Get user stats from the subcollection users/{userId}/stats/current
    */
   getUserStats(userId: string): Observable<UserStats | null> {
@@ -142,6 +156,20 @@ export class UserStatsService {
           return of({ user: null, stats: null });
         }
         return this.getUserStats(userDoc.id).pipe(map((stats) => ({ user: userDoc, stats })));
+      }),
+    );
+  }
+
+  /**
+   * Get any user's profile with stats by user ID
+   */
+  getAnyUserProfile(userId: string): Observable<CurrentUserProfile> {
+    return this.getUserById(userId).pipe(
+      switchMap((userDoc) => {
+        if (!userDoc) {
+          return of({ user: null, stats: null });
+        }
+        return this.getUserStats(userId).pipe(map((stats) => ({ user: userDoc, stats })));
       }),
     );
   }

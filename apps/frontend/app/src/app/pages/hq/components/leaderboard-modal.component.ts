@@ -158,6 +158,7 @@ export type LeaderboardPeriod = 'weekly' | 'daily';
       .modal-content {
         background: linear-gradient(135deg, rgba(15, 15, 25, 0.98), rgba(25, 15, 35, 0.98));
         border: 2px solid var(--neon-yellow);
+        border-bottom: none;
         border-radius: 16px 16px 0 0;
         width: 100%;
         max-width: 500px;
@@ -173,6 +174,7 @@ export type LeaderboardPeriod = 'weekly' | 'daily';
 
       @media (min-width: 640px) {
         .modal-content {
+          border-bottom: 2px solid var(--neon-yellow);
           border-radius: 16px;
           animation: fadeIn 0.2s ease-out;
         }

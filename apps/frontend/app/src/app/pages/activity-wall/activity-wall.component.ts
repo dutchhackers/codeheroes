@@ -14,28 +14,28 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
   standalone: true,
   imports: [ActivityItemComponent, ActivityStackComponent, DebugPanelComponent],
   template: `
-    <!-- Header -->
-    <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-4 py-4 md:px-8 md:py-5">
+    <!-- Header (desktop only - bottom nav identifies the tab on mobile) -->
+    <header class="hidden md:block sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-8 py-5">
       <div class="relative z-10">
-        <h1 class="text-2xl md:text-4xl font-bold italic text-white">Activity Wall</h1>
+        <h1 class="text-4xl font-bold italic text-white">Activity Wall</h1>
       </div>
     </header>
 
     <!-- Main Content -->
-    <main class="relative z-10 px-3 md:px-6 lg:px-8 pb-24">
+    <main class="relative z-10 px-3 pt-4 md:px-6 md:pt-0 lg:px-8 pb-24">
       @if (isLoading()) {
         <div class="flex items-center justify-center py-20 md:py-32">
-          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse font-mono" role="status" aria-live="polite">
+          <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse" role="status" aria-live="polite">
             Loading...
           </div>
         </div>
       } @else if (feedItems().length === 0) {
         <div class="flex flex-col items-center justify-center py-20 md:py-32">
-          <p class="text-lg md:text-2xl text-slate-500 font-mono">No activities yet</p>
-          <p class="text-sm md:text-lg mt-3 text-slate-600 font-mono">Awaiting activity stream...</p>
+          <p class="text-lg md:text-2xl text-slate-500">No activities yet</p>
+          <p class="text-sm md:text-lg mt-3 text-slate-600">Awaiting activity stream...</p>
         </div>
       } @else {
-        <div class="py-6 flex flex-col gap-6 md:gap-8 lg:gap-10">
+        <div class="max-w-2xl mx-auto py-6 flex flex-col gap-6 md:gap-8 lg:gap-10">
           @for (item of feedItems(); track trackFeedItem(item); let i = $index) {
             @if (isStack(item)) {
               <app-activity-stack [stack]="item" [isNew]="i === 0" (selectActivity)="onSelectActivity($event)" />

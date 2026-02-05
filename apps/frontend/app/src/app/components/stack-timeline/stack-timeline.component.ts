@@ -41,12 +41,12 @@ interface TimelineEvent {
 
             <!-- Event content -->
             <div class="flex-1 min-w-0 flex items-center gap-2">
-              <span class="text-slate-500 text-xs font-mono">{{ event.formattedTime }}</span>
+              <span class="text-slate-500 text-xs">{{ event.formattedTime }}</span>
               <span class="text-slate-400 text-sm font-medium">{{ event.userInfo?.displayName || 'Unknown' }}</span>
               <span [class]="event.textColor" class="text-sm">{{ event.actionLabel }}</span>
               @if (!last) {
                 <!-- Subtle XP badge -->
-                <span class="text-slate-600 text-xs font-mono ml-auto"> +{{ event.xpEarned }} XP </span>
+                <span class="text-slate-600 text-xs ml-auto"> +{{ event.xpEarned }} XP </span>
               }
             </div>
           </div>

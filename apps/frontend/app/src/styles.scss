@@ -20,9 +20,12 @@ body {
   padding: 0;
   font-family: 'JetBrains Mono', 'Courier New', Consolas, monospace;
   background: #000;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Tron Perspective Grid Background */
+/* Subtle Tron Perspective Grid Background */
 .cyber-grid-bg {
   background: #000;
   min-height: 100vh;
@@ -30,7 +33,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Perspective grid container */
+/* Lighter perspective grid container */
 .cyber-grid-bg::before {
   content: '';
   position: fixed;
@@ -40,17 +43,18 @@ body {
   bottom: 0;
   background:
     /* Horizontal lines */
-    repeating-linear-gradient(0deg, transparent, transparent 58px, var(--grid-color) 58px, var(--grid-color) 60px),
+    repeating-linear-gradient(0deg, transparent, transparent 58px, rgba(138, 43, 226, 0.15) 58px, rgba(138, 43, 226, 0.15) 60px),
     /* Vertical lines */
-      repeating-linear-gradient(90deg, transparent, transparent 58px, var(--grid-color) 58px, var(--grid-color) 60px);
+      repeating-linear-gradient(90deg, transparent, transparent 58px, rgba(138, 43, 226, 0.15) 58px, rgba(138, 43, 226, 0.15) 60px);
   background-size: 60px 60px;
   transform: perspective(400px) rotateX(60deg) scale(2.5);
   transform-origin: center center;
   pointer-events: none;
   z-index: 0;
+  opacity: 0.6;
 }
 
-/* Horizon glow effect */
+/* Softer horizon glow effect */
 .cyber-grid-bg::after {
   content: '';
   position: fixed;
@@ -59,8 +63,8 @@ body {
   right: 0;
   height: 50%;
   background:
-    radial-gradient(ellipse 100% 50% at 50% 100%, rgba(138, 43, 226, 0.15) 0%, transparent 60%),
-    linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 50%);
+    radial-gradient(ellipse 100% 50% at 50% 100%, rgba(138, 43, 226, 0.08) 0%, transparent 60%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
@@ -146,21 +150,25 @@ body {
   animation: slideInGlow 0.5s ease-out forwards;
 }
 
-/* Scrollbar styling for dark theme */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+/* Scrollbar styling for dark theme - desktop only.
+   On mobile, native overlay scrollbars are preferred to avoid
+   consuming layout space and causing asymmetric padding. */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(138, 43, 226, 0.5);
-  border-radius: 3px;
-}
+  ::-webkit-scrollbar-thumb {
+    background: rgba(138, 43, 226, 0.5);
+    border-radius: 3px;
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(138, 43, 226, 0.7);
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(138, 43, 226, 0.7);
+  }
 }

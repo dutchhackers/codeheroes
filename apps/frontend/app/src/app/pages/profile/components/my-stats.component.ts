@@ -5,102 +5,146 @@ import { WeeklyStatsRecord } from '../../../core/services/user-stats.service';
   selector: 'app-my-stats',
   standalone: true,
   template: `
-    <div class="my-stats-card">
-      <h3 class="section-title">WEEKLY TRENDS</h3>
-      <p class="subsection-title">LAST 4 WEEKS</p>
+    <div class="weekly-trends-card">
+      <h3 class="section-title">Weekly Trends</h3>
+      <p class="subtitle">Last 4 weeks average</p>
       <div class="stats-grid">
-        <div class="stat-item" style="--stat-color: var(--neon-purple)">
-          <span class="stat-value">{{ fourWeekAverages().prsPerWeek }}</span>
-          <span class="stat-label">PRs/Week</span>
+        <div class="trend-item">
+          <div class="trend-icon" style="background: color-mix(in srgb, var(--neon-purple) 15%, transparent)">
+            <span style="color: var(--neon-purple)">🔀</span>
+          </div>
+          <div class="trend-content">
+            <span class="trend-value">{{ fourWeekAverages().prsPerWeek }}</span>
+            <span class="trend-label">PRs/Week</span>
+          </div>
         </div>
-        <div class="stat-item" style="--stat-color: var(--neon-orange)">
-          <span class="stat-value">{{ fourWeekAverages().reviewsPerWeek }}</span>
-          <span class="stat-label">Reviews/Week</span>
+        <div class="trend-item">
+          <div class="trend-icon" style="background: color-mix(in srgb, var(--neon-orange) 15%, transparent)">
+            <span style="color: var(--neon-orange)">👁️</span>
+          </div>
+          <div class="trend-content">
+            <span class="trend-value">{{ fourWeekAverages().reviewsPerWeek }}</span>
+            <span class="trend-label">Reviews/Week</span>
+          </div>
         </div>
-        <div class="stat-item" style="--stat-color: var(--neon-cyan)">
-          <span class="stat-value">{{ formatXp(fourWeekAverages().xpPerWeek) }}</span>
-          <span class="stat-label">XP/Week</span>
+        <div class="trend-item">
+          <div class="trend-icon" style="background: color-mix(in srgb, var(--neon-cyan) 15%, transparent)">
+            <span style="color: var(--neon-cyan)">⚡</span>
+          </div>
+          <div class="trend-content">
+            <span class="trend-value">{{ formatXp(fourWeekAverages().xpPerWeek) }}</span>
+            <span class="trend-label">XP/Week</span>
+          </div>
         </div>
-        <div class="stat-item" style="--stat-color: var(--neon-green)">
-          <span class="stat-value">{{ fourWeekAverages().pushesPerWeek }}</span>
-          <span class="stat-label">Pushes/Week</span>
+        <div class="trend-item">
+          <div class="trend-icon" style="background: color-mix(in srgb, var(--neon-green) 15%, transparent)">
+            <span style="color: var(--neon-green)">📤</span>
+          </div>
+          <div class="trend-content">
+            <span class="trend-value">{{ fourWeekAverages().pushesPerWeek }}</span>
+            <span class="trend-label">Pushes/Week</span>
+          </div>
         </div>
       </div>
     </div>
   `,
   styles: [
     `
-      .my-stats-card {
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(8px);
+      .weekly-trends-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        padding: 1.25rem;
-        margin-top: 1.5rem;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
       }
 
       .section-title {
-        font-size: 0.75rem;
+        font-size: 1rem;
         font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: rgba(255, 255, 255, 0.7);
-        margin: 0 0 0.5rem 0;
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0 0 0.25rem 0;
+        letter-spacing: -0.02em;
       }
 
-      .subsection-title {
-        font-size: 0.65rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: rgba(255, 255, 255, 0.4);
-        margin: 0 0 0.75rem 0;
+      .subtitle {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.5);
+        margin: 0 0 1.25rem 0;
       }
 
       .stats-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
+        gap: 1rem;
       }
 
-      @media (min-width: 480px) {
+      @media (min-width: 640px) {
         .stats-grid {
           grid-template-columns: repeat(4, 1fr);
         }
       }
 
-      .stat-item {
-        text-align: center;
-        padding: 0.75rem 0.5rem;
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 8px;
-        border: 1px solid color-mix(in srgb, var(--stat-color) 30%, transparent);
+      .trend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        transition: all 0.2s;
       }
 
-      .stat-value {
-        display: block;
+      .trend-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .trend-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
         font-size: 1.25rem;
-        font-weight: bold;
-        color: var(--stat-color);
-        text-shadow: 0 0 10px color-mix(in srgb, var(--stat-color) 50%, transparent);
-        margin-bottom: 0.25rem;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        flex-shrink: 0;
       }
 
-      .stat-label {
-        display: block;
-        font-size: 0.6rem;
+      .trend-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+        min-width: 0;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .trend-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.95);
+        line-height: 1;
+      }
+
+      .trend-label {
+        font-size: 0.75rem;
         color: rgba(255, 255, 255, 0.5);
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.03em;
+        overflow-wrap: break-word;
+        line-height: 1.2;
       }
 
       @media (min-width: 768px) {
-        .stat-value {
+        .trend-value {
           font-size: 1.5rem;
         }
 
-        .stat-label {
-          font-size: 0.65rem;
+        .trend-label {
+          font-size: 0.8rem;
         }
       }
     `,

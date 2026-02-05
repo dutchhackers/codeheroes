@@ -1,4 +1,4 @@
-import { DatabaseInstance } from '@codeheroes/common';
+import { DatabaseInstance, logger } from '@codeheroes/common';
 import { NotificationService } from '@codeheroes/notifications';
 import { Collections, RewardType } from '@codeheroes/types';
 import { FieldValue, Firestore } from 'firebase-admin/firestore';
@@ -22,6 +22,19 @@ export interface RewardClaim {
   expiresAt?: string;
 }
 
+/**
+ * Result of transaction phase containing data needed for side effects
+ */
+interface RewardTransactionResult {
+  alreadyGranted: boolean;
+  rewardData?: {
+    earnedAt: string;
+    type: RewardType;
+    badgeId?: string;
+    amount?: number;
+  };
+}
+
 export class RewardService {
   private db: Firestore;
   private notificationService: NotificationService;
@@ -35,57 +48,98 @@ export class RewardService {
     this.eventService = new EventPublisherService();
   }
 
+  /**
+   * Grants a reward to a user using a two-phase approach:
+   * 1. Transaction phase: Atomic state updates only (no external async operations)
+   * 2. Side effect phase: Notifications and badge operations after transaction commits
+   *
+   * This prevents race conditions from async operations inside transactions.
+   */
   async grantReward(userId: string, reward: Reward): Promise<void> {
     const userRef = this.db.collection(Collections.Users).doc(userId);
     const rewardRef = userRef.collection(Collections.Rewards).doc(reward.id);
 
-    await this.db.runTransaction(async (transaction) => {
+    // Phase 1: Transaction for atomic state updates only
+    const result = await this.db.runTransaction<RewardTransactionResult>(async (transaction) => {
       const doc = await transaction.get(rewardRef);
       if (doc.exists) {
-        return; // Reward already granted
+        return { alreadyGranted: true }; // Reward already granted
       }
 
+      const earnedAt = new Date().toISOString();
       const rewardData = {
         ...reward,
-        earnedAt: new Date().toISOString(),
+        earnedAt,
         claimed: false,
       };
 
       transaction.set(rewardRef, rewardData);
 
-      // Create notification
+      // Update user stats to reflect new reward (use set+merge to handle missing docs)
+      const statsRef = userRef.collection(Collections.Stats).doc('current');
+      transaction.set(statsRef, {
+        'stats.rewards.total': FieldValue.increment(1),
+        'stats.rewards.lastEarned': earnedAt,
+      }, { merge: true });
+
+      // Handle POINTS reward type within transaction (it's a simple field update)
+      if (reward.type === 'POINTS' && reward.amount) {
+        transaction.set(statsRef, {
+          xp: FieldValue.increment(reward.amount),
+        }, { merge: true });
+      }
+
+      // Return data needed for side effects
+      return {
+        alreadyGranted: false,
+        rewardData: {
+          earnedAt,
+          type: reward.type,
+          badgeId: reward.type === 'BADGE' ? (reward.metadata?.badgeId ?? reward.id) : undefined,
+          amount: reward.amount,
+        },
+      };
+    });
+
+    // If reward was already granted, no side effects needed
+    if (result.alreadyGranted) {
+      logger.info('Reward already granted, skipping side effects', {
+        userId,
+        rewardId: reward.id,
+      });
+      return;
+    }
+
+    // Phase 2: Side effects AFTER transaction commits successfully
+    // These operations are idempotent so safe to retry
+    try {
+      // Create notification (non-critical, don't fail the reward grant)
       await this.notificationService.createNotification(userId, {
         type: 'REWARD_EARNED',
         title: 'New Reward!',
         message: `You've earned: ${reward.name}`,
         metadata: { rewardId: reward.id, rewardType: reward.type },
       });
+    } catch (error) {
+      logger.error('Failed to create reward notification', { userId, rewardId: reward.id, error });
+      // Don't rethrow - notification is non-critical
+    }
 
-      // Update user stats to reflect new reward
-      transaction.update(userRef.collection(Collections.Stats).doc('current'), {
-        'stats.rewards.total': FieldValue.increment(1),
-        'stats.rewards.lastEarned': rewardData.earnedAt,
-      });
-
-      // Handle specific reward types
-      switch (reward.type) {
-        case 'BADGE':
-          // Grant the badge using the catalog-based BadgeService
-          // Use metadata.badgeId for the catalog lookup (reward.id is the document ID, not badge catalog ID)
-          const badgeId = reward.metadata?.badgeId ?? reward.id;
-          if (badgeId) {
-            await this.badgeService.grantBadge(userId, badgeId);
-          }
-          break;
-        case 'POINTS':
-          if (reward.amount) {
-            transaction.update(userRef.collection(Collections.Stats).doc('current'), {
-              xp: FieldValue.increment(reward.amount),
-            });
-          }
-          break;
+    // Handle BADGE reward type - grant the actual badge
+    if (result.rewardData?.type === 'BADGE' && result.rewardData.badgeId) {
+      try {
+        await this.badgeService.grantBadge(userId, result.rewardData.badgeId);
+      } catch (error) {
+        logger.warn('Failed to grant badge after reward transaction committed', {
+          userId,
+          badgeId: result.rewardData.badgeId,
+          rewardId: reward.id,
+          error,
+        });
+        // Badge grant is idempotent via create(), so this is safe
+        // Don't rethrow - the reward record was created successfully
       }
-    });
+    }
   }
 
   async claimReward(userId: string, rewardId: string): Promise<boolean> {
