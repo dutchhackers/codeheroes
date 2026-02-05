@@ -20,6 +20,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </svg>
         <span class="nav-label">ACTIVITY</span>
       </a>
+      <a routerLink="/search" routerLinkActive="active" class="nav-item" aria-label="Search users">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <span class="nav-label">SEARCH</span>
+      </a>
       <a routerLink="/profile" routerLinkActive="active" class="nav-item" aria-label="User profile">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="8" r="4" />
