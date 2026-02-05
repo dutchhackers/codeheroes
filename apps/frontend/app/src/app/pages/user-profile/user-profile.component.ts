@@ -148,6 +148,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   readonly #userStatsService = inject(UserStatsService);
   readonly #userCacheService = inject(UserCacheService);
 
+  #routeSubscription: Subscription | null = null;
   #profileSubscription: Subscription | null = null;
   #activitiesSubscription: Subscription | null = null;
   #badgesSubscription: Subscription | null = null;
@@ -163,9 +164,10 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // Get userId from route params
-    this.#route.params.subscribe((params) => {
+    this.#routeSubscription = this.#route.params.subscribe((params) => {
       const userId = params['id'];
       if (userId) {
+        this.#cleanupProfileSubscriptions();
         this.#loadProfile(userId);
       } else {
         this.isLoading.set(false);
@@ -174,6 +176,11 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.#routeSubscription?.unsubscribe();
+    this.#cleanupProfileSubscriptions();
+  }
+
+  #cleanupProfileSubscriptions() {
     this.#profileSubscription?.unsubscribe();
     this.#activitiesSubscription?.unsubscribe();
     this.#badgesSubscription?.unsubscribe();

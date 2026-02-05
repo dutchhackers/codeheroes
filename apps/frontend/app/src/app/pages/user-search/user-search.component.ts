@@ -68,6 +68,7 @@ import { UserSearchService } from '../../core/services/user-search.service';
                 type="button"
                 (click)="viewProfile(user.id)"
                 class="user-card w-full text-left"
+                [attr.aria-label]="'View profile of ' + user.displayName"
               >
                 <div class="flex items-center gap-4">
                   <!-- Avatar -->
@@ -94,9 +95,6 @@ import { UserSearchService } from '../../core/services/user-search.service';
                     <h3 class="text-white font-semibold truncate">
                       {{ user.displayName }}
                     </h3>
-                    @if (user.email) {
-                      <p class="text-sm text-slate-500 truncate">{{ user.email }}</p>
-                    }
                   </div>
 
                   <!-- Arrow -->
