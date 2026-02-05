@@ -8,6 +8,7 @@ export * from './lib/progression/core/service-registry';
 export * from './lib/progression/repositories/progression.repository';
 export * from './lib/progression/repositories/activity.repository';
 export * from './lib/progression/repositories/game-action.repository';
+export * from './lib/progression/repositories/project.repository';
 
 // Services
 export * from './lib/progression/services/progression.service';
