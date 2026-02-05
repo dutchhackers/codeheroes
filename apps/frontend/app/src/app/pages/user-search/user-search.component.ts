@@ -120,7 +120,7 @@ import { UserSearchService } from '../../core/services/user-search.service';
           </div>
         } @else {
           <div class="text-center py-12">
-            <p class="text-lg text-slate-500">Start typing to search for heroes</p>
+            <p class="text-lg text-slate-500">Browse heroes or start typing to search</p>
           </div>
         }
       </div>

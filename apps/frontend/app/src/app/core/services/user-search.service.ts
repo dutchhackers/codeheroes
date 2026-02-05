@@ -21,7 +21,7 @@ export class UserSearchService {
   readonly #injector = inject(Injector);
 
   /**
-   * Search for users by display name (case-insensitive prefix search)
+   * Search for users by display name (case-sensitive prefix search)
    */
   searchUsers(searchTerm: string, limitCount = 20): Observable<UserDto[]> {
     if (!searchTerm || searchTerm.trim().length === 0) {

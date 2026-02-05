@@ -185,7 +185,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     await this.#userCacheService.loadUsers();
 
     // Subscribe to profile data
-    this.#profileSubscription = this.#userStatsService.getUserProfile(userId).subscribe({
+    this.#profileSubscription = this.#userStatsService.getAnyUserProfile(userId).subscribe({
       next: ({ user, stats }) => {
         this.user.set(user);
         this.stats.set(stats);

@@ -163,7 +163,7 @@ export class UserStatsService {
   /**
    * Get any user's profile with stats by user ID
    */
-  getUserProfile(userId: string): Observable<CurrentUserProfile> {
+  getAnyUserProfile(userId: string): Observable<CurrentUserProfile> {
     return this.getUserById(userId).pipe(
       switchMap((userDoc) => {
         if (!userDoc) {
