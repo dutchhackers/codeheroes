@@ -135,7 +135,7 @@ export class GameActionService {
       error !== null &&
       typeof error === 'object' &&
       'code' in error &&
-      error.code === ALREADY_EXISTS_ERROR_CODE
+      (error.code === ALREADY_EXISTS_ERROR_CODE || error.code === 'ALREADY_EXISTS')
     );
   }
 

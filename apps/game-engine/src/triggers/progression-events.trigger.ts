@@ -39,9 +39,27 @@ async function tryMarkMessageAsProcessed(messageId: string): Promise<boolean> {
       logger.info('Message already processed', { messageId });
       return false; // Already processed
     }
-    // For other errors, log and rethrow
-    logger.error('Error checking message idempotency', { messageId, error });
+    // For other errors, log with context and rethrow
+    logger.error('Error checking message idempotency', {
+      messageId,
+      operation: 'tryMarkMessageAsProcessed',
+      error,
+    });
     throw error;
+  }
+}
+
+/**
+ * Removes a processed message marker so the message can be retried.
+ * Called when event processing fails after the marker was created.
+ */
+async function removeProcessedMarker(messageId: string): Promise<void> {
+  try {
+    const db = DatabaseInstance.getInstance();
+    await db.collection(PROCESSED_MESSAGES_COLLECTION).doc(messageId).delete();
+    logger.info('Removed processed marker for retry', { messageId });
+  } catch (error) {
+    logger.warn('Failed to remove processed marker', { messageId, error });
   }
 }
 
@@ -61,7 +79,8 @@ export const onLevelUp = onMessagePublished('progression-events', async (event) 
   }
 
   // Check for duplicate message processing
-  const shouldProcess = await tryMarkMessageAsProcessed(`levelup_${messageId}`);
+  const dedupId = `levelup_${messageId}`;
+  const shouldProcess = await tryMarkMessageAsProcessed(dedupId);
   if (!shouldProcess) {
     logger.info('Level-up message already processed, skipping', { messageId });
     return;
@@ -69,25 +88,48 @@ export const onLevelUp = onMessagePublished('progression-events', async (event) 
 
   const eventHandler = new EventProcessorService();
   logger.info('Processing level up event', { userId: progressionEvent.userId });
-  await eventHandler.handleEvent(progressionEvent);
-  logger.info('Level up event processed successfully');
+
+  try {
+    await eventHandler.handleEvent(progressionEvent);
+    logger.info('Level up event processed successfully');
+  } catch (error) {
+    // Remove processed marker so Pub/Sub retry can reprocess the message
+    await removeProcessedMarker(dedupId);
+    throw error;
+  }
 });
 
 export const onBadgeEarned = onMessagePublished('progression-events', async (event) => {
   const messageId = event.data.message.messageId;
   const progressionEvent = event.data.message.json;
 
+  logger.info('Received progression event', {
+    messageId,
+    eventType: progressionEvent.type,
+    data: progressionEvent,
+  });
+
   if (progressionEvent.type !== ProgressionEventType.BADGE_EARNED) {
     return;
   }
 
   // Check for duplicate message processing
-  const shouldProcess = await tryMarkMessageAsProcessed(`badge_${messageId}`);
+  const dedupId = `badge_${messageId}`;
+  const shouldProcess = await tryMarkMessageAsProcessed(dedupId);
   if (!shouldProcess) {
     logger.info('Badge earned message already processed, skipping', { messageId });
     return;
   }
 
   const eventHandler = new EventProcessorService();
-  await eventHandler.handleEvent(progressionEvent);
+  logger.info('Processing badge earned event', { userId: progressionEvent.userId });
+
+  try {
+    await eventHandler.handleEvent(progressionEvent);
+    logger.info('Badge earned event processed successfully', { userId: progressionEvent.userId });
+  } catch (error) {
+    // Remove processed marker so Pub/Sub retry can reprocess the message
+    await removeProcessedMarker(dedupId);
+    throw error;
+  }
 });

@@ -75,17 +75,18 @@ export class RewardService {
 
       transaction.set(rewardRef, rewardData);
 
-      // Update user stats to reflect new reward
-      transaction.update(userRef.collection(Collections.Stats).doc('current'), {
+      // Update user stats to reflect new reward (use set+merge to handle missing docs)
+      const statsRef = userRef.collection(Collections.Stats).doc('current');
+      transaction.set(statsRef, {
         'stats.rewards.total': FieldValue.increment(1),
         'stats.rewards.lastEarned': earnedAt,
-      });
+      }, { merge: true });
 
       // Handle POINTS reward type within transaction (it's a simple field update)
       if (reward.type === 'POINTS' && reward.amount) {
-        transaction.update(userRef.collection(Collections.Stats).doc('current'), {
+        transaction.set(statsRef, {
           xp: FieldValue.increment(reward.amount),
-        });
+        }, { merge: true });
       }
 
       // Return data needed for side effects
@@ -129,9 +130,10 @@ export class RewardService {
       try {
         await this.badgeService.grantBadge(userId, result.rewardData.badgeId);
       } catch (error) {
-        logger.error('Failed to grant badge', {
+        logger.warn('Failed to grant badge after reward transaction committed', {
           userId,
           badgeId: result.rewardData.badgeId,
+          rewardId: reward.id,
           error,
         });
         // Badge grant is idempotent via create(), so this is safe
