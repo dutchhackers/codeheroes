@@ -3,6 +3,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { UserSeeder } from './lib/seeders/user.seeder';
 import { ConnectedAccountSeeder } from './lib/seeders/connected-account.seeder';
 import { SystemSeeder } from './lib/seeders/system.seeder';
+import { ProjectSeeder } from './lib/seeders/project.seeder';
 import { ProgressionResetter } from './lib/resetters/progression.resetter';
 import { SchemaDiscovery } from './lib/discovery/schema.discovery';
 import { loadJsonData } from './lib/utils/file-loader';
@@ -34,6 +35,7 @@ async function runSeed(db: FirebaseFirestore.Firestore) {
   const userSeeder = new UserSeeder();
   const connectedAccountSeeder = new ConnectedAccountSeeder();
   const systemSeeder = new SystemSeeder();
+  const projectSeeder = new ProjectSeeder();
 
   // Seed system settings first
   const systemData = await loadJsonData<{ system: any[] }>('system.json');
@@ -46,6 +48,10 @@ async function runSeed(db: FirebaseFirestore.Firestore) {
   // Seed connected accounts
   const accountData = await loadJsonData<{ connectedAccounts: any[] }>('connected-accounts.json');
   await connectedAccountSeeder.seed(db, accountData.connectedAccounts);
+
+  // Seed projects
+  const projectData = await loadJsonData<{ projects: any[] }>('projects.json');
+  await projectSeeder.seed(db, projectData.projects);
 
   console.log('✅ Seeding completed');
 }
