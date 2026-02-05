@@ -134,7 +134,7 @@ import { WeeklyStatsRecord } from '../../../core/services/user-stats.service';
         color: rgba(255, 255, 255, 0.5);
         text-transform: uppercase;
         letter-spacing: 0.03em;
-        word-break: break-word;
+        overflow-wrap: break-word;
         line-height: 1.2;
       }
 
