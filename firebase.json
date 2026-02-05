@@ -70,6 +70,14 @@
       "ignore": [
         "*.local"
       ]
+    },
+    {
+      "codebase": "azure-receiver",
+      "source": "dist/apps/azure-receiver",
+      "runtime": "nodejs24",
+      "ignore": [
+        "*.local"
+      ]
     }
   ],
   "emulators": {
