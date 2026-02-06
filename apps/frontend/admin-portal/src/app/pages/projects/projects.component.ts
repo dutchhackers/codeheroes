@@ -1,13 +1,14 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { ProjectCardComponent } from './components/project-card.component';
+import { EditProjectModalComponent } from './components/edit-project-modal.component';
 import { ProjectsService } from '../../core/services/projects.service';
 import { ProjectSummaryDto } from '@codeheroes/types';
 
 @Component({
   selector: 'admin-projects',
   standalone: true,
-  imports: [ProjectCardComponent, SuiButtonComponent],
+  imports: [ProjectCardComponent, EditProjectModalComponent, SuiButtonComponent],
   template: `
     <div>
       <div class="page-header">
@@ -37,11 +38,19 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       } @else {
         <div class="projects-grid">
           @for (project of projects(); track project.id) {
-            <admin-project-card [project]="project" />
+            <admin-project-card [project]="project" (viewClick)="openEditModal(project)" />
           }
         </div>
       }
     </div>
+
+    @if (editingProject()) {
+      <admin-edit-project-modal
+        [project]="editingProject()!"
+        (cancel)="closeEditModal()"
+        (save)="saveProject($event)"
+      />
+    }
   `,
   styles: [
     `
@@ -110,6 +119,7 @@ export class ProjectsComponent implements OnInit {
   readonly projects = signal<ProjectSummaryDto[]>([]);
   readonly isLoading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly editingProject = signal<ProjectSummaryDto | null>(null);
 
   ngOnInit(): void {
     this.loadProjects();
@@ -127,6 +137,31 @@ export class ProjectsComponent implements OnInit {
         this.error.set('Failed to load projects. Please try again.');
         this.isLoading.set(false);
         console.error('Failed to load projects:', err);
+      },
+    });
+  }
+
+  openEditModal(project: ProjectSummaryDto): void {
+    this.editingProject.set(project);
+  }
+
+  closeEditModal(): void {
+    this.editingProject.set(null);
+  }
+
+  saveProject(newName: string): void {
+    const project = this.editingProject();
+    if (!project) return;
+
+    this.#projectsService.updateProject(project.id, { name: newName }).subscribe({
+      next: () => {
+        this.projects.update((list) =>
+          list.map((p) => (p.id === project.id ? { ...p, name: newName } : p)),
+        );
+        this.closeEditModal();
+      },
+      error: (err) => {
+        console.error('Failed to update project:', err);
       },
     });
   }

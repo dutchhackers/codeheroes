@@ -63,7 +63,9 @@ import { AuthService } from '../core/services/auth.service';
         </div>
       </aside>
       <main class="main-content">
-        <router-outlet />
+        <div class="content-wrapper">
+          <router-outlet />
+        </div>
       </main>
     </div>
   `,
@@ -195,7 +197,11 @@ import { AuthService } from '../core/services/auth.service';
         flex: 1;
         overflow-y: auto;
         background: var(--theme-color-bg-neutral-secondary);
-        padding: 32px;
+        padding: 32px 48px;
+      }
+
+      .content-wrapper {
+        max-width: 1200px;
       }
     `,
   ],

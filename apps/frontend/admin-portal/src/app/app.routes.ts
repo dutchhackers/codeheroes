@@ -19,7 +19,7 @@ export const appRoutes: Routes = [
         path: 'projects',
         loadComponent: () => import('./pages/projects/projects.component').then((m) => m.ProjectsComponent),
       },
-      {
+{
         path: 'users',
         loadComponent: () => import('./pages/users/users.component').then((m) => m.UsersComponent),
       },

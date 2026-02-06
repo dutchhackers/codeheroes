@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { SuiBadgeComponent } from '@move4mobile/stride-ui';
 import { ProjectSummaryDto } from '@codeheroes/types';
 
@@ -14,11 +14,11 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       </div>
       <h3 class="card-title">{{ project().name }}</h3>
       <p class="card-subtitle">
-        {{ project().activeMemberCount }} members · {{ project().repositoryCount }} repos
+        {{ project().activeMemberCount }} members &middot; {{ project().repositoryCount }} repos
       </p>
-      <a class="card-view-link" href="javascript:void(0)">
+      <a class="card-view-link" (click)="viewClick.emit()">
         View
-        <span class="arrow">→</span>
+        <span class="arrow">&rarr;</span>
       </a>
     </div>
   `,
@@ -28,11 +28,10 @@ import { ProjectSummaryDto } from '@codeheroes/types';
         background: var(--theme-color-bg-surface-default);
         border: 1px solid var(--theme-color-border-default-default);
         border-radius: 8px;
-        padding: 16px;
+        padding: 20px;
         transition: box-shadow 0.15s ease;
         display: flex;
         flex-direction: column;
-        gap: 0;
       }
 
       .card:hover {
@@ -43,7 +42,7 @@ import { ProjectSummaryDto } from '@codeheroes/types';
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
       }
 
       .card-icon {
@@ -70,7 +69,8 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       .card-subtitle {
         font-size: 13px;
         color: var(--theme-color-text-neutral-tertiary);
-        margin-bottom: 16px;
+        margin-bottom: 20px;
+        flex: 1;
       }
 
       .card-view-link {
@@ -101,4 +101,5 @@ import { ProjectSummaryDto } from '@codeheroes/types';
 })
 export class ProjectCardComponent {
   readonly project = input.required<ProjectSummaryDto>();
+  readonly viewClick = output<void>();
 }

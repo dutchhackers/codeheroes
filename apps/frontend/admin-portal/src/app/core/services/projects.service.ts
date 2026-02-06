@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, from, switchMap } from 'rxjs';
-import { ProjectSummaryDto, ProjectDetailDto } from '@codeheroes/types';
+import { ProjectSummaryDto, ProjectDetailDto, UpdateProjectDto } from '@codeheroes/types';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -24,6 +24,15 @@ export class ProjectsService {
       switchMap((token) => {
         const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
         return this.#http.get<ProjectDetailDto>(`${environment.apiUrl}/projects/${id}`, { headers });
+      }),
+    );
+  }
+
+  updateProject(id: string, data: UpdateProjectDto): Observable<ProjectDetailDto> {
+    return from(this.#auth.getIdToken()).pipe(
+      switchMap((token) => {
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+        return this.#http.put<ProjectDetailDto>(`${environment.apiUrl}/projects/${id}`, data, { headers });
       }),
     );
   }
