@@ -1,8 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { forkJoin } from 'rxjs';
+import { ProjectsService } from '../../core/services/projects.service';
+import { UsersService } from '../../core/services/users.service';
+import { DashboardService, LeaderboardEntry } from '../../core/services/dashboard.service';
 
 @Component({
   selector: 'admin-home',
   standalone: true,
+  imports: [],
   template: `
     <div>
       <h1 class="page-title">Dashboard</h1>
@@ -11,21 +16,60 @@ import { Component } from '@angular/core';
       <div class="stats-grid">
         <div class="stat-card">
           <span class="stat-label">Projects</span>
-          <span class="stat-value">--</span>
+          <span class="stat-value">{{ isLoading() ? '...' : projectCount() }}</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">Users</span>
-          <span class="stat-value">--</span>
+          <span class="stat-value">{{ isLoading() ? '...' : userCountLabel() }}</span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">Total XP</span>
-          <span class="stat-value">--</span>
+          <span class="stat-label">Total XP (all projects)</span>
+          <span class="stat-value">{{ isLoading() ? '...' : formatNumber(totalXp()) }}</span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">Actions (7d)</span>
-          <span class="stat-value">--</span>
+          <span class="stat-label">Total Actions (all projects)</span>
+          <span class="stat-value">{{ isLoading() ? '...' : formatNumber(totalActions()) }}</span>
         </div>
       </div>
+
+      @if (leaderboard().length > 0) {
+        <h2 class="section-title">Weekly Leaderboard</h2>
+        <div class="table-container">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Level</th>
+                <th>XP This Week</th>
+                <th>Total XP</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of leaderboard(); track entry.userId; let i = $index) {
+                <tr>
+                  <td class="rank-cell">{{ i + 1 }}</td>
+                  <td>
+                    <div class="user-cell">
+                      <div class="user-avatar">{{ entry.displayName?.charAt(0)?.toUpperCase() || '?' }}</div>
+                      <span class="user-name">{{ entry.displayName }}</span>
+                    </div>
+                  </td>
+                  <td>{{ entry.level }}</td>
+                  <td class="xp-cell">+{{ formatNumber(entry.xpGained) }}</td>
+                  <td>{{ formatNumber(entry.totalXp) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (!isLoading() && error()) {
+        <div class="error-state">
+          <p>{{ error() }}</p>
+        </div>
+      }
     </div>
   `,
   styles: [
@@ -70,7 +114,141 @@ import { Component } from '@angular/core';
         font-weight: 700;
         color: var(--theme-color-text-default);
       }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--theme-color-text-default);
+        margin-top: 32px;
+        margin-bottom: 16px;
+      }
+
+      .table-container {
+        background: var(--theme-color-bg-surface-default);
+        border: 1px solid var(--theme-color-border-default-default);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .leaderboard-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .leaderboard-table th {
+        text-align: left;
+        padding: 12px 16px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--theme-color-text-neutral-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--theme-color-border-default-default);
+        background: var(--theme-color-bg-neutral-secondary);
+      }
+
+      .leaderboard-table td {
+        padding: 12px 16px;
+        font-size: 14px;
+        color: var(--theme-color-text-default);
+        border-bottom: 1px solid var(--theme-color-border-default-default);
+      }
+
+      .leaderboard-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .leaderboard-table tr:hover td {
+        background: var(--theme-color-bg-neutral-secondary);
+      }
+
+      .rank-cell {
+        font-weight: 600;
+        color: var(--theme-color-text-neutral-tertiary);
+        width: 48px;
+      }
+
+      .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .user-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--theme-color-bg-neutral-secondary);
+        color: var(--theme-color-text-brand-default);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+
+      .user-name {
+        font-weight: 500;
+      }
+
+      .xp-cell {
+        color: var(--theme-color-text-brand-default);
+        font-weight: 600;
+      }
+
+      .error-state {
+        background: var(--theme-color-feedback-bg-error-secondary);
+        border: 1px solid var(--theme-color-feedback-border-error-default);
+        border-radius: 8px;
+        padding: 16px;
+        color: var(--theme-color-feedback-text-error-default);
+        font-size: 14px;
+        margin-top: 24px;
+      }
     `,
   ],
 })
-export class HomeComponent {}
+export class HomeComponent implements OnInit {
+  readonly #projectsService = inject(ProjectsService);
+  readonly #usersService = inject(UsersService);
+  readonly #dashboardService = inject(DashboardService);
+
+  readonly projectCount = signal(0);
+  readonly userCountLabel = signal('0');
+  readonly totalXp = signal(0);
+  readonly totalActions = signal(0);
+  readonly leaderboard = signal<LeaderboardEntry[]>([]);
+  readonly isLoading = signal(true);
+  readonly error = signal<string | null>(null);
+
+  ngOnInit(): void {
+    forkJoin({
+      projects: this.#projectsService.getProjects(),
+      users: this.#usersService.getUsers({ limit: 100 }),
+      leaderboard: this.#dashboardService.getWeeklyLeaderboard(),
+    }).subscribe({
+      next: ({ projects, users, leaderboard }) => {
+        this.projectCount.set(projects.length);
+        this.totalXp.set(projects.reduce((sum, p) => sum + p.totalXp, 0));
+        this.totalActions.set(projects.reduce((sum, p) => sum + p.totalActions, 0));
+
+        const userItems = users.items.length;
+        this.userCountLabel.set(users.hasMore ? `${userItems}+` : `${userItems}`);
+
+        this.leaderboard.set(leaderboard);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.error.set('Failed to load dashboard data.');
+        this.isLoading.set(false);
+        console.error('Dashboard load error:', err);
+      },
+    });
+  }
+
+  formatNumber(value: number | string): string {
+    if (typeof value === 'string') return value;
+    return value.toLocaleString();
+  }
+}
