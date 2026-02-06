@@ -1,4 +1,5 @@
-export type ConnectedAccountProvider = 'github' | 'strava' | 'azure' | 'bitbucket' | 'system';
+export const CONNECTED_ACCOUNT_PROVIDERS = ['github', 'strava', 'azure', 'bitbucket', 'system'] as const;
+export type ConnectedAccountProvider = (typeof CONNECTED_ACCOUNT_PROVIDERS)[number];
 
 // ProviderConnection isn't in use yet
 export interface ProviderConnection {

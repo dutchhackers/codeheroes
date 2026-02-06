@@ -4,6 +4,7 @@ import { ActionHandlerFactory } from '../handlers/action-handler.factory';
 import { ActivityRepository } from '../repositories/activity.repository';
 import { GameActionRepository } from '../repositories/game-action.repository';
 import { ProgressionRepository } from '../repositories/progression.repository';
+import { ProjectRepository } from '../repositories/project.repository';
 import { ActivityRecorderService } from '../services/activity-recorder.service';
 import { ProgressionService } from '../services/progression.service';
 import { XpCalculatorService } from '../services/xp-calculator.service';
@@ -16,6 +17,7 @@ export interface ServiceRegistry {
   progressionStateRepository: ProgressionRepository;
   activityRepository: ActivityRepository;
   gameActionRepository: GameActionRepository;
+  projectRepository: ProjectRepository;
   xpCalculatorService: XpCalculatorService;
   activityRecorderService: ActivityRecorderService;
   eventPublisherService: EventPublisherService;
@@ -34,6 +36,7 @@ export function createServiceRegistry(): ServiceRegistry {
   const progressionStateRepository = new ProgressionRepository(db);
   const activityRepository = new ActivityRepository(db);
   const gameActionRepository = new GameActionRepository(db);
+  const projectRepository = new ProjectRepository(db);
 
   // Create supporting services
   const xpCalculatorService = new XpCalculatorService();
@@ -48,6 +51,7 @@ export function createServiceRegistry(): ServiceRegistry {
     xpCalculatorService,
     activityRecorderService,
     eventPublisherService,
+    projectRepository,
   );
 
   // Initialize action handlers
@@ -58,6 +62,7 @@ export function createServiceRegistry(): ServiceRegistry {
     progressionStateRepository,
     activityRepository,
     gameActionRepository,
+    projectRepository,
     xpCalculatorService,
     activityRecorderService,
     eventPublisherService,

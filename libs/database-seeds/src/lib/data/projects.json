@@ -1,0 +1,13 @@
+{
+  "projects": [
+    {
+      "name": "Example Project",
+      "slug": "example-project",
+      "description": "An example project with two repos",
+      "repositories": [
+        { "provider": "github", "owner": "example-org", "name": "frontend", "fullName": "example-org/frontend" },
+        { "provider": "github", "owner": "example-org", "name": "backend", "fullName": "example-org/backend" }
+      ]
+    }
+  ]
+}

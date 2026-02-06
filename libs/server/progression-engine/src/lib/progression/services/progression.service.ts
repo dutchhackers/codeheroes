@@ -1,9 +1,10 @@
 import { logger } from '@codeheroes/common';
-import { GameAction, ActionResult, GameActionActivity } from '@codeheroes/types';
+import { GameAction, ActionResult, GameActionActivity, GameActionContext } from '@codeheroes/types';
 
 import { ProgressionRepository } from '../repositories/progression.repository';
 import { ActivityRepository } from '../repositories/activity.repository';
 import { GameActionRepository } from '../repositories/game-action.repository';
+import { ProjectRepository } from '../repositories/project.repository';
 import { XpCalculatorService } from './xp-calculator.service';
 import { ActivityRecorderService } from './activity-recorder.service';
 import { EventPublisherService } from '../events/event-publisher.service';
@@ -21,6 +22,7 @@ export class ProgressionService {
     private xpCalculator: XpCalculatorService,
     private activityRecorder: ActivityRecorderService,
     private eventPublisher: EventPublisherService,
+    private projectRepository: ProjectRepository,
   ) {}
 
   /**
@@ -71,6 +73,9 @@ export class ProgressionService {
 
       // 7. Mark the game action as processed
       await this.gameActionRepository.markAsProcessed(action.id);
+
+      // 7b. Update project stats (best-effort, never blocks)
+      await this.updateProjectStats(action, xpResult.total);
 
       // 8. Return the action result
       const result = {
@@ -184,6 +189,52 @@ export class ProgressionService {
    */
   async getRecentActivities(userId: string, limit = 10) {
     return this.activityRepository.getRecentActivities(userId, limit);
+  }
+
+  /**
+   * Update project stats for a game action (best-effort, never throws)
+   */
+  private async updateProjectStats(action: GameAction, xpGained: number): Promise<void> {
+    try {
+      const repo = this.extractRepository(action.context);
+      if (!repo) {
+        return; // No repository context (e.g., workout/manual actions)
+      }
+
+      const mapping = await this.projectRepository.resolveProjectForRepo(action.provider, repo.owner, repo.name);
+      if (!mapping) {
+        return; // Repo not assigned to any project — skip silently
+      }
+
+      await this.projectRepository.updateProjectStats({
+        projectId: mapping.projectId,
+        xpGained,
+        actionType: action.type,
+        userId: action.userId,
+        repoFullName: `${repo.owner}/${repo.name}`,
+      });
+
+      logger.debug('Project stats updated', {
+        projectId: mapping.projectId,
+        actionType: action.type,
+        xpGained,
+      });
+    } catch (error) {
+      logger.warn('Failed to update project stats (non-critical)', {
+        actionId: action.id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
+   * Extract repository owner/name from a game action context
+   */
+  private extractRepository(context: GameActionContext): { owner: string; name: string } | null {
+    if ('repository' in context && context.repository) {
+      return { owner: context.repository.owner, name: context.repository.name };
+    }
+    return null;
   }
 
   /**
