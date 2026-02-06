@@ -1,29 +1,34 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'admin-login',
   standalone: true,
+  imports: [SuiButtonComponent],
   template: `
-    <div class="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-      <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-8 w-full max-w-sm">
-        <div class="text-center mb-8">
-          <h1 class="text-2xl font-semibold text-slate-900 mb-1">Code Heroes</h1>
-          <p class="text-sm text-slate-500">Admin Portal</p>
+    <div class="login-page">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="login-logo">CH</div>
+          <h1 class="login-title">Code Heroes</h1>
+          <p class="login-subtitle">Admin Portal</p>
         </div>
         @if (error) {
-          <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+          <div class="login-error">
             {{ error }}
           </div>
         }
-        <button
-          type="button"
-          (click)="signIn()"
+        <sui-button
+          variant="outline"
+          color="neutral"
+          size="lg"
           [disabled]="isSigningIn"
-          class="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          [loading]="isSigningIn"
+          (click)="signIn()"
         >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
+          <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path
               fill="#4285F4"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -41,11 +46,85 @@ import { AuthService } from '../../core/services/auth.service';
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          {{ isSigningIn ? 'Signing in...' : 'Sign in with Google' }}
-        </button>
+          Sign in with Google
+        </sui-button>
       </div>
     </div>
   `,
+  styles: [
+    `
+      .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: var(--theme-color-bg-neutral-secondary);
+      }
+
+      .login-card {
+        background: var(--theme-color-bg-surface-default);
+        border: 1px solid var(--theme-color-border-default-default);
+        border-radius: 12px;
+        padding: 40px 32px;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: var(--theme-effect-styles-drop-shadow-200);
+      }
+
+      .login-header {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .login-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: var(--theme-color-bg-brand-default);
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 18px;
+        margin-bottom: 16px;
+      }
+
+      .login-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--theme-color-text-default);
+        margin-bottom: 4px;
+      }
+
+      .login-subtitle {
+        font-size: 14px;
+        color: var(--theme-color-text-neutral-tertiary);
+      }
+
+      .login-error {
+        margin-bottom: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        background: var(--theme-color-feedback-bg-error-secondary);
+        border: 1px solid var(--theme-color-feedback-border-error-default);
+        color: var(--theme-color-feedback-text-error-default);
+        font-size: 14px;
+      }
+
+      .google-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+
+      sui-button {
+        display: block;
+        width: 100%;
+      }
+    `,
+  ],
 })
 export class LoginComponent {
   readonly #auth = inject(AuthService);

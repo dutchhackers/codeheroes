@@ -12,12 +12,20 @@ export const appRoutes: Routes = [
     canActivate: [authGuard],
     children: [
       {
+        path: 'home',
+        loadComponent: () => import('./pages/home/home.component').then((m) => m.HomeComponent),
+      },
+      {
         path: 'projects',
         loadComponent: () => import('./pages/projects/projects.component').then((m) => m.ProjectsComponent),
       },
       {
+        path: 'users',
+        loadComponent: () => import('./pages/users/users.component').then((m) => m.UsersComponent),
+      },
+      {
         path: '',
-        redirectTo: 'projects',
+        redirectTo: 'home',
         pathMatch: 'full',
       },
     ],

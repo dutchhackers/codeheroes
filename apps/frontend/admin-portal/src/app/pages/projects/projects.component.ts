@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { ProjectCardComponent } from './components/project-card.component';
 import { ProjectsService } from '../../core/services/projects.service';
 import { ProjectSummaryDto } from '@codeheroes/types';
@@ -6,37 +7,35 @@ import { ProjectSummaryDto } from '@codeheroes/types';
 @Component({
   selector: 'admin-projects',
   standalone: true,
-  imports: [ProjectCardComponent],
+  imports: [ProjectCardComponent, SuiButtonComponent],
   template: `
     <div>
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-semibold text-slate-900">Projects</h2>
-        @if (!isLoading() && !error()) {
-          <span class="text-sm text-slate-500">{{ projects().length }} projects</span>
-        }
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Projects</h1>
+          @if (!isLoading() && !error()) {
+            <p class="page-subtitle">{{ projects().length }} projects</p>
+          }
+        </div>
       </div>
 
       @if (isLoading()) {
-        <div class="flex items-center justify-center py-12">
-          <p class="text-sm text-slate-500">Loading projects...</p>
+        <div class="loading-state">
+          <p>Loading projects...</p>
         </div>
       } @else if (error()) {
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p class="text-sm text-red-700">{{ error() }}</p>
-          <button
-            type="button"
-            (click)="loadProjects()"
-            class="mt-2 text-sm text-red-600 hover:text-red-800 font-medium"
-          >
+        <div class="error-state">
+          <p>{{ error() }}</p>
+          <sui-button variant="outline" color="neutral" size="sm" (click)="loadProjects()">
             Try again
-          </button>
+          </sui-button>
         </div>
       } @else if (projects().length === 0) {
-        <div class="text-center py-12">
-          <p class="text-sm text-slate-500">No projects found.</p>
+        <div class="empty-state">
+          <p>No projects found.</p>
         </div>
       } @else {
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="projects-grid">
           @for (project of projects(); track project.id) {
             <admin-project-card [project]="project" />
           }
@@ -44,6 +43,54 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       }
     </div>
   `,
+  styles: [
+    `
+      .page-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 24px;
+      }
+
+      .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--theme-color-text-default);
+        margin-bottom: 4px;
+      }
+
+      .page-subtitle {
+        font-size: 14px;
+        color: var(--theme-color-text-neutral-tertiary);
+      }
+
+      .loading-state,
+      .empty-state {
+        text-align: center;
+        padding: 48px 0;
+        color: var(--theme-color-text-neutral-tertiary);
+        font-size: 14px;
+      }
+
+      .error-state {
+        background: var(--theme-color-feedback-bg-error-secondary);
+        border: 1px solid var(--theme-color-feedback-border-error-default);
+        border-radius: 8px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--theme-color-feedback-text-error-default);
+        font-size: 14px;
+      }
+
+      .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 16px;
+      }
+    `,
+  ],
 })
 export class ProjectsComponent implements OnInit {
   readonly #projectsService = inject(ProjectsService);
