@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
-import { UsersService, UserSummary } from '../../core/services/users.service';
+import { UserDto } from '@codeheroes/types';
+import { UsersService } from '../../core/services/users.service';
 
 @Component({
   selector: 'admin-users',
@@ -13,7 +14,7 @@ import { UsersService, UserSummary } from '../../core/services/users.service';
         <div>
           <h1 class="page-title">Users</h1>
           @if (!isLoading() && !error()) {
-            <p class="page-subtitle">{{ users().length }} registered users</p>
+            <p class="page-subtitle">Showing {{ users().length }} users</p>
           }
         </div>
       </div>
@@ -39,9 +40,8 @@ import { UsersService, UserSummary } from '../../core/services/users.service';
             <thead>
               <tr>
                 <th>User</th>
-                <th>Level</th>
-                <th>XP</th>
-                <th>Actions</th>
+                <th>Type</th>
+                <th>Last Login</th>
                 <th>Joined</th>
               </tr>
             </thead>
@@ -59,14 +59,38 @@ import { UsersService, UserSummary } from '../../core/services/users.service';
                       </div>
                     </div>
                   </td>
-                  <td>{{ user.level ?? '--' }}</td>
-                  <td>{{ user.xp ?? '--' }}</td>
-                  <td>{{ user.totalActions ?? '--' }}</td>
+                  <td>
+                    <span class="user-type-badge" [class.user-type-bot]="user.userType !== 'user'">
+                      {{ user.userType }}
+                    </span>
+                  </td>
+                  <td>{{ user.lastLogin | date: 'mediumDate' }}</td>
                   <td>{{ user.createdAt | date: 'mediumDate' }}</td>
                 </tr>
               }
             </tbody>
           </table>
+        </div>
+
+        <div class="pagination-controls">
+          <sui-button
+            variant="outline"
+            color="neutral"
+            size="sm"
+            [disabled]="pageHistory().length === 0"
+            (click)="previousPage()"
+          >
+            Previous
+          </sui-button>
+          <sui-button
+            variant="outline"
+            color="neutral"
+            size="sm"
+            [disabled]="!hasMore()"
+            (click)="nextPage()"
+          >
+            Next
+          </sui-button>
         </div>
       }
     </div>
@@ -180,15 +204,43 @@ import { UsersService, UserSummary } from '../../core/services/users.service';
         font-size: 12px;
         color: var(--theme-color-text-neutral-tertiary);
       }
+
+      .user-type-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        background: var(--theme-color-bg-neutral-secondary);
+        color: var(--theme-color-text-neutral-secondary);
+        text-transform: capitalize;
+      }
+
+      .user-type-bot {
+        background: var(--theme-color-bg-brand-default);
+        color: #fff;
+      }
+
+      .pagination-controls {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 16px;
+      }
     `,
   ],
 })
 export class UsersComponent implements OnInit {
   readonly #usersService = inject(UsersService);
 
-  readonly users = signal<UserSummary[]>([]);
+  readonly users = signal<UserDto[]>([]);
   readonly isLoading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly hasMore = signal(false);
+  readonly pageHistory = signal<string[]>([]);
+
+  #currentLastId: string | null = null;
+  readonly #pageSize = 25;
 
   ngOnInit(): void {
     this.loadUsers();
@@ -197,9 +249,17 @@ export class UsersComponent implements OnInit {
   loadUsers(): void {
     this.isLoading.set(true);
     this.error.set(null);
-    this.#usersService.getUsers().subscribe({
-      next: (users) => {
-        this.users.set(users);
+
+    const params: { limit: number; startAfterId?: string } = { limit: this.#pageSize };
+    if (this.#currentLastId) {
+      params.startAfterId = this.#currentLastId;
+    }
+
+    this.#usersService.getUsers(params).subscribe({
+      next: (response) => {
+        this.users.set(response.items);
+        this.hasMore.set(response.hasMore);
+        this.#currentLastId = response.lastId;
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -208,5 +268,23 @@ export class UsersComponent implements OnInit {
         console.error('Failed to load users:', err);
       },
     });
+  }
+
+  nextPage(): void {
+    if (!this.hasMore() || !this.#currentLastId) return;
+    this.pageHistory.update((history) => [...history, this.#currentLastId!]);
+    this.loadUsers();
+  }
+
+  previousPage(): void {
+    const history = this.pageHistory();
+    if (history.length === 0) return;
+
+    const newHistory = [...history];
+    newHistory.pop();
+    this.pageHistory.set(newHistory);
+
+    this.#currentLastId = newHistory.length > 0 ? newHistory[newHistory.length - 1] : null;
+    this.loadUsers();
   }
 }
