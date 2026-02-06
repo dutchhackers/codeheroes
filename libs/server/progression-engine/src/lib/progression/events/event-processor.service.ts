@@ -39,14 +39,8 @@ export class EventProcessorService {
       case ProgressionEventType.LEVEL_UP:
         await this.handleLevelUp(event);
         break;
-      case ProgressionEventType.BADGE_EARNED:
-        await this.handleBadgeEarned(event);
-        break;
       case ProgressionEventType.ACTIVITY_RECORDED:
         await this.handleActivityRecorded(event);
-        break;
-      case ProgressionEventType.XP_GAINED:
-        await this.handleXpGained(event);
         break;
     }
   }
@@ -102,19 +96,6 @@ export class EventProcessorService {
       message: `Congratulations! You've reached level ${newLevel}!`,
       metadata: { level: newLevel, previousLevel },
     });
-  }
-
-  /**
-   * Handle badge earned events
-   * @param event Badge earned event
-   */
-  private async handleBadgeEarned(event: ProgressionEvent): Promise<void> {
-    const { userId, data } = event;
-    const badgeId = data.badgeId;
-    if (!badgeId) return;
-
-    // Badge already granted by BadgeService, just log
-    logger.info('Badge earned event processed', { userId, badgeId });
   }
 
   /**
@@ -197,14 +178,5 @@ export class EventProcessorService {
     }
 
     logger.info('Activity recorded event processed', { userId, activityType });
-  }
-
-  /**
-   * Handle XP gained events
-   * @param event XP gained event
-   */
-  private async handleXpGained(event: ProgressionEvent): Promise<void> {
-    // Handle XP gained events if needed
-    // Most XP-related processing is handled by the progression service
   }
 }
