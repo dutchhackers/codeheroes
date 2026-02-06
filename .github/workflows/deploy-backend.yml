@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy Backend
 
 on:
   workflow_dispatch:
@@ -11,15 +11,6 @@ on:
           - test
           - production
         default: test
-      deploy_target:
-        description: 'What to deploy'
-        required: true
-        type: choice
-        options:
-          - all
-          - frontend
-          - backend
-        default: all
       deploy_rules:
         description: 'Deploy Firestore/Storage rules'
         required: false
@@ -54,28 +45,10 @@ jobs:
           CI: true
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
-      - name: Create env file
-        run: |
-          echo "FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}" >> .env
-          echo "FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}" >> .env
-          echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env
-          echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env
-          echo "FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}" >> .env
-
-      - name: Generate config files
-        run: npm run setup
-
-      - name: Build frontend
-        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
-        run: npx nx build app --configuration=${{ inputs.environment }}
-
       - name: Build backend
-        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
         run: npx nx run-many --target=build --projects=api,auth-service,game-engine,github-receiver
 
       - name: Regenerate function package-lock files
-        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
         run: |
           for dir in dist/apps/api dist/apps/auth-service dist/apps/game-engine dist/apps/github-receiver; do
             if [ -d "$dir" ]; then
@@ -86,16 +59,7 @@ jobs:
             fi
           done
 
-      - name: Upload frontend artifact
-        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
-        uses: actions/upload-artifact@v6
-        with:
-          name: frontend-build
-          path: dist/apps/frontend/app
-          retention-days: 1
-
       - name: Upload backend artifact
-        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
         uses: actions/upload-artifact@v6
         with:
           name: backend-build
@@ -134,55 +98,30 @@ jobs:
           CI: true
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
-      - name: Download frontend artifact
-        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
-        uses: actions/download-artifact@v7
-        with:
-          name: frontend-build
-          path: dist/apps/frontend/app
-
       - name: Download backend artifact
-        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
         uses: actions/download-artifact@v7
         with:
           name: backend-build
           path: dist/apps
+
+      - name: Create env file
+        run: |
+          echo "FIREBASE_TEST_PROJECT_ID=${{ secrets.FIREBASE_TEST_PROJECT_ID }}" >> .env
+          echo "FIREBASE_TEST_APP_SITE=${{ secrets.FIREBASE_TEST_APP_SITE }}" >> .env
+          echo "FIREBASE_TEST_ADMIN_PORTAL_SITE=${{ secrets.FIREBASE_TEST_ADMIN_PORTAL_SITE }}" >> .env
+          echo "FIREBASE_PROD_PROJECT_ID=${{ secrets.FIREBASE_PROD_PROJECT_ID }}" >> .env
+          echo "FIREBASE_PROD_APP_SITE=${{ secrets.FIREBASE_PROD_APP_SITE }}" >> .env
+          echo "FIREBASE_PROD_ADMIN_PORTAL_SITE=${{ secrets.FIREBASE_PROD_ADMIN_PORTAL_SITE }}" >> .env
+
+      - name: Generate config files
+        run: npm run setup
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v3
         with:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
-      - name: Create .firebaserc
-        run: |
-          cat > .firebaserc << 'EOF'
-          {
-            "projects": {
-              "default": "codeheroes-test",
-              "test": "codeheroes-test",
-              "production": "codeheroes-prod"
-            },
-            "targets": {
-              "codeheroes-test": {
-                "hosting": {
-                  "app": ["codeheroes-app-ui-test"]
-                }
-              },
-              "codeheroes-prod": {
-                "hosting": {
-                  "app": ["codeheroes-app-ui"]
-                }
-              }
-            }
-          }
-          EOF
-
-      - name: Deploy hosting
-        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
-        run: npx nx run firebase-app:firebase --configuration=${{ inputs.environment }} deploy --only hosting:app
-
       - name: Deploy functions
-        if: inputs.deploy_target == 'all' || inputs.deploy_target == 'backend'
         run: npx nx run firebase-app:firebase --configuration=${{ inputs.environment }} deploy --only functions
 
       - name: Deploy rules
