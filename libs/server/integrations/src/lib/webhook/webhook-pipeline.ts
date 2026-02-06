@@ -32,8 +32,14 @@ export async function processWebhook({ req, res, provider }: WebhookPipelinePara
       return;
     }
 
-    const eventType = validation.eventType!;
-    const eventId = validation.eventId!;
+    if (!validation.eventType || !validation.eventId) {
+      logger.error('Webhook validation missing eventType or eventId', { provider });
+      res.status(400).send('Invalid webhook payload: missing event identifiers');
+      return;
+    }
+
+    const eventType = validation.eventType;
+    const eventId = validation.eventId;
 
     logger.log('Processing event:', `${provider}.${eventType}${req.body?.action ? `.${req.body.action}` : ''}`);
 
