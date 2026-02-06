@@ -17,10 +17,12 @@ export class DatabaseService extends BaseFirestoreService<DocumentData> {
       return undefined;
     }
 
+    const provider = (details.provider as string) || 'github';
+
     try {
       const connectedAccountSnapshot = await this.db
         .collectionGroup('connectedAccounts')
-        .where('provider', '==', 'github')
+        .where('provider', '==', provider)
         .where('externalUserId', '==', sender.id)
         .limit(1)
         .get();

@@ -15,6 +15,10 @@ export interface CommitDetails {
     name: string;
     email: string;
   };
+  committer?: {
+    name: string;
+    email: string;
+  };
 }
 
 export interface BaseContext {
