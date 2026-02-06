@@ -1,39 +1,25 @@
 import { Component, input } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { SuiBadgeComponent } from '@move4mobile/stride-ui';
 import { ProjectSummaryDto } from '@codeheroes/types';
 
 @Component({
   selector: 'admin-project-card',
   standalone: true,
-  imports: [DecimalPipe, SuiBadgeComponent],
+  imports: [SuiBadgeComponent],
   template: `
     <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">{{ project().name }}</h3>
-        <sui-badge variant="soft" color="neutral" [compact]="true">{{ project().slug }}</sui-badge>
+      <div class="card-top">
+        <div class="card-icon">{{ project().name.charAt(0).toUpperCase() }}</div>
+        <sui-badge variant="soft" color="success" [compact]="true">Active</sui-badge>
       </div>
-      @if (project().description) {
-        <p class="card-description">{{ project().description }}</p>
-      }
-      <div class="stats-grid">
-        <div class="stat">
-          <span class="stat-label">Repos</span>
-          <span class="stat-value">{{ project().repositoryCount }}</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">XP</span>
-          <span class="stat-value">{{ project().totalXp | number }}</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Actions</span>
-          <span class="stat-value">{{ project().totalActions | number }}</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Members</span>
-          <span class="stat-value">{{ project().activeMemberCount }}</span>
-        </div>
-      </div>
+      <h3 class="card-title">{{ project().name }}</h3>
+      <p class="card-subtitle">
+        {{ project().activeMemberCount }} members · {{ project().repositoryCount }} repos
+      </p>
+      <a class="card-view-link" href="javascript:void(0)">
+        View
+        <span class="arrow">→</span>
+      </a>
     </div>
   `,
   styles: [
@@ -42,62 +28,73 @@ import { ProjectSummaryDto } from '@codeheroes/types';
         background: var(--theme-color-bg-surface-default);
         border: 1px solid var(--theme-color-border-default-default);
         border-radius: 8px;
-        padding: 20px;
+        padding: 16px;
         transition: box-shadow 0.15s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
       }
 
       .card:hover {
         box-shadow: var(--theme-effect-styles-drop-shadow-200);
       }
 
-      .card-header {
+      .card-top {
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
-        gap: 8px;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
+      }
+
+      .card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: var(--theme-color-bg-brand-default);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 18px;
+        flex-shrink: 0;
       }
 
       .card-title {
         font-size: 16px;
         font-weight: 600;
         color: var(--theme-color-text-default);
+        margin-bottom: 4px;
       }
 
-      .card-description {
-        font-size: 14px;
+      .card-subtitle {
+        font-size: 13px;
         color: var(--theme-color-text-neutral-tertiary);
         margin-bottom: 16px;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
       }
 
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
+      .card-view-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--theme-color-text-brand-default);
+        text-decoration: none;
+        cursor: pointer;
       }
 
-      .stat {
-        background: var(--theme-color-bg-neutral-secondary);
-        border-radius: 6px;
-        padding: 10px 12px;
+      .card-view-link:hover {
+        text-decoration: underline;
       }
 
-      .stat-label {
-        display: block;
-        font-size: 12px;
-        color: var(--theme-color-text-neutral-tertiary);
-        margin-bottom: 2px;
+      .arrow {
+        font-size: 16px;
+        transition: transform 0.15s ease;
       }
 
-      .stat-value {
-        display: block;
-        font-size: 18px;
-        font-weight: 700;
-        color: var(--theme-color-text-default);
+      .card-view-link:hover .arrow {
+        transform: translateX(2px);
       }
     `,
   ],

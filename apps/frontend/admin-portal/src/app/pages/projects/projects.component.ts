@@ -86,8 +86,20 @@ import { ProjectSummaryDto } from '@codeheroes/types';
 
       .projects-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 16px;
+      }
+
+      @media (max-width: 960px) {
+        .projects-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 600px) {
+        .projects-grid {
+          grid-template-columns: 1fr;
+        }
       }
     `,
   ],
