@@ -130,9 +130,9 @@ describe('AzureDevOpsProviderAdapter', () => {
       const result = adapter.mapEventToGameAction('git.push', basePushWebhook, 'user-123');
 
       expect(result).not.toBeNull();
-      expect(result?.type).toBe('code_push');
-      expect(result?.userId).toBe('user-123');
-      expect(result?.provider).toBe('azure');
+      expect((result as any)?.type).toBe('code_push');
+      expect((result as any)?.userId).toBe('user-123');
+      expect((result as any)?.provider).toBe('azure');
       expect((result as any)?.context?.branch).toBe('main');
       expect((result as any)?.context?.commits).toHaveLength(1);
       expect((result as any)?.context?.repository?.name).toBe('my-repo');
@@ -197,8 +197,8 @@ describe('AzureDevOpsProviderAdapter', () => {
       const result = adapter.mapEventToGameAction('git.pullrequest.created', basePrWebhook, 'user-123');
 
       expect(result).not.toBeNull();
-      expect(result?.type).toBe('pull_request_create');
-      expect(result?.userId).toBe('user-123');
+      expect((result as any)?.type).toBe('pull_request_create');
+      expect((result as any)?.userId).toBe('user-123');
       expect((result as any)?.context?.pullRequest?.title).toBe('Add feature X');
       expect((result as any)?.context?.pullRequest?.branch).toBe('feature/add-x');
       expect((result as any)?.context?.pullRequest?.baseBranch).toBe('main');
@@ -217,7 +217,7 @@ describe('AzureDevOpsProviderAdapter', () => {
       const result = adapter.mapEventToGameAction('git.pullrequest.merged', mergedPr, 'user-123');
 
       expect(result).not.toBeNull();
-      expect(result?.type).toBe('pull_request_merge');
+      expect((result as any)?.type).toBe('pull_request_merge');
     });
 
     it('should return null for unregistered event types', () => {
