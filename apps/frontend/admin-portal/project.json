@@ -20,6 +20,11 @@
           {
             "glob": "**/*",
             "input": "apps/frontend/admin-portal/public"
+          },
+          {
+            "glob": "**/*",
+            "input": "node_modules/@move4mobile/theme-framna/assets/fonts",
+            "output": "/assets/fonts"
           }
         ],
         "styles": ["apps/frontend/admin-portal/src/styles.scss"],
