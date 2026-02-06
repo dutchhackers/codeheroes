@@ -1,0 +1,15 @@
+import { Environment } from './environment.interface';
+
+export const environment: Environment = {
+  name: 'test',
+  useEmulators: false,
+  apiUrl: 'https://europe-west1-${FIREBASE_TEST_PROJECT_ID}.cloudfunctions.net/api',
+  firebase: {
+    apiKey: '${FIREBASE_TEST_API_KEY}',
+    authDomain: '${FIREBASE_TEST_AUTH_DOMAIN}',
+    projectId: '${FIREBASE_TEST_PROJECT_ID}',
+    storageBucket: '${FIREBASE_TEST_STORAGE_BUCKET}',
+    messagingSenderId: '${FIREBASE_TEST_MESSAGING_SENDER_ID}',
+    appId: '${FIREBASE_TEST_APP_ID}',
+  },
+};

@@ -1,2 +1,3 @@
-# Local environment overrides
 src/environments/environment.local.ts
+src/environments/environment.test.ts
+src/environments/environment.prod.ts
