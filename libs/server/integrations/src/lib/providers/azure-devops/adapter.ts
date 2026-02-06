@@ -26,6 +26,9 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
     return handler ? handler(eventData, userId) : null;
   }
 
+  // TODO: Implement webhook signature validation using `secret` param
+  // Azure DevOps Service Hooks support HTTP header-based authentication (Basic Auth)
+  // and can be configured with a shared secret for HMAC signature verification.
   validateWebhook(
     headers: Record<string, string | string[] | undefined>,
     body: any,
@@ -155,6 +158,11 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
       ? (new Date(resource.closedDate).getTime() - new Date(resource.creationDate).getTime()) / 1000
       : 0;
 
+    // TODO: Enrich PR metrics via Azure DevOps REST API
+    // Azure webhook payloads don't include diff stats (unlike GitHub).
+    // To populate commits/additions/deletions/changedFiles, call:
+    //   GET {org}/{project}/_apis/git/repositories/{repo}/pullRequests/{id}?api-version=7.0
+    // with $expand=all to get iteration and thread counts.
     const prMetrics: PullRequestMetrics = {
       type: 'pull_request',
       timestamp: resource.closedDate || webhook.createdDate,
