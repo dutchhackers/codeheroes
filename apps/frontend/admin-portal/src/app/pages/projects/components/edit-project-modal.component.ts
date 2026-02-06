@@ -1,4 +1,4 @@
-import { Component, input, output, signal, OnInit } from '@angular/core';
+import { Component, input, output, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { ProjectSummaryDto } from '@codeheroes/types';
@@ -36,16 +36,13 @@ import { ProjectSummaryDto } from '@codeheroes/types';
             variant="solid"
             color="brand"
             size="sm"
-            [disabled]="isSaving() || !name.trim() || name.trim() === project().name"
+            [disabled]="!name.trim() || name.trim() === project().name"
             (click)="onSave()"
           >
-            {{ isSaving() ? 'Saving...' : 'Save' }}
+            Save
           </sui-button>
         </div>
 
-        @if (errorMessage()) {
-          <p class="error-text">{{ errorMessage() }}</p>
-        }
       </div>
     </div>
   `,
@@ -130,12 +127,7 @@ import { ProjectSummaryDto } from '@codeheroes/types';
         margin-top: 20px;
       }
 
-      .error-text {
-        font-size: 13px;
-        color: var(--theme-color-feedback-text-error-default);
-        margin-top: 12px;
-      }
-    `,
+`,
   ],
 })
 export class EditProjectModalComponent implements OnInit {
@@ -144,8 +136,6 @@ export class EditProjectModalComponent implements OnInit {
   readonly save = output<string>();
 
   name = '';
-  readonly isSaving = signal(false);
-  readonly errorMessage = signal<string | null>(null);
 
   ngOnInit(): void {
     this.name = this.project().name;

@@ -22,13 +22,19 @@ export class DashboardService {
   readonly #auth = inject(AuthService);
 
   getWeeklyLeaderboard(): Observable<LeaderboardEntry[]> {
+    return this.#withAuth((headers) =>
+      this.#http.get<LeaderboardEntry[]>(
+        `${environment.apiUrl}/leaderboards/week?includeZeroXp=true`,
+        { headers },
+      ),
+    );
+  }
+
+  #withAuth<T>(fn: (headers: HttpHeaders) => Observable<T>): Observable<T> {
     return from(this.#auth.getIdToken()).pipe(
       switchMap((token) => {
-        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-        return this.#http.get<LeaderboardEntry[]>(
-          `${environment.apiUrl}/leaderboards/week?includeZeroXp=true`,
-          { headers },
-        );
+        if (!token) throw new Error('Not authenticated');
+        return fn(new HttpHeaders().set('Authorization', `Bearer ${token}`));
       }),
     );
   }

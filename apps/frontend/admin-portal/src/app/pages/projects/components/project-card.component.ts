@@ -16,10 +16,10 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       <p class="card-subtitle">
         {{ project().activeMemberCount }} members &middot; {{ project().repositoryCount }} repos
       </p>
-      <a class="card-view-link" (click)="viewClick.emit()">
+      <button type="button" class="card-view-link" (click)="viewClick.emit()">
         View
         <span class="arrow">&rarr;</span>
-      </a>
+      </button>
     </div>
   `,
   styles: [
