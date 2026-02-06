@@ -6,7 +6,6 @@ export enum ProgressionEventType {
   LEVEL_UP = 'progression.level.up',
   BADGE_EARNED = 'progression.badge.earned',
   ACTIVITY_RECORDED = 'progression.activity.recorded',
-  ACHIEVEMENT_UNLOCKED = 'progression.achievement.unlocked',
 }
 
 export interface ProgressionEvent {
@@ -18,10 +17,8 @@ export interface ProgressionEvent {
     state?: Partial<ProgressionState>;
     previousState?: Partial<ProgressionState>;
     badgeId?: string;
-    // New (after recent refactoring)
     xpGained?: number;
     previousLevel?: number;
     newLevel?: number;
-    achievementId?: string;
   };
 }

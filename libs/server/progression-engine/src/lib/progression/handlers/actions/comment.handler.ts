@@ -2,7 +2,6 @@ import { GameActionContext, GameActionMetrics, GameActionType } from '@codeheroe
 import { Firestore } from 'firebase-admin/firestore';
 import { XP_VALUES } from '../../../config/xp-values.config';
 import { AbstractActionHandler } from '../action-handler.base';
-import { ProgressionService } from '../../services/progression.service';
 
 /**
  * Handler for comment actions (issue and PR comments)
@@ -10,11 +9,8 @@ import { ProgressionService } from '../../services/progression.service';
 export class CommentHandler extends AbstractActionHandler {
   protected actionType: GameActionType = 'comment_create';
 
-  constructor(
-    protected db: Firestore,
-    protected progressionService: ProgressionService,
-  ) {
-    super(db, progressionService);
+  constructor(protected db: Firestore) {
+    super(db);
   }
 
   /**

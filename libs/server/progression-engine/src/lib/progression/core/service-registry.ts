@@ -55,7 +55,7 @@ export function createServiceRegistry(): ServiceRegistry {
   );
 
   // Initialize action handlers
-  ActionHandlerFactory.initialize(db, progressionService);
+  ActionHandlerFactory.initialize(db);
 
   // Return the registry with all services
   return {
