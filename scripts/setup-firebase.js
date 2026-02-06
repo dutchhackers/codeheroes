@@ -9,7 +9,9 @@ const firebasercConfig = firebasercTemplate
   .replaceAll('${FIREBASE_TEST_PROJECT_ID}', testProjectId)
   .replaceAll('${FIREBASE_PROD_PROJECT_ID}', prodProjectId)
   .replace('${FIREBASE_TEST_APP_SITE}', process.env.FIREBASE_TEST_APP_SITE || `${testProjectId}-app`)
-  .replace('${FIREBASE_PROD_APP_SITE}', process.env.FIREBASE_PROD_APP_SITE || 'codeheroes-app-ui');
+  .replace('${FIREBASE_PROD_APP_SITE}', process.env.FIREBASE_PROD_APP_SITE || 'codeheroes-app-ui')
+  .replace('${FIREBASE_TEST_ADMIN_PORTAL_SITE}', process.env.FIREBASE_TEST_ADMIN_PORTAL_SITE || 'codeheroes-admin-ui-test')
+  .replace('${FIREBASE_PROD_ADMIN_PORTAL_SITE}', process.env.FIREBASE_PROD_ADMIN_PORTAL_SITE || 'codeheroes-admin-ui');
 fs.writeFileSync('.firebaserc', firebasercConfig);
 
 // Generate app (main PWA) environment files

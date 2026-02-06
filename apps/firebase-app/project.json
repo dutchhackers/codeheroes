@@ -119,6 +119,20 @@
           "command": "nx run firebase-app:firebase --configuration=production deploy --only hosting:app"
         }
       }
+    },
+    "deploy-admin-portal": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run firebase-app:firebase deploy --only hosting:admin-portal"
+      },
+      "configurations": {
+        "test": {
+          "command": "nx run firebase-app:firebase --configuration=test deploy --only hosting:admin-portal"
+        },
+        "production": {
+          "command": "nx run firebase-app:firebase --configuration=production deploy --only hosting:admin-portal"
+        }
+      }
     }
   }
 }

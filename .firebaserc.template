@@ -7,12 +7,14 @@
   "targets": {
     "${FIREBASE_TEST_PROJECT_ID}": {
       "hosting": {
-        "app": ["${FIREBASE_TEST_APP_SITE}"]
+        "app": ["${FIREBASE_TEST_APP_SITE}"],
+        "admin-portal": ["${FIREBASE_TEST_ADMIN_PORTAL_SITE}"]
       }
     },
     "${FIREBASE_PROD_PROJECT_ID}": {
       "hosting": {
-        "app": ["${FIREBASE_PROD_APP_SITE}"]
+        "app": ["${FIREBASE_PROD_APP_SITE}"],
+        "admin-portal": ["${FIREBASE_PROD_ADMIN_PORTAL_SITE}"]
       }
     }
   }
