@@ -14,65 +14,94 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
       <h1 class="page-title">Dashboard</h1>
       <p class="page-subtitle">Welcome to the Code Heroes admin portal.</p>
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-label">Projects</span>
-          <span class="stat-value">{{ isLoading() ? '...' : projectCount() }}</span>
+      @if (isLoading()) {
+        <!-- Skeleton: stat cards -->
+        <div class="stats-grid">
+          @for (_ of [1, 2, 3, 4]; track $index) {
+            <div class="stat-card">
+              <div class="skeleton skeleton-label"></div>
+              <div class="skeleton skeleton-value"></div>
+            </div>
+          }
         </div>
-        <div class="stat-card">
-          <span class="stat-label">Users</span>
-          <span class="stat-value">{{ isLoading() ? '...' : userCountLabel() }}</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Total XP (all projects)</span>
-          <span class="stat-value">{{ isLoading() ? '...' : formatNumber(totalXp()) }}</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Total Actions (all projects)</span>
-          <span class="stat-value">{{ isLoading() ? '...' : formatNumber(totalActions()) }}</span>
-        </div>
-      </div>
 
-      @if (leaderboardTop().length > 0) {
-        <div class="section-header">
-          <h2 class="section-title">Weekly Leaderboard</h2>
-          <a class="view-all-link" routerLink="/leaderboard">View all</a>
+        <!-- Skeleton: leaderboard -->
+        <div class="section-header" style="margin-top: 32px">
+          <div class="skeleton skeleton-section-title"></div>
         </div>
         <div class="table-container">
-          <table class="leaderboard-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>User</th>
-                <th>Level</th>
-                <th>XP This Week</th>
-                <th>Total XP</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (entry of leaderboardTop(); track entry.userId; let i = $index) {
-                <tr>
-                  <td class="rank-cell">{{ i + 1 }}</td>
-                  <td>
-                    <div class="user-cell">
-                      <div class="user-avatar">{{ entry.displayName?.charAt(0)?.toUpperCase() || '?' }}</div>
-                      <span class="user-name">{{ entry.displayName }}</span>
-                    </div>
-                  </td>
-                  <td>{{ entry.level }}</td>
-                  <td class="xp-cell">+{{ formatNumber(entry.xpGained) }}</td>
-                  <td>{{ formatNumber(entry.totalXp) }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
+          <div class="skeleton-table">
+            @for (_ of [1, 2, 3, 4, 5]; track $index) {
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-rank"></div>
+                <div class="skeleton skeleton-avatar-ph"></div>
+                <div class="skeleton skeleton-name"></div>
+                <div class="skeleton skeleton-number"></div>
+                <div class="skeleton skeleton-number"></div>
+                <div class="skeleton skeleton-number"></div>
+              </div>
+            }
+          </div>
         </div>
-      }
-
-      @if (!isLoading() && error()) {
+      } @else if (error()) {
         <div class="error-state">
           <p>{{ error() }}</p>
         </div>
+      } @else {
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Projects</span>
+            <span class="stat-value">{{ projectCount() }}</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Users</span>
+            <span class="stat-value">{{ userCountLabel() }}</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Total XP (all projects)</span>
+            <span class="stat-value">{{ formatNumber(totalXp()) }}</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Total Actions (all projects)</span>
+            <span class="stat-value">{{ formatNumber(totalActions()) }}</span>
+          </div>
+        </div>
+
+        @if (leaderboardTop().length > 0) {
+          <div class="section-header">
+            <h2 class="section-title">Weekly Leaderboard</h2>
+            <a class="view-all-link" routerLink="/leaderboard">View all</a>
+          </div>
+          <div class="table-container">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>User</th>
+                  <th>Level</th>
+                  <th>XP This Week</th>
+                  <th>Total XP</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (entry of leaderboardTop(); track entry.userId; let i = $index) {
+                  <tr>
+                    <td class="rank-cell">{{ i + 1 }}</td>
+                    <td>
+                      <div class="user-cell">
+                        <div class="user-avatar">{{ entry.displayName?.charAt(0)?.toUpperCase() || '?' }}</div>
+                        <span class="user-name">{{ entry.displayName }}</span>
+                      </div>
+                    </td>
+                    <td>{{ entry.level }}</td>
+                    <td class="xp-cell">+{{ formatNumber(entry.xpGained) }}</td>
+                    <td>{{ formatNumber(entry.totalXp) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
       }
     </div>
   `,
@@ -226,6 +255,71 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
         color: var(--theme-color-feedback-text-error-default);
         font-size: 14px;
         margin-top: 24px;
+      }
+
+      /* Skeleton loader */
+      @keyframes shimmer {
+        0% { opacity: 1; }
+        50% { opacity: 0.4; }
+        100% { opacity: 1; }
+      }
+
+      .skeleton {
+        background: var(--theme-color-bg-neutral-secondary);
+        border-radius: 4px;
+        animation: shimmer 1.5s ease-in-out infinite;
+      }
+
+      .skeleton-label {
+        height: 14px;
+        width: 80px;
+      }
+
+      .skeleton-value {
+        height: 32px;
+        width: 64px;
+      }
+
+      .skeleton-section-title {
+        height: 20px;
+        width: 180px;
+      }
+
+      .skeleton-table {
+        padding: 12px 0;
+      }
+
+      .skeleton-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+      }
+
+      .skeleton-rank {
+        height: 16px;
+        width: 24px;
+        flex-shrink: 0;
+      }
+
+      .skeleton-avatar-ph {
+        height: 28px;
+        width: 28px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .skeleton-name {
+        height: 16px;
+        width: 120px;
+        flex-shrink: 0;
+      }
+
+      .skeleton-number {
+        height: 16px;
+        width: 48px;
+        flex-shrink: 0;
+        margin-left: auto;
       }
     `,
   ],
