@@ -1,1 +1,2 @@
-export const ActivityLib = {};
+// Placeholder - activity lib
+export {};

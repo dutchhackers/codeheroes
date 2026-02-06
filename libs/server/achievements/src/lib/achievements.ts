@@ -1,3 +1,2 @@
-export function achievements(): string {
-  return 'achievements';
-}
+// Placeholder - achievements lib
+export {};
