@@ -164,7 +164,7 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
     // with $expand=all to get iteration and thread counts.
     const prMetrics: PullRequestMetrics = {
       type: 'pull_request',
-      timestamp: resource.closedDate || webhook.createdDate,
+      timestamp: resource.closedDate || resource.creationDate || webhook.createdDate,
       commits: 0,
       additions: 0,
       deletions: 0,
