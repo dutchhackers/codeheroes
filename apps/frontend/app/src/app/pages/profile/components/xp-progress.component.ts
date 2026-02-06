@@ -28,8 +28,8 @@ import { UserStats } from '@codeheroes/types';
           <div class="progress-bar" [style.width.%]="progressPercent()"></div>
         </div>
         <div class="progress-info">
-          <span class="progress-text">{{ stats()?.currentLevelXp ?? 0 }} / {{ stats()?.xpToNextLevel ?? 0 }} XP</span>
-          <span class="next-level-text">{{ remainingXp() }} to Level {{ (stats()?.level ?? 0) + 1 }}</span>
+          <span class="progress-text">{{ formatNumber(stats()?.currentLevelXp ?? 0) }} / {{ formatNumber(levelXpSpan()) }} XP</span>
+          <span class="next-level-text">{{ formatNumber(stats()?.xpToNextLevel ?? 0) }} to Level {{ (stats()?.level ?? 0) + 1 }}</span>
         </div>
       </div>
     </div>
@@ -152,16 +152,17 @@ import { UserStats } from '@codeheroes/types';
 export class XpProgressComponent {
   stats = input<UserStats | null>(null);
 
-  progressPercent = computed(() => {
-    const s = this.stats();
-    if (!s || !s.xpToNextLevel) return 0;
-    return Math.min(100, (s.currentLevelXp / s.xpToNextLevel) * 100);
-  });
-
-  remainingXp = computed(() => {
+  levelXpSpan = computed(() => {
     const s = this.stats();
     if (!s) return 0;
-    return (s.xpToNextLevel ?? 0) - (s.currentLevelXp ?? 0);
+    return (s.currentLevelXp ?? 0) + (s.xpToNextLevel ?? 0);
+  });
+
+  progressPercent = computed(() => {
+    const s = this.stats();
+    const span = this.levelXpSpan();
+    if (!s || !span) return 0;
+    return Math.min(100, ((s.currentLevelXp ?? 0) / span) * 100);
   });
 
   formatNumber(num: number): string {
