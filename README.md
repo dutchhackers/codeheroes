@@ -12,7 +12,6 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
 - [game-engine](apps/game-engine) - Game engine Firebase function
 - [github-receiver](apps/github-receiver) - GitHub webhooks receiver Firebase function
 - [app](apps/frontend/app) - Main PWA application
-- [web-legacy](apps/frontend/web-legacy) - Legacy web application
 
 ### Libraries
 
@@ -74,8 +73,6 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
      This will:
    - Generate `.firebaserc` file with your project ID
    - Create environment files for the web applications:
-     - `apps/frontend/web-legacy/src/environments/environment.local.ts` (development)
-     - `apps/frontend/web-legacy/src/environments/environment.prod.ts` (production)
      - `apps/frontend/app/src/environments/environment.local.ts` (development)
      - `apps/frontend/app/src/environments/environment.prod.ts` (production)
 

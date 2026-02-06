@@ -74,12 +74,8 @@ codeheroes/
 │   │   └── src/             # Testing tool
 │   │
 │   └── frontend/
-│       ├── app/             # Main PWA app (Angular) - real-time activity display
-│       │   └── src/         # TV/public display app
-│       │
-│       └── web-legacy/      # Legacy Angular frontend
-│           └── src/
-│               └── environments/ # Firebase config
+│       └── app/             # Main PWA app (Angular) - real-time activity display
+│           └── src/         # TV/public display app
 │
 ├── libs/                    # Shared libraries
 │   ├── server/
@@ -182,7 +178,6 @@ codeheroes/
 | `npm install` | Install all dependencies |
 | `npm run setup` | Generate config files from .env |
 | `nx serve firebase-app` | Start all emulators + watch mode |
-| `nx serve web-legacy` | Start legacy Angular dev server |
 | `nx serve app` | Start main PWA app |
 | `nx serve github-simulator -- push` | Simulate GitHub push event |
 | `nx build api` | Build api functions |
