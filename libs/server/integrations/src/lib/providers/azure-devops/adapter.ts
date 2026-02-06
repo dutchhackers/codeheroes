@@ -1,11 +1,10 @@
 import {
-  GameAction,
   CodePushContext,
   CodePushMetrics,
   PullRequestContext,
   PullRequestMetrics,
 } from '@codeheroes/types';
-import { ProviderAdapter } from '../interfaces/provider.interface';
+import { ProviderAdapter, GameActionResult } from '../interfaces/provider.interface';
 import { AzurePushWebhook, AzurePullRequestWebhook } from './types';
 
 export class AzureDevOpsProviderAdapter implements ProviderAdapter {
@@ -15,8 +14,8 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
     eventType: string,
     eventData: any,
     userId: string
-  ): Partial<GameAction> | null {
-    const handlers: Record<string, (data: any, uid: string) => Partial<GameAction> | null> = {
+  ): GameActionResult {
+    const handlers: Record<string, (data: any, uid: string) => GameActionResult> = {
       'git.push': this.handlePushWebhook.bind(this),
       'git.pullrequest.created': this.handlePullRequestWebhook.bind(this),
       'git.pullrequest.merged': this.handlePullRequestWebhook.bind(this),
@@ -57,11 +56,11 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
            eventData?.resource?.createdBy?.id;
   }
 
-  private handlePushWebhook(webhook: AzurePushWebhook, uid: string): Partial<GameAction> | null {
+  private handlePushWebhook(webhook: AzurePushWebhook, uid: string): GameActionResult {
     const { resource } = webhook;
     
     if (!resource.commits?.length) {
-      return { skipReason: 'Push contains no commits' } as any;
+      return { skipReason: 'Push contains no commits' };
     }
 
     const branchRef = resource.refUpdates[0]?.name || '';
@@ -118,7 +117,7 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
   private handlePullRequestWebhook(
     webhook: AzurePullRequestWebhook,
     uid: string
-  ): Partial<GameAction> {
+  ): GameActionResult {
     const { resource, eventType } = webhook;
 
     let actionType: 'pull_request_create' | 'pull_request_merge' | null = null;
@@ -131,7 +130,7 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
     if (!actionType) {
       return {
         skipReason: `PR event ${eventType} with status ${resource.status} not eligible for rewards`,
-      } as Partial<GameAction>;
+      };
     }
 
     const sourceBranchName = resource.sourceRefName.replace(/^refs\/heads\//, '');
