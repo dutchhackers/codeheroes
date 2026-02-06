@@ -1,5 +1,6 @@
 name: Deploy Admin Portal
 
+# yamllint disable-line
 on:
   workflow_dispatch:
     inputs:
