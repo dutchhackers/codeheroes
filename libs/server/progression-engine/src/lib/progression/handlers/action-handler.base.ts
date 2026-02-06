@@ -1,6 +1,5 @@
 import { GameActionContext, GameActionMetrics, GameActionType } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
-import { ProgressionService } from '../services/progression.service';
 
 /**
  * Base class for all game action handlers
@@ -15,10 +14,7 @@ export abstract class AbstractActionHandler {
    * Create a new action handler
    * @param db Firestore instance
    */
-  constructor(
-    protected db: Firestore,
-    protected progressionService: ProgressionService,
-  ) {}
+  constructor(protected db: Firestore) {}
 
   /**
    * Calculate bonuses for the action based on context and metrics

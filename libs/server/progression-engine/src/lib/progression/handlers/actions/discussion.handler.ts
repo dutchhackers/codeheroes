@@ -2,7 +2,6 @@ import { GameActionContext, GameActionMetrics, GameActionType } from '@codeheroe
 import { Firestore } from 'firebase-admin/firestore';
 import { XP_VALUES } from '../../../config/xp-values.config';
 import { AbstractActionHandler } from '../action-handler.base';
-import { ProgressionService } from '../../services/progression.service';
 
 /**
  * Handler for discussion actions (create and comment)
@@ -13,15 +12,13 @@ export class DiscussionHandler extends AbstractActionHandler {
   /**
    * Create a new discussion handler
    * @param db Firestore instance
-   * @param progressionService Progression service instance
    * @param action 'create' or 'comment'
    */
   constructor(
     protected db: Firestore,
-    protected progressionService: ProgressionService,
     private action: 'create' | 'comment',
   ) {
-    super(db, progressionService);
+    super(db);
 
     // Set the action type based on the action parameter
     if (action === 'create') {

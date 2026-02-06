@@ -30,9 +30,6 @@ export interface ProgressionState {
 
   /** Timestamp when counters were last updated */
   countersLastUpdated: string;
-
-  /** Optional array of achievement IDs earned by the user */
-  achievements?: string[];
 }
 
 /**
@@ -44,9 +41,6 @@ export interface ProgressionUpdate {
 
   /** Type of activity that generated the XP */
   activityType?: string;
-
-  /** Optional array of new achievements earned from this update */
-  achievements?: string[];
 }
 
 /**
@@ -61,7 +55,4 @@ export interface ProgressionUpdateResult {
 
   /** Whether the user leveled up during this update */
   leveledUp: boolean;
-
-  /** Any achievements earned during this update */
-  newAchievements?: string[];
 }
