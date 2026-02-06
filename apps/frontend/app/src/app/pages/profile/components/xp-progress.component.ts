@@ -162,7 +162,7 @@ export class XpProgressComponent {
     const s = this.stats();
     const span = this.levelXpSpan();
     if (!s || !span) return 0;
-    return Math.min(100, (s.currentLevelXp / span) * 100);
+    return Math.min(100, ((s.currentLevelXp ?? 0) / span) * 100);
   });
 
   formatNumber(num: number): string {
