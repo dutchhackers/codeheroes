@@ -130,6 +130,13 @@ router.put('/:id', async (req, res) => {
   try {
     const { slug, repositories, name, description, ...rest } = req.body;
 
+    // Reject unknown fields
+    const unexpectedFields = Object.keys(rest);
+    if (unexpectedFields.length > 0) {
+      res.status(400).json({ error: `Unknown fields: ${unexpectedFields.join(', ')}. Allowed: name, description, repositories` });
+      return;
+    }
+
     // Slug cannot be changed (it is the document ID)
     if (slug !== undefined) {
       res.status(400).json({ error: 'slug cannot be updated (it is the document ID)' });
@@ -160,7 +167,14 @@ router.put('/:id', async (req, res) => {
     }
 
     const updateData: Record<string, unknown> = {};
-    if (name !== undefined) updateData.name = name.trim();
+    if (name !== undefined) {
+      const trimmedName = name?.trim();
+      if (!trimmedName) {
+        res.status(400).json({ error: 'name cannot be empty' });
+        return;
+      }
+      updateData.name = trimmedName;
+    }
     if (description !== undefined) updateData.description = description?.trim();
     if (repositories !== undefined) updateData.repositories = repositories;
 
