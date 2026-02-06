@@ -5,21 +5,6 @@
   },
   "hosting": [
     {
-      "target": "web-legacy",
-      "public": "dist/apps/frontend/web-legacy/browser",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "rewrites": [
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
-    },
-    {
       "target": "app",
       "public": "dist/apps/frontend/app/browser",
       "ignore": [

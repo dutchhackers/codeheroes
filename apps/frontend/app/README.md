@@ -40,10 +40,10 @@ Current production bundle size: ~720kb initial bundle (~192kb transferred)
 Code Heroes App is deployed to Firebase Hosting as a separate site.
 
 ```bash
-# Deploy app only
+# Deploy app
 nx run firebase-app:firebase deploy --only hosting:app
 
-# Deploy all hosting sites (web-legacy + app)
+# Or deploy all hosting sites
 nx run firebase-app:firebase deploy --only hosting
 ```
 
