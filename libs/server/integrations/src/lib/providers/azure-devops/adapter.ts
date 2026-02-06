@@ -118,13 +118,11 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
   ): Partial<GameAction> {
     const { resource, eventType } = webhook;
 
-    let actionType: 'pull_request_create' | 'pull_request_merge' | 'pull_request_close' | null = null;
+    let actionType: 'pull_request_create' | 'pull_request_merge' | null = null;
     if (eventType === 'git.pullrequest.created') {
       actionType = 'pull_request_create';
     } else if (eventType === 'git.pullrequest.merged' || resource.status === 'completed') {
       actionType = 'pull_request_merge';
-    } else if (resource.status === 'abandoned') {
-      actionType = 'pull_request_close';
     }
 
     if (!actionType) {

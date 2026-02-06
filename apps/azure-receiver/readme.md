@@ -9,7 +9,7 @@ This function serves as the integration point between Azure DevOps and the CodeH
 ## Key Responsibilities
 
 - Accept HTTP POST requests from Azure DevOps webhook subscriptions
-- Validate incoming webhook signatures and payload structure
+- Validate incoming webhook payload structure
 - Transform Azure DevOps event data into CodeHeroes internal format
 - Store raw webhook data for auditing and troubleshooting
 - Detect and prevent duplicate event processing

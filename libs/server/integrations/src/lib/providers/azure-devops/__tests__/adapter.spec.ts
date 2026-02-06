@@ -220,18 +220,7 @@ describe('AzureDevOpsProviderAdapter', () => {
       expect(result?.type).toBe('pull_request_merge');
     });
 
-    it('should skip abandoned PRs', () => {
-      const abandonedPr: AzurePullRequestWebhook = {
-        ...basePrWebhook,
-        eventType: 'git.pullrequest.created' as any,
-        resource: { ...basePrWebhook.resource, status: 'abandoned' },
-      };
-      // Force an eventType that doesn't match created or merged to trigger abandon check
-      const result = adapter.mapEventToGameAction('git.pullrequest.updated' as any, abandonedPr, 'user-123');
-      expect(result).toBeNull();
-    });
-
-    it('should return null for unknown event types', () => {
+    it('should return null for unregistered event types', () => {
       const result = adapter.mapEventToGameAction('unknown.event', basePrWebhook, 'user-123');
       expect(result).toBeNull();
     });
