@@ -1,6 +1,5 @@
 name: Deploy App
 
-# yamllint disable-line
 on:
   workflow_dispatch:
     inputs:
