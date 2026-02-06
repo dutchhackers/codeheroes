@@ -1,13 +1,12 @@
 import { DatabaseInstance, logger } from '@codeheroes/common';
 import { ProjectRepository } from '@codeheroes/progression-engine';
-import { ConnectedAccountProvider, ProjectDetailDto, ProjectSummaryDto } from '@codeheroes/types';
+import { CONNECTED_ACCOUNT_PROVIDERS, ProjectDetailDto, ProjectSummaryDto } from '@codeheroes/types';
 import * as express from 'express';
 import { getTimePeriodIds } from '@codeheroes/progression-engine';
 
 const router = express.Router();
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const VALID_PROVIDERS: ConnectedAccountProvider[] = ['github', 'strava', 'azure', 'bitbucket', 'system'];
 
 function getProjectRepository(): ProjectRepository {
   return new ProjectRepository(DatabaseInstance.getInstance());
@@ -94,8 +93,8 @@ router.post('/', async (req, res) => {
         res.status(400).json({ error: 'Each repository must have provider, owner, and name' });
         return;
       }
-      if (!VALID_PROVIDERS.includes(r.provider)) {
-        res.status(400).json({ error: `Invalid provider "${r.provider}". Must be one of: ${VALID_PROVIDERS.join(', ')}` });
+      if (!CONNECTED_ACCOUNT_PROVIDERS.includes(r.provider)) {
+        res.status(400).json({ error: `Invalid provider "${r.provider}". Must be one of: ${CONNECTED_ACCOUNT_PROVIDERS.join(', ')}` });
         return;
       }
       r.fullName = `${r.owner}/${r.name}`;
@@ -144,8 +143,8 @@ router.put('/:id', async (req, res) => {
           res.status(400).json({ error: 'Each repository must have provider, owner, and name' });
           return;
         }
-        if (!VALID_PROVIDERS.includes(r.provider)) {
-          res.status(400).json({ error: `Invalid provider "${r.provider}". Must be one of: ${VALID_PROVIDERS.join(', ')}` });
+        if (!CONNECTED_ACCOUNT_PROVIDERS.includes(r.provider)) {
+          res.status(400).json({ error: `Invalid provider "${r.provider}". Must be one of: ${CONNECTED_ACCOUNT_PROVIDERS.join(', ')}` });
           return;
         }
         r.fullName = `${r.owner}/${r.name}`;
