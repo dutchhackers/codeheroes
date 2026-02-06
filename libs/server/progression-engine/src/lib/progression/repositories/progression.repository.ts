@@ -23,7 +23,6 @@ interface TransactionPlan {
     state: ProgressionState;
     previousState: ProgressionState;
     leveledUp: boolean;
-    newAchievements: string[];
   };
 }
 
@@ -79,7 +78,6 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
         lastActivityDate: userStats.lastActivityDate || null,
         counters: mergedCounters,
         countersLastUpdated: userStats.countersLastUpdated || getCurrentTimeAsISO(),
-        achievements: userStats.achievements || [],
       };
     } catch (error) {
       logger.error('Error retrieving progression state', { userId, error });
@@ -161,7 +159,6 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
       lastActivityDate: null,
       counters: initialCounters,
       countersLastUpdated: now,
-      achievements: [],
     };
 
     try {
@@ -249,7 +246,6 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
         state: newState,
         previousState,
         leveledUp,
-        newAchievements: update.achievements || [],
       },
     };
   }
@@ -303,7 +299,6 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
 
       // Build the corrected stats data using recalculated values
       const now = getCurrentTimeAsISO();
-      const freshAchievements = freshData?.achievements ?? plan.writes?.stats?.data?.achievements ?? [];
       const correctedStatsData = plan.writes?.stats?.data
         ? {
             ...plan.writes.stats.data,
@@ -314,7 +309,6 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
             counters: recalculatedCounters,
             countersLastUpdated: now,
             lastActivityDate: new Date().toISOString().split('T')[0],
-            achievements: freshAchievements,
           }
         : null;
 
@@ -362,7 +356,6 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
           counters: recalculatedCounters,
           countersLastUpdated: now,
           lastActivityDate: new Date().toISOString().split('T')[0],
-          achievements: freshAchievements,
         },
         previousState: {
           // previousState reflects the actual pre-transaction document state
@@ -372,7 +365,6 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
           counters: freshCounters,
           lastActivityDate: freshData?.lastActivityDate ?? plan.result!.previousState.lastActivityDate,
           countersLastUpdated: freshData?.countersLastUpdated ?? plan.result!.previousState.countersLastUpdated,
-          achievements: freshData?.achievements ?? plan.result!.previousState.achievements,
         },
       };
     });

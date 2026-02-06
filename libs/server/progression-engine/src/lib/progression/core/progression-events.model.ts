@@ -9,8 +9,6 @@ export enum ProgressionEventType {
   LEVEL_UP = 'progression.level.up',
   BADGE_EARNED = 'progression.badge.earned',
   ACTIVITY_RECORDED = 'progression.activity.recorded',
-  ACHIEVEMENT_UNLOCKED = 'progression.achievement.unlocked',
-  STREAK_MILESTONE = 'progression.streak.milestone',
 }
 
 /**
