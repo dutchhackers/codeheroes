@@ -39,6 +39,8 @@ jobs:
       - name: Install node modules
         if: steps.node-cache.outputs.cache-hit != 'true'
         run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
       - name: Build app
         run: npx nx run-many --target=build --all

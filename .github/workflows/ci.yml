@@ -37,6 +37,7 @@ jobs:
         run: npm ci
         env:
           CI: true
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
       - name: Setup Firebase
         run: npm run setup
