@@ -1,5 +1,11 @@
 import { GameAction } from '@codeheroes/types';
 
+export interface SkippedAction {
+  skipReason: string;
+}
+
+export type GameActionResult = Partial<GameAction> | SkippedAction | null;
+
 /**
  * Interface for external provider adapters
  * Standardizes the integration with different source control systems
@@ -15,9 +21,9 @@ export interface ProviderAdapter {
    * @param eventType Type of event from the provider
    * @param eventData Event payload data
    * @param userId User ID for the game action
-   * @returns Partial GameAction or null if event should be skipped
+   * @returns Partial GameAction, SkippedAction with reason, or null if event should be ignored
    */
-  mapEventToGameAction(eventType: string, eventData: any, userId: string): Partial<GameAction> | null;
+  mapEventToGameAction(eventType: string, eventData: any, userId: string): GameActionResult;
 
   /**
    * Validates webhook request

@@ -52,8 +52,8 @@ describe('GitHubAdapter', () => {
       const result = adapter.mapEventToGameAction('pull_request', event, 'user-123');
 
       expect(result).not.toBeNull();
-      expect(result?.type).toBe('pull_request_create');
-      expect(result?.userId).toBe('user-123');
+      expect((result as any)?.type).toBe('pull_request_create');
+      expect((result as any)?.userId).toBe('user-123');
     });
 
     it('should map "closed" action with merged=true to pull_request_merge', () => {
@@ -69,7 +69,7 @@ describe('GitHubAdapter', () => {
       const result = adapter.mapEventToGameAction('pull_request', event, 'user-123');
 
       expect(result).not.toBeNull();
-      expect(result?.type).toBe('pull_request_merge');
+      expect((result as any)?.type).toBe('pull_request_merge');
     });
 
     it('should map "closed" action with merged=false to pull_request_close', () => {
@@ -84,7 +84,7 @@ describe('GitHubAdapter', () => {
       const result = adapter.mapEventToGameAction('pull_request', event, 'user-123');
 
       expect(result).not.toBeNull();
-      expect(result?.type).toBe('pull_request_close');
+      expect((result as any)?.type).toBe('pull_request_close');
     });
 
     it('should skip "synchronize" action with skipReason', () => {
@@ -92,7 +92,7 @@ describe('GitHubAdapter', () => {
       const result = adapter.mapEventToGameAction('pull_request', event, 'user-123');
 
       expect(result).not.toBeNull();
-      expect(result?.type).toBeUndefined();
+      expect((result as any)?.type).toBeUndefined();
       expect((result as any)?.skipReason).toBe("Pull request action 'synchronize' not tracked for XP gains");
     });
 
@@ -101,7 +101,7 @@ describe('GitHubAdapter', () => {
       const result = adapter.mapEventToGameAction('pull_request', event, 'user-123');
 
       expect(result).not.toBeNull();
-      expect(result?.type).toBeUndefined();
+      expect((result as any)?.type).toBeUndefined();
       expect((result as any)?.skipReason).toBe("Pull request action 'edited' not tracked for XP gains");
     });
 
@@ -110,7 +110,7 @@ describe('GitHubAdapter', () => {
       const result = adapter.mapEventToGameAction('pull_request', event, 'user-123');
 
       expect(result).not.toBeNull();
-      expect(result?.type).toBeUndefined();
+      expect((result as any)?.type).toBeUndefined();
       expect((result as any)?.skipReason).toBe("Pull request action 'reopened' not tracked for XP gains");
     });
   });

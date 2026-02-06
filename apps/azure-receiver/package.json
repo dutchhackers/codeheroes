@@ -1,0 +1,16 @@
+{
+  "name": "azure-receiver",
+  "description": "Firebase Function for processing Azure DevOps webhooks",
+  "scripts": {
+    "test": "nx test azure-receiver",
+    "lint": "nx lint azure-receiver",
+    "build": "nx build azure-receiver",
+    "deploy": "nx deploy azure-receiver"
+  },
+  "engines": {
+    "node": "24"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "private": true
+}

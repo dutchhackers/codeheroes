@@ -1,5 +1,4 @@
 import {
-  GameAction,
   CodePushContext,
   CodePushMetrics,
   CodeReviewContext,
@@ -19,7 +18,7 @@ import {
   DiscussionContext,
   DiscussionMetrics,
 } from '@codeheroes/types';
-import { ProviderAdapter } from '../interfaces/provider.interface';
+import { ProviderAdapter, GameActionResult } from '../interfaces/provider.interface';
 import {
   IssueEvent,
   PullRequestEvent,
@@ -42,7 +41,7 @@ export class GitHubAdapter implements ProviderAdapter {
   /**
    * Maps GitHub events to game actions
    */
-  mapEventToGameAction(eventType: string, eventData: any, userId: string): Partial<GameAction> | null {
+  mapEventToGameAction(eventType: string, eventData: any, userId: string): GameActionResult {
     switch (eventType) {
       case 'push':
         return this.mapCodePushEvent(eventData as PushEvent, userId);
@@ -115,12 +114,12 @@ export class GitHubAdapter implements ProviderAdapter {
     return eventData?.sender?.id?.toString();
   }
 
-  private mapCodePushEvent(data: PushEvent, userId: string): Partial<GameAction> | null {
+  private mapCodePushEvent(data: PushEvent, userId: string): GameActionResult {
     // Return null with skip reason if there are no commits
     if (!data.commits || data.commits.length === 0) {
       return {
         skipReason: 'No commits in push event',
-      } as any;
+      };
     }
 
     const context: CodePushContext = {
@@ -175,7 +174,7 @@ export class GitHubAdapter implements ProviderAdapter {
     };
   }
 
-  private mapReviewEvent(event: PullRequestReviewEvent, userId: string): Partial<GameAction> {
+  private mapReviewEvent(event: PullRequestReviewEvent, userId: string): GameActionResult {
     const context: CodeReviewContext = {
       type: 'code_review',
       provider: 'github',
@@ -221,7 +220,7 @@ export class GitHubAdapter implements ProviderAdapter {
     };
   }
 
-  private mapPullRequestEvent(event: PullRequestEvent, userId: string): Partial<GameAction> {
+  private mapPullRequestEvent(event: PullRequestEvent, userId: string): GameActionResult {
     // Determine action type - only track specific actions for XP
     const type = (() => {
       if (event.action === 'closed' && event.pull_request.merged) {
@@ -241,7 +240,7 @@ export class GitHubAdapter implements ProviderAdapter {
     if (!type) {
       return {
         skipReason: `Pull request action '${event.action}' not tracked for XP gains`,
-      } as Partial<GameAction>;
+      };
     }
 
     const context: PullRequestContext = {
@@ -290,7 +289,7 @@ export class GitHubAdapter implements ProviderAdapter {
     };
   }
 
-  private mapIssueEvent(event: IssueEvent, userId: string): Partial<GameAction> {
+  private mapIssueEvent(event: IssueEvent, userId: string): GameActionResult {
     // Convert GitHub issue event to game action based on action type
     const actionType = (() => {
       switch (event.action) {
@@ -309,7 +308,7 @@ export class GitHubAdapter implements ProviderAdapter {
     if (!actionType) {
       return {
         skipReason: `Issue action '${event.action}' not tracked for XP gains`,
-      } as Partial<GameAction>;
+      };
     }
 
     // Create the issue context
@@ -358,12 +357,12 @@ export class GitHubAdapter implements ProviderAdapter {
     };
   }
 
-  private mapIssueCommentEvent(event: IssueCommentEvent, userId: string): Partial<GameAction> {
+  private mapIssueCommentEvent(event: IssueCommentEvent, userId: string): GameActionResult {
     // Only track 'created' action for XP
     if (event.action !== 'created') {
       return {
         skipReason: `Comment action '${event.action}' not tracked for XP gains`,
-      } as Partial<GameAction>;
+      };
     }
 
     // Determine if the comment is on a PR or an issue
@@ -415,12 +414,12 @@ export class GitHubAdapter implements ProviderAdapter {
     };
   }
 
-  private mapReviewCommentEvent(event: PullRequestReviewCommentEvent, userId: string): Partial<GameAction> {
+  private mapReviewCommentEvent(event: PullRequestReviewCommentEvent, userId: string): GameActionResult {
     // Only track 'created' action for XP
     if (event.action !== 'created') {
       return {
         skipReason: `Review comment action '${event.action}' not tracked for XP gains`,
-      } as Partial<GameAction>;
+      };
     }
 
     // Check if the comment contains a code suggestion (```suggestion block)
@@ -476,19 +475,19 @@ export class GitHubAdapter implements ProviderAdapter {
     };
   }
 
-  private mapReleaseEvent(event: ReleaseEvent, userId: string): Partial<GameAction> {
+  private mapReleaseEvent(event: ReleaseEvent, userId: string): GameActionResult {
     // Only track 'published' action for XP (avoid double-counting)
     if (event.action !== 'published') {
       return {
         skipReason: `Release action '${event.action}' not tracked for XP gains`,
-      } as Partial<GameAction>;
+      };
     }
 
     // Skip draft releases
     if (event.release.draft) {
       return {
         skipReason: 'Draft releases not tracked for XP gains',
-      } as Partial<GameAction>;
+      };
     }
 
     // Parse semver from tag name
@@ -572,19 +571,19 @@ export class GitHubAdapter implements ProviderAdapter {
     return { isMajor: false, isMinor: false, isPatch: true };
   }
 
-  private mapWorkflowRunEvent(event: WorkflowRunEvent, userId: string): Partial<GameAction> {
+  private mapWorkflowRunEvent(event: WorkflowRunEvent, userId: string): GameActionResult {
     // Only track 'completed' action with 'success' conclusion for XP
     if (event.action !== 'completed') {
       return {
         skipReason: `Workflow run action '${event.action}' not tracked for XP gains`,
-      } as Partial<GameAction>;
+      };
     }
 
     // Only reward successful workflow runs
     if (event.workflow_run.conclusion !== 'success') {
       return {
         skipReason: `Workflow run conclusion '${event.workflow_run.conclusion}' not tracked for XP gains`,
-      } as Partial<GameAction>;
+      };
     }
 
     // Check if this is a deployment workflow
@@ -633,12 +632,12 @@ export class GitHubAdapter implements ProviderAdapter {
     };
   }
 
-  private mapDiscussionEvent(event: DiscussionEvent, userId: string): Partial<GameAction> {
+  private mapDiscussionEvent(event: DiscussionEvent, userId: string): GameActionResult {
     // Only track 'created' action for XP
     if (event.action !== 'created') {
       return {
         skipReason: `Discussion action '${event.action}' not tracked for XP gains`,
-      } as Partial<GameAction>;
+      };
     }
 
     // Create the discussion context
@@ -683,12 +682,12 @@ export class GitHubAdapter implements ProviderAdapter {
     };
   }
 
-  private mapDiscussionCommentEvent(event: DiscussionCommentEvent, userId: string): Partial<GameAction> {
+  private mapDiscussionCommentEvent(event: DiscussionCommentEvent, userId: string): GameActionResult {
     // Only track 'created' action for XP
     if (event.action !== 'created') {
       return {
         skipReason: `Discussion comment action '${event.action}' not tracked for XP gains`,
-      } as Partial<GameAction>;
+      };
     }
 
     // Create the discussion context
