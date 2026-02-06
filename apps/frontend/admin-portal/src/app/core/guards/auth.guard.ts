@@ -1,5 +1,7 @@
 import { inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CanActivateFn, Router } from '@angular/router';
+import { filter, map, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 export const authGuard: CanActivateFn = () => {
@@ -7,20 +9,11 @@ export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (authService.isLoading()) {
-    // Wait for auth state to resolve
-    return new Promise<boolean>((resolve) => {
-      const checkAuth = setInterval(() => {
-        if (!authService.isLoading()) {
-          clearInterval(checkAuth);
-          if (authService.isAuthenticated()) {
-            resolve(true);
-          } else {
-            router.navigate(['/login']);
-            resolve(false);
-          }
-        }
-      }, 50);
-    });
+    return toObservable(authService.isLoading).pipe(
+      filter((loading) => !loading),
+      take(1),
+      map(() => (authService.isAuthenticated() ? true : router.createUrlTree(['/login']))),
+    );
   }
 
   if (authService.isAuthenticated()) {

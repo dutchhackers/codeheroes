@@ -11,28 +11,28 @@ export class ProjectsService {
   readonly #auth = inject(AuthService);
 
   getProjects(): Observable<ProjectSummaryDto[]> {
-    return from(this.#auth.getIdToken()).pipe(
-      switchMap((token) => {
-        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-        return this.#http.get<ProjectSummaryDto[]>(`${environment.apiUrl}/projects`, { headers });
-      }),
+    return this.#withAuth((headers) =>
+      this.#http.get<ProjectSummaryDto[]>(`${environment.apiUrl}/projects`, { headers }),
     );
   }
 
   getProject(id: string): Observable<ProjectDetailDto> {
-    return from(this.#auth.getIdToken()).pipe(
-      switchMap((token) => {
-        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-        return this.#http.get<ProjectDetailDto>(`${environment.apiUrl}/projects/${id}`, { headers });
-      }),
+    return this.#withAuth((headers) =>
+      this.#http.get<ProjectDetailDto>(`${environment.apiUrl}/projects/${id}`, { headers }),
     );
   }
 
   updateProject(id: string, data: UpdateProjectDto): Observable<ProjectDetailDto> {
+    return this.#withAuth((headers) =>
+      this.#http.put<ProjectDetailDto>(`${environment.apiUrl}/projects/${id}`, data, { headers }),
+    );
+  }
+
+  #withAuth<T>(fn: (headers: HttpHeaders) => Observable<T>): Observable<T> {
     return from(this.#auth.getIdToken()).pipe(
       switchMap((token) => {
-        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-        return this.#http.put<ProjectDetailDto>(`${environment.apiUrl}/projects/${id}`, data, { headers });
+        if (!token) throw new Error('Not authenticated');
+        return fn(new HttpHeaders().set('Authorization', `Bearer ${token}`));
       }),
     );
   }

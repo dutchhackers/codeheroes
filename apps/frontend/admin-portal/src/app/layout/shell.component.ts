@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { AuthService } from '../core/services/auth.service';
 
@@ -208,9 +208,10 @@ import { AuthService } from '../core/services/auth.service';
 })
 export class ShellComponent {
   readonly auth = inject(AuthService);
+  readonly #router = inject(Router);
 
   async onSignOut(): Promise<void> {
     await this.auth.signOut();
-    window.location.href = '/login';
+    await this.#router.navigate(['/login']);
   }
 }
