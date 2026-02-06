@@ -1,5 +1,5 @@
 import { DatabaseInstance, getCurrentTimeAsISO, logger } from '@codeheroes/common';
-import { GameAction, GameActionContext } from '@codeheroes/types';
+import { GameAction } from '@codeheroes/types';
 import { Firestore } from 'firebase-admin/firestore';
 import { ProviderFactory } from '../providers/provider.factory';
 
@@ -139,26 +139,6 @@ export class GameActionService {
     );
   }
 
-  /**
-   * @deprecated Use createIdempotent instead for new code
-   * Legacy create method for backwards compatibility
-   */
-  private async create(data: Partial<GameAction>): Promise<GameAction> {
-    const docRef = this.db.collection(this.collection).doc();
-    const now = getCurrentTimeAsISO();
-
-    const gameAction: GameAction = {
-      id: docRef.id,
-      ...(data as Omit<GameAction, 'id' | 'status' | 'createdAt' | 'updatedAt'>),
-      status: 'pending',
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    await docRef.set(gameAction);
-    return gameAction;
-  }
-
   async markAsProcessed(id: string): Promise<void> {
     await this.db.collection(this.collection).doc(id).update({
       status: 'processed',
@@ -175,38 +155,4 @@ export class GameActionService {
     });
   }
 
-  async findByExternalId(externalId: string): Promise<GameAction | null> {
-    const snapshot = await this.db.collection(this.collection).where('externalId', '==', externalId).limit(1).get();
-
-    if (snapshot.empty) return null;
-    return snapshot.docs[0].data() as GameAction;
-  }
-
-  async findRecentByUser(userId: string, limit = 10): Promise<GameAction[]> {
-    const snapshot = await this.db
-      .collection(this.collection)
-      .where('userId', '==', userId)
-      .orderBy('timestamp', 'desc')
-      .limit(limit)
-      .get();
-
-    return snapshot.docs.map((doc) => doc.data() as GameAction);
-  }
-
-  async findByContext<T extends GameActionContext>(
-    contextType: T['type'],
-    contextFilter: Partial<T>,
-  ): Promise<GameAction[]> {
-    let query = this.db.collection(this.collection).where('context.type', '==', contextType);
-
-    // Add filters for each provided context field
-    Object.entries(contextFilter).forEach(([key, value]) => {
-      if (value !== undefined) {
-        query = query.where(`context.${key}`, '==', value);
-      }
-    });
-
-    const snapshot = await query.get();
-    return snapshot.docs.map((doc) => doc.data() as GameAction);
-  }
 }
