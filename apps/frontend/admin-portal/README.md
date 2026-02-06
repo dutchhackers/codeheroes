@@ -1,53 +1,54 @@
 # Admin Portal
 
-Beheerportaal voor Code Heroes, gebouwd met Angular 21 en Stride UI.
+Admin dashboard for Code Heroes, built with Angular 21 and Stride UI.
 
-## Architectuur
+## Architecture
 
 ### Angular Setup
 
-- **Angular 21** standalone-component applicatie (geen NgModules)
-- Bootstrapping via `bootstrapApplication()` met `ApplicationConfig`
-- Zone change detection met `eventCoalescing: true`
-- Alle pagina-componenten zijn **lazy-loaded** via `loadComponent()`
+- **Angular 21** standalone-component application (no NgModules)
+- Bootstrapping via `bootstrapApplication()` with `ApplicationConfig`
+- Zone change detection with `eventCoalescing: true`
+- All page components are **lazy-loaded** via `loadComponent()`
 
 ### Routing
 
 ```
-/login                → LoginComponent        (publiek)
-/                     → ShellComponent         (beschermd door authGuard)
+/login                → LoginComponent        (public)
+/                     → ShellComponent         (protected by authGuard)
   ├── /home           → HomeComponent          (dashboard)
   ├── /projects       → ProjectsComponent
   ├── /users          → UsersComponent
-  └── (default)       → redirect naar /home
+  ├── /leaderboard    → LeaderboardComponent   (not in sidebar)
+  └── (default)       → redirect to /home
 ```
 
-`ShellComponent` fungeert als layout-wrapper met sidebar (navigatie, user-info, sign-out) en `<router-outlet>`.
+`ShellComponent` serves as the layout wrapper with a sidebar (navigation, user info, sign-out) and a `<router-outlet>`.
 
-### Authenticatie
+### Authentication
 
-- **Firebase Authentication** met Google OAuth (popup-flow)
-- `AuthService` beheert state via Angular **Signals** (`currentUser`, `isAuthenticated`, `isLoading`)
-- Functionele `authGuard` (CanActivateFn) beschermt routes onder `/`
-- Firebase Auth Emulator (port 9099) wordt gebruikt wanneer `environment.useEmulators === true`
+- **Firebase Authentication** with Google OAuth (popup flow)
+- `AuthService` manages state via Angular **Signals** (`currentUser`, `isAuthenticated`, `isLoading`)
+- Functional `authGuard` (CanActivateFn) protects all routes under `/`
+- Firebase Auth Emulator (port 9099) is used when `environment.useEmulators === true`
 
-### Backend Interactie
+### Backend Interaction
 
-REST calls naar een Express API (Cloud Function):
+REST calls to an Express API (Cloud Function):
 
 | Environment | API URL |
 |---|---|
 | Local | `http://localhost:5001/codeheroes-test/europe-west1/api` |
 | Test/Prod | `https://europe-west1-codeheroes-test.cloudfunctions.net/api` |
 
-Patroon in elke service:
-1. Firebase ID token ophalen via `AuthService.getIdToken()`
-2. Promise → Observable via `from()` + `switchMap()`
-3. HTTP request met `Authorization: Bearer {token}` header
+Pattern used in every service:
+1. Fetch Firebase ID token via `AuthService.getIdToken()`
+2. Convert Promise to Observable via `from()` + `switchMap()`
+3. Execute HTTP request with `Authorization: Bearer {token}` header
 
-Types (`UserDto`, `ProjectSummaryDto`, `PaginatedResponse<T>`) komen uit `@codeheroes/types`.
+Types (`UserDto`, `ProjectSummaryDto`, `PaginatedResponse<T>`) are imported from `@codeheroes/types`.
 
-### Projectstructuur
+### Project Structure
 
 ```
 src/app/
@@ -61,6 +62,7 @@ src/app/
 ├── layout/shell.component.ts
 ├── pages/
 │   ├── home/home.component.ts
+│   ├── leaderboard/leaderboard.component.ts
 │   ├── login/login.component.ts
 │   ├── projects/projects.component.ts
 │   └── users/users.component.ts
@@ -69,19 +71,19 @@ src/app/
 └── app.routes.ts
 ```
 
-## Stride UI Implementatie
+## Stride UI Integration
 
 ### Dependencies
 
 ```
 @move4mobile/stride-ui     ^1.17.0
 @move4mobile/theme-framna  ^0.3.12
-quill                      ^2.0.3   (peer dep van stride-ui)
+quill                      ^2.0.3   (peer dep of stride-ui)
 ```
 
-### Setup stappen
+### Setup Steps
 
-**1. Font assets configureren** in `project.json`:
+**1. Configure font assets** in `project.json`:
 
 ```json
 {
@@ -91,7 +93,7 @@ quill                      ^2.0.3   (peer dep van stride-ui)
 }
 ```
 
-**2. Theme initialiseren** in `styles.scss`:
+**2. Initialize theme** in `styles.scss`:
 
 ```scss
 @use 'tailwindcss';
@@ -101,7 +103,7 @@ quill                      ^2.0.3   (peer dep van stride-ui)
 @include theme.init();
 ```
 
-**3. Components importeren** (standalone):
+**3. Import components** (standalone):
 
 ```typescript
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
@@ -115,26 +117,26 @@ import { SuiButtonComponent } from '@move4mobile/stride-ui';
 
 ### Lessons Learned
 
-1. **`theme.init()` moet op top-level** — De mixin genereert CSS op `body {}`. Aanroepen binnen `:root {}` of een andere selector werkt niet.
+1. **`theme.init()` must be called at top level** — The mixin generates CSS on `body {}`. Calling it inside `:root {}` or any other selector produces nested output and doesn't work.
 
-2. **CSS variable naamgeving** wijkt af van verwachting:
+2. **CSS variable naming** differs from what you might expect:
    - Background: `--theme-color-bg-surface-default`, `bg-neutral-secondary`, `bg-brand-default`
    - Text: `--theme-color-text-default`, `text-neutral-secondary`, `text-neutral-tertiary`
-   - Border: `--theme-color-border-default-default` (dubbel "default")
+   - Border: `--theme-color-border-default-default` (double "default")
    - Feedback: `--theme-color-feedback-bg-error-secondary`, `feedback-border-error-default`
    - Font: `--theme-font-family-default`
    - Shadow: `--theme-effect-styles-drop-shadow-200`
 
-3. **Font-kopie is vereist** — Zonder de assets-config in `project.json` valt de UI terug op system fonts.
+3. **Font copy is required** — Without the assets config in `project.json`, the UI falls back to system fonts.
 
-4. **Quill als peer dependency** — Ondanks "optional" markering geeft npm warnings zonder. Installeer het altijd mee.
+4. **Quill as peer dependency** — Despite being marked "optional", npm produces warnings without it. Always install it.
 
-5. **Standalone imports, geen modules** — Gebruik `SuiButtonComponent` (niet `SuiButtonModule`) voor Angular 21+ standalone components.
+5. **Standalone imports, not modules** — Use `SuiButtonComponent` (not `SuiButtonModule`) for Angular 21+ standalone components.
 
 ## Development
 
 ```bash
-# Serve lokaal (met emulators)
+# Serve locally (with emulators)
 npx nx serve admin-portal
 
 # Build
@@ -144,4 +146,4 @@ npx nx build admin-portal
 npx nx build admin-portal --configuration=production
 ```
 
-Dev server draait op **port 4202**.
+Dev server runs on **port 4202**.
