@@ -7,13 +7,11 @@
   "targets": {
     "${FIREBASE_TEST_PROJECT_ID}": {
       "hosting": {
-        "web-legacy": ["${FIREBASE_TEST_PROJECT_ID}"],
         "app": ["${FIREBASE_TEST_APP_SITE}"]
       }
     },
     "${FIREBASE_PROD_PROJECT_ID}": {
       "hosting": {
-        "web-legacy": ["${FIREBASE_PROD_PROJECT_ID}"],
         "app": ["${FIREBASE_PROD_APP_SITE}"]
       }
     }

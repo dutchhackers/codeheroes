@@ -1,9 +1,0 @@
-export type ActivityType =
-  | 'BRANCH_DELETED'
-  | 'BRANCH_CREATED'
-  | 'PR_CREATED'
-  | 'CODE_PUSH'
-  | 'PR_REVIEW_SUBMITTED'
-  | 'PR_UPDATED'
-  | 'PR_MERGED'
-  | 'PR_REVIEW_THREAD_RESOLVED';

@@ -165,13 +165,11 @@ jobs:
             "targets": {
               "codeheroes-test": {
                 "hosting": {
-                  "web-legacy": ["codeheroes-test"],
                   "app": ["codeheroes-app-ui-test"]
                 }
               },
               "codeheroes-prod": {
                 "hosting": {
-                  "web-legacy": ["codeheroes-prod"],
                   "app": ["codeheroes-app-ui"]
                 }
               }
