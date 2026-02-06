@@ -1,0 +1,15 @@
+@use 'tailwindcss';
+@use '@move4mobile/theme-framna/theme';
+@use '@move4mobile/stride-ui/sass/reset';
+
+@include theme.init();
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--theme-font-family-default), system-ui, sans-serif;
+  background: var(--theme-color-bg-surface-default);
+  color: var(--theme-color-text-default);
+}
