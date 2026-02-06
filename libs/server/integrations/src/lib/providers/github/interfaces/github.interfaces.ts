@@ -1,21 +1,3 @@
-export interface CommonPayload {
-  repository?: GitHubRepository;
-  sender?: GitHubUser;
-}
-
-export interface CommonMappedData {
-  repository?: {
-    id: string;
-    name: string;
-    owner: string;
-    ownerType: string;
-  };
-  sender?: {
-    id: string;
-    login: string;
-  };
-}
-
 export interface GitHubUser {
   id: number;
   login: string;
@@ -68,13 +50,6 @@ export interface PushEvent {
   compare?: string;
   commits: GitHubCommit[];
   head_commit?: GitHubCommit | null;
-}
-
-export interface GitHubHeaders {
-  'x-github-event'?: string;
-  'x-github-delivery'?: string;
-  'x-hub-signature'?: string;
-  [key: string]: string | string[] | undefined;
 }
 
 export interface GitHubTeam {
@@ -166,65 +141,6 @@ export interface WorkflowRunEvent {
   sender: GitHubUser;
 }
 
-export interface WorkflowJobEvent {
-  action: 'queued' | 'in_progress' | 'completed' | 'waiting';
-  workflow_job: {
-    id: number;
-    run_id: number;
-    workflow_name: string;
-    head_branch: string;
-    status: string;
-    conclusion: string | null;
-    started_at: string;
-    completed_at: string | null;
-    name: string;
-    labels: string[];
-    runner_name: string | null;
-    html_url: string;
-  };
-  repository: GitHubRepository;
-  sender: GitHubUser;
-}
-
-export interface CheckRunEvent {
-  action: 'created' | 'completed' | 'rerequested' | 'requested_action';
-  check_run: {
-    id: number;
-    head_sha: string;
-    status: string;
-    conclusion: string | null;
-    started_at: string;
-    completed_at: string | null;
-    output: {
-      title: string;
-      summary: string;
-      text?: string;
-    };
-    name: string;
-    check_suite: {
-      id: number;
-    };
-    html_url: string;
-  };
-  repository: GitHubRepository;
-  sender: GitHubUser;
-}
-
-export interface CheckSuiteEvent {
-  action: 'completed' | 'requested' | 'rerequested';
-  check_suite: {
-    id: number;
-    head_branch: string;
-    head_sha: string;
-    status: string;
-    conclusion: string | null;
-    before: string;
-    after: string;
-  };
-  repository: GitHubRepository;
-  sender: GitHubUser;
-}
-
 export interface PullRequestReviewEvent {
   action: 'submitted' | 'edited' | 'dismissed';
   review: {
@@ -248,39 +164,6 @@ export interface PullRequestReviewEvent {
     title: string;
     state: 'open' | 'closed';
     html_url: string;
-  };
-  repository: GitHubRepository;
-  sender: GitHubUser;
-}
-
-export interface PullRequestReviewThreadEvent {
-  action: 'resolved' | 'unresolved';
-  thread: {
-    id: number;
-    node_id: string;
-    comments: number;
-    resolved: boolean;
-    resolution?: {
-      user: GitHubUser;
-      commit_id: string;
-    };
-    line: number;
-    start_line?: number;
-    original_line?: number;
-    side?: string;
-    start_side?: string;
-    original_position?: number;
-    position?: number;
-    diff_hunk?: string;
-    path?: string;
-  };
-  pull_request: {
-    id: number;
-    number: number;
-    title: string;
-    state: 'open' | 'closed';
-    html_url: string;
-    user?: GitHubUser;
   };
   repository: GitHubRepository;
   sender: GitHubUser;
@@ -311,22 +194,6 @@ export interface PullRequestReviewCommentEvent {
     state: 'open' | 'closed';
     html_url: string;
   };
-  repository: GitHubRepository;
-  sender: GitHubUser;
-}
-
-export interface CreateEvent extends CommonPayload {
-  ref: string;
-  ref_type: 'branch' | 'tag' | 'repository';
-  master_branch: string;
-  description: string | null;
-  pusher_type: string;
-}
-
-export interface DeleteEvent {
-  ref: string;
-  ref_type: 'branch' | 'tag';
-  pusher_type: string;
   repository: GitHubRepository;
   sender: GitHubUser;
 }
