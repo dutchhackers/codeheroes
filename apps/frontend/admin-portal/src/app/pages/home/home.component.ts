@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ProjectsService } from '../../core/services/projects.service';
 import { UsersService } from '../../core/services/users.service';
@@ -7,7 +8,7 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
 @Component({
   selector: 'admin-home',
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   template: `
     <div>
       <h1 class="page-title">Dashboard</h1>
@@ -32,8 +33,11 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
         </div>
       </div>
 
-      @if (leaderboard().length > 0) {
-        <h2 class="section-title">Weekly Leaderboard</h2>
+      @if (leaderboardTop().length > 0) {
+        <div class="section-header">
+          <h2 class="section-title">Weekly Leaderboard</h2>
+          <a class="view-all-link" routerLink="/leaderboard">View all</a>
+        </div>
         <div class="table-container">
           <table class="leaderboard-table">
             <thead>
@@ -46,7 +50,7 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
               </tr>
             </thead>
             <tbody>
-              @for (entry of leaderboard(); track entry.userId; let i = $index) {
+              @for (entry of leaderboardTop(); track entry.userId; let i = $index) {
                 <tr>
                   <td class="rank-cell">{{ i + 1 }}</td>
                   <td>
@@ -115,12 +119,29 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
         color: var(--theme-color-text-default);
       }
 
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 32px;
+        margin-bottom: 16px;
+      }
+
       .section-title {
         font-size: 18px;
         font-weight: 600;
         color: var(--theme-color-text-default);
-        margin-top: 32px;
-        margin-bottom: 16px;
+      }
+
+      .view-all-link {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--theme-color-text-brand-default);
+        text-decoration: none;
+      }
+
+      .view-all-link:hover {
+        text-decoration: underline;
       }
 
       .table-container {
@@ -219,6 +240,7 @@ export class HomeComponent implements OnInit {
   readonly totalXp = signal(0);
   readonly totalActions = signal(0);
   readonly leaderboard = signal<LeaderboardEntry[]>([]);
+  readonly leaderboardTop = computed(() => this.leaderboard().slice(0, 5));
   readonly isLoading = signal(true);
   readonly error = signal<string | null>(null);
 

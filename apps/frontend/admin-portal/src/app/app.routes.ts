@@ -24,6 +24,11 @@ export const appRoutes: Routes = [
         loadComponent: () => import('./pages/users/users.component').then((m) => m.UsersComponent),
       },
       {
+        path: 'leaderboard',
+        loadComponent: () =>
+          import('./pages/leaderboard/leaderboard.component').then((m) => m.LeaderboardComponent),
+      },
+      {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full',
