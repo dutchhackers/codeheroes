@@ -216,6 +216,12 @@ router.get('/:id/stats/daily/:dayId?', async (req, res) => {
 
   try {
     const repo = getProjectRepository();
+    const project = await repo.getProject(req.params.id);
+    if (!project) {
+      res.status(404).json({ error: 'Project not found' });
+      return;
+    }
+
     const dayId = req.params.dayId ?? getTimePeriodIds().daily;
     const stats = await repo.getProjectTimeBasedStats(req.params.id, 'daily', dayId);
 
@@ -232,6 +238,12 @@ router.get('/:id/stats/weekly/:weekId?', async (req, res) => {
 
   try {
     const repo = getProjectRepository();
+    const project = await repo.getProject(req.params.id);
+    if (!project) {
+      res.status(404).json({ error: 'Project not found' });
+      return;
+    }
+
     const weekId = req.params.weekId ?? getTimePeriodIds().weekly;
     const stats = await repo.getProjectTimeBasedStats(req.params.id, 'weekly', weekId);
 

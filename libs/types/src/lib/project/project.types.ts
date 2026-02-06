@@ -79,7 +79,6 @@ export interface CreateProjectDto {
 
 export interface UpdateProjectDto {
   name?: string;
-  slug?: string;
   description?: string;
   repositories?: ProjectRepository[];
 }
