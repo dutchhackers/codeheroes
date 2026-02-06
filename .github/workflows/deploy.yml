@@ -52,6 +52,7 @@ jobs:
         run: npm ci
         env:
           CI: true
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
       - name: Create env file
         run: |
@@ -131,6 +132,7 @@ jobs:
         run: npm ci
         env:
           CI: true
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
       - name: Download frontend artifact
         if: inputs.deploy_target == 'all' || inputs.deploy_target == 'frontend'
