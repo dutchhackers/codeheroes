@@ -73,8 +73,8 @@ import { MyStatsComponent } from './components/my-stats.component';
           <!-- Name and Level -->
           <div class="text-center mb-4">
             <div class="inline-flex items-center gap-2">
-              <h2 class="text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
-                {{ formatDisplayName(user()?.displayName ?? '') }}
+              <h2 class="text-xl md:text-2xl font-bold text-white">
+                {{ user()?.displayName || 'Unknown' }}
               </h2>
               <button type="button" class="edit-button" (click)="openEditModal()" aria-label="Edit profile">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -274,34 +274,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return '';
     }
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  }
-
-  formatDisplayName(name: string): string {
-    if (!name) return 'Unknown';
-
-    // Similar to the techUsername logic but just uppercase
-    const upper = name.toUpperCase();
-    const parts = upper.split(/\s+/);
-
-    if (parts.length >= 2) {
-      // "Sander Elderhorst" -> "SANDER.E"
-      return `${parts[0]}.${parts[1].charAt(0)}`;
-    }
-
-    // Single word handling
-    const breakPoints = ['NIGHT', 'CODE', 'DARK', 'FIRE', 'STAR', 'CYBER', 'TECH', 'MEGA', 'ULTRA'];
-    for (const prefix of breakPoints) {
-      if (upper.startsWith(prefix) && upper.length > prefix.length) {
-        return `${prefix}.${upper.slice(prefix.length)}`;
-      }
-    }
-
-    if (upper.length >= 8) {
-      const mid = Math.floor(upper.length / 2);
-      return `${upper.slice(0, mid)}.${upper.slice(mid)}`;
-    }
-
-    return upper;
   }
 
   getUserInfo(userId: string) {

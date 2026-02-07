@@ -6,9 +6,10 @@ import { SystemSeeder } from './lib/seeders/system.seeder';
 import { ProjectSeeder } from './lib/seeders/project.seeder';
 import { ProgressionResetter } from './lib/resetters/progression.resetter';
 import { SchemaDiscovery } from './lib/discovery/schema.discovery';
+import { LowercaseNamesMigration } from './lib/migrations/lowercase-names.migration';
 import { loadJsonData } from './lib/utils/file-loader';
 
-const VALID_COMMANDS = ['seed', 'reset-progression', 'discover-schema'] as const;
+const VALID_COMMANDS = ['seed', 'reset-progression', 'discover-schema', 'backfill-lowercase-names'] as const;
 type Command = (typeof VALID_COMMANDS)[number];
 
 function printUsage() {
@@ -16,9 +17,10 @@ function printUsage() {
 Usage: node main.js <command>
 
 Commands:
-  seed               Seed the database with initial data (users, accounts, system)
-  reset-progression  Reset all progression data (XP, levels, badges) while preserving users
-  discover-schema    Discover and report the current Firestore schema
+  seed                       Seed the database with initial data (users, accounts, system)
+  reset-progression          Reset all progression data (XP, levels, badges) while preserving users
+  discover-schema            Discover and report the current Firestore schema
+  backfill-lowercase-names   Backfill displayNameLower field on all user documents
 
 Environment Variables:
   FIREBASE_PROJECT_ID       Required. Firebase project ID (e.g., codeheroes-test)
@@ -64,6 +66,11 @@ async function runResetProgression(db: FirebaseFirestore.Firestore) {
 async function runDiscoverSchema(db: FirebaseFirestore.Firestore) {
   const discovery = new SchemaDiscovery(db);
   await discovery.discover();
+}
+
+async function runBackfillLowercaseNames(db: FirebaseFirestore.Firestore) {
+  const migration = new LowercaseNamesMigration();
+  await migration.run(db);
 }
 
 async function main() {
@@ -113,6 +120,9 @@ async function main() {
         break;
       case 'discover-schema':
         await runDiscoverSchema(db);
+        break;
+      case 'backfill-lowercase-names':
+        await runBackfillLowercaseNames(db);
         break;
     }
     process.exit(0);

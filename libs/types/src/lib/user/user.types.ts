@@ -4,6 +4,7 @@ export type UserType = 'user' | 'bot' | 'system';
 
 export interface UserDto extends BaseDocument {
   displayName: string;
+  displayNameLower?: string | null;
   email: string;
   photoUrl: string | null;
   active: boolean;
