@@ -42,6 +42,9 @@ export class EventProcessorService {
       case ProgressionEventType.ACTIVITY_RECORDED:
         await this.handleActivityRecorded(event);
         break;
+      default:
+        logger.debug('Unhandled progression event type', { type: event.type, userId: event.userId });
+        break;
     }
   }
 
