@@ -5,10 +5,14 @@ export class DatabaseInstance {
 
   private static initialize() {
     const db = getFirestore();
-    const settings: Settings = {
-      ignoreUndefinedProperties: true,
-    };
-    db.settings(settings);
+    try {
+      const settings: Settings = {
+        ignoreUndefinedProperties: true,
+      };
+      db.settings(settings);
+    } catch {
+      // settings() throws if Firestore was already initialized (e.g. by admin.initializeApp())
+    }
     return db;
   }
 
