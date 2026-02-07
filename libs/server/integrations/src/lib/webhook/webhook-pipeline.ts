@@ -25,7 +25,9 @@ export async function processWebhook({ req, res, provider, secret }: WebhookPipe
     const providerAdapter = ProviderFactory.getProvider(provider);
 
     // Step 2: Validate webhook using the provider adapter
-    const validation = providerAdapter.validateWebhook(req.headers, req.body, secret);
+    // Pass rawBody for signature verification (Firebase Cloud Functions provides req.rawBody)
+    const rawBody = (req as any).rawBody;
+    const validation = providerAdapter.validateWebhook(req.headers, req.body, secret, rawBody);
 
     if (!validation.isValid) {
       logger.error('Webhook validation failed', { provider, error: validation.error });

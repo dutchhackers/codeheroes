@@ -22,13 +22,13 @@ const createProjectSchema = z.object({
   slug: z.string().regex(SLUG_PATTERN, 'slug must be lowercase alphanumeric with hyphens (e.g., "my-project")'),
   description: z.string().max(1000).optional().transform((v) => v?.trim()),
   repositories: z.array(repositorySchema).default([]),
-}).strict();
+});
 
 const updateProjectSchema = z.object({
   name: z.string().min(1).max(200).transform((v) => v.trim()).optional(),
   description: z.string().max(1000).optional().transform((v) => v?.trim()),
   repositories: z.array(repositorySchema).optional(),
-}).strict();
+});
 
 function getProjectRepository(): ProjectRepository {
   return new ProjectRepository(DatabaseInstance.getInstance());

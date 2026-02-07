@@ -10,7 +10,7 @@ const router = express.Router();
 const createUserSchema = z.object({
   displayName: z.string().min(1).max(100),
   email: z.string().email(),
-}).strict();
+});
 
 // implement GET /users/:id
 router.get('/:id', async (req, res) => {

@@ -76,6 +76,7 @@ export class GitHubAdapter implements ProviderAdapter {
     headers: Record<string, string | string[] | undefined>,
     body: any,
     secret?: string,
+    rawBody?: Buffer | string,
   ): { isValid: boolean; error?: string; eventType?: string; eventId?: string } {
     const githubEvent = headers['x-github-event'] as string;
     const eventId = headers['x-github-delivery'] as string;
@@ -96,7 +97,7 @@ export class GitHubAdapter implements ProviderAdapter {
         };
       }
 
-      const payload = typeof body === 'string' ? body : JSON.stringify(body);
+      const payload = rawBody ?? (typeof body === 'string' ? body : JSON.stringify(body));
       if (!this.verifySignature(payload, signature, secret)) {
         return {
           isValid: false,
@@ -119,7 +120,7 @@ export class GitHubAdapter implements ProviderAdapter {
     return eventData?.sender?.id?.toString();
   }
 
-  private verifySignature(payload: string, signature: string, secret: string): boolean {
+  private verifySignature(payload: string | Buffer, signature: string, secret: string): boolean {
     const expected = 'sha256=' + createHmac('sha256', secret).update(payload).digest('hex');
     try {
       return timingSafeEqual(Buffer.from(signature), Buffer.from(expected));

@@ -36,6 +36,7 @@ export interface ProviderAdapter {
     headers: Record<string, string | string[] | undefined>,
     body: any,
     secret?: string,
+    rawBody?: Buffer | string,
   ): {
     isValid: boolean;
     error?: string;

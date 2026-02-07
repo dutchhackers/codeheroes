@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'crypto';
 import {
   CodePushContext,
   CodePushMetrics,
@@ -28,16 +29,22 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
   validateWebhook(
     headers: Record<string, string | string[] | undefined>,
     body: any,
-    secret?: string
+    secret?: string,
+    _rawBody?: Buffer | string,
   ): { isValid: boolean; error?: string; eventType?: string; eventId?: string } {
     if (secret) {
-      const authHeader = headers['authorization'] as string;
+      const rawHeader = headers['authorization'];
+      const authHeader = Array.isArray(rawHeader) ? rawHeader[0] : rawHeader;
       if (!authHeader) {
         return { isValid: false, error: 'Missing Authorization header' };
       }
 
       const expected = 'Basic ' + Buffer.from(secret).toString('base64');
-      if (authHeader !== expected) {
+      try {
+        if (!timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected))) {
+          return { isValid: false, error: 'Invalid Authorization header' };
+        }
+      } catch {
         return { isValid: false, error: 'Invalid Authorization header' };
       }
     }
