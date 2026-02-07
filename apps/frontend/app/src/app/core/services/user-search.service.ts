@@ -59,7 +59,7 @@ export class UserSearchService {
     const usersQuery = query(
       usersRef,
       where('active', '==', true),
-      orderBy('displayNameLower'),
+      orderBy('displayName'),
       firestoreLimit(limitCount)
     );
 

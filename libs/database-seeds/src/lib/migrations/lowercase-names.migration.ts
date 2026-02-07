@@ -17,7 +17,7 @@ export class LowercaseNamesMigration {
       const data = doc.data();
       const displayName = data.displayName;
 
-      if (!displayName) {
+      if (!displayName || typeof displayName !== 'string') {
         skipped++;
         continue;
       }

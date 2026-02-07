@@ -31,7 +31,7 @@ export class UserService extends BaseFirestoreService<User> {
       lastLogin: getCurrentTimeAsISO(),
       userType: input.userType || 'user',
       ...input,
-      displayNameLower: input.displayName?.toLowerCase() ?? null,
+      ...(input.displayName ? { displayNameLower: input.displayName.toLowerCase() } : {}),
       ...timestamps,
     };
 
@@ -71,16 +71,11 @@ export class UserService extends BaseFirestoreService<User> {
     const docRef = this.collection.doc(userId);
     const timestamps = this.updateTimestamps();
 
-    const updateData: Record<string, unknown> = {
+    await docRef.update({
       ...input,
       ...timestamps,
-    };
-
-    if (input.displayName !== undefined) {
-      updateData.displayNameLower = input.displayName.toLowerCase();
-    }
-
-    await docRef.update(updateData);
+      ...(input.displayName !== undefined && { displayNameLower: input.displayName.toLowerCase() }),
+    });
 
     return this.getUser(userId);
   }
