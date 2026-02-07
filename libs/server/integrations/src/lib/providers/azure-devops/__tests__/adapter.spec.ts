@@ -109,6 +109,37 @@ describe('AzureDevOpsProviderAdapter', () => {
       expect(result).toBe('pusher-id');
     });
 
+    it('should extract closedBy.id for merged/abandoned PRs', () => {
+      const result = adapter.extractUserId({
+        resource: {
+          closedBy: { id: 'closer-id', displayName: 'Closer', uniqueName: 'closer@example.com' },
+          createdBy: { id: 'creator-id', displayName: 'Creator', uniqueName: 'creator@example.com' },
+        },
+      });
+      expect(result).toBe('closer-id');
+    });
+
+    it('should prefer pushedBy over closedBy and createdBy', () => {
+      const result = adapter.extractUserId({
+        resource: {
+          pushedBy: { id: 'pusher-id', displayName: 'Pusher', uniqueName: 'pusher@example.com' },
+          closedBy: { id: 'closer-id', displayName: 'Closer', uniqueName: 'closer@example.com' },
+          createdBy: { id: 'creator-id', displayName: 'Creator', uniqueName: 'creator@example.com' },
+        },
+      });
+      expect(result).toBe('pusher-id');
+    });
+
+    it('should prefer closedBy over createdBy', () => {
+      const result = adapter.extractUserId({
+        resource: {
+          closedBy: { id: 'closer-id', displayName: 'Closer', uniqueName: 'closer@example.com' },
+          createdBy: { id: 'creator-id', displayName: 'Creator', uniqueName: 'creator@example.com' },
+        },
+      });
+      expect(result).toBe('closer-id');
+    });
+
     it('should return undefined when no user info present', () => {
       const result = adapter.extractUserId({ resource: {} });
       expect(result).toBeUndefined();
@@ -277,6 +308,80 @@ describe('AzureDevOpsProviderAdapter', () => {
       };
       const result = adapter.mapEventToGameAction('git.pullrequest.merged', mergedPr, 'user-123');
       expect((result as any)?.metrics?.timeToMerge).toBe(3600);
+    });
+
+    it('should map PR updated with abandoned status to pull_request_close', () => {
+      const abandonedPr: AzurePullRequestWebhook = {
+        ...basePrWebhook,
+        eventType: 'git.pullrequest.updated',
+        resource: {
+          ...basePrWebhook.resource,
+          status: 'abandoned',
+          closedDate: '2024-01-02T00:00:00Z',
+        },
+      };
+      const result = adapter.mapEventToGameAction('git.pullrequest.updated', abandonedPr, 'user-123');
+
+      expect(result).not.toBeNull();
+      expect((result as any)?.type).toBe('pull_request_close');
+    });
+
+    it('should map PR updated with completed status to pull_request_merge', () => {
+      const completedPr: AzurePullRequestWebhook = {
+        ...basePrWebhook,
+        eventType: 'git.pullrequest.updated',
+        resource: {
+          ...basePrWebhook.resource,
+          status: 'completed',
+          closedDate: '2024-01-02T00:00:00Z',
+        },
+      };
+      const result = adapter.mapEventToGameAction('git.pullrequest.updated', completedPr, 'user-123');
+
+      expect(result).not.toBeNull();
+      expect((result as any)?.type).toBe('pull_request_merge');
+    });
+
+    it('should skip PR updated with active status', () => {
+      const activePr: AzurePullRequestWebhook = {
+        ...basePrWebhook,
+        eventType: 'git.pullrequest.updated',
+        resource: {
+          ...basePrWebhook.resource,
+          status: 'active',
+        },
+      };
+      const result = adapter.mapEventToGameAction('git.pullrequest.updated', activePr, 'user-123');
+
+      expect((result as any)?.skipReason).toContain('not eligible for rewards');
+    });
+
+    it('should use closedBy as externalUser for merged PRs when available', () => {
+      const mergedPr: AzurePullRequestWebhook = {
+        ...basePrWebhook,
+        eventType: 'git.pullrequest.merged',
+        resource: {
+          ...basePrWebhook.resource,
+          status: 'completed',
+          closedDate: '2024-01-02T00:00:00Z',
+          closedBy: {
+            id: 'merger-guid',
+            displayName: 'Merger User',
+            uniqueName: 'merger@example.com',
+          },
+        },
+      };
+      const result = adapter.mapEventToGameAction('git.pullrequest.merged', mergedPr, 'user-123');
+
+      expect((result as any)?.externalUser?.id).toBe('merger-guid');
+      expect((result as any)?.externalUser?.username).toBe('merger@example.com');
+    });
+
+    it('should fall back to createdBy as externalUser when closedBy is absent', () => {
+      const result = adapter.mapEventToGameAction('git.pullrequest.created', basePrWebhook, 'user-123');
+
+      expect((result as any)?.externalUser?.id).toBe('user-guid-456');
+      expect((result as any)?.externalUser?.username).toBe('test@example.com');
     });
   });
 });

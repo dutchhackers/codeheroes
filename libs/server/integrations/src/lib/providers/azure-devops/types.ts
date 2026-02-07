@@ -77,6 +77,11 @@ export type AzurePullRequestWebhook = AzureDevOpsWebhook & {
       displayName: string;
       uniqueName: string;
     };
+    closedBy?: {
+      id: string;
+      displayName: string;
+      uniqueName: string;
+    };
     repository: {
       id: string;
       name: string;

@@ -197,6 +197,8 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
       timeToMerge: timeDelta,
     };
 
+    const actor = resource.closedBy || resource.createdBy;
+
     return {
       userId: uid,
       externalId: String(resource.pullRequestId),
@@ -204,8 +206,8 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
       type: actionType,
       timestamp: prMetrics.timestamp,
       externalUser: {
-        id: resource.createdBy.id,
-        username: resource.createdBy.uniqueName,
+        id: actor.id,
+        username: actor.uniqueName,
       },
       context: prContext,
       metrics: prMetrics,
