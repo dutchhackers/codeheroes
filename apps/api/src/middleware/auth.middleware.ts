@@ -11,7 +11,12 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
     return;
   }
 
-  const token = authHeader.split('Bearer ')[1];
+  const token = authHeader.slice('Bearer '.length).trim();
+  if (!token) {
+    logger.warn('Missing token in Authorization header');
+    res.status(401).json({ message: 'Missing or invalid authorization token' });
+    return;
+  }
 
   try {
     req.user = await getAuth().verifyIdToken(token);
