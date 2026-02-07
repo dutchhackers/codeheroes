@@ -1,10 +1,19 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
-import { Auth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, Unsubscribe } from '@angular/fire/auth';
+import {
+  Auth,
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  Unsubscribe,
+} from '@angular/fire/auth';
 import { Subscription, filter } from 'rxjs';
 import { BottomNavComponent } from './bottom-nav.component';
 import { EnvironmentBannerComponent, showEnvironmentIndicator } from './environment-banner.component';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-shell',
@@ -137,9 +146,16 @@ export class ShellComponent implements OnInit, OnDestroy {
   updateAvailable = signal(false);
 
   ngOnInit() {
+    let autoLoginAttempted = false;
+
     this.#authUnsubscribe = onAuthStateChanged(this.#auth, (user) => {
       this.isAuthenticated.set(!!user);
       this.isLoading.set(false);
+
+      if (!user && !autoLoginAttempted && environment.useEmulators && environment.autoLogin) {
+        autoLoginAttempted = true;
+        this.#autoLogin(environment.autoLogin.email, environment.autoLogin.password);
+      }
     });
 
     if (this.#swUpdate.isEnabled) {
@@ -158,6 +174,23 @@ export class ShellComponent implements OnInit, OnDestroy {
 
   applyUpdate(): void {
     location.reload();
+  }
+
+  async #autoLogin(email: string, password: string): Promise<void> {
+    try {
+      await signInWithEmailAndPassword(this.#auth, email, password);
+    } catch (signInError: unknown) {
+      const code = (signInError as { code?: string })?.code;
+      if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+        try {
+          await createUserWithEmailAndPassword(this.#auth, email, password);
+        } catch (createError) {
+          console.error('Auto-login user creation failed:', createError);
+        }
+      } else {
+        console.error('Auto-login sign-in failed:', signInError);
+      }
+    }
   }
 
   async signInWithGoogle() {
