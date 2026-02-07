@@ -253,7 +253,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     if (parts.length >= 2) {
       // "Sander Elderhorst" -> "SANDER.E"
-      return `${parts[0]}.${parts[1].charAt(0)}`;
+      return `${parts[0]}.${[...parts[1]][0]}`;
     }
 
     // Single word handling
@@ -264,9 +264,10 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (upper.length >= 8) {
-      const mid = Math.floor(upper.length / 2);
-      return `${upper.slice(0, mid)}.${upper.slice(mid)}`;
+    const chars = [...upper];
+    if (chars.length >= 8) {
+      const mid = Math.floor(chars.length / 2);
+      return `${chars.slice(0, mid).join('')}.${chars.slice(mid).join('')}`;
     }
 
     return upper;
