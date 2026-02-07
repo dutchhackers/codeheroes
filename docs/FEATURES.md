@@ -402,7 +402,7 @@ Admin dashboard met platform overzicht en statistieken.
 #### 5. Leaderboard - Ranking Beheer
 **Route**: `/leaderboard`
 
-**Functionaliteities**:
+**Functionaliteiten**:
 - Full leaderboard weergave
 - Ranking details
 - Periode selectie
@@ -468,7 +468,7 @@ Admin dashboard met platform overzicht en statistieken.
 - **Secondary**: Neon Purple (`--neon-purple`, paars)
 - **Accent**: Neon Green (`--neon-green`, groen)
 - **Warning**: Neon Orange (`--neon-orange`, oranje)
-- **Background**: Black met transparancy (`bg-black/90`)
+- **Background**: Black met transparency (`bg-black/90`)
 - **Text**: White primary, Slate secondary
 - **Borders**: Purple/Cyan glows
 
