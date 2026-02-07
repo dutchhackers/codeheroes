@@ -93,6 +93,15 @@ A monorepo project built with [Nx](https://nx.dev) workspace architecture.
    - Firestore Emulator: http://localhost:8080
    - Auth Emulator: http://localhost:9099
 
+## Documentation
+
+For a comprehensive overview of all features and screens in the application, see:
+- **[Features Overview](docs/FEATURES.md)** - Complete list of all UI screens and functionalities (in Dutch)
+
+Additional documentation:
+- [Architecture](docs/architecture/) - System architecture and design
+- [Contributing Guidelines](docs/contributing/) - How to contribute to the project
+
 ## Contributing
 
 1. Create a feature branch
