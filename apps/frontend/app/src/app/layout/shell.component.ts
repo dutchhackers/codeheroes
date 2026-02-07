@@ -1,10 +1,19 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
-import { Auth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, Unsubscribe } from '@angular/fire/auth';
+import {
+  Auth,
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  Unsubscribe,
+} from '@angular/fire/auth';
 import { Subscription, filter } from 'rxjs';
 import { BottomNavComponent } from './bottom-nav.component';
 import { EnvironmentBannerComponent, showEnvironmentIndicator } from './environment-banner.component';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-shell',
@@ -142,6 +151,10 @@ export class ShellComponent implements OnInit, OnDestroy {
       this.isLoading.set(false);
     });
 
+    if (environment.useEmulators && environment.autoLogin) {
+      this.#autoLogin(environment.autoLogin.email, environment.autoLogin.password);
+    }
+
     if (this.#swUpdate.isEnabled) {
       this.#updateSubscription = this.#swUpdate.versionUpdates
         .pipe(filter((event): event is VersionReadyEvent => event.type === 'VERSION_READY'))
@@ -158,6 +171,18 @@ export class ShellComponent implements OnInit, OnDestroy {
 
   applyUpdate(): void {
     location.reload();
+  }
+
+  async #autoLogin(email: string, password: string): Promise<void> {
+    try {
+      await signInWithEmailAndPassword(this.#auth, email, password);
+    } catch {
+      try {
+        await createUserWithEmailAndPassword(this.#auth, email, password);
+      } catch (createError) {
+        console.error('Auto-login failed:', createError);
+      }
+    }
   }
 
   async signInWithGoogle() {

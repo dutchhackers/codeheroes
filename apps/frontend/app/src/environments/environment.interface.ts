@@ -13,4 +13,8 @@ export interface Environment {
     messagingSenderId: string;
     appId: string;
   };
+  autoLogin?: {
+    email: string;
+    password: string;
+  };
 }

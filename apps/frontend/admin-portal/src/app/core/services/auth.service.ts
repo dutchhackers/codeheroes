@@ -3,11 +3,14 @@ import {
   Auth,
   GoogleAuthProvider,
   User,
+  createUserWithEmailAndPassword,
   onAuthStateChanged,
+  signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
   Unsubscribe,
 } from '@angular/fire/auth';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService implements OnDestroy {
@@ -23,6 +26,22 @@ export class AuthService implements OnDestroy {
       this.currentUser.set(user);
       this.isLoading.set(false);
     });
+
+    if (environment.useEmulators && environment.autoLogin) {
+      this.#autoLogin(environment.autoLogin.email, environment.autoLogin.password);
+    }
+  }
+
+  async #autoLogin(email: string, password: string): Promise<void> {
+    try {
+      await signInWithEmailAndPassword(this.#auth, email, password);
+    } catch {
+      try {
+        await createUserWithEmailAndPassword(this.#auth, email, password);
+      } catch (createError) {
+        console.error('Auto-login failed:', createError);
+      }
+    }
   }
 
   ngOnDestroy() {
