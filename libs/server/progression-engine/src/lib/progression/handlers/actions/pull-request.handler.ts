@@ -2,7 +2,6 @@ import { GameActionContext, GameActionMetrics, GameActionType } from '@codeheroe
 import { Firestore } from 'firebase-admin/firestore';
 import { XP_VALUES } from '../../../config/xp-values.config';
 import { AbstractActionHandler } from '../action-handler.base';
-import { ProgressionService } from '../../services/progression.service';
 
 /**
  * Handler for pull request actions (create, merge, close)
@@ -17,10 +16,9 @@ export class PullRequestCreateHandler extends AbstractActionHandler {
    */
   constructor(
     protected db: Firestore,
-    protected progressionService: ProgressionService,
     private action: 'create' | 'merge' | 'close',
   ) {
-    super(db, progressionService);
+    super(db);
 
     // Set the action type based on the action parameter
     if (action === 'create') {

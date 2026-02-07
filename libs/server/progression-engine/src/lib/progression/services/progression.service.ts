@@ -260,12 +260,5 @@ export class ProgressionService {
         previousLevel: updateResult.previousState.level,
       });
     }
-
-    // 4. Publish achievement events if there are new achievements
-    if (updateResult.newAchievements && updateResult.newAchievements.length > 0) {
-      for (const achievementId of updateResult.newAchievements) {
-        await this.eventPublisher.emitAchievementUnlocked(userId, achievementId);
-      }
-    }
   }
 }

@@ -71,50 +71,6 @@ export class EventPublisherService {
   }
 
   /**
-   * Emit a badge earned event
-   * @param userId User ID who earned the badge
-   * @param badgeId ID of the earned badge
-   * @param state Current progression state
-   */
-  async emitBadgeEarned(userId: string, badgeId: string, state: ProgressionState): Promise<void> {
-    await this.emit({
-      userId,
-      timestamp: new Date().toISOString(),
-      type: ProgressionEventType.BADGE_EARNED,
-      data: {
-        badgeId,
-        state,
-      },
-    });
-
-    logger.info('Badge earned event published', {
-      userId,
-      badgeId,
-    });
-  }
-
-  /**
-   * Emit an achievement unlocked event
-   * @param userId User ID who unlocked the achievement
-   * @param achievementId ID of the unlocked achievement
-   */
-  async emitAchievementUnlocked(userId: string, achievementId: string): Promise<void> {
-    await this.emit({
-      userId,
-      timestamp: new Date().toISOString(),
-      type: ProgressionEventType.ACHIEVEMENT_UNLOCKED,
-      data: {
-        achievementId,
-      },
-    });
-
-    logger.info('Achievement unlocked event published', {
-      userId,
-      achievementId,
-    });
-  }
-
-  /**
    * Emit an activity recorded event
    * @param userId User ID whose activity was recorded
    * @param activity The recorded activity (game action activities only)

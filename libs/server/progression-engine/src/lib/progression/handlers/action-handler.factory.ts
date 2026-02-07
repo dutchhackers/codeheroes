@@ -10,13 +10,11 @@ import { ReviewCommentHandler } from './actions/review-comment.handler';
 import { ReleaseHandler } from './actions/release.handler';
 import { WorkflowRunHandler } from './actions/workflow-run.handler';
 import { DiscussionHandler } from './actions/discussion.handler';
-import { ProgressionService } from '../services/progression.service';
 
 /**
  * Factory for creating action handlers based on action type
  */
 export class ActionHandlerFactory {
-  private static db: Firestore;
   private static handlers: Map<GameActionType, AbstractActionHandler>;
   private static initialized = false;
 
@@ -24,35 +22,34 @@ export class ActionHandlerFactory {
    * Initialize the factory with Firestore instance and handlers
    * @param db Firestore instance
    */
-  static initialize(db: Firestore, progressionService: ProgressionService): void {
-    this.db = db;
+  static initialize(db: Firestore): void {
     this.handlers = new Map();
 
-    // Register all handlers, passing the progression service
-    this.handlers.set('code_push', new CodePushHandler(db, progressionService));
-    this.handlers.set('pull_request_create', new PullRequestCreateHandler(db, progressionService, 'create'));
-    this.handlers.set('pull_request_merge', new PullRequestCreateHandler(db, progressionService, 'merge'));
-    this.handlers.set('pull_request_close', new PullRequestCreateHandler(db, progressionService, 'close'));
-    this.handlers.set('code_review_submit', new CodeReviewSubmitHandler(db, progressionService));
+    // Register all handlers
+    this.handlers.set('code_push', new CodePushHandler(db));
+    this.handlers.set('pull_request_create', new PullRequestCreateHandler(db, 'create'));
+    this.handlers.set('pull_request_merge', new PullRequestCreateHandler(db, 'merge'));
+    this.handlers.set('pull_request_close', new PullRequestCreateHandler(db, 'close'));
+    this.handlers.set('code_review_submit', new CodeReviewSubmitHandler(db));
 
     // Register issue handlers
-    this.handlers.set('issue_create', new IssueHandler(db, progressionService, 'create'));
-    this.handlers.set('issue_close', new IssueHandler(db, progressionService, 'close'));
-    this.handlers.set('issue_reopen', new IssueHandler(db, progressionService, 'reopen'));
+    this.handlers.set('issue_create', new IssueHandler(db, 'create'));
+    this.handlers.set('issue_close', new IssueHandler(db, 'close'));
+    this.handlers.set('issue_reopen', new IssueHandler(db, 'reopen'));
 
     // Register comment handlers
-    this.handlers.set('comment_create', new CommentHandler(db, progressionService));
-    this.handlers.set('review_comment_create', new ReviewCommentHandler(db, progressionService));
+    this.handlers.set('comment_create', new CommentHandler(db));
+    this.handlers.set('review_comment_create', new ReviewCommentHandler(db));
 
     // Register release handler
-    this.handlers.set('release_publish', new ReleaseHandler(db, progressionService));
+    this.handlers.set('release_publish', new ReleaseHandler(db));
 
     // Register workflow run handler
-    this.handlers.set('ci_success', new WorkflowRunHandler(db, progressionService));
+    this.handlers.set('ci_success', new WorkflowRunHandler(db));
 
     // Register discussion handlers
-    this.handlers.set('discussion_create', new DiscussionHandler(db, progressionService, 'create'));
-    this.handlers.set('discussion_comment', new DiscussionHandler(db, progressionService, 'comment'));
+    this.handlers.set('discussion_create', new DiscussionHandler(db, 'create'));
+    this.handlers.set('discussion_comment', new DiscussionHandler(db, 'comment'));
 
     this.initialized = true;
   }
