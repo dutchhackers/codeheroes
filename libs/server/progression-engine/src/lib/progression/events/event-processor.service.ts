@@ -43,7 +43,7 @@ export class EventProcessorService {
         await this.handleActivityRecorded(event);
         break;
       default:
-        logger.debug('Unhandled progression event type', { type: event.type, userId: event.userId });
+        logger.warn('Received unhandled progression event type', { type: event.type, userId: event.userId });
         break;
     }
   }

@@ -15,7 +15,6 @@ import { DiscussionHandler } from './actions/discussion.handler';
  * Factory for creating action handlers based on action type
  */
 export class ActionHandlerFactory {
-  private static db: Firestore;
   private static handlers: Map<GameActionType, AbstractActionHandler>;
   private static initialized = false;
 
@@ -24,7 +23,6 @@ export class ActionHandlerFactory {
    * @param db Firestore instance
    */
   static initialize(db: Firestore): void {
-    this.db = db;
     this.handlers = new Map();
 
     // Register all handlers
