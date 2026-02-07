@@ -42,10 +42,15 @@ export class BitbucketServerAdapter implements ProviderAdapter {
       }
     }
 
+    const derivedEventId = eventId
+      || body?.changes?.[0]?.toHash
+      || (body?.pullRequest ? `${body.pullRequest.id}-${body.pullRequest.updatedDate}-${eventType}` : undefined)
+      || `${eventType}-${Date.now()}`;
+
     return {
       isValid: true,
       eventType,
-      eventId: eventId || body?.eventKey || eventType,
+      eventId: derivedEventId,
     };
   }
 
@@ -102,11 +107,20 @@ export class BitbucketServerAdapter implements ProviderAdapter {
       isForced: false,
     };
 
+    const normalizeTimestamp = (value: string | number): string => {
+      try {
+        const date = new Date(value);
+        return isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
+      } catch {
+        return new Date().toISOString();
+      }
+    };
+
     const pushMetrics: CodePushMetrics = {
       type: 'code_push',
       timestamp: commits[0]
         ? new Date(commits[0].authorTimestamp).toISOString()
-        : webhook.date,
+        : normalizeTimestamp(webhook.date),
       commitCount: commits.length,
     };
 

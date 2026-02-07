@@ -19,13 +19,22 @@ describe('BitbucketServerAdapter', () => {
       expect(result.eventId).toBe('req-123');
     });
 
-    it('should use eventKey from body when x-request-id is missing', () => {
+    it('should derive eventId from payload when x-request-id is missing', () => {
       const result = adapter.validateWebhook(
         { 'x-event-key': 'repo:refs_changed' },
-        { eventKey: 'repo:refs_changed' },
+        { changes: [{ toHash: 'abc123' }] },
       );
       expect(result.isValid).toBe(true);
-      expect(result.eventId).toBe('repo:refs_changed');
+      expect(result.eventId).toBe('abc123');
+    });
+
+    it('should derive eventId from PR payload when x-request-id is missing', () => {
+      const result = adapter.validateWebhook(
+        { 'x-event-key': 'pr:opened' },
+        { pullRequest: { id: 42, updatedDate: 1704067200000 } },
+      );
+      expect(result.isValid).toBe(true);
+      expect(result.eventId).toBe('42-1704067200000-pr:opened');
     });
 
     it('should reject when x-event-key is missing', () => {

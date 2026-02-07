@@ -1,5 +1,5 @@
 import { Config } from '../lib/config';
-import { buildActor, buildRepository, generateHash, getCurrentTimestamp, generateNumber } from './common';
+import { buildActor, buildRepository, generateHash, getCurrentTimestamp } from './common';
 
 export interface PushOptions {
   branch?: string;

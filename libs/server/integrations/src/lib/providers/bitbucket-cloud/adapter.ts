@@ -61,6 +61,10 @@ export class BitbucketCloudAdapter implements ProviderAdapter {
   }
 
   private handlePushWebhook(webhook: BitbucketCloudPushWebhook, uid: string): GameActionResult {
+    if (!webhook.push?.changes?.length) {
+      return { skipReason: 'Push contains no changes' };
+    }
+
     const change = webhook.push.changes[0];
     if (!change) {
       return { skipReason: 'Push contains no changes' };
