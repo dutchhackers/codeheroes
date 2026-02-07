@@ -24,7 +24,7 @@ export class UserSeeder implements Seeder<User> {
       // Ensure all users have a userType, default to 'user' if not provided
       batch.set(ref, {
         ...user,
-        displayNameLower: user.displayName?.toLowerCase() ?? null,
+        displayNameLower: user.displayName.toLowerCase(),
         userType: user.userType || 'user',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
