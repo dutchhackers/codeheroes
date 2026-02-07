@@ -1,9 +1,16 @@
 import { logger, UserService } from '@codeheroes/common';
 import * as express from 'express';
+import { z } from 'zod';
 import { transformTo, transformArrayTo } from '../core/utils/transformer.utils';
 import { UserDto } from '../core/dto/user.dto';
+import { validate } from '../middleware/validate.middleware';
 
 const router = express.Router();
+
+const createUserSchema = z.object({
+  displayName: z.string().min(1).max(100),
+  email: z.string().email(),
+});
 
 // implement GET /users/:id
 router.get('/:id', async (req, res) => {
@@ -33,7 +40,7 @@ router.get('/', async (req, res) => {
   res.json(transformedUsers);
 });
 
-router.post('/', async (req, res) => {
+router.post('/', validate(createUserSchema), async (req, res) => {
   logger.debug('POST /users', req.body);
 
   const userService = new UserService();

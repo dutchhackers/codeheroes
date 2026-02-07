@@ -1,4 +1,9 @@
+import { createHmac } from 'crypto';
 import { GitHubAdapter } from './github.adapter';
+
+function signPayload(payload: string, secret: string): string {
+  return 'sha256=' + createHmac('sha256', secret).update(payload).digest('hex');
+}
 
 describe('GitHubAdapter', () => {
   let adapter: GitHubAdapter;
@@ -8,7 +13,7 @@ describe('GitHubAdapter', () => {
   });
 
   describe('validateWebhook', () => {
-    it('should validate GitHub webhook', () => {
+    it('should validate GitHub webhook without secret', () => {
       const headers = {
         'x-github-event': 'push',
         'x-github-delivery': '123456',
@@ -17,6 +22,51 @@ describe('GitHubAdapter', () => {
       expect(result.isValid).toBe(true);
       expect(result.eventType).toBe('push');
       expect(result.eventId).toBe('123456');
+    });
+
+    it('should reject when required headers are missing', () => {
+      const result = adapter.validateWebhook({}, {});
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain('Missing required GitHub webhook headers');
+    });
+
+    it('should validate a correct HMAC-SHA256 signature', () => {
+      const secret = 'test-secret';
+      const body = { action: 'opened' };
+      const payload = JSON.stringify(body);
+      const signature = signPayload(payload, secret);
+
+      const headers = {
+        'x-github-event': 'push',
+        'x-github-delivery': '123456',
+        'x-hub-signature-256': signature,
+      };
+      const result = adapter.validateWebhook(headers, body, secret);
+      expect(result.isValid).toBe(true);
+    });
+
+    it('should reject an invalid signature', () => {
+      const secret = 'test-secret';
+      const body = { action: 'opened' };
+
+      const headers = {
+        'x-github-event': 'push',
+        'x-github-delivery': '123456',
+        'x-hub-signature-256': 'sha256=invalidsignature',
+      };
+      const result = adapter.validateWebhook(headers, body, secret);
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBe('Invalid webhook signature');
+    });
+
+    it('should reject when secret is set but signature header is missing', () => {
+      const headers = {
+        'x-github-event': 'push',
+        'x-github-delivery': '123456',
+      };
+      const result = adapter.validateWebhook(headers, {}, 'my-secret');
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBe('Missing webhook signature header');
     });
   });
 

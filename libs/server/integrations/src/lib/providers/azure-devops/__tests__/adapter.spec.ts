@@ -45,6 +45,39 @@ describe('AzureDevOpsProviderAdapter', () => {
       const result = adapter.validateWebhook({}, null);
       expect(result.isValid).toBe(false);
     });
+
+    it('should validate correct Basic Auth when secret is set', () => {
+      const secret = 'user:pass';
+      const headers = {
+        authorization: 'Basic ' + Buffer.from(secret).toString('base64'),
+      };
+      const result = adapter.validateWebhook(headers, {
+        eventType: 'git.push',
+        id: 'abc-123',
+      }, secret);
+      expect(result.isValid).toBe(true);
+    });
+
+    it('should reject when secret is set but Authorization header is missing', () => {
+      const result = adapter.validateWebhook({}, {
+        eventType: 'git.push',
+        id: 'abc-123',
+      }, 'user:pass');
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBe('Missing Authorization header');
+    });
+
+    it('should reject when Authorization header has wrong value', () => {
+      const headers = {
+        authorization: 'Basic ' + Buffer.from('wrong:creds').toString('base64'),
+      };
+      const result = adapter.validateWebhook(headers, {
+        eventType: 'git.push',
+        id: 'abc-123',
+      }, 'user:pass');
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBe('Invalid Authorization header');
+    });
   });
 
   describe('extractUserId', () => {

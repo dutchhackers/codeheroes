@@ -1,5 +1,7 @@
 import cors from 'cors';
 import express from 'express';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import admin from 'firebase-admin';
 
 import { CharactersController } from './controllers/characters-controller';
@@ -16,11 +18,54 @@ const app = express();
 
 admin.initializeApp();
 
-// Remove powered-by Express header
+// Security headers
+app.use(helmet());
+
+// Remove powered-by Express header (also handled by helmet, but explicit)
 app.disable('x-powered-by');
 
-// Automatically allow cross-origin requests
-app.use(cors({ origin: true }));
+// Trust proxy — required for correct client IP behind Cloud Functions / load balancer
+app.set('trust proxy', true);
+
+// Request body size limit
+app.use(express.json({ limit: '1mb' }));
+
+// CORS — restrict to allowed origins when ALLOWED_ORIGINS is set,
+// otherwise allow all origins (backward compatible default)
+let allowedOrigins: string[] | null = null;
+
+if (process.env.ALLOWED_ORIGINS !== undefined) {
+  const parsedOrigins = process.env.ALLOWED_ORIGINS.split(',')
+    .map((o) => o.trim())
+    .filter((o) => o.length > 0);
+
+  allowedOrigins = parsedOrigins.length > 0 ? parsedOrigins : null;
+}
+
+app.use(
+  cors({
+    origin: allowedOrigins
+      ? (origin, callback) => {
+          if (!origin || allowedOrigins!.includes(origin)) {
+            callback(null, true);
+          } else {
+            callback(null, false);
+          }
+        }
+      : true,
+  }),
+);
+
+// Rate limiting — 100 requests per 15 minutes per IP
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later' },
+  }),
+);
 
 // Require Firebase Auth for all routes
 app.use(authMiddleware);

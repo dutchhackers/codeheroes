@@ -2,11 +2,33 @@ import { DatabaseInstance, logger } from '@codeheroes/common';
 import { ProjectRepository } from '@codeheroes/progression-engine';
 import { CONNECTED_ACCOUNT_PROVIDERS, ProjectDetailDto, ProjectSummaryDto } from '@codeheroes/types';
 import * as express from 'express';
+import { z } from 'zod';
 import { getTimePeriodIds } from '@codeheroes/progression-engine';
+import { validate } from '../middleware/validate.middleware';
 
 const router = express.Router();
 
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+const repositorySchema = z.object({
+  provider: z.enum(CONNECTED_ACCOUNT_PROVIDERS as unknown as [string, ...string[]]),
+  owner: z.string().min(1),
+  name: z.string().min(1),
+  fullName: z.string().optional(),
+});
+
+const createProjectSchema = z.object({
+  name: z.string().min(1).max(200).transform((v) => v.trim()),
+  slug: z.string().regex(SLUG_PATTERN, 'slug must be lowercase alphanumeric with hyphens (e.g., "my-project")'),
+  description: z.string().max(1000).optional().transform((v) => v?.trim()),
+  repositories: z.array(repositorySchema).default([]),
+});
+
+const updateProjectSchema = z.object({
+  name: z.string().min(1).max(200).transform((v) => v.trim()).optional(),
+  description: z.string().max(1000).optional().transform((v) => v?.trim()),
+  repositories: z.array(repositorySchema).optional(),
+});
 
 function getProjectRepository(): ProjectRepository {
   return new ProjectRepository(DatabaseInstance.getInstance());
@@ -71,32 +93,14 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /projects — create project
-router.post('/', async (req, res) => {
+router.post('/', validate(createProjectSchema), async (req, res) => {
   logger.debug('POST /projects', req.body);
 
   try {
-    const { name, slug, description, repositories = [] } = req.body;
+    const { name, slug, description, repositories } = req.body;
 
-    if (!name?.trim() || !slug) {
-      res.status(400).json({ error: 'name and slug are required' });
-      return;
-    }
-
-    if (!SLUG_PATTERN.test(slug)) {
-      res.status(400).json({ error: 'slug must be lowercase alphanumeric with hyphens (e.g., "my-project")' });
-      return;
-    }
-
-    // Validate repositories
+    // Derive fullName for each repository
     for (const r of repositories) {
-      if (!r.provider || !r.owner || !r.name) {
-        res.status(400).json({ error: 'Each repository must have provider, owner, and name' });
-        return;
-      }
-      if (!CONNECTED_ACCOUNT_PROVIDERS.includes(r.provider)) {
-        res.status(400).json({ error: `Invalid provider "${r.provider}". Must be one of: ${CONNECTED_ACCOUNT_PROVIDERS.join(', ')}` });
-        return;
-      }
       r.fullName = `${r.owner}/${r.name}`;
     }
 
@@ -110,9 +114,9 @@ router.post('/', async (req, res) => {
     }
 
     const project = await repo.createProject({
-      name: name.trim(),
+      name,
       slug,
-      description: description?.trim(),
+      description,
       repositories,
     });
 
@@ -124,36 +128,15 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /projects/:id — update project
-router.put('/:id', async (req, res) => {
+router.put('/:id', validate(updateProjectSchema), async (req, res) => {
   logger.debug('PUT /projects/:id', { id: req.params.id, body: req.body });
 
   try {
-    const { slug, repositories, name, description, ...rest } = req.body;
+    const { repositories, name, description } = req.body;
 
-    // Reject unknown fields
-    const unexpectedFields = Object.keys(rest);
-    if (unexpectedFields.length > 0) {
-      res.status(400).json({ error: `Unknown fields: ${unexpectedFields.join(', ')}. Allowed: name, description, repositories` });
-      return;
-    }
-
-    // Slug cannot be changed (it is the document ID)
-    if (slug !== undefined) {
-      res.status(400).json({ error: 'slug cannot be updated (it is the document ID)' });
-      return;
-    }
-
-    // Validate repositories if provided
+    // Derive fullName for repositories if provided
     if (repositories) {
       for (const r of repositories) {
-        if (!r.provider || !r.owner || !r.name) {
-          res.status(400).json({ error: 'Each repository must have provider, owner, and name' });
-          return;
-        }
-        if (!CONNECTED_ACCOUNT_PROVIDERS.includes(r.provider)) {
-          res.status(400).json({ error: `Invalid provider "${r.provider}". Must be one of: ${CONNECTED_ACCOUNT_PROVIDERS.join(', ')}` });
-          return;
-        }
         r.fullName = `${r.owner}/${r.name}`;
       }
     }
@@ -167,15 +150,8 @@ router.put('/:id', async (req, res) => {
     }
 
     const updateData: Record<string, unknown> = {};
-    if (name !== undefined) {
-      const trimmedName = name?.trim();
-      if (!trimmedName) {
-        res.status(400).json({ error: 'name cannot be empty' });
-        return;
-      }
-      updateData.name = trimmedName;
-    }
-    if (description !== undefined) updateData.description = description?.trim();
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
     if (repositories !== undefined) updateData.repositories = repositories;
 
     await repo.updateProject(req.params.id, updateData);
