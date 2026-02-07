@@ -25,16 +25,25 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
     return handler ? handler(eventData, userId) : null;
   }
 
-  // TODO: Implement webhook signature validation using `secret` param
-  // Azure DevOps Service Hooks support HTTP header-based authentication (Basic Auth)
-  // and can be configured with a shared secret for HMAC signature verification.
   validateWebhook(
     headers: Record<string, string | string[] | undefined>,
     body: any,
     secret?: string
   ): { isValid: boolean; error?: string; eventType?: string; eventId?: string } {
+    if (secret) {
+      const authHeader = headers['authorization'] as string;
+      if (!authHeader) {
+        return { isValid: false, error: 'Missing Authorization header' };
+      }
+
+      const expected = 'Basic ' + Buffer.from(secret).toString('base64');
+      if (authHeader !== expected) {
+        return { isValid: false, error: 'Invalid Authorization header' };
+      }
+    }
+
     const { eventType, id, notificationId } = body || {};
-    
+
     if (!eventType) {
       return { isValid: false, error: 'Azure DevOps webhook missing eventType field' };
     }

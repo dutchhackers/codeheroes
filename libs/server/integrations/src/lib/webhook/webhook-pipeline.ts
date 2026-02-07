@@ -10,9 +10,10 @@ export interface WebhookPipelineParams {
   req: Request;
   res: Response;
   provider: ConnectedAccountProvider;
+  secret?: string;
 }
 
-export async function processWebhook({ req, res, provider }: WebhookPipelineParams): Promise<void> {
+export async function processWebhook({ req, res, provider, secret }: WebhookPipelineParams): Promise<void> {
   try {
     // Step 1: Verify provider support
     if (!ProviderFactory.supportsProvider(provider)) {
@@ -24,7 +25,7 @@ export async function processWebhook({ req, res, provider }: WebhookPipelinePara
     const providerAdapter = ProviderFactory.getProvider(provider);
 
     // Step 2: Validate webhook using the provider adapter
-    const validation = providerAdapter.validateWebhook(req.headers, req.body);
+    const validation = providerAdapter.validateWebhook(req.headers, req.body, secret);
 
     if (!validation.isValid) {
       logger.error('Webhook validation failed', { provider, error: validation.error });

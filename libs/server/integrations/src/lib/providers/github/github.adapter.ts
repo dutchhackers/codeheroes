@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from 'crypto';
 import {
   CodePushContext,
   CodePushMetrics,
@@ -86,13 +87,17 @@ export class GitHubAdapter implements ProviderAdapter {
       };
     }
 
-    // Implement signature validation if secret is provided
-    if (secret && headers['x-hub-signature-256']) {
-      // Implement signature validation using crypto
-      // This is a placeholder - actual implementation needed
-      const isSignatureValid = true; // Replace with actual validation
+    if (secret) {
+      const signature = headers['x-hub-signature-256'] as string;
+      if (!signature) {
+        return {
+          isValid: false,
+          error: 'Missing webhook signature header',
+        };
+      }
 
-      if (!isSignatureValid) {
+      const payload = typeof body === 'string' ? body : JSON.stringify(body);
+      if (!this.verifySignature(payload, signature, secret)) {
         return {
           isValid: false,
           error: 'Invalid webhook signature',
@@ -112,6 +117,15 @@ export class GitHubAdapter implements ProviderAdapter {
    */
   extractUserId(eventData: any): string | undefined {
     return eventData?.sender?.id?.toString();
+  }
+
+  private verifySignature(payload: string, signature: string, secret: string): boolean {
+    const expected = 'sha256=' + createHmac('sha256', secret).update(payload).digest('hex');
+    try {
+      return timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+    } catch {
+      return false;
+    }
   }
 
   private mapCodePushEvent(data: PushEvent, userId: string): GameActionResult {

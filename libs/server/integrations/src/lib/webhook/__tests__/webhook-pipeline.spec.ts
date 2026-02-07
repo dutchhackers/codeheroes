@@ -190,4 +190,28 @@ describe('processWebhook', () => {
       expect.objectContaining({ provider: 'azure' })
     );
   });
+
+  it('should pass secret to validateWebhook when provided', async () => {
+    const res = createMockRes();
+
+    await processWebhook({ req: createMockReq(), res, provider: 'github', secret: 'my-secret' });
+
+    expect(mockAdapter.validateWebhook).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.any(Object),
+      'my-secret'
+    );
+  });
+
+  it('should pass undefined secret to validateWebhook when not provided', async () => {
+    const res = createMockRes();
+
+    await processWebhook({ req: createMockReq(), res, provider: 'github' });
+
+    expect(mockAdapter.validateWebhook).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.any(Object),
+      undefined
+    );
+  });
 });
