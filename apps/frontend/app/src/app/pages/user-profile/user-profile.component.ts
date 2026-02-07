@@ -71,8 +71,8 @@ import { MyStatsComponent } from '../profile/components/my-stats.component';
 
           <!-- Name and Level -->
           <div class="text-center mb-4">
-            <h2 class="text-xl md:text-2xl font-bold text-white uppercase tracking-wide">
-              {{ formatDisplayName(user()?.displayName ?? '') }}
+            <h2 class="text-xl md:text-2xl font-bold text-white">
+              {{ user()?.displayName || 'Unknown' }}
             </h2>
             <p
               class="text-sm md:text-base text-purple-400 mt-1"
@@ -242,35 +242,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       return '';
     }
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  }
-
-  formatDisplayName(name: string): string {
-    if (!name) return 'Unknown';
-
-    // Similar to the techUsername logic but just uppercase
-    const upper = name.toUpperCase();
-    const parts = upper.split(/\s+/);
-
-    if (parts.length >= 2) {
-      // "Sander Elderhorst" -> "SANDER.E"
-      return `${parts[0]}.${[...parts[1]][0]}`;
-    }
-
-    // Single word handling
-    const breakPoints = ['NIGHT', 'CODE', 'DARK', 'FIRE', 'STAR', 'CYBER', 'TECH', 'MEGA', 'ULTRA'];
-    for (const prefix of breakPoints) {
-      if (upper.startsWith(prefix) && upper.length > prefix.length) {
-        return `${prefix}.${upper.slice(prefix.length)}`;
-      }
-    }
-
-    const chars = [...upper];
-    if (chars.length >= 8) {
-      const mid = Math.floor(chars.length / 2);
-      return `${chars.slice(0, mid).join('')}.${chars.slice(mid).join('')}`;
-    }
-
-    return upper;
   }
 
   getUserInfo(userId: string) {
