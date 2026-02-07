@@ -11,9 +11,9 @@ import {
   where,
 } from '@angular/fire/firestore';
 import { Auth, user } from '@angular/fire/auth';
-import { Observable, of, switchMap, map, catchError, combineLatest } from 'rxjs';
+import { Observable, of, from, switchMap, map, catchError, combineLatest } from 'rxjs';
 import { Activity, TimeBasedActivityStats, UserDto } from '@codeheroes/types';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
 export interface DailyProgress {
@@ -69,6 +69,15 @@ export class HqDataService {
 
   // Initialize user observable in injection context to avoid warnings
   readonly #authUser$ = user(this.#auth);
+
+  #withAuth<T>(fn: (headers: HttpHeaders) => Observable<T>): Observable<T> {
+    return from(this.#auth.currentUser?.getIdToken() ?? Promise.resolve(null)).pipe(
+      switchMap((token) => {
+        if (!token) throw new Error('Not authenticated');
+        return fn(new HttpHeaders().set('Authorization', `Bearer ${token}`));
+      }),
+    );
+  }
 
   /**
    * Get the current authenticated user's Firestore user document
@@ -233,7 +242,9 @@ export class HqDataService {
   }> {
     return combineLatest([
       this.#getCurrentUserDoc(),
-      this.#http.get<LeaderboardEntry[]>(`${environment.apiUrl}/leaderboards/${period}`),
+      this.#withAuth((headers) =>
+        this.#http.get<LeaderboardEntry[]>(`${environment.apiUrl}/leaderboards/${period}`, { headers }),
+      ),
     ]).pipe(
       map(([userDoc, leaderboard]) => {
         // Add rank to each entry
