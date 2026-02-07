@@ -27,21 +27,23 @@ app.disable('x-powered-by');
 // Request body size limit
 app.use(express.json({ limit: '1mb' }));
 
-// CORS — restrict to allowed origins
+// CORS — restrict to allowed origins when ALLOWED_ORIGINS is set,
+// otherwise allow all origins (backward compatible default)
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
-  : ['http://localhost:4200', 'http://localhost:4300'];
+  : null;
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g., server-to-server, curl)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: allowedOrigins
+      ? (origin, callback) => {
+          if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+          } else {
+            callback(new Error('Not allowed by CORS'));
+          }
+        }
+      : true,
   }),
 );
 
