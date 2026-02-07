@@ -21,22 +21,20 @@ export class UserSearchService {
   readonly #injector = inject(Injector);
 
   /**
-   * Search for users by display name (case-sensitive prefix search)
+   * Search for users by display name (case-insensitive prefix search)
    */
   searchUsers(searchTerm: string, limitCount = 20): Observable<UserDto[]> {
     if (!searchTerm || searchTerm.trim().length === 0) {
       return of([]);
     }
 
-    const trimmed = searchTerm.trim();
+    const trimmed = searchTerm.trim().toLowerCase();
     const usersRef = collection(this.#firestore, 'users');
-    
-    // Create a query that searches for users whose displayName starts with the search term
-    // Firebase requires the field to be indexed for this to work efficiently
+
     const searchQuery = query(
       usersRef,
       where('active', '==', true),
-      orderBy('displayName'),
+      orderBy('displayNameLower'),
       startAt(trimmed),
       endAt(trimmed + '\uf8ff'),
       firestoreLimit(limitCount)
@@ -61,7 +59,7 @@ export class UserSearchService {
     const usersQuery = query(
       usersRef,
       where('active', '==', true),
-      orderBy('displayName'),
+      orderBy('displayNameLower'),
       firestoreLimit(limitCount)
     );
 

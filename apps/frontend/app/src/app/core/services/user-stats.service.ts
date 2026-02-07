@@ -200,6 +200,7 @@ export class UserStatsService {
     const userDocRef = doc(this.#firestore, `users/${userId}`);
     await updateDoc(userDocRef, {
       displayName: trimmed,
+      displayNameLower: trimmed.toLowerCase(),
       updatedAt: new Date().toISOString(),
     });
   }
