@@ -2,6 +2,18 @@
 
 A monorepo project built with [Nx](https://nx.dev) workspace architecture.
 
+## 🔒 Security
+
+**Important:** This repository has undergone a comprehensive security audit. Please review the security documentation before deploying to production:
+
+- 📋 [Security Quick Reference](SECURITY_QUICK_REF.txt) - Start here for immediate actions
+- 📄 [Security Audit Summary](SECURITY_AUDIT_SUMMARY.md) - Executive summary
+- 📖 [Full Security Report](SECURITY_AUDIT_REPORT.md) - Detailed findings
+- 🔧 [Security Fixes Guide](SECURITY_FIXES_GUIDE.md) - Implementation guide
+- 📜 [Security Policy](SECURITY.md) - Reporting vulnerabilities and policies
+
+**⚠️ Current Status:** HIGH RISK - Critical issues must be fixed before production deployment.
+
 ## Project Structure
 
 ### Applications
