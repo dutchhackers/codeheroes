@@ -1,0 +1,16 @@
+{
+  "name": "bitbucket-server-receiver",
+  "description": "Firebase Function for processing Bitbucket Server webhooks",
+  "scripts": {
+    "test": "nx test bitbucket-server-receiver",
+    "lint": "nx lint bitbucket-server-receiver",
+    "build": "nx build bitbucket-server-receiver",
+    "deploy": "nx deploy bitbucket-server-receiver"
+  },
+  "engines": {
+    "node": "24"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "private": true
+}

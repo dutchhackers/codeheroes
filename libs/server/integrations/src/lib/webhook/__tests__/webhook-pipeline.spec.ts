@@ -123,10 +123,10 @@ describe('processWebhook', () => {
     (ProviderFactory.supportsProvider as jest.Mock).mockReturnValue(false);
     const res = createMockRes();
 
-    await processWebhook({ req: createMockReq(), res, provider: 'bitbucket' });
+    await processWebhook({ req: createMockReq(), res, provider: 'strava' });
 
     expect(res._status).toBe(500);
-    expect(res._body).toContain('bitbucket');
+    expect(res._body).toContain('strava');
   });
 
   it('should return 400 for invalid webhook', async () => {

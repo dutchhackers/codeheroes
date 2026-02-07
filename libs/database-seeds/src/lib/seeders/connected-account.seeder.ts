@@ -3,7 +3,7 @@ import { Seeder } from '../types/seeder.interface';
 
 export interface ConnectedAccount {
   userId: string;  // Add userId to interface
-  provider: 'github' | 'strava' | 'azure' | 'bitbucket';
+  provider: 'github' | 'strava' | 'azure' | 'bitbucket_cloud' | 'bitbucket_server';
   externalUserId: string;
   externalUserName?: string;
   accessToken?: string;
