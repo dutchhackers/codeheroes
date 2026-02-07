@@ -146,14 +146,17 @@ export class ShellComponent implements OnInit, OnDestroy {
   updateAvailable = signal(false);
 
   ngOnInit() {
+    let autoLoginAttempted = false;
+
     this.#authUnsubscribe = onAuthStateChanged(this.#auth, (user) => {
       this.isAuthenticated.set(!!user);
       this.isLoading.set(false);
-    });
 
-    if (environment.useEmulators && environment.autoLogin) {
-      this.#autoLogin(environment.autoLogin.email, environment.autoLogin.password);
-    }
+      if (!user && !autoLoginAttempted && environment.useEmulators && environment.autoLogin) {
+        autoLoginAttempted = true;
+        this.#autoLogin(environment.autoLogin.email, environment.autoLogin.password);
+      }
+    });
 
     if (this.#swUpdate.isEnabled) {
       this.#updateSubscription = this.#swUpdate.versionUpdates
@@ -176,11 +179,16 @@ export class ShellComponent implements OnInit, OnDestroy {
   async #autoLogin(email: string, password: string): Promise<void> {
     try {
       await signInWithEmailAndPassword(this.#auth, email, password);
-    } catch {
-      try {
-        await createUserWithEmailAndPassword(this.#auth, email, password);
-      } catch (createError) {
-        console.error('Auto-login failed:', createError);
+    } catch (signInError: unknown) {
+      const code = (signInError as { code?: string })?.code;
+      if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+        try {
+          await createUserWithEmailAndPassword(this.#auth, email, password);
+        } catch (createError) {
+          console.error('Auto-login user creation failed:', createError);
+        }
+      } else {
+        console.error('Auto-login sign-in failed:', signInError);
       }
     }
   }
