@@ -71,10 +71,12 @@ export class HqDataService {
   readonly #authUser$ = user(this.#auth);
 
   #withAuth<T>(fn: (headers: HttpHeaders) => Observable<T>): Observable<T> {
-    return from(this.#auth.currentUser?.getIdToken() ?? Promise.resolve(null)).pipe(
-      switchMap((token) => {
-        if (!token) throw new Error('Not authenticated');
-        return fn(new HttpHeaders().set('Authorization', `Bearer ${token}`));
+    return this.#authUser$.pipe(
+      switchMap((authUser) => {
+        if (!authUser) throw new Error('Not authenticated');
+        return from(authUser.getIdToken()).pipe(
+          switchMap((token) => fn(new HttpHeaders().set('Authorization', `Bearer ${token}`))),
+        );
       }),
     );
   }
