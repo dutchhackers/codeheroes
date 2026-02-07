@@ -10,6 +10,9 @@ FIREBASE_PROJECT_ID=your-project-id nx seed database-seeds
 
 # Seed test environment (use with caution!)
 FIREBASE_PROJECT_ID=your-test-project-id nx seed database-seeds
+
+# Backfill displayNameLower for existing users (case-insensitive search support)
+node dist/libs/database-seeds/src/main.js backfill-lowercase-names
 ```
 
 ## Data Files
@@ -32,6 +35,13 @@ FIREBASE_PROJECT_ID=your-test-project-id nx seed database-seeds
 1. Only seed local emulators, not shared environments
 2. If you must seed test/prod, warn users they may need to re-login
 3. Consider adding `uid` fields to seed data for known test users
+
+### Computed Fields
+
+The seeder automatically derives computed fields at seed time:
+- `displayNameLower` — lowercase version of `displayName`, used for case-insensitive user search
+
+For existing databases where users were created before this field existed, run the `backfill-lowercase-names` migration command.
 
 ### TODO: Improve Seed Data
 
