@@ -1,9 +1,10 @@
 import { Firestore, Timestamp } from 'firebase-admin/firestore';
+import { ConnectedAccountProvider } from '@codeheroes/types';
 import { Seeder } from '../types/seeder.interface';
 
 export interface ConnectedAccount {
-  userId: string;  // Add userId to interface
-  provider: 'github' | 'strava' | 'azure' | 'bitbucket';
+  userId: string;
+  provider: ConnectedAccountProvider;
   externalUserId: string;
   externalUserName?: string;
   accessToken?: string;

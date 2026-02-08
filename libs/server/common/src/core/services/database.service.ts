@@ -10,14 +10,20 @@ export class DatabaseService extends BaseFirestoreService<DocumentData> {
   }
 
   async lookupUserId(details: Record<string, unknown>): Promise<string | undefined> {
-    const sender = details.sender as { id: string; login: string } | undefined;
+    const sender = details.sender as { id: string } | undefined;
 
     if (!sender?.id) {
       logger.warn('No sender ID found in event details');
       return undefined;
     }
 
-    const provider = (details.provider as string) || 'github';
+    const provider = details.provider as string;
+    if (!provider) {
+      logger.error('No provider specified in lookupUserId — refusing to default to github', {
+        senderId: sender.id,
+      });
+      return undefined;
+    }
 
     try {
       const connectedAccountSnapshot = await this.db
@@ -38,7 +44,7 @@ export class DatabaseService extends BaseFirestoreService<DocumentData> {
         return userId;
       }
 
-      logger.warn('No matching user found for sender', { senderId: sender.id, login: sender.login });
+      logger.warn('No matching user found for sender', { provider, senderId: sender.id });
       return undefined;
     } catch (error) {
       logger.error('Error looking up user ID', { error, senderId: sender.id });
