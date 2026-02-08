@@ -17,15 +17,18 @@ export class BitbucketAdapter implements ProviderAdapter {
     secret?: string,
     rawBody?: Buffer | string,
   ): { isValid: boolean; error?: string; eventType?: string; eventId?: string } {
-    const eventType = headers['x-event-key'] as string;
-    const eventId = headers['x-request-uuid'] as string;
+    const rawEventType = headers['x-event-key'];
+    const eventType = Array.isArray(rawEventType) ? rawEventType[0] : rawEventType;
+    const rawEventId = headers['x-request-uuid'];
+    const eventId = Array.isArray(rawEventId) ? rawEventId[0] : rawEventId;
 
     if (!eventType || !eventId) {
       return { isValid: false, error: 'Missing required Bitbucket webhook headers' };
     }
 
     if (secret) {
-      const signature = headers['x-hub-signature'] as string;
+      const rawSignature = headers['x-hub-signature'];
+      const signature = Array.isArray(rawSignature) ? rawSignature[0] : rawSignature;
       if (!signature) {
         return { isValid: false, error: 'Missing webhook signature header' };
       }
@@ -134,6 +137,10 @@ export class BitbucketAdapter implements ProviderAdapter {
     uid: string,
   ): GameActionResult {
     const { pullrequest } = webhook;
+
+    if (!pullrequest?.id || !pullrequest?.source?.branch?.name || !pullrequest?.destination?.branch?.name) {
+      return { skipReason: 'Pull request payload missing required fields' };
+    }
 
     const actionType: 'pull_request_create' | 'pull_request_merge' =
       pullrequest.state === 'MERGED' ? 'pull_request_merge' : 'pull_request_create';
