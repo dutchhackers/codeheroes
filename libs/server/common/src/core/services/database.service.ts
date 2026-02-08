@@ -19,7 +19,9 @@ export class DatabaseService extends BaseFirestoreService<DocumentData> {
 
     const provider = details.provider as string;
     if (!provider) {
-      logger.error('No provider specified in lookupUserId — refusing to default to github');
+      logger.error('No provider specified in lookupUserId — refusing to default to github', {
+        senderId: sender.id,
+      });
       return undefined;
     }
 
