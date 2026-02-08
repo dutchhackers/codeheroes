@@ -19,6 +19,7 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
     const handlers: Record<string, (data: any, uid: string) => GameActionResult> = {
       'git.push': this.handlePushWebhook.bind(this),
       'git.pullrequest.created': this.handlePullRequestWebhook.bind(this),
+      'git.pullrequest.updated': this.handlePullRequestWebhook.bind(this),
       'git.pullrequest.merged': this.handlePullRequestWebhook.bind(this),
     };
 
@@ -68,7 +69,8 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
   }
 
   extractUserId(eventData: any): string | undefined {
-    return eventData?.resource?.pushedBy?.id || 
+    return eventData?.resource?.pushedBy?.id ||
+           eventData?.resource?.closedBy?.id ||
            eventData?.resource?.createdBy?.id;
   }
 
@@ -136,11 +138,16 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
   ): GameActionResult {
     const { resource, eventType } = webhook;
 
-    let actionType: 'pull_request_create' | 'pull_request_merge' | null = null;
+    let actionType: 'pull_request_create' | 'pull_request_merge' | 'pull_request_close' | null = null;
     if (eventType === 'git.pullrequest.created') {
       actionType = 'pull_request_create';
     } else if (eventType === 'git.pullrequest.merged' || resource.status === 'completed') {
       actionType = 'pull_request_merge';
+    } else if (eventType === 'git.pullrequest.updated' && resource.status === 'abandoned') {
+      actionType = 'pull_request_close';
+    } else if (eventType === 'git.pullrequest.updated') {
+      // PR updated events that aren't merges or closes (e.g., title change, reviewer added) — skip
+      return { skipReason: `PR update with status ${resource.status} not eligible for rewards` };
     }
 
     if (!actionType) {
@@ -190,6 +197,8 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
       timeToMerge: timeDelta,
     };
 
+    const actor = resource.closedBy || resource.createdBy;
+
     return {
       userId: uid,
       externalId: String(resource.pullRequestId),
@@ -197,8 +206,8 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
       type: actionType,
       timestamp: prMetrics.timestamp,
       externalUser: {
-        id: resource.createdBy.id,
-        username: resource.createdBy.uniqueName,
+        id: actor.id,
+        username: actor.uniqueName,
       },
       context: prContext,
       metrics: prMetrics,
