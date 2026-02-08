@@ -1,8 +1,9 @@
 // Azure DevOps webhook payload structures
 
-export type AzureDevOpsEventType = 
-  | 'git.push' 
+export type AzureDevOpsEventType =
+  | 'git.push'
   | 'git.pullrequest.created'
+  | 'git.pullrequest.updated'
   | 'git.pullrequest.merged';
 
 export type AzureDevOpsWebhook = {
@@ -59,7 +60,7 @@ export type AzurePushWebhook = AzureDevOpsWebhook & {
 };
 
 export type AzurePullRequestWebhook = AzureDevOpsWebhook & {
-  eventType: 'git.pullrequest.created' | 'git.pullrequest.merged';
+  eventType: 'git.pullrequest.created' | 'git.pullrequest.updated' | 'git.pullrequest.merged';
   resource: {
     pullRequestId: number;
     status: string;
@@ -72,6 +73,11 @@ export type AzurePullRequestWebhook = AzureDevOpsWebhook & {
     closedDate?: string;
     url: string;
     createdBy: {
+      id: string;
+      displayName: string;
+      uniqueName: string;
+    };
+    closedBy?: {
       id: string;
       displayName: string;
       uniqueName: string;
