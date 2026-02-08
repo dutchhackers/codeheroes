@@ -1,4 +1,4 @@
-export const CONNECTED_ACCOUNT_PROVIDERS = ['github', 'strava', 'azure', 'bitbucket_cloud', 'bitbucket_server', 'system'] as const;
+export const CONNECTED_ACCOUNT_PROVIDERS = ['github', 'strava', 'azure', 'bitbucket', 'system'] as const;
 export type ConnectedAccountProvider = (typeof CONNECTED_ACCOUNT_PROVIDERS)[number];
 
 // ProviderConnection isn't in use yet

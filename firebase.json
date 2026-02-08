@@ -80,16 +80,8 @@
       ]
     },
     {
-      "codebase": "bitbucket-cloud-receiver",
-      "source": "dist/apps/bitbucket-cloud-receiver",
-      "runtime": "nodejs24",
-      "ignore": [
-        "*.local"
-      ]
-    },
-    {
-      "codebase": "bitbucket-server-receiver",
-      "source": "dist/apps/bitbucket-server-receiver",
+      "codebase": "bitbucket-receiver",
+      "source": "dist/apps/bitbucket-receiver",
       "runtime": "nodejs24",
       "ignore": [
         "*.local"
