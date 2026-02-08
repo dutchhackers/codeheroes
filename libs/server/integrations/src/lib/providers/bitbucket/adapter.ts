@@ -65,15 +65,15 @@ export class BitbucketAdapter implements ProviderAdapter {
       return { skipReason: 'Push contains no changes' };
     }
 
-    const change = webhook.push.changes[0];
-    if (!change) {
-      return { skipReason: 'Push contains no changes' };
-    }
+    const change = webhook.push.changes.find(
+      (c) => c && Array.isArray(c.commits) && c.commits.length > 0,
+    );
 
-    const commits = change.commits || [];
-    if (commits.length === 0) {
+    if (!change) {
       return { skipReason: 'Push contains no commits' };
     }
+
+    const commits = change.commits;
 
     const branchName = change.new?.name || '';
 
