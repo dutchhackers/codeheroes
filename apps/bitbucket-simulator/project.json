@@ -1,0 +1,37 @@
+{
+  "name": "bitbucket-simulator",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/bitbucket-simulator/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/bitbucket-simulator",
+        "main": "apps/bitbucket-simulator/src/main.ts",
+        "tsConfig": "apps/bitbucket-simulator/tsconfig.app.json",
+        "generatePackageJson": true,
+        "platform": "node",
+        "bundle": true,
+        "thirdParty": true,
+        "target": "node20",
+        "format": ["cjs"],
+        "esbuildOptions": {
+          "logLevel": "info"
+        }
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node dist/apps/bitbucket-simulator/main.cjs",
+        "env": {
+          "FIRESTORE_EMULATOR_HOST": "localhost:8080"
+        }
+      },
+      "dependsOn": ["build"]
+    }
+  }
+}

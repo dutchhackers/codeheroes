@@ -1,6 +1,7 @@
 import { ProviderAdapter } from './interfaces/provider.interface';
 import { GitHubAdapter } from './github/github.adapter';
 import { AzureDevOpsProviderAdapter } from './azure-devops/adapter';
+import { BitbucketAdapter } from './bitbucket/adapter';
 
 /**
  * Factory for creating provider adapters
@@ -20,8 +21,9 @@ export class ProviderFactory {
     const azureDevOpsAdapter = new AzureDevOpsProviderAdapter();
     this.providers.set(azureDevOpsAdapter.providerName, azureDevOpsAdapter);
 
-    // Register other providers as they become available
-    // this.providers.set('bitbucket', new BitbucketAdapter());
+    // Register Bitbucket provider
+    const bitbucketAdapter = new BitbucketAdapter();
+    this.providers.set(bitbucketAdapter.providerName, bitbucketAdapter);
   }
 
   /**

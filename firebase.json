@@ -78,6 +78,14 @@
       "ignore": [
         "*.local"
       ]
+    },
+    {
+      "codebase": "bitbucket-receiver",
+      "source": "dist/apps/bitbucket-receiver",
+      "runtime": "nodejs24",
+      "ignore": [
+        "*.local"
+      ]
     }
   ],
   "emulators": {
