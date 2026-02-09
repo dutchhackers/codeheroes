@@ -46,11 +46,11 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
       - name: Build backend
-        run: npx nx run-many --target=build --projects=api,auth-service,game-engine,github-receiver,azure-receiver
+        run: npx nx run-many --target=build --projects=api,auth-service,game-engine,github-receiver,azure-receiver,bitbucket-receiver
 
       - name: Regenerate function package-lock files
         run: |
-          for dir in dist/apps/api dist/apps/auth-service dist/apps/game-engine dist/apps/github-receiver dist/apps/azure-receiver; do
+          for dir in dist/apps/api dist/apps/auth-service dist/apps/game-engine dist/apps/github-receiver dist/apps/azure-receiver dist/apps/bitbucket-receiver; do
             if [ -d "$dir" ]; then
               echo "Regenerating package-lock.json for $dir"
               cd "$dir"
@@ -69,6 +69,7 @@ jobs:
             dist/apps/game-engine
             dist/apps/github-receiver
             dist/apps/azure-receiver
+            dist/apps/bitbucket-receiver
           retention-days: 1
 
   deploy:
