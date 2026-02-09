@@ -65,16 +65,16 @@ export class ProgressionService {
 
       const updateResult = await this.stateRepository.updateState(action.userId, progressionUpdate, activity);
 
-      // 6. Publish events based on state changes
+      // 5. Publish events based on state changes
       await this.publishProgressionEvents(action.userId, updateResult, activity);
 
-      // 7. Mark the game action as processed
+      // 6. Mark the game action as processed
       await this.gameActionRepository.markAsProcessed(action.id);
 
-      // 7b. Update project stats (best-effort, never blocks)
+      // 6b. Update project stats (best-effort, never blocks)
       await this.updateProjectStats(action, xpResult.total);
 
-      // 8. Return the action result
+      // 7. Return the action result
       const result = {
         xpGained: xpResult.total,
         level: updateResult.state.level,
