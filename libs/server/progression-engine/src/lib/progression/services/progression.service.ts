@@ -57,27 +57,24 @@ export class ProgressionService {
       // 3. Create activity record
       const activity = this.activityRecorder.createFromAction(action, xpResult);
 
-      // 4. Record the activity in the database
-      const recordedActivity = await this.activityRepository.recordActivity(activity) as GameActionActivity;
-
-      // 5. Update user's progression state
+      // 4. Update user's progression state (activity will be recorded within the transaction)
       const progressionUpdate: ProgressionUpdate = {
         xpGained: xpResult.total,
         activityType: action.type,
       };
 
-      const updateResult = await this.stateRepository.updateState(action.userId, progressionUpdate, recordedActivity);
+      const updateResult = await this.stateRepository.updateState(action.userId, progressionUpdate, activity);
 
-      // 6. Publish events based on state changes
-      await this.publishProgressionEvents(action.userId, updateResult, recordedActivity);
+      // 5. Publish events based on state changes
+      await this.publishProgressionEvents(action.userId, updateResult, activity);
 
-      // 7. Mark the game action as processed
+      // 6. Mark the game action as processed
       await this.gameActionRepository.markAsProcessed(action.id);
 
-      // 7b. Update project stats (best-effort, never blocks)
+      // 6b. Update project stats (best-effort, never blocks)
       await this.updateProjectStats(action, xpResult.total);
 
-      // 8. Return the action result
+      // 7. Return the action result
       const result = {
         xpGained: xpResult.total,
         level: updateResult.state.level,
@@ -133,10 +130,9 @@ export class ProgressionService {
       let activity: GameActionActivity | undefined;
       if (update.activityType) {
         activity = this.activityRecorder.createManualActivity(userId, update);
-        await this.activityRepository.recordActivity(activity);
       }
 
-      // 3. Update progression state
+      // 3. Update progression state (activity will be recorded within the transaction if provided)
       const updateResult = await this.stateRepository.updateState(userId, update, activity);
 
       // 4. Publish events
