@@ -1,8 +1,11 @@
-import { logger, UserService } from '@codeheroes/common';
+import { getCurrentTimeAsISO, logger, UserService } from '@codeheroes/common';
+import { Collections, CONNECTED_ACCOUNT_PROVIDERS } from '@codeheroes/types';
 import * as express from 'express';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { z } from 'zod';
-import { transformTo, transformArrayTo } from '../core/utils/transformer.utils';
+import { ConnectedAccountDto } from '../core/dto/connected-account.dto';
 import { UserDto } from '../core/dto/user.dto';
+import { transformArrayTo, transformTo } from '../core/utils/transformer.utils';
 import { validate } from '../middleware/validate.middleware';
 
 const router = express.Router();
@@ -10,6 +13,12 @@ const router = express.Router();
 const createUserSchema = z.object({
   displayName: z.string().min(1).max(100),
   email: z.string().email(),
+});
+
+const addConnectedAccountSchema = z.object({
+  provider: z.enum(CONNECTED_ACCOUNT_PROVIDERS).refine((p) => p !== 'system', { message: 'Provider "system" is not allowed for connected accounts' }),
+  externalUserId: z.string().min(1).refine((val) => !val.includes('/'), { message: 'External user ID must not contain "/"' }),
+  externalUserName: z.string().optional(),
 });
 
 // implement GET /users/:id
@@ -45,6 +54,123 @@ router.post('/', validate(createUserSchema), async (req, res) => {
 
   const userService = new UserService();
   res.json(await userService.createUser(req.body));
+});
+
+// --- Connected Accounts ---
+
+router.get('/:userId/connected-accounts', async (req, res) => {
+  const { userId } = req.params;
+  logger.debug('GET /users/:userId/connected-accounts', { userId });
+
+  try {
+    const db = getFirestore();
+    const userDoc = await db.collection(Collections.Users).doc(userId).get();
+    if (!userDoc.exists) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const snapshot = await db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.ConnectedAccounts)
+      .get();
+
+    const accounts = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
+      };
+    });
+
+    res.json(transformArrayTo<ConnectedAccountDto>(ConnectedAccountDto, accounts));
+  } catch (error) {
+    logger.error('Error fetching connected accounts:', error);
+    res.status(500).json({ error: 'Failed to fetch connected accounts' });
+  }
+});
+
+router.post('/:userId/connected-accounts', validate(addConnectedAccountSchema), async (req, res) => {
+  const { userId } = req.params;
+  const { provider, externalUserId, externalUserName } = req.body;
+  logger.debug('POST /users/:userId/connected-accounts', { userId, provider, externalUserId });
+
+  try {
+    const db = getFirestore();
+    const userDoc = await db.collection(Collections.Users).doc(userId).get();
+    if (!userDoc.exists) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const docId = `${provider}_${externalUserId}`;
+    const now = getCurrentTimeAsISO();
+    const data: Record<string, string> = {
+      provider,
+      externalUserId,
+      createdAt: now,
+      updatedAt: now,
+    };
+    if (externalUserName) {
+      data.externalUserName = externalUserName;
+    }
+
+    const accountRef = db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.ConnectedAccounts)
+      .doc(docId);
+
+    try {
+      await accountRef.create(data);
+    } catch (createError: any) {
+      if (createError?.code === 6 || createError?.code === 'already-exists') {
+        res.status(409).json({ error: 'Connected account already exists' });
+        return;
+      }
+      throw createError;
+    }
+
+    const result = { id: docId, ...data };
+    res.status(201).json(transformTo<ConnectedAccountDto>(ConnectedAccountDto, result));
+  } catch (error) {
+    logger.error('Error adding connected account:', error);
+    res.status(500).json({ error: 'Failed to add connected account' });
+  }
+});
+
+router.delete('/:userId/connected-accounts/:accountId', async (req, res) => {
+  const { userId, accountId } = req.params;
+  logger.debug('DELETE /users/:userId/connected-accounts/:accountId', { userId, accountId });
+
+  try {
+    const db = getFirestore();
+    const userDoc = await db.collection(Collections.Users).doc(userId).get();
+    if (!userDoc.exists) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const accountRef = db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.ConnectedAccounts)
+      .doc(accountId);
+
+    const accountDoc = await accountRef.get();
+    if (!accountDoc.exists) {
+      res.status(404).json({ error: 'Connected account not found' });
+      return;
+    }
+
+    await accountRef.delete();
+    res.status(204).send();
+  } catch (error) {
+    logger.error('Error removing connected account:', error);
+    res.status(500).json({ error: 'Failed to remove connected account' });
+  }
 });
 
 export { router as UsersController };

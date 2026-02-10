@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { Router } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { UserDto } from '@codeheroes/types';
 import { UsersService } from '../../core/services/users.service';
@@ -47,7 +48,7 @@ import { UsersService } from '../../core/services/users.service';
             </thead>
             <tbody>
               @for (user of users(); track user.id) {
-                <tr>
+                <tr class="clickable-row" tabindex="0" role="link" (click)="openUser(user.id)" (keydown.enter)="openUser(user.id)" (keyup.space)="$event.preventDefault(); openUser(user.id)">
                   <td>
                     <div class="user-cell">
                       <div class="user-avatar">{{ user.displayName?.charAt(0)?.toUpperCase() || '?' }}</div>
@@ -175,6 +176,10 @@ import { UsersService } from '../../core/services/users.service';
         background: var(--theme-color-bg-neutral-secondary);
       }
 
+      .clickable-row {
+        cursor: pointer;
+      }
+
       .user-cell {
         display: flex;
         align-items: center;
@@ -232,6 +237,7 @@ import { UsersService } from '../../core/services/users.service';
 })
 export class UsersComponent implements OnInit {
   readonly #usersService = inject(UsersService);
+  readonly #router = inject(Router);
 
   readonly users = signal<UserDto[]>([]);
   readonly isLoading = signal(true);
@@ -274,6 +280,10 @@ export class UsersComponent implements OnInit {
     if (!this.hasMore() || !this.#currentLastId) return;
     this.pageHistory.update((history) => [...history, this.#currentLastId!]);
     this.loadUsers();
+  }
+
+  openUser(id: string): void {
+    this.#router.navigate(['/users', id]);
   }
 
   previousPage(): void {
