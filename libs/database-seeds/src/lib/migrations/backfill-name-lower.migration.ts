@@ -22,15 +22,22 @@ export class BackfillNameLowerMigration {
         continue;
       }
 
-      const updates: Record<string, string> = {};
+      const lower = name.toLowerCase();
+      const needsName = !data.name;
+      const needsNameLower = data.nameLower !== lower;
 
-      // Ensure name is set
-      if (!data.name) {
-        updates.name = name;
+      if (!needsName && !needsNameLower) {
+        skipped++;
+        continue;
       }
 
-      // Set nameLower
-      updates.nameLower = name.toLowerCase();
+      const updates: Record<string, string> = {};
+      if (needsName) {
+        updates.name = name;
+      }
+      if (needsNameLower) {
+        updates.nameLower = lower;
+      }
 
       batch.update(doc.ref, updates);
       batchCount++;

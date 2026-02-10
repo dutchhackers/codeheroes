@@ -25,7 +25,7 @@ export class UserService extends BaseFirestoreService<User> {
     const nextId = await this.counterService.getNextUserId();
     const timestamps = this.createTimestamps();
 
-    const name = input.name || input.displayName || '';
+    const name = (input.name?.trim() || input.displayName?.trim() || input.email || nextId);
     const userDoc: User = {
       id: nextId,
       active: true,
