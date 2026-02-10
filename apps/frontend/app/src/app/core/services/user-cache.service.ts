@@ -4,6 +4,7 @@ import { UserDto } from '@codeheroes/types';
 
 export interface UserInfo {
   id: string;
+  name: string | null;
   displayName: string;
   photoUrl: string | null;
 }
@@ -32,6 +33,7 @@ export class UserCacheService {
       const data = doc.data() as UserDto;
       usersMap.set(doc.id, {
         id: doc.id,
+        name: data.name ?? null,
         displayName: data.displayName,
         photoUrl: data.photoUrl,
       });

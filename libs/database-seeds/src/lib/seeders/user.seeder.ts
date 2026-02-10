@@ -6,9 +6,9 @@ interface User {
   id: string;
   uid: string | null; // Firebase Auth UID
   email: string;
+  name?: string | null;
   displayName: string;
   photoUrl: string;
-  lastLogin: string; // ISO string
   active: boolean;
   createdAt: string; // ISO string
   updatedAt: string; // ISO string
@@ -25,6 +25,7 @@ export class UserSeeder implements Seeder<User> {
       // Ensure all users have a userType, default to 'user' if not provided
       batch.set(ref, {
         ...user,
+        name: user.name ?? user.displayName,
         displayNameLower: user.displayName.toLowerCase(),
         userType: user.userType || 'user',
         createdAt: now,

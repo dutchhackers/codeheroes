@@ -46,12 +46,36 @@ export class UserService extends BaseFirestoreService<User> {
 
   async getUsers(params: PaginationParams = {}): Promise<PaginatedResponse<User>> {
     const limit = params.limit || 10;
-    let query = this.collection.orderBy('createdAt', 'desc').limit(limit + 1);
+    const searchTerm = params.search?.trim().toLowerCase();
 
-    if (params.startAfterId) {
+    const allowedSortFields: Record<string, string> = {
+      name: 'displayNameLower',
+      createdAt: 'createdAt',
+    };
+
+    let orderField = 'createdAt';
+    let sortDirection: 'asc' | 'desc' = params.sortDirection || 'desc';
+
+    if (searchTerm) {
+      // Search forces sort by displayNameLower
+      orderField = 'displayNameLower';
+      sortDirection = 'asc';
+    } else if (params.sortBy && allowedSortFields[params.sortBy]) {
+      orderField = allowedSortFields[params.sortBy];
+    }
+
+    let query = this.collection.orderBy(orderField, sortDirection).limit(limit + 1);
+
+    if (searchTerm && !params.startAfterId) {
+      // First page of search: use value-based range
+      query = query.startAt(searchTerm).endAt(searchTerm + '\uf8ff');
+    } else if (params.startAfterId) {
       const startAfterDoc = await this.collection.doc(params.startAfterId).get();
       if (startAfterDoc.exists) {
         query = query.startAfter(startAfterDoc);
+        if (searchTerm) {
+          query = query.endAt(searchTerm + '\uf8ff');
+        }
       }
     }
 

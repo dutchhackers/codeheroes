@@ -1,6 +1,7 @@
 export interface CreateUserInput {
   uid?: string;
   email: string | null;
+  name?: string | null;
   displayName: string | null;
   photoUrl: string | null;
   userType?: 'user' | 'bot' | 'system';
@@ -8,7 +9,9 @@ export interface CreateUserInput {
 
 export interface UpdateUserInput {
   uid?: string;
+  name?: string;
   displayName?: string;
   photoUrl?: string;
+  active?: boolean;
   userType?: 'user' | 'bot' | 'system';
 }

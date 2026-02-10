@@ -12,13 +12,19 @@ export class UserDto {
   email: string;
 
   @Expose()
+  name?: string | null;
+
+  @Expose()
   displayName: string;
 
-  @Expose()
-  photoURL: string;
+  @Expose({ name: 'photoUrl' })
+  photoUrl: string;
 
   @Expose()
-  lastLogin: string;
+  active: boolean;
+
+  @Expose()
+  lastLogin?: string | null;
 
   @Expose()
   userType: UserType;

@@ -36,6 +36,7 @@ export interface WeeklyStats {
 
 export interface LeaderboardEntry {
   userId: string;
+  name: string | null;
   displayName: string;
   photoUrl: string | null;
   xpGained: number;

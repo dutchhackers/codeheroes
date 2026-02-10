@@ -11,8 +11,16 @@ import { validate } from '../middleware/validate.middleware';
 const router = express.Router();
 
 const createUserSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
   displayName: z.string().min(1).max(100),
   email: z.string().email(),
+});
+
+const updateUserSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  displayName: z.string().min(1).max(100).optional(),
+  active: z.boolean().optional(),
+  userType: z.enum(['user', 'bot', 'system']).optional(),
 });
 
 const addConnectedAccountSchema = z.object({
@@ -35,9 +43,18 @@ router.get('/', async (req, res) => {
   logger.debug('GET /users', req.query);
 
   const userService = new UserService();
+  const sortDirectionRaw = req.query.sortDirection as string | undefined;
+  const sortDirection: 'asc' | 'desc' | undefined =
+    sortDirectionRaw === 'asc' || sortDirectionRaw === 'desc'
+      ? sortDirectionRaw
+      : undefined;
+
   const params = {
     limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
     startAfterId: req.query.startAfterId as string | undefined,
+    sortBy: req.query.sortBy as string | undefined,
+    sortDirection,
+    search: req.query.search as string | undefined,
   };
 
   const users = await userService.getUsers(params);
@@ -54,6 +71,14 @@ router.post('/', validate(createUserSchema), async (req, res) => {
 
   const userService = new UserService();
   res.json(await userService.createUser(req.body));
+});
+
+router.patch('/:id', validate(updateUserSchema), async (req, res) => {
+  logger.debug('PATCH /users/:id', { id: req.params.id, body: req.body });
+
+  const userService = new UserService();
+  const updated = await userService.updateUser(req.params.id, req.body);
+  res.json(transformTo<UserDto>(UserDto, updated));
 });
 
 // --- Connected Accounts ---

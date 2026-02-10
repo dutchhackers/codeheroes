@@ -1,5 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { UserDto } from '@codeheroes/types';
@@ -8,7 +9,7 @@ import { UsersService } from '../../core/services/users.service';
 @Component({
   selector: 'admin-users',
   standalone: true,
-  imports: [DatePipe, SuiButtonComponent],
+  imports: [DatePipe, FormsModule, SuiButtonComponent],
   template: `
     <div>
       <div class="page-header">
@@ -17,6 +18,15 @@ import { UsersService } from '../../core/services/users.service';
           @if (!isLoading() && !error()) {
             <p class="page-subtitle">Showing {{ users().length }} users</p>
           }
+        </div>
+        <div class="search-container">
+          <input
+            class="search-input"
+            type="text"
+            placeholder="Search users..."
+            [ngModel]="searchInput"
+            (ngModelChange)="onSearchChange($event)"
+          />
         </div>
       </div>
 
@@ -33,27 +43,52 @@ import { UsersService } from '../../core/services/users.service';
         </div>
       } @else if (users().length === 0) {
         <div class="empty-state">
-          <p>No users found.</p>
+          @if (searchTerm()) {
+            <p>No users found matching "{{ searchTerm() }}".</p>
+            <sui-button variant="outline" color="neutral" size="sm" (click)="clearSearch()">
+              Clear search
+            </sui-button>
+          } @else {
+            <p>No users found.</p>
+          }
         </div>
       } @else {
         <div class="table-container">
           <table class="users-table">
             <thead>
               <tr>
-                <th>User</th>
+                <th class="sortable-header" tabindex="0" role="button" [attr.aria-sort]="sortBy() === 'name' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : null" (click)="toggleSort('name')" (keydown.enter)="toggleSort('name')" (keydown.space)="$event.preventDefault(); toggleSort('name')">
+                  User
+                  @if (sortBy() === 'name') {
+                    <span class="sort-arrow">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </th>
                 <th>Type</th>
                 <th>Last Login</th>
-                <th>Joined</th>
+                <th class="sortable-header" tabindex="0" role="button" [attr.aria-sort]="sortBy() === 'createdAt' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : null" (click)="toggleSort('createdAt')" (keydown.enter)="toggleSort('createdAt')" (keydown.space)="$event.preventDefault(); toggleSort('createdAt')">
+                  Joined
+                  @if (sortBy() === 'createdAt') {
+                    <span class="sort-arrow">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </th>
               </tr>
             </thead>
             <tbody>
               @for (user of users(); track user.id) {
-                <tr class="clickable-row" tabindex="0" role="link" (click)="openUser(user.id)" (keydown.enter)="openUser(user.id)" (keyup.space)="$event.preventDefault(); openUser(user.id)">
+                <tr class="clickable-row" [class.inactive-row]="!user.active" tabindex="0" role="link" (click)="openUser(user.id)" (keydown.enter)="openUser(user.id)" (keyup.space)="$event.preventDefault(); openUser(user.id)">
                   <td>
                     <div class="user-cell">
-                      <div class="user-avatar">{{ user.displayName?.charAt(0)?.toUpperCase() || '?' }}</div>
+                      <div class="user-avatar">{{ (user.name || user.displayName)?.charAt(0)?.toUpperCase() || '?' }}</div>
                       <div>
-                        <div class="user-name">{{ user.displayName || 'Unknown' }}</div>
+                        <div class="user-name">
+                          {{ user.name || user.displayName || 'Unknown' }}
+                          @if (user.active === false) {
+                            <span class="inactive-badge">Inactive</span>
+                          }
+                        </div>
+                        @if (user.name && user.displayName && user.name !== user.displayName) {
+                          <div class="user-email">{{ user.displayName }}</div>
+                        }
                         @if (user.email) {
                           <div class="user-email">{{ user.email }}</div>
                         }
@@ -117,12 +152,40 @@ import { UsersService } from '../../core/services/users.service';
         color: var(--theme-color-text-neutral-tertiary);
       }
 
+      .search-container {
+        flex-shrink: 0;
+      }
+
+      .search-input {
+        padding: 8px 12px;
+        border: 1px solid var(--theme-color-border-default-default);
+        border-radius: 6px;
+        font-size: 14px;
+        color: var(--theme-color-text-default);
+        background: var(--theme-color-bg-surface-default);
+        min-width: 240px;
+        font-family: inherit;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: var(--theme-color-border-brand-default);
+      }
+
+      .search-input::placeholder {
+        color: var(--theme-color-text-neutral-tertiary);
+      }
+
       .loading-state,
       .empty-state {
         text-align: center;
         padding: 48px 0;
         color: var(--theme-color-text-neutral-tertiary);
         font-size: 14px;
+      }
+
+      .empty-state sui-button {
+        margin-top: 12px;
       }
 
       .error-state {
@@ -180,6 +243,10 @@ import { UsersService } from '../../core/services/users.service';
         cursor: pointer;
       }
 
+      .inactive-row td {
+        opacity: 0.6;
+      }
+
       .user-cell {
         display: flex;
         align-items: center;
@@ -226,6 +293,31 @@ import { UsersService } from '../../core/services/users.service';
         color: #fff;
       }
 
+      .inactive-badge {
+        display: inline-block;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 500;
+        background: var(--theme-color-feedback-bg-error-secondary);
+        color: var(--theme-color-feedback-text-error-default);
+        margin-left: 8px;
+      }
+
+      .sortable-header {
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .sortable-header:hover {
+        color: var(--theme-color-text-brand-default);
+      }
+
+      .sort-arrow {
+        margin-left: 4px;
+        font-size: 11px;
+      }
+
       .pagination-controls {
         display: flex;
         justify-content: flex-end;
@@ -235,7 +327,7 @@ import { UsersService } from '../../core/services/users.service';
     `,
   ],
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent implements OnInit, OnDestroy {
   readonly #usersService = inject(UsersService);
   readonly #router = inject(Router);
 
@@ -244,7 +336,12 @@ export class UsersComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly hasMore = signal(false);
   readonly pageHistory = signal<string[]>([]);
+  readonly sortBy = signal<string>('name');
+  readonly sortDirection = signal<'asc' | 'desc'>('asc');
+  readonly searchTerm = signal<string>('');
 
+  searchInput = '';
+  #searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   #currentLastId: string | null = null;
   readonly #pageSize = 25;
 
@@ -252,13 +349,26 @@ export class UsersComponent implements OnInit {
     this.loadUsers();
   }
 
+  ngOnDestroy(): void {
+    if (this.#searchDebounceTimer) {
+      clearTimeout(this.#searchDebounceTimer);
+    }
+  }
+
   loadUsers(): void {
     this.isLoading.set(true);
     this.error.set(null);
 
-    const params: { limit: number; startAfterId?: string } = { limit: this.#pageSize };
+    const params: { limit: number; startAfterId?: string; sortBy?: string; sortDirection?: string; search?: string } = {
+      limit: this.#pageSize,
+      sortBy: this.sortBy(),
+      sortDirection: this.sortDirection(),
+    };
     if (this.#currentLastId) {
       params.startAfterId = this.#currentLastId;
+    }
+    if (this.searchTerm()) {
+      params.search = this.searchTerm();
     }
 
     this.#usersService.getUsers(params).subscribe({
@@ -274,6 +384,40 @@ export class UsersComponent implements OnInit {
         console.error('Failed to load users:', err);
       },
     });
+  }
+
+  onSearchChange(value: string): void {
+    this.searchInput = value;
+    if (this.#searchDebounceTimer) {
+      clearTimeout(this.#searchDebounceTimer);
+    }
+    this.#searchDebounceTimer = setTimeout(() => {
+      this.searchTerm.set(value.trim());
+      this.#currentLastId = null;
+      this.pageHistory.set([]);
+      this.loadUsers();
+    }, 300);
+  }
+
+  clearSearch(): void {
+    this.searchInput = '';
+    this.searchTerm.set('');
+    this.#currentLastId = null;
+    this.pageHistory.set([]);
+    this.loadUsers();
+  }
+
+  toggleSort(field: string): void {
+    if (this.sortBy() === field) {
+      this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortBy.set(field);
+      this.sortDirection.set(field === 'name' ? 'asc' : 'desc');
+    }
+    // Reset pagination when sort changes
+    this.#currentLastId = null;
+    this.pageHistory.set([]);
+    this.loadUsers();
   }
 
   nextPage(): void {
