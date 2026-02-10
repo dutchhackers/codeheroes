@@ -364,20 +364,20 @@ export class ActivityItemComponent {
     const user = this.userInfo();
     if (!user) return '?';
 
-    const name = user.name || user.displayName;
-    const parts = name.split(/\s+/);
+    const displayName = user.displayName;
+    const parts = displayName.split(/\s+/);
     if (parts.length >= 2) {
       return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
     }
-    return name.substring(0, 2).toUpperCase();
+    return displayName.substring(0, 2).toUpperCase();
   });
 
   techUsername = computed(() => {
     const user = this.userInfo();
     if (!user) return 'UNKNOWN';
 
-    const name = user.name || user.displayName;
-    const upper = name.toUpperCase();
+    const displayName = user.displayName;
+    const upper = displayName.toUpperCase();
 
     // Check if it's two words (first + last name)
     const parts = upper.split(/\s+/);

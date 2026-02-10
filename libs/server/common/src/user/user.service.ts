@@ -25,13 +25,16 @@ export class UserService extends BaseFirestoreService<User> {
     const nextId = await this.counterService.getNextUserId();
     const timestamps = this.createTimestamps();
 
+    const name = input.name || input.displayName || '';
     const userDoc: User = {
       id: nextId,
       active: true,
       lastLogin: getCurrentTimeAsISO(),
       userType: input.userType || 'user',
       ...input,
+      name,
       ...(input.displayName ? { displayNameLower: input.displayName.toLowerCase() } : {}),
+      nameLower: name.toLowerCase(),
       ...timestamps,
     };
 
@@ -49,7 +52,7 @@ export class UserService extends BaseFirestoreService<User> {
     const searchTerm = params.search?.trim().toLowerCase();
 
     const allowedSortFields: Record<string, string> = {
-      name: 'displayNameLower',
+      name: 'nameLower',
       createdAt: 'createdAt',
     };
 
@@ -57,8 +60,8 @@ export class UserService extends BaseFirestoreService<User> {
     let sortDirection: 'asc' | 'desc' = params.sortDirection || 'desc';
 
     if (searchTerm) {
-      // Search forces sort by displayNameLower
-      orderField = 'displayNameLower';
+      // Search forces sort by nameLower
+      orderField = 'nameLower';
       sortDirection = 'asc';
     } else if (params.sortBy && allowedSortFields[params.sortBy]) {
       orderField = allowedSortFields[params.sortBy];
@@ -99,6 +102,7 @@ export class UserService extends BaseFirestoreService<User> {
       ...input,
       ...timestamps,
       ...(input.displayName !== undefined && { displayNameLower: input.displayName.toLowerCase() }),
+      ...(input.name !== undefined && { nameLower: input.name.toLowerCase() }),
     });
 
     return this.getUser(userId);

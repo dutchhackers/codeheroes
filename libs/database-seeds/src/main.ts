@@ -8,10 +8,11 @@ import { ProgressionResetter } from './lib/resetters/progression.resetter';
 import { SchemaDiscovery } from './lib/discovery/schema.discovery';
 import { LowercaseNamesMigration } from './lib/migrations/lowercase-names.migration';
 import { BackfillNameMigration } from './lib/migrations/backfill-name.migration';
+import { BackfillNameLowerMigration } from './lib/migrations/backfill-name-lower.migration';
 import { ClearLastLoginMigration } from './lib/migrations/clear-last-login.migration';
 import { loadJsonData } from './lib/utils/file-loader';
 
-const VALID_COMMANDS = ['seed', 'reset-progression', 'discover-schema', 'backfill-lowercase-names', 'backfill-name', 'clear-last-login'] as const;
+const VALID_COMMANDS = ['seed', 'reset-progression', 'discover-schema', 'backfill-lowercase-names', 'backfill-name', 'backfill-name-lower', 'clear-last-login'] as const;
 type Command = (typeof VALID_COMMANDS)[number];
 
 function printUsage() {
@@ -24,6 +25,7 @@ Commands:
   discover-schema            Discover and report the current Firestore schema
   backfill-lowercase-names   Backfill displayNameLower field on all user documents
   backfill-name              Backfill name field from displayName on all user documents
+  backfill-name-lower        Backfill nameLower field (and ensure name is set) on all user documents
   clear-last-login           Remove bogus lastLogin (2024-01-01) from seeded users
 
 Environment Variables:
@@ -79,6 +81,11 @@ async function runBackfillLowercaseNames(db: FirebaseFirestore.Firestore) {
 
 async function runBackfillName(db: FirebaseFirestore.Firestore) {
   const migration = new BackfillNameMigration();
+  await migration.run(db);
+}
+
+async function runBackfillNameLower(db: FirebaseFirestore.Firestore) {
+  const migration = new BackfillNameLowerMigration();
   await migration.run(db);
 }
 
@@ -140,6 +147,9 @@ async function main() {
         break;
       case 'backfill-name':
         await runBackfillName(db);
+        break;
+      case 'backfill-name-lower':
+        await runBackfillNameLower(db);
         break;
       case 'clear-last-login':
         await runClearLastLogin(db);

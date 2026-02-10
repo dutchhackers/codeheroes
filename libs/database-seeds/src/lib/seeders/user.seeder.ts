@@ -23,10 +23,12 @@ export class UserSeeder implements Seeder<User> {
       const ref = db.collection('users').doc(user.id);
       const now = new Date().toISOString();
       // Ensure all users have a userType, default to 'user' if not provided
+      const name = user.name ?? user.displayName;
       batch.set(ref, {
         ...user,
-        name: user.name ?? user.displayName,
+        name,
         displayNameLower: user.displayName.toLowerCase(),
+        nameLower: name.toLowerCase(),
         userType: user.userType || 'user',
         createdAt: now,
         updatedAt: now,

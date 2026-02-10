@@ -48,7 +48,7 @@ function getTimePeriodIds(timestamp?: string): TimePeriod {
  */
 interface LeaderboardEntry {
   userId: string;
-  name: string | null;
+  name: string;
   displayName: string;
   photoUrl: string | null;
   xpGained: number;
@@ -108,7 +108,7 @@ async function getXpLeaderboard(
 
     return {
       userId,
-      name: userData.name || null,
+      name: userData.name || userData.displayName || userId,
       displayName: userDisplayName,
       photoUrl: userData.photoUrl || null,
       xpGained: periodStats?.xpGained || 0,

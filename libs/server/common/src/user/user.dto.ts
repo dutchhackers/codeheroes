@@ -1,7 +1,7 @@
 export interface CreateUserInput {
   uid?: string;
   email: string | null;
-  name?: string | null;
+  name?: string;
   displayName: string | null;
   photoUrl: string | null;
   userType?: 'user' | 'bot' | 'system';

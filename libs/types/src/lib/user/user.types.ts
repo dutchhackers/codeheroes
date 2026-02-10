@@ -3,9 +3,10 @@ import { BaseDocument } from '../core/base.types';
 export type UserType = 'user' | 'bot' | 'system';
 
 export interface UserDto extends BaseDocument {
-  name?: string | null;
+  name: string;
   displayName: string;
   displayNameLower?: string | null;
+  nameLower?: string;
   email: string;
   photoUrl: string | null;
   active: boolean;
