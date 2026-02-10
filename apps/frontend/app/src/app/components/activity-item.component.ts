@@ -364,7 +364,7 @@ export class ActivityItemComponent {
     const user = this.userInfo();
     if (!user) return '?';
 
-    const name = user.displayName;
+    const name = user.name || user.displayName;
     const parts = name.split(/\s+/);
     if (parts.length >= 2) {
       return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
@@ -376,7 +376,7 @@ export class ActivityItemComponent {
     const user = this.userInfo();
     if (!user) return 'UNKNOWN';
 
-    const name = user.displayName;
+    const name = user.name || user.displayName;
     const upper = name.toUpperCase();
 
     // Check if it's two words (first + last name)

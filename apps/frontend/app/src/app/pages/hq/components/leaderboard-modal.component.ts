@@ -108,13 +108,13 @@ export type LeaderboardPeriod = 'weekly' | 'daily';
                   </span>
                   <div class="user-info">
                     @if (entry.photoUrl) {
-                      <img [src]="entry.photoUrl" [alt]="entry.displayName" class="avatar" loading="lazy" />
+                      <img [src]="entry.photoUrl" [alt]="entry.name || entry.displayName" class="avatar" loading="lazy" />
                     } @else {
                       <div class="avatar-placeholder">
-                        {{ LeaderboardUtils.getInitials(entry.displayName) }}
+                        {{ LeaderboardUtils.getInitials(entry.name || entry.displayName) }}
                       </div>
                     }
-                    <span class="name">{{ LeaderboardUtils.formatName(entry.displayName, 18, 15) }}</span>
+                    <span class="name">{{ LeaderboardUtils.formatName(entry.name || entry.displayName, 18, 15) }}</span>
                   </div>
                   <span class="xp-gained">+{{ LeaderboardUtils.formatXp(entry.xpGained) }}</span>
                   @if (entry.userId === currentUserId()) {

@@ -68,13 +68,13 @@ import { MyStatsComponent } from './components/my-stats.component';
       } @else {
         <div class="max-w-2xl mx-auto py-8">
           <!-- Avatar -->
-          <app-profile-avatar [photoUrl]="user()?.photoUrl ?? null" [displayName]="user()?.displayName ?? ''" />
+          <app-profile-avatar [photoUrl]="user()?.photoUrl ?? null" [displayName]="(user()?.name || user()?.displayName) ?? ''" />
 
           <!-- Name and Level -->
           <div class="text-center mb-4">
             <div class="inline-flex items-center gap-2">
               <h2 class="text-xl md:text-2xl font-bold text-white">
-                {{ user()?.displayName || 'Unknown' }}
+                {{ user()?.name || user()?.displayName || 'Unknown' }}
               </h2>
               <button type="button" class="edit-button" (click)="openEditModal()" aria-label="Edit profile">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

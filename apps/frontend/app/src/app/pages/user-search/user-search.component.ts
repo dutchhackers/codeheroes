@@ -68,7 +68,7 @@ import { UserSearchService } from '../../core/services/user-search.service';
                 type="button"
                 (click)="viewProfile(user.id)"
                 class="user-card w-full text-left"
-                [attr.aria-label]="'View profile of ' + user.displayName"
+                [attr.aria-label]="'View profile of ' + (user.name || user.displayName)"
               >
                 <div class="flex items-center gap-4">
                   <!-- Avatar -->
@@ -76,7 +76,7 @@ import { UserSearchService } from '../../core/services/user-search.service';
                     @if (user.photoUrl) {
                       <img
                         [src]="user.photoUrl"
-                        [alt]="user.displayName + ' avatar'"
+                        [alt]="(user.name || user.displayName) + ' avatar'"
                         class="w-12 h-12 rounded-full border-2 border-purple-500/30"
                       />
                     } @else {
@@ -84,7 +84,7 @@ import { UserSearchService } from '../../core/services/user-search.service';
                         class="w-12 h-12 rounded-full border-2 border-purple-500/30 bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center"
                       >
                         <span class="text-white font-bold text-lg">
-                          {{ getInitials(user.displayName) }}
+                          {{ getInitials(user.name || user.displayName) }}
                         </span>
                       </div>
                     }
@@ -93,8 +93,11 @@ import { UserSearchService } from '../../core/services/user-search.service';
                   <!-- User Info -->
                   <div class="flex-1 min-w-0">
                     <h3 class="text-white font-semibold truncate">
-                      {{ user.displayName }}
+                      {{ user.name || user.displayName }}
                     </h3>
+                    @if (user.name && user.displayName && user.name !== user.displayName) {
+                      <p class="text-sm text-slate-400 truncate">{{ user.displayName }}</p>
+                    }
                   </div>
 
                   <!-- Arrow -->
