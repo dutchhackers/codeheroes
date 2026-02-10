@@ -16,7 +16,7 @@ const createUserSchema = z.object({
 });
 
 const addConnectedAccountSchema = z.object({
-  provider: z.enum(CONNECTED_ACCOUNT_PROVIDERS.filter((p) => p !== 'system') as [string, ...string[]]),
+  provider: z.enum(CONNECTED_ACCOUNT_PROVIDERS).refine((p) => p !== 'system', { message: 'Provider "system" is not allowed for connected accounts' }),
   externalUserId: z.string().min(1).refine((val) => !val.includes('/'), { message: 'External user ID must not contain "/"' }),
   externalUserName: z.string().optional(),
 });
@@ -117,12 +117,21 @@ router.post('/:userId/connected-accounts', validate(addConnectedAccountSchema), 
       data.externalUserName = externalUserName;
     }
 
-    await db
+    const accountRef = db
       .collection(Collections.Users)
       .doc(userId)
       .collection(Collections.ConnectedAccounts)
-      .doc(docId)
-      .set(data);
+      .doc(docId);
+
+    try {
+      await accountRef.create(data);
+    } catch (createError: any) {
+      if (createError?.code === 6 || createError?.code === 'already-exists') {
+        res.status(409).json({ error: 'Connected account already exists' });
+        return;
+      }
+      throw createError;
+    }
 
     const result = { id: docId, ...data };
     res.status(201).json(transformTo<ConnectedAccountDto>(ConnectedAccountDto, result));
