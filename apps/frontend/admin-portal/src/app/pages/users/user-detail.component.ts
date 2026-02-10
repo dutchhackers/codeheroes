@@ -30,7 +30,7 @@ import { UsersService } from '../../core/services/users.service';
           <div class="user-avatar-lg">{{ (u.name || u.displayName)?.charAt(0)?.toUpperCase() || '?' }}</div>
           <div class="user-info">
             <h1 class="user-name">{{ u.name || u.displayName || 'Unknown' }}</h1>
-            @if (u.displayName && u.name !== u.displayName) {
+            @if (u.name && u.displayName && u.name !== u.displayName) {
               <p class="user-display-name">{{ u.displayName }}</p>
             }
             @if (u.email) {
@@ -544,9 +544,12 @@ export class UserDetailComponent implements OnInit {
   hasChanges(): boolean {
     const u = this.user();
     if (!u) return false;
+    const trimmedName = this.formName.trim();
+    const trimmedDisplayName = this.formDisplayName.trim();
+    if (!trimmedName || !trimmedDisplayName) return false;
     return (
-      this.formName !== (u.name || '') ||
-      this.formDisplayName !== (u.displayName || '') ||
+      trimmedName !== (u.name || '') ||
+      trimmedDisplayName !== (u.displayName || '') ||
       this.formUserType !== (u.userType || 'user') ||
       this.formActive !== u.active
     );

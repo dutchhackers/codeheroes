@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -57,7 +57,7 @@ import { UsersService } from '../../core/services/users.service';
           <table class="users-table">
             <thead>
               <tr>
-                <th class="sortable-header" (click)="toggleSort('name')">
+                <th class="sortable-header" tabindex="0" role="button" [attr.aria-sort]="sortBy() === 'name' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : null" (click)="toggleSort('name')" (keydown.enter)="toggleSort('name')" (keydown.space)="$event.preventDefault(); toggleSort('name')">
                   User
                   @if (sortBy() === 'name') {
                     <span class="sort-arrow">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
@@ -65,7 +65,7 @@ import { UsersService } from '../../core/services/users.service';
                 </th>
                 <th>Type</th>
                 <th>Last Login</th>
-                <th class="sortable-header" (click)="toggleSort('createdAt')">
+                <th class="sortable-header" tabindex="0" role="button" [attr.aria-sort]="sortBy() === 'createdAt' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : null" (click)="toggleSort('createdAt')" (keydown.enter)="toggleSort('createdAt')" (keydown.space)="$event.preventDefault(); toggleSort('createdAt')">
                   Joined
                   @if (sortBy() === 'createdAt') {
                     <span class="sort-arrow">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
@@ -327,7 +327,7 @@ import { UsersService } from '../../core/services/users.service';
     `,
   ],
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent implements OnInit, OnDestroy {
   readonly #usersService = inject(UsersService);
   readonly #router = inject(Router);
 
@@ -347,6 +347,12 @@ export class UsersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUsers();
+  }
+
+  ngOnDestroy(): void {
+    if (this.#searchDebounceTimer) {
+      clearTimeout(this.#searchDebounceTimer);
+    }
   }
 
   loadUsers(): void {

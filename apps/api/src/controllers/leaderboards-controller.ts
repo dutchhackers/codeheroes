@@ -36,6 +36,7 @@ function getTimePeriodIds(timestamp?: string): TimePeriod {
  * @experimental This interface is experimental and subject to change.
  * @interface LeaderboardEntry
  * @property {string} userId - Unique identifier for the user
+ * @property {string | null} name - User's full name, null if not set
  * @property {string} displayName - User's display name shown on the leaderboard
  * @property {string | null} photoUrl - URL to user's profile photo, null if not set
  * @property {number} xpGained - Experience points gained in the current period

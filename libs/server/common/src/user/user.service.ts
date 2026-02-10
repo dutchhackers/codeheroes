@@ -48,6 +48,11 @@ export class UserService extends BaseFirestoreService<User> {
     const limit = params.limit || 10;
     const searchTerm = params.search?.trim().toLowerCase();
 
+    const allowedSortFields: Record<string, string> = {
+      name: 'displayNameLower',
+      createdAt: 'createdAt',
+    };
+
     let orderField = 'createdAt';
     let sortDirection: 'asc' | 'desc' = params.sortDirection || 'desc';
 
@@ -55,10 +60,8 @@ export class UserService extends BaseFirestoreService<User> {
       // Search forces sort by displayNameLower
       orderField = 'displayNameLower';
       sortDirection = 'asc';
-    } else if (params.sortBy === 'name') {
-      orderField = 'displayNameLower';
-    } else if (params.sortBy) {
-      orderField = params.sortBy;
+    } else if (params.sortBy && allowedSortFields[params.sortBy]) {
+      orderField = allowedSortFields[params.sortBy];
     }
 
     let query = this.collection.orderBy(orderField, sortDirection).limit(limit + 1);

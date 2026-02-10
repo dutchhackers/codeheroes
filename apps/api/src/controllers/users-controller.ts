@@ -18,7 +18,7 @@ const createUserSchema = z.object({
 
 const updateUserSchema = z.object({
   name: z.string().min(1).max(100).optional(),
-  displayName: z.string().min(2).max(50).optional(),
+  displayName: z.string().min(1).max(100).optional(),
   active: z.boolean().optional(),
   userType: z.enum(['user', 'bot', 'system']).optional(),
 });
@@ -43,11 +43,17 @@ router.get('/', async (req, res) => {
   logger.debug('GET /users', req.query);
 
   const userService = new UserService();
+  const sortDirectionRaw = req.query.sortDirection as string | undefined;
+  const sortDirection: 'asc' | 'desc' | undefined =
+    sortDirectionRaw === 'asc' || sortDirectionRaw === 'desc'
+      ? sortDirectionRaw
+      : undefined;
+
   const params = {
     limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
     startAfterId: req.query.startAfterId as string | undefined,
     sortBy: req.query.sortBy as string | undefined,
-    sortDirection: req.query.sortDirection as 'asc' | 'desc' | undefined,
+    sortDirection,
     search: req.query.search as string | undefined,
   };
 
