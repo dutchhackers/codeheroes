@@ -9,7 +9,6 @@ interface User {
   name?: string | null;
   displayName: string;
   photoUrl: string;
-  lastLogin: string; // ISO string
   active: boolean;
   createdAt: string; // ISO string
   updatedAt: string; // ISO string
