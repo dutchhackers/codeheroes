@@ -3,6 +3,7 @@ export interface PaginationParams {
   startAfterId?: string;
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
+  search?: string;
 }
 
 export interface PaginatedResponse<T> {

@@ -46,11 +46,16 @@ export class UserService extends BaseFirestoreService<User> {
 
   async getUsers(params: PaginationParams = {}): Promise<PaginatedResponse<User>> {
     const limit = params.limit || 10;
-    const sortDirection = params.sortDirection || 'desc';
+    const searchTerm = params.search?.trim().toLowerCase();
 
-    // Map sortBy to actual Firestore field names
     let orderField = 'createdAt';
-    if (params.sortBy === 'name') {
+    let sortDirection: 'asc' | 'desc' = params.sortDirection || 'desc';
+
+    if (searchTerm) {
+      // Search forces sort by displayNameLower
+      orderField = 'displayNameLower';
+      sortDirection = 'asc';
+    } else if (params.sortBy === 'name') {
       orderField = 'displayNameLower';
     } else if (params.sortBy) {
       orderField = params.sortBy;
@@ -58,10 +63,16 @@ export class UserService extends BaseFirestoreService<User> {
 
     let query = this.collection.orderBy(orderField, sortDirection).limit(limit + 1);
 
-    if (params.startAfterId) {
+    if (searchTerm && !params.startAfterId) {
+      // First page of search: use value-based range
+      query = query.startAt(searchTerm).endAt(searchTerm + '\uf8ff');
+    } else if (params.startAfterId) {
       const startAfterDoc = await this.collection.doc(params.startAfterId).get();
       if (startAfterDoc.exists) {
         query = query.startAfter(startAfterDoc);
+        if (searchTerm) {
+          query = query.endAt(searchTerm + '\uf8ff');
+        }
       }
     }
 
