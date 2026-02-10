@@ -55,6 +55,12 @@ export class UsersService {
     );
   }
 
+  updateUser(id: string, data: { name?: string; displayName?: string }): Observable<UserDto> {
+    return this.#withAuth((headers) =>
+      this.#http.patch<UserDto>(`${environment.apiUrl}/users/${id}`, data, { headers }),
+    );
+  }
+
   #withAuth<T>(fn: (headers: HttpHeaders) => Observable<T>): Observable<T> {
     return from(this.#auth.getIdToken()).pipe(
       switchMap((token) => {

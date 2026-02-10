@@ -27,9 +27,36 @@ import { UsersService } from '../../core/services/users.service';
         </div>
       } @else if (user(); as u) {
         <div class="user-header">
-          <div class="user-avatar-lg">{{ u.displayName?.charAt(0)?.toUpperCase() || '?' }}</div>
+          <div class="user-avatar-lg">{{ (u.name || u.displayName)?.charAt(0)?.toUpperCase() || '?' }}</div>
           <div class="user-info">
-            <h1 class="user-name">{{ u.displayName || 'Unknown' }}</h1>
+            @if (isEditingName()) {
+              <div class="inline-edit">
+                <input
+                  class="form-input name-edit-input"
+                  type="text"
+                  [(ngModel)]="editNameValue"
+                  (keydown.enter)="saveName()"
+                  (keydown.escape)="cancelEditName()"
+                  placeholder="Name"
+                />
+                <div class="inline-edit-actions">
+                  <sui-button variant="solid" color="brand" size="sm" (click)="saveName()" [disabled]="isSavingName()">
+                    Save
+                  </sui-button>
+                  <sui-button variant="outline" color="neutral" size="sm" (click)="cancelEditName()">
+                    Cancel
+                  </sui-button>
+                </div>
+              </div>
+            } @else {
+              <h1 class="user-name editable" (click)="startEditName()" title="Click to edit name">
+                {{ u.name || u.displayName || 'Unknown' }}
+                <span class="edit-icon">✎</span>
+              </h1>
+            }
+            @if (u.displayName && u.name !== u.displayName) {
+              <p class="user-display-name">{{ u.displayName }}</p>
+            }
             @if (u.email) {
               <p class="user-email">{{ u.email }}</p>
             }
@@ -37,6 +64,9 @@ import { UsersService } from '../../core/services/users.service';
               Type: <span class="user-type-badge" [class.user-type-bot]="u.userType !== 'user'">{{ u.userType }}</span>
               · Joined: {{ u.createdAt | date: 'mediumDate' }}
             </p>
+            @if (nameError()) {
+              <p class="form-error">{{ nameError() }}</p>
+            }
           </div>
         </div>
 
@@ -205,10 +235,50 @@ import { UsersService } from '../../core/services/users.service';
         margin-bottom: 2px;
       }
 
+      .user-info .user-display-name {
+        font-size: 14px;
+        color: var(--theme-color-text-neutral-secondary);
+        margin-bottom: 2px;
+      }
+
       .user-info .user-email {
         font-size: 14px;
         color: var(--theme-color-text-neutral-tertiary);
         margin-bottom: 4px;
+      }
+
+      .editable {
+        cursor: pointer;
+      }
+
+      .editable:hover .edit-icon {
+        opacity: 1;
+      }
+
+      .edit-icon {
+        font-size: 14px;
+        opacity: 0;
+        margin-left: 8px;
+        color: var(--theme-color-text-neutral-tertiary);
+        transition: opacity 0.2s;
+      }
+
+      .inline-edit {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+
+      .name-edit-input {
+        font-size: 20px;
+        font-weight: 700;
+        padding: 4px 8px;
+      }
+
+      .inline-edit-actions {
+        display: flex;
+        gap: 8px;
       }
 
       .user-meta {
@@ -369,12 +439,16 @@ export class UserDetailComponent implements OnInit {
   readonly accountsError = signal<string | null>(null);
   readonly showAddForm = signal(false);
   readonly addError = signal<string | null>(null);
+  readonly isEditingName = signal(false);
+  readonly isSavingName = signal(false);
+  readonly nameError = signal<string | null>(null);
 
   readonly providers = CONNECTED_ACCOUNT_PROVIDERS.filter((p) => p !== 'system');
 
   newProvider: ConnectedAccountProvider | '' = '';
   newExternalUserId = '';
   newExternalUserName = '';
+  editNameValue = '';
 
   #userId = '';
 
@@ -463,6 +537,38 @@ export class UserDetailComponent implements OnInit {
     this.newExternalUserId = '';
     this.newExternalUserName = '';
     this.addError.set(null);
+  }
+
+  startEditName(): void {
+    const u = this.user();
+    this.editNameValue = u?.name || u?.displayName || '';
+    this.isEditingName.set(true);
+    this.nameError.set(null);
+  }
+
+  cancelEditName(): void {
+    this.isEditingName.set(false);
+    this.nameError.set(null);
+  }
+
+  saveName(): void {
+    const trimmed = this.editNameValue.trim();
+    if (!trimmed) return;
+
+    this.isSavingName.set(true);
+    this.nameError.set(null);
+
+    this.#usersService.updateUser(this.#userId, { name: trimmed }).subscribe({
+      next: (updated) => {
+        this.user.set(updated);
+        this.isEditingName.set(false);
+        this.isSavingName.set(false);
+      },
+      error: () => {
+        this.nameError.set('Failed to update name.');
+        this.isSavingName.set(false);
+      },
+    });
   }
 
   goBack(): void {

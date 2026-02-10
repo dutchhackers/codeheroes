@@ -51,9 +51,12 @@ import { UsersService } from '../../core/services/users.service';
                 <tr class="clickable-row" tabindex="0" role="link" (click)="openUser(user.id)" (keydown.enter)="openUser(user.id)" (keyup.space)="$event.preventDefault(); openUser(user.id)">
                   <td>
                     <div class="user-cell">
-                      <div class="user-avatar">{{ user.displayName?.charAt(0)?.toUpperCase() || '?' }}</div>
+                      <div class="user-avatar">{{ (user.name || user.displayName)?.charAt(0)?.toUpperCase() || '?' }}</div>
                       <div>
-                        <div class="user-name">{{ user.displayName || 'Unknown' }}</div>
+                        <div class="user-name">{{ user.name || user.displayName || 'Unknown' }}</div>
+                        @if (user.name && user.displayName && user.name !== user.displayName) {
+                          <div class="user-email">{{ user.displayName }}</div>
+                        }
                         @if (user.email) {
                           <div class="user-email">{{ user.email }}</div>
                         }
