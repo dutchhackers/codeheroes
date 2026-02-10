@@ -17,7 +17,7 @@ const createUserSchema = z.object({
 
 const addConnectedAccountSchema = z.object({
   provider: z.enum(CONNECTED_ACCOUNT_PROVIDERS.filter((p) => p !== 'system') as [string, ...string[]]),
-  externalUserId: z.string().min(1),
+  externalUserId: z.string().min(1).refine((val) => !val.includes('/'), { message: 'External user ID must not contain "/"' }),
   externalUserName: z.string().optional(),
 });
 

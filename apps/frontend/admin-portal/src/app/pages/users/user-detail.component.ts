@@ -3,7 +3,7 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
-import { ConnectedAccountDto, CONNECTED_ACCOUNT_PROVIDERS, UserDto } from '@codeheroes/types';
+import { ConnectedAccountDto, ConnectedAccountProvider, CONNECTED_ACCOUNT_PROVIDERS, UserDto } from '@codeheroes/types';
 import { UsersService } from '../../core/services/users.service';
 
 @Component({
@@ -12,7 +12,7 @@ import { UsersService } from '../../core/services/users.service';
   imports: [DatePipe, FormsModule, SuiButtonComponent],
   template: `
     <div>
-      <a class="back-link" (click)="goBack()">← Back to Users</a>
+      <button type="button" class="back-link" (click)="goBack()">← Back to Users</button>
 
       @if (isLoading()) {
         <div class="loading-state">
@@ -89,6 +89,13 @@ import { UsersService } from '../../core/services/users.service';
             <div class="loading-state">
               <p>Loading connected accounts...</p>
             </div>
+          } @else if (accountsError()) {
+            <div class="error-state">
+              <p>{{ accountsError() }}</p>
+              <sui-button variant="outline" color="neutral" size="sm" (click)="loadAccounts()">
+                Try again
+              </sui-button>
+            </div>
           } @else if (accounts().length === 0) {
             <div class="empty-state">
               <p>No connected accounts.</p>
@@ -137,9 +144,13 @@ import { UsersService } from '../../core/services/users.service';
       .back-link {
         display: inline-block;
         margin-bottom: 24px;
+        padding: 0;
+        border: none;
+        background: none;
         font-size: 14px;
         color: var(--theme-color-text-brand-default);
         cursor: pointer;
+        font-family: inherit;
       }
 
       .back-link:hover {
@@ -355,12 +366,13 @@ export class UserDetailComponent implements OnInit {
   readonly isLoading = signal(true);
   readonly accountsLoading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly accountsError = signal<string | null>(null);
   readonly showAddForm = signal(false);
   readonly addError = signal<string | null>(null);
 
   readonly providers = CONNECTED_ACCOUNT_PROVIDERS.filter((p) => p !== 'system');
 
-  newProvider = '';
+  newProvider: ConnectedAccountProvider | '' = '';
   newExternalUserId = '';
   newExternalUserName = '';
 
@@ -394,6 +406,7 @@ export class UserDetailComponent implements OnInit {
 
   loadAccounts(): void {
     this.accountsLoading.set(true);
+    this.accountsError.set(null);
 
     this.#usersService.getConnectedAccounts(this.#userId).subscribe({
       next: (accounts) => {
@@ -401,7 +414,7 @@ export class UserDetailComponent implements OnInit {
         this.accountsLoading.set(false);
       },
       error: () => {
-        this.accounts.set([]);
+        this.accountsError.set('Failed to load connected accounts.');
         this.accountsLoading.set(false);
       },
     });
@@ -411,8 +424,9 @@ export class UserDetailComponent implements OnInit {
     if (!this.canSave()) return;
     this.addError.set(null);
 
-    const data: { provider: string; externalUserId: string; externalUserName?: string } = {
-      provider: this.newProvider,
+    const provider = this.newProvider as ConnectedAccountProvider;
+    const data: { provider: ConnectedAccountProvider; externalUserId: string; externalUserName?: string } = {
+      provider,
       externalUserId: this.newExternalUserId.trim(),
     };
     if (this.newExternalUserName.trim()) {

@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, from, switchMap } from 'rxjs';
-import { ConnectedAccountDto, UserDto, PaginatedResponse } from '@codeheroes/types';
+import { ConnectedAccountDto, ConnectedAccountProvider, UserDto, PaginatedResponse } from '@codeheroes/types';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
 
@@ -40,7 +40,7 @@ export class UsersService {
 
   addConnectedAccount(
     userId: string,
-    data: { provider: string; externalUserId: string; externalUserName?: string },
+    data: { provider: ConnectedAccountProvider; externalUserId: string; externalUserName?: string },
   ): Observable<ConnectedAccountDto> {
     return this.#withAuth((headers) =>
       this.#http.post<ConnectedAccountDto>(`${environment.apiUrl}/users/${userId}/connected-accounts`, data, {

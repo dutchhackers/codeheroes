@@ -48,7 +48,7 @@ import { UsersService } from '../../core/services/users.service';
             </thead>
             <tbody>
               @for (user of users(); track user.id) {
-                <tr class="clickable-row" (click)="openUser(user.id)">
+                <tr class="clickable-row" tabindex="0" role="link" (click)="openUser(user.id)" (keydown.enter)="openUser(user.id)" (keydown.space)="openUser(user.id)">
                   <td>
                     <div class="user-cell">
                       <div class="user-avatar">{{ user.displayName?.charAt(0)?.toUpperCase() || '?' }}</div>
