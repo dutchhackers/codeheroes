@@ -108,7 +108,7 @@ async function getXpLeaderboard(
 
     return {
       userId,
-      name: userData.name || userData.displayName || userId,
+      name: userData.name,
       displayName: userDisplayName,
       photoUrl: userData.photoUrl || null,
       xpGained: periodStats?.xpGained || 0,

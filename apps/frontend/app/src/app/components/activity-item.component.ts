@@ -63,7 +63,7 @@ import { UserInfo } from '../core/services/user-cache.service';
         <div class="activity-text" [class]="actionDisplay().textColor">
           <p class="activity-description">
             <span class="activity-time">[{{ formattedTime() }}]</span>
-            <span class="activity-user">{{ techUsername() }}</span>
+            <span class="activity-user">{{ userInfo()?.displayName || 'UNKNOWN' }}</span>
             <span>{{ descriptionText() }}</span>
           </p>
         </div>
@@ -370,40 +370,6 @@ export class ActivityItemComponent {
       return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
     }
     return displayName.substring(0, 2).toUpperCase();
-  });
-
-  techUsername = computed(() => {
-    const user = this.userInfo();
-    if (!user) return 'UNKNOWN';
-
-    const displayName = user.displayName;
-    const upper = displayName.toUpperCase();
-
-    // Check if it's two words (first + last name)
-    const parts = upper.split(/\s+/);
-    if (parts.length >= 2) {
-      // "Sander Elderhorst" → "SANDER.E"
-      return `${parts[0]}.${parts[1].charAt(0)}`;
-    }
-
-    // Single word - try to split camelCase or find natural break
-    const singleWord = upper;
-
-    // Common word breaks for compound names
-    const breakPoints = ['NIGHT', 'CODE', 'DARK', 'FIRE', 'STAR', 'CYBER', 'TECH', 'MEGA', 'ULTRA'];
-    for (const prefix of breakPoints) {
-      if (singleWord.startsWith(prefix) && singleWord.length > prefix.length) {
-        return `${prefix}.${singleWord.slice(prefix.length)}`;
-      }
-    }
-
-    // If word is long enough, split roughly in half
-    if (singleWord.length >= 8) {
-      const mid = Math.floor(singleWord.length / 2);
-      return `${singleWord.slice(0, mid)}.${singleWord.slice(mid)}`;
-    }
-
-    return singleWord;
   });
 
   // Plain text description (no HTML, single color)
