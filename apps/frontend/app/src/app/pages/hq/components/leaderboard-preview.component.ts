@@ -48,13 +48,13 @@ import * as LeaderboardUtils from '../utils/leaderboard.utils';
               </div>
               <div class="user-profile">
                 @if (entry.photoUrl) {
-                  <img [src]="entry.photoUrl" [alt]="entry.name || entry.displayName" class="user-avatar" loading="lazy" />
+                  <img [src]="entry.photoUrl" [alt]="entry.displayName" class="user-avatar" loading="lazy" />
                 } @else {
                   <div class="user-avatar-placeholder">
-                    {{ LeaderboardUtils.getInitials(entry.name || entry.displayName) }}
+                    {{ LeaderboardUtils.getInitials(entry.displayName) }}
                   </div>
                 }
-                <span class="user-name">{{ LeaderboardUtils.formatName(entry.name || entry.displayName) }}</span>
+                <span class="user-name">{{ LeaderboardUtils.formatName(entry.displayName) }}</span>
               </div>
               <div class="xp-badge">
                 <span class="xp-value">+{{ LeaderboardUtils.formatXp(entry.xpGained) }}</span>

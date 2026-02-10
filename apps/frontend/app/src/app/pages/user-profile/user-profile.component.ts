@@ -67,12 +67,12 @@ import { MyStatsComponent } from '../profile/components/my-stats.component';
       } @else {
         <div class="max-w-2xl mx-auto py-8">
           <!-- Avatar -->
-          <app-profile-avatar [photoUrl]="user()?.photoUrl ?? null" [displayName]="(user()?.name || user()?.displayName) ?? ''" />
+          <app-profile-avatar [photoUrl]="user()?.photoUrl ?? null" [displayName]="user()?.displayName ?? ''" />
 
           <!-- Name and Level -->
           <div class="text-center mb-4">
             <h2 class="text-xl md:text-2xl font-bold text-white">
-              {{ user()?.name || user()?.displayName || 'Unknown' }}
+              {{ user()?.displayName || 'Unknown' }}
             </h2>
             <p
               class="text-sm md:text-base text-purple-400 mt-1"
