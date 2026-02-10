@@ -21,6 +21,9 @@ export class UserDto {
   photoURL: string;
 
   @Expose()
+  active: boolean;
+
+  @Expose()
   lastLogin: string;
 
   @Expose()

@@ -19,6 +19,8 @@ const createUserSchema = z.object({
 const updateUserSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   displayName: z.string().min(2).max(50).optional(),
+  active: z.boolean().optional(),
+  userType: z.enum(['user', 'bot', 'system']).optional(),
 });
 
 const addConnectedAccountSchema = z.object({
@@ -44,6 +46,8 @@ router.get('/', async (req, res) => {
   const params = {
     limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
     startAfterId: req.query.startAfterId as string | undefined,
+    sortBy: req.query.sortBy as string | undefined,
+    sortDirection: req.query.sortDirection as 'asc' | 'desc' | undefined,
   };
 
   const users = await userService.getUsers(params);

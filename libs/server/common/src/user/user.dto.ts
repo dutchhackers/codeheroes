@@ -12,5 +12,6 @@ export interface UpdateUserInput {
   name?: string;
   displayName?: string;
   photoUrl?: string;
+  active?: boolean;
   userType?: 'user' | 'bot' | 'system';
 }

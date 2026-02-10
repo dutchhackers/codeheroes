@@ -1,6 +1,8 @@
 export interface PaginationParams {
   limit?: number;
   startAfterId?: string;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
 export interface PaginatedResponse<T> {

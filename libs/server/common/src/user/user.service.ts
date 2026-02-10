@@ -46,7 +46,17 @@ export class UserService extends BaseFirestoreService<User> {
 
   async getUsers(params: PaginationParams = {}): Promise<PaginatedResponse<User>> {
     const limit = params.limit || 10;
-    let query = this.collection.orderBy('createdAt', 'desc').limit(limit + 1);
+    const sortDirection = params.sortDirection || 'desc';
+
+    // Map sortBy to actual Firestore field names
+    let orderField = 'createdAt';
+    if (params.sortBy === 'name') {
+      orderField = 'displayNameLower';
+    } else if (params.sortBy) {
+      orderField = params.sortBy;
+    }
+
+    let query = this.collection.orderBy(orderField, sortDirection).limit(limit + 1);
 
     if (params.startAfterId) {
       const startAfterDoc = await this.collection.doc(params.startAfterId).get();
