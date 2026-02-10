@@ -16,8 +16,17 @@
       "updateMode": "prefetch",
       "resources": {
         "files": [
-          "/icons/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)",
-          "/fonts/**/*.woff2"
+          "/icons/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif)"
+        ]
+      }
+    },
+    {
+      "name": "fonts",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/fonts/**/*.(otf|ttf|woff|woff2)"
         ]
       }
     }
