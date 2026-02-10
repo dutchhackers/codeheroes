@@ -12,6 +12,9 @@ export class UserDto {
   email: string;
 
   @Expose()
+  name: string;
+
+  @Expose()
   displayName: string;
 
   @Expose()

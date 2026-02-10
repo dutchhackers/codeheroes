@@ -3,6 +3,7 @@ import { BaseDocument } from '../core/base.types';
 export type UserType = 'user' | 'bot' | 'system';
 
 export interface UserDto extends BaseDocument {
+  name?: string | null;
   displayName: string;
   displayNameLower?: string | null;
   email: string;
@@ -16,12 +17,14 @@ export interface UserDto extends BaseDocument {
 export interface CreateUserDto {
   uid?: string;
   email: string;
+  name?: string | null;
   displayName: string;
   photoUrl?: string | null;
   userType?: UserType; // Default to 'user' if not specified
 }
 
 export interface UpdateUserDto {
+  name?: string;
   displayName?: string;
   photoUrl?: string;
   active?: boolean;
