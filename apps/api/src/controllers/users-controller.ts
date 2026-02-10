@@ -11,8 +11,14 @@ import { validate } from '../middleware/validate.middleware';
 const router = express.Router();
 
 const createUserSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
   displayName: z.string().min(1).max(100),
   email: z.string().email(),
+});
+
+const updateUserSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  displayName: z.string().min(2).max(50).optional(),
 });
 
 const addConnectedAccountSchema = z.object({
@@ -54,6 +60,14 @@ router.post('/', validate(createUserSchema), async (req, res) => {
 
   const userService = new UserService();
   res.json(await userService.createUser(req.body));
+});
+
+router.patch('/:id', validate(updateUserSchema), async (req, res) => {
+  logger.debug('PATCH /users/:id', { id: req.params.id, body: req.body });
+
+  const userService = new UserService();
+  const updated = await userService.updateUser(req.params.id, req.body);
+  res.json(transformTo<UserDto>(UserDto, updated));
 });
 
 // --- Connected Accounts ---
