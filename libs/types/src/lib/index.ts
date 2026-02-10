@@ -1,4 +1,5 @@
 export * from './core/base.types';
+export * from './core/connected-account.types';
 export * from './core/providers';
 // export * from './core/constants';
 
