@@ -10,7 +10,7 @@ export class UsersService {
   readonly #http = inject(HttpClient);
   readonly #auth = inject(AuthService);
 
-  getUsers(params?: { limit?: number; startAfterId?: string }): Observable<PaginatedResponse<UserDto>> {
+  getUsers(params?: { limit?: number; startAfterId?: string; sortBy?: string; sortDirection?: string }): Observable<PaginatedResponse<UserDto>> {
     return this.#withAuth((headers) => {
       let httpParams = new HttpParams();
       if (params?.limit) {
@@ -18,6 +18,12 @@ export class UsersService {
       }
       if (params?.startAfterId) {
         httpParams = httpParams.set('startAfterId', params.startAfterId);
+      }
+      if (params?.sortBy) {
+        httpParams = httpParams.set('sortBy', params.sortBy);
+      }
+      if (params?.sortDirection) {
+        httpParams = httpParams.set('sortDirection', params.sortDirection);
       }
       return this.#http.get<PaginatedResponse<UserDto>>(`${environment.apiUrl}/users`, {
         headers,
@@ -55,7 +61,7 @@ export class UsersService {
     );
   }
 
-  updateUser(id: string, data: { name?: string; displayName?: string }): Observable<UserDto> {
+  updateUser(id: string, data: { name?: string; displayName?: string; active?: boolean; userType?: string }): Observable<UserDto> {
     return this.#withAuth((headers) =>
       this.#http.patch<UserDto>(`${environment.apiUrl}/users/${id}`, data, { headers }),
     );

@@ -72,6 +72,68 @@ import { UsersService } from '../../core/services/users.service';
 
         <div class="section">
           <div class="section-header">
+            <h2 class="section-title">Account Settings</h2>
+          </div>
+          <div class="settings-card">
+            <div class="settings-row">
+              <div class="settings-label">Display Name</div>
+              <div class="settings-value">
+                @if (isEditingDisplayName()) {
+                  <div class="inline-edit-row">
+                    <input
+                      class="form-input settings-input"
+                      type="text"
+                      [(ngModel)]="editDisplayNameValue"
+                      (keydown.enter)="saveDisplayName()"
+                      (keydown.escape)="cancelEditDisplayName()"
+                      placeholder="Display Name"
+                    />
+                    <div class="inline-edit-actions">
+                      <sui-button variant="solid" color="brand" size="sm" (click)="saveDisplayName()" [disabled]="isSavingDisplayName()">
+                        Save
+                      </sui-button>
+                      <sui-button variant="outline" color="neutral" size="sm" (click)="cancelEditDisplayName()">
+                        Cancel
+                      </sui-button>
+                    </div>
+                  </div>
+                  @if (displayNameError()) {
+                    <p class="form-error">{{ displayNameError() }}</p>
+                  }
+                } @else {
+                  <span class="editable" (click)="startEditDisplayName()" title="Click to edit">
+                    {{ u.displayName || '—' }}
+                    <span class="edit-icon">✎</span>
+                  </span>
+                }
+              </div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-label">User Type</div>
+              <div class="settings-value">
+                <select class="form-input settings-select" [ngModel]="u.userType" (ngModelChange)="changeUserType($event)">
+                  <option value="user">user</option>
+                  <option value="bot">bot</option>
+                  <option value="system">system</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-label">Status</div>
+              <div class="settings-value">
+                <label class="status-toggle">
+                  <input type="checkbox" [checked]="u.active" (change)="toggleActive()" />
+                  <span class="status-label" [class.status-active]="u.active" [class.status-inactive]="!u.active">
+                    {{ u.active ? 'Active' : 'Inactive' }}
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">
             <h2 class="section-title">Connected Accounts</h2>
             @if (!showAddForm()) {
               <sui-button variant="outline" color="neutral" size="sm" (click)="showAddForm.set(true)">
@@ -423,6 +485,87 @@ import { UsersService } from '../../core/services/users.service';
         font-size: 13px;
         color: var(--theme-color-feedback-text-error-default);
       }
+
+      .settings-card {
+        background: var(--theme-color-bg-surface-default);
+        border: 1px solid var(--theme-color-border-default-default);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .settings-row {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--theme-color-border-default-default);
+      }
+
+      .settings-row:last-child {
+        border-bottom: none;
+      }
+
+      .settings-label {
+        width: 140px;
+        flex-shrink: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--theme-color-text-neutral-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .settings-value {
+        flex: 1;
+        font-size: 14px;
+        color: var(--theme-color-text-default);
+      }
+
+      .settings-value .editable {
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .inline-edit-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .settings-input {
+        max-width: 280px;
+      }
+
+      .settings-select {
+        max-width: 160px;
+        cursor: pointer;
+      }
+
+      .status-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .status-toggle input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: var(--theme-color-bg-brand-default);
+      }
+
+      .status-label {
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .status-active {
+        color: var(--theme-color-text-brand-default);
+      }
+
+      .status-inactive {
+        color: var(--theme-color-text-neutral-tertiary);
+      }
     `,
   ],
 })
@@ -442,6 +585,9 @@ export class UserDetailComponent implements OnInit {
   readonly isEditingName = signal(false);
   readonly isSavingName = signal(false);
   readonly nameError = signal<string | null>(null);
+  readonly isEditingDisplayName = signal(false);
+  readonly isSavingDisplayName = signal(false);
+  readonly displayNameError = signal<string | null>(null);
 
   readonly providers = CONNECTED_ACCOUNT_PROVIDERS.filter((p) => p !== 'system');
 
@@ -449,6 +595,7 @@ export class UserDetailComponent implements OnInit {
   newExternalUserId = '';
   newExternalUserName = '';
   editNameValue = '';
+  editDisplayNameValue = '';
 
   #userId = '';
 
@@ -568,6 +715,56 @@ export class UserDetailComponent implements OnInit {
         this.nameError.set('Failed to update name.');
         this.isSavingName.set(false);
       },
+    });
+  }
+
+  startEditDisplayName(): void {
+    const u = this.user();
+    this.editDisplayNameValue = u?.displayName || '';
+    this.isEditingDisplayName.set(true);
+    this.displayNameError.set(null);
+  }
+
+  cancelEditDisplayName(): void {
+    this.isEditingDisplayName.set(false);
+    this.displayNameError.set(null);
+  }
+
+  saveDisplayName(): void {
+    const trimmed = this.editDisplayNameValue.trim();
+    if (!trimmed || trimmed.length < 2) return;
+
+    this.isSavingDisplayName.set(true);
+    this.displayNameError.set(null);
+
+    this.#usersService.updateUser(this.#userId, { displayName: trimmed }).subscribe({
+      next: (updated) => {
+        this.user.set(updated);
+        this.isEditingDisplayName.set(false);
+        this.isSavingDisplayName.set(false);
+      },
+      error: () => {
+        this.displayNameError.set('Failed to update display name.');
+        this.isSavingDisplayName.set(false);
+      },
+    });
+  }
+
+  changeUserType(userType: string): void {
+    this.#usersService.updateUser(this.#userId, { userType }).subscribe({
+      next: (updated) => this.user.set(updated),
+      error: () => alert('Failed to update user type.'),
+    });
+  }
+
+  toggleActive(): void {
+    const u = this.user();
+    if (!u) return;
+
+    const newActive = !u.active;
+    this.#usersService.updateUser(this.#userId, { active: newActive }).subscribe({
+      next: (updated) => this.user.set(updated),
+      error: () => alert('Failed to update status.'),
     });
   }
 

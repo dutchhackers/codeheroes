@@ -40,10 +40,20 @@ import { UsersService } from '../../core/services/users.service';
           <table class="users-table">
             <thead>
               <tr>
-                <th>User</th>
+                <th class="sortable-header" (click)="toggleSort('name')">
+                  User
+                  @if (sortBy() === 'name') {
+                    <span class="sort-arrow">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </th>
                 <th>Type</th>
                 <th>Last Login</th>
-                <th>Joined</th>
+                <th class="sortable-header" (click)="toggleSort('createdAt')">
+                  Joined
+                  @if (sortBy() === 'createdAt') {
+                    <span class="sort-arrow">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -229,6 +239,20 @@ import { UsersService } from '../../core/services/users.service';
         color: #fff;
       }
 
+      .sortable-header {
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .sortable-header:hover {
+        color: var(--theme-color-text-brand-default);
+      }
+
+      .sort-arrow {
+        margin-left: 4px;
+        font-size: 11px;
+      }
+
       .pagination-controls {
         display: flex;
         justify-content: flex-end;
@@ -247,6 +271,8 @@ export class UsersComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly hasMore = signal(false);
   readonly pageHistory = signal<string[]>([]);
+  readonly sortBy = signal<string>('createdAt');
+  readonly sortDirection = signal<'asc' | 'desc'>('desc');
 
   #currentLastId: string | null = null;
   readonly #pageSize = 25;
@@ -259,9 +285,13 @@ export class UsersComponent implements OnInit {
     this.isLoading.set(true);
     this.error.set(null);
 
-    const params: { limit: number; startAfterId?: string } = { limit: this.#pageSize };
+    const params: { limit: number; startAfterId?: string; sortBy?: string; sortDirection?: string } = { limit: this.#pageSize };
     if (this.#currentLastId) {
       params.startAfterId = this.#currentLastId;
+    }
+    if (this.sortBy() !== 'createdAt' || this.sortDirection() !== 'desc') {
+      params.sortBy = this.sortBy();
+      params.sortDirection = this.sortDirection();
     }
 
     this.#usersService.getUsers(params).subscribe({
@@ -277,6 +307,19 @@ export class UsersComponent implements OnInit {
         console.error('Failed to load users:', err);
       },
     });
+  }
+
+  toggleSort(field: string): void {
+    if (this.sortBy() === field) {
+      this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortBy.set(field);
+      this.sortDirection.set(field === 'name' ? 'asc' : 'desc');
+    }
+    // Reset pagination when sort changes
+    this.#currentLastId = null;
+    this.pageHistory.set([]);
+    this.loadUsers();
   }
 
   nextPage(): void {
