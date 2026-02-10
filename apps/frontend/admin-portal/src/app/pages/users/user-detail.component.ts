@@ -29,31 +29,7 @@ import { UsersService } from '../../core/services/users.service';
         <div class="user-header">
           <div class="user-avatar-lg">{{ (u.name || u.displayName)?.charAt(0)?.toUpperCase() || '?' }}</div>
           <div class="user-info">
-            @if (isEditingName()) {
-              <div class="inline-edit">
-                <input
-                  class="form-input name-edit-input"
-                  type="text"
-                  [(ngModel)]="editNameValue"
-                  (keydown.enter)="saveName()"
-                  (keydown.escape)="cancelEditName()"
-                  placeholder="Name"
-                />
-                <div class="inline-edit-actions">
-                  <sui-button variant="solid" color="brand" size="sm" (click)="saveName()" [disabled]="isSavingName()">
-                    Save
-                  </sui-button>
-                  <sui-button variant="outline" color="neutral" size="sm" (click)="cancelEditName()">
-                    Cancel
-                  </sui-button>
-                </div>
-              </div>
-            } @else {
-              <h1 class="user-name editable" (click)="startEditName()" title="Click to edit name">
-                {{ u.name || u.displayName || 'Unknown' }}
-                <span class="edit-icon">✎</span>
-              </h1>
-            }
+            <h1 class="user-name">{{ u.name || u.displayName || 'Unknown' }}</h1>
             @if (u.displayName && u.name !== u.displayName) {
               <p class="user-display-name">{{ u.displayName }}</p>
             }
@@ -64,54 +40,40 @@ import { UsersService } from '../../core/services/users.service';
               Type: <span class="user-type-badge" [class.user-type-bot]="u.userType !== 'user'">{{ u.userType }}</span>
               · Joined: {{ u.createdAt | date: 'mediumDate' }}
             </p>
-            @if (nameError()) {
-              <p class="form-error">{{ nameError() }}</p>
-            }
           </div>
         </div>
 
         <div class="section">
           <div class="section-header">
-            <h2 class="section-title">Account Settings</h2>
+            <h2 class="section-title">User Details</h2>
           </div>
           <div class="settings-card">
             <div class="settings-row">
+              <div class="settings-label">Name</div>
+              <div class="settings-value">
+                <input
+                  class="form-input settings-input"
+                  type="text"
+                  [(ngModel)]="formName"
+                  placeholder="Name"
+                />
+              </div>
+            </div>
+            <div class="settings-row">
               <div class="settings-label">Display Name</div>
               <div class="settings-value">
-                @if (isEditingDisplayName()) {
-                  <div class="inline-edit-row">
-                    <input
-                      class="form-input settings-input"
-                      type="text"
-                      [(ngModel)]="editDisplayNameValue"
-                      (keydown.enter)="saveDisplayName()"
-                      (keydown.escape)="cancelEditDisplayName()"
-                      placeholder="Display Name"
-                    />
-                    <div class="inline-edit-actions">
-                      <sui-button variant="solid" color="brand" size="sm" (click)="saveDisplayName()" [disabled]="isSavingDisplayName()">
-                        Save
-                      </sui-button>
-                      <sui-button variant="outline" color="neutral" size="sm" (click)="cancelEditDisplayName()">
-                        Cancel
-                      </sui-button>
-                    </div>
-                  </div>
-                  @if (displayNameError()) {
-                    <p class="form-error">{{ displayNameError() }}</p>
-                  }
-                } @else {
-                  <span class="editable" (click)="startEditDisplayName()" title="Click to edit">
-                    {{ u.displayName || '—' }}
-                    <span class="edit-icon">✎</span>
-                  </span>
-                }
+                <input
+                  class="form-input settings-input"
+                  type="text"
+                  [(ngModel)]="formDisplayName"
+                  placeholder="Display Name"
+                />
               </div>
             </div>
             <div class="settings-row">
               <div class="settings-label">User Type</div>
               <div class="settings-value">
-                <select class="form-input settings-select" [ngModel]="u.userType" (ngModelChange)="changeUserType($event)">
+                <select class="form-input settings-select" [(ngModel)]="formUserType">
                   <option value="user">user</option>
                   <option value="bot">bot</option>
                   <option value="system">system</option>
@@ -122,12 +84,26 @@ import { UsersService } from '../../core/services/users.service';
               <div class="settings-label">Status</div>
               <div class="settings-value">
                 <label class="status-toggle">
-                  <input type="checkbox" [checked]="u.active" (change)="toggleActive()" />
-                  <span class="status-label" [class.status-active]="u.active" [class.status-inactive]="!u.active">
-                    {{ u.active ? 'Active' : 'Inactive' }}
+                  <input type="checkbox" [(ngModel)]="formActive" />
+                  <span class="status-label" [class.status-active]="formActive" [class.status-inactive]="!formActive">
+                    {{ formActive ? 'Active' : 'Inactive' }}
                   </span>
                 </label>
               </div>
+            </div>
+            <div class="settings-row settings-actions">
+              @if (saveError()) {
+                <p class="form-error">{{ saveError() }}</p>
+              }
+              <sui-button
+                variant="solid"
+                color="brand"
+                size="sm"
+                [disabled]="!hasChanges() || isSaving()"
+                (click)="saveUserDetails()"
+              >
+                {{ isSaving() ? 'Saving...' : 'Save' }}
+              </sui-button>
             </div>
           </div>
         </div>
@@ -164,7 +140,7 @@ import { UsersService } from '../../core/services/users.service';
                 </div>
               </div>
               <div class="form-actions">
-                <sui-button variant="solid" color="brand" size="sm" [disabled]="!canSave()" (click)="addAccount()">
+                <sui-button variant="solid" color="brand" size="sm" [disabled]="!canSaveAccount()" (click)="addAccount()">
                   Save
                 </sui-button>
                 <sui-button variant="outline" color="neutral" size="sm" (click)="cancelAdd()">
@@ -309,40 +285,6 @@ import { UsersService } from '../../core/services/users.service';
         margin-bottom: 4px;
       }
 
-      .editable {
-        cursor: pointer;
-      }
-
-      .editable:hover .edit-icon {
-        opacity: 1;
-      }
-
-      .edit-icon {
-        font-size: 14px;
-        opacity: 0;
-        margin-left: 8px;
-        color: var(--theme-color-text-neutral-tertiary);
-        transition: opacity 0.2s;
-      }
-
-      .inline-edit {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-bottom: 4px;
-      }
-
-      .name-edit-input {
-        font-size: 20px;
-        font-weight: 700;
-        padding: 4px 8px;
-      }
-
-      .inline-edit-actions {
-        display: flex;
-        gap: 8px;
-      }
-
       .user-meta {
         font-size: 13px;
         color: var(--theme-color-text-neutral-tertiary);
@@ -481,7 +423,6 @@ import { UsersService } from '../../core/services/users.service';
       }
 
       .form-error {
-        margin-top: 8px;
         font-size: 13px;
         color: var(--theme-color-feedback-text-error-default);
       }
@@ -504,6 +445,11 @@ import { UsersService } from '../../core/services/users.service';
         border-bottom: none;
       }
 
+      .settings-actions {
+        justify-content: flex-end;
+        gap: 12px;
+      }
+
       .settings-label {
         width: 140px;
         flex-shrink: 0;
@@ -518,17 +464,6 @@ import { UsersService } from '../../core/services/users.service';
         flex: 1;
         font-size: 14px;
         color: var(--theme-color-text-default);
-      }
-
-      .settings-value .editable {
-        display: inline-flex;
-        align-items: center;
-      }
-
-      .inline-edit-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
       }
 
       .settings-input {
@@ -582,20 +517,21 @@ export class UserDetailComponent implements OnInit {
   readonly accountsError = signal<string | null>(null);
   readonly showAddForm = signal(false);
   readonly addError = signal<string | null>(null);
-  readonly isEditingName = signal(false);
-  readonly isSavingName = signal(false);
-  readonly nameError = signal<string | null>(null);
-  readonly isEditingDisplayName = signal(false);
-  readonly isSavingDisplayName = signal(false);
-  readonly displayNameError = signal<string | null>(null);
+  readonly isSaving = signal(false);
+  readonly saveError = signal<string | null>(null);
 
   readonly providers = CONNECTED_ACCOUNT_PROVIDERS.filter((p) => p !== 'system');
 
+  // Connected accounts form
   newProvider: ConnectedAccountProvider | '' = '';
   newExternalUserId = '';
   newExternalUserName = '';
-  editNameValue = '';
-  editDisplayNameValue = '';
+
+  // User details form
+  formName = '';
+  formDisplayName = '';
+  formUserType = 'user';
+  formActive = true;
 
   #userId = '';
 
@@ -605,7 +541,18 @@ export class UserDetailComponent implements OnInit {
     this.loadAccounts();
   }
 
-  canSave(): boolean {
+  hasChanges(): boolean {
+    const u = this.user();
+    if (!u) return false;
+    return (
+      this.formName !== (u.name || '') ||
+      this.formDisplayName !== (u.displayName || '') ||
+      this.formUserType !== (u.userType || 'user') ||
+      this.formActive !== u.active
+    );
+  }
+
+  canSaveAccount(): boolean {
     return this.newProvider !== '' && this.newExternalUserId.trim() !== '';
   }
 
@@ -616,6 +563,7 @@ export class UserDetailComponent implements OnInit {
     this.#usersService.getUser(this.#userId).subscribe({
       next: (user) => {
         this.user.set(user);
+        this.#initForm(user);
         this.isLoading.set(false);
       },
       error: () => {
@@ -641,8 +589,42 @@ export class UserDetailComponent implements OnInit {
     });
   }
 
+  saveUserDetails(): void {
+    const u = this.user();
+    if (!u || !this.hasChanges()) return;
+
+    this.isSaving.set(true);
+    this.saveError.set(null);
+
+    const updates: Record<string, unknown> = {};
+    if (this.formName !== (u.name || '')) {
+      updates['name'] = this.formName.trim();
+    }
+    if (this.formDisplayName !== (u.displayName || '')) {
+      updates['displayName'] = this.formDisplayName.trim();
+    }
+    if (this.formUserType !== (u.userType || 'user')) {
+      updates['userType'] = this.formUserType;
+    }
+    if (this.formActive !== u.active) {
+      updates['active'] = this.formActive;
+    }
+
+    this.#usersService.updateUser(this.#userId, updates).subscribe({
+      next: (updated) => {
+        this.user.set(updated);
+        this.#initForm(updated);
+        this.isSaving.set(false);
+      },
+      error: () => {
+        this.saveError.set('Failed to save changes.');
+        this.isSaving.set(false);
+      },
+    });
+  }
+
   addAccount(): void {
-    if (!this.canSave()) return;
+    if (!this.canSaveAccount()) return;
     this.addError.set(null);
 
     const provider = this.newProvider as ConnectedAccountProvider;
@@ -686,89 +668,14 @@ export class UserDetailComponent implements OnInit {
     this.addError.set(null);
   }
 
-  startEditName(): void {
-    const u = this.user();
-    this.editNameValue = u?.name || u?.displayName || '';
-    this.isEditingName.set(true);
-    this.nameError.set(null);
-  }
-
-  cancelEditName(): void {
-    this.isEditingName.set(false);
-    this.nameError.set(null);
-  }
-
-  saveName(): void {
-    const trimmed = this.editNameValue.trim();
-    if (!trimmed) return;
-
-    this.isSavingName.set(true);
-    this.nameError.set(null);
-
-    this.#usersService.updateUser(this.#userId, { name: trimmed }).subscribe({
-      next: (updated) => {
-        this.user.set(updated);
-        this.isEditingName.set(false);
-        this.isSavingName.set(false);
-      },
-      error: () => {
-        this.nameError.set('Failed to update name.');
-        this.isSavingName.set(false);
-      },
-    });
-  }
-
-  startEditDisplayName(): void {
-    const u = this.user();
-    this.editDisplayNameValue = u?.displayName || '';
-    this.isEditingDisplayName.set(true);
-    this.displayNameError.set(null);
-  }
-
-  cancelEditDisplayName(): void {
-    this.isEditingDisplayName.set(false);
-    this.displayNameError.set(null);
-  }
-
-  saveDisplayName(): void {
-    const trimmed = this.editDisplayNameValue.trim();
-    if (!trimmed || trimmed.length < 2) return;
-
-    this.isSavingDisplayName.set(true);
-    this.displayNameError.set(null);
-
-    this.#usersService.updateUser(this.#userId, { displayName: trimmed }).subscribe({
-      next: (updated) => {
-        this.user.set(updated);
-        this.isEditingDisplayName.set(false);
-        this.isSavingDisplayName.set(false);
-      },
-      error: () => {
-        this.displayNameError.set('Failed to update display name.');
-        this.isSavingDisplayName.set(false);
-      },
-    });
-  }
-
-  changeUserType(userType: string): void {
-    this.#usersService.updateUser(this.#userId, { userType }).subscribe({
-      next: (updated) => this.user.set(updated),
-      error: () => alert('Failed to update user type.'),
-    });
-  }
-
-  toggleActive(): void {
-    const u = this.user();
-    if (!u) return;
-
-    const newActive = !u.active;
-    this.#usersService.updateUser(this.#userId, { active: newActive }).subscribe({
-      next: (updated) => this.user.set(updated),
-      error: () => alert('Failed to update status.'),
-    });
-  }
-
   goBack(): void {
     this.#router.navigate(['/users']);
+  }
+
+  #initForm(user: UserDto): void {
+    this.formName = user.name || '';
+    this.formDisplayName = user.displayName || '';
+    this.formUserType = user.userType || 'user';
+    this.formActive = user.active;
   }
 }

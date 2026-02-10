@@ -10,7 +10,7 @@ export class UsersService {
   readonly #http = inject(HttpClient);
   readonly #auth = inject(AuthService);
 
-  getUsers(params?: { limit?: number; startAfterId?: string; sortBy?: string; sortDirection?: string }): Observable<PaginatedResponse<UserDto>> {
+  getUsers(params?: { limit?: number; startAfterId?: string; sortBy?: string; sortDirection?: string; search?: string }): Observable<PaginatedResponse<UserDto>> {
     return this.#withAuth((headers) => {
       let httpParams = new HttpParams();
       if (params?.limit) {
@@ -24,6 +24,9 @@ export class UsersService {
       }
       if (params?.sortDirection) {
         httpParams = httpParams.set('sortDirection', params.sortDirection);
+      }
+      if (params?.search) {
+        httpParams = httpParams.set('search', params.search);
       }
       return this.#http.get<PaginatedResponse<UserDto>>(`${environment.apiUrl}/users`, {
         headers,
