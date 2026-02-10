@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, from, switchMap } from 'rxjs';
-import { UserDto, PaginatedResponse } from '@codeheroes/types';
+import { ConnectedAccountDto, UserDto, PaginatedResponse } from '@codeheroes/types';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
 
@@ -29,6 +29,29 @@ export class UsersService {
   getUser(id: string): Observable<UserDto> {
     return this.#withAuth((headers) =>
       this.#http.get<UserDto>(`${environment.apiUrl}/users/${id}`, { headers }),
+    );
+  }
+
+  getConnectedAccounts(userId: string): Observable<ConnectedAccountDto[]> {
+    return this.#withAuth((headers) =>
+      this.#http.get<ConnectedAccountDto[]>(`${environment.apiUrl}/users/${userId}/connected-accounts`, { headers }),
+    );
+  }
+
+  addConnectedAccount(
+    userId: string,
+    data: { provider: string; externalUserId: string; externalUserName?: string },
+  ): Observable<ConnectedAccountDto> {
+    return this.#withAuth((headers) =>
+      this.#http.post<ConnectedAccountDto>(`${environment.apiUrl}/users/${userId}/connected-accounts`, data, {
+        headers,
+      }),
+    );
+  }
+
+  removeConnectedAccount(userId: string, accountId: string): Observable<void> {
+    return this.#withAuth((headers) =>
+      this.#http.delete<void>(`${environment.apiUrl}/users/${userId}/connected-accounts/${accountId}`, { headers }),
     );
   }
 
