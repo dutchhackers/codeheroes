@@ -22,7 +22,7 @@ import { switchMap } from 'rxjs';
         </div>
         <div class="form-group">
           <label class="form-label">Slug *</label>
-          <input class="form-input" type="text" [(ngModel)]="slug" placeholder="project-slug" />
+          <input class="form-input" type="text" [(ngModel)]="slug" (ngModelChange)="slugManuallyEdited = true" placeholder="project-slug" />
           <span class="form-hint">Lowercase alphanumeric with hyphens</span>
         </div>
         <div class="form-group">

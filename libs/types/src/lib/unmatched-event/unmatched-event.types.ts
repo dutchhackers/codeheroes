@@ -29,5 +29,5 @@ export interface UnmatchedEvent extends BaseDocument {
   resolvedAt?: string;
   resolvedBy?: string;
   resolutionAction?: UnmatchedEventResolutionAction;
-  resolutionTargetId?: string | null;
+  resolutionTargetId?: string;
 }

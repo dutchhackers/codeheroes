@@ -45,7 +45,7 @@ export class UnmatchedEventsService {
 
   resolve(
     id: string,
-    data: { resolutionAction: UnmatchedEventResolutionAction; resolutionTargetId?: string },
+    data: { resolutionAction: UnmatchedEventResolutionAction; resolutionTargetId: string },
   ): Observable<UnmatchedEvent> {
     return this.#withAuth((headers) =>
       this.#http.post<UnmatchedEvent>(`${environment.apiUrl}/unmatched-events/${id}/resolve`, data, {

@@ -15,7 +15,7 @@ const RESOLUTION_ACTIONS: readonly [UnmatchedEventResolutionAction, ...Unmatched
 
 const resolveSchema = z.object({
   resolutionAction: z.enum(RESOLUTION_ACTIONS),
-  resolutionTargetId: z.string().optional(),
+  resolutionTargetId: z.string().min(1),
 });
 
 // GET /unmatched-events/summary

@@ -27,7 +27,7 @@ interface RecordUnlinkedRepoInput {
 interface ResolveInput {
   resolvedBy: string;
   resolutionAction: UnmatchedEventResolutionAction;
-  resolutionTargetId?: string;
+  resolutionTargetId: string;
 }
 
 export class UnmatchedEventRepository extends BaseRepository<UnmatchedEvent> {
@@ -165,7 +165,7 @@ export class UnmatchedEventRepository extends BaseRepository<UnmatchedEvent> {
       resolvedAt: now,
       resolvedBy: input.resolvedBy,
       resolutionAction: input.resolutionAction,
-      resolutionTargetId: input.resolutionTargetId || null,
+      resolutionTargetId: input.resolutionTargetId,
       updatedAt: now,
     });
   }
