@@ -25,6 +25,7 @@ export class NotificationManagerComponent implements OnInit, OnDestroy {
   readonly #userStatsService = inject(UserStatsService);
   
   #notificationSubscription: Subscription | null = null;
+  #userDocSubscription: Subscription | null = null;
   #processedNotifications = new Set<string>();
 
   showLevelUpPopup = signal(false);
@@ -32,28 +33,40 @@ export class NotificationManagerComponent implements OnInit, OnDestroy {
   currentLevelUpMessage = signal('');
 
   ngOnInit() {
-    // Check if notifications are enabled in user preferences
-    this.#userStatsService.getCurrentUserDoc().subscribe((userDoc) => {
-      if (!userDoc) return;
-      
-      const notificationsEnabled = userDoc.preferences?.notificationsEnabled ?? true;
-      
-      if (!notificationsEnabled) {
-        // User has disabled notifications, don't subscribe
+    // Subscribe to user document to monitor notification preferences
+    this.#userDocSubscription = this.#userStatsService.getCurrentUserDoc().subscribe((userDoc) => {
+      if (!userDoc) {
+        // User not logged in, clean up notification subscription
+        this.#cleanupNotificationSubscription();
         return;
       }
       
-      // Subscribe to notifications
-      this.#notificationSubscription = this.#notificationService
-        .getCurrentUserUnreadNotifications()
-        .subscribe((notifications) => {
-          this.#handleNewNotifications(notifications);
-        });
+      const notificationsEnabled = userDoc.preferences?.notificationsEnabled ?? true;
+      
+      if (notificationsEnabled && !this.#notificationSubscription) {
+        // Notifications enabled and not yet subscribed - create subscription
+        this.#notificationSubscription = this.#notificationService
+          .getCurrentUserUnreadNotifications()
+          .subscribe((notifications) => {
+            this.#handleNewNotifications(notifications);
+          });
+      } else if (!notificationsEnabled && this.#notificationSubscription) {
+        // Notifications disabled and currently subscribed - clean up
+        this.#cleanupNotificationSubscription();
+      }
     });
   }
 
   ngOnDestroy() {
-    this.#notificationSubscription?.unsubscribe();
+    this.#cleanupNotificationSubscription();
+    this.#userDocSubscription?.unsubscribe();
+  }
+
+  #cleanupNotificationSubscription() {
+    if (this.#notificationSubscription) {
+      this.#notificationSubscription.unsubscribe();
+      this.#notificationSubscription = null;
+    }
   }
 
   #handleNewNotifications(notifications: Notification[]) {

@@ -184,15 +184,6 @@ import { SettingsModalComponent } from './components/settings-modal.component';
         display: block;
       }
 
-      .logout-button {
-        padding: 0.625rem;
-        min-width: 44px;
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
       .action-button {
         padding: 0.625rem;
         min-width: 44px;

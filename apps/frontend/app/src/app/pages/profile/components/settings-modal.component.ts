@@ -1,4 +1,4 @@
-import { Component, HostListener, output, input, signal } from '@angular/core';
+import { Component, HostListener, output, input, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
