@@ -25,8 +25,8 @@ import { switchMap } from 'rxjs';
           <input class="form-input" type="email" [(ngModel)]="email" placeholder="Email address" />
         </div>
         <div class="form-group">
-          <label class="form-label">Name</label>
-          <input class="form-input" type="text" [(ngModel)]="name" placeholder="Full name (optional)" />
+          <label class="form-label">Name *</label>
+          <input class="form-input" type="text" [(ngModel)]="name" placeholder="Full name" />
         </div>
 
         @if (errorMsg()) {
@@ -42,7 +42,7 @@ import { switchMap } from 'rxjs';
             color="brand"
             size="sm"
             (click)="save()"
-            [disabled]="isSaving() || !displayName || !email"
+            [disabled]="isSaving() || !displayName || !email || !name"
           >
             {{ isSaving() ? 'Creating...' : 'Create User' }}
           </sui-button>
@@ -147,18 +147,16 @@ export class CreateUserModalComponent implements OnInit {
   }
 
   save(): void {
-    if (!this.displayName || !this.email) return;
+    if (!this.displayName || !this.email || !this.name) return;
 
     this.isSaving.set(true);
     this.errorMsg.set(null);
 
-    const userData: { displayName: string; email: string; name?: string } = {
+    const userData = {
       displayName: this.displayName,
       email: this.email,
+      name: this.name,
     };
-    if (this.name) {
-      userData.name = this.name;
-    }
 
     this.#usersService
       .createUser(userData)

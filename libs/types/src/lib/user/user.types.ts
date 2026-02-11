@@ -18,7 +18,7 @@ export interface UserDto extends BaseDocument {
 export interface CreateUserDto {
   uid?: string;
   email: string;
-  name?: string | null;
+  name: string;
   displayName: string;
   photoUrl?: string | null;
   userType?: UserType; // Default to 'user' if not specified
