@@ -224,13 +224,22 @@ export class DailyProgressComponent {
   });
 
   constructor() {
-    // Animate progress when it changes, ensuring DOM is ready
+    let isInitialRender = true;
+    
+    // Ensure first animation happens after initial render
+    afterNextRender(() => {
+      if (isInitialRender) {
+        this.animatedProgress.set(this.progressPercent());
+        isInitialRender = false;
+      }
+    });
+    
+    // Animate progress when it changes after initial render
     effect(() => {
       const targetPercent = this.progressPercent();
-      // Use afterNextRender to ensure the component is rendered before animating
-      afterNextRender(() => {
+      if (!isInitialRender) {
         this.animatedProgress.set(targetPercent);
-      });
+      }
     });
   }
 
