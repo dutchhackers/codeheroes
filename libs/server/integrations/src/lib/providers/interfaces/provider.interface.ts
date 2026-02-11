@@ -50,4 +50,11 @@ export interface ProviderAdapter {
    * @returns External user ID if found
    */
   extractUserId(eventData: any): string | undefined;
+
+  /**
+   * Extracts user name from event data
+   * @param eventData Event payload data
+   * @returns External user name if found
+   */
+  extractUserName?(eventData: any): string | undefined;
 }
