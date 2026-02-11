@@ -140,6 +140,10 @@ export class CreateUserModalComponent implements OnInit {
 
   ngOnInit(): void {
     this.displayName = this.event.externalUserName || '';
+
+    if (this.event.provider === 'github' && this.event.externalUserName?.endsWith('[bot]')) {
+      this.email = `${this.event.externalUserId}+${this.event.externalUserName}@users.noreply.github.com`;
+    }
   }
 
   save(): void {
