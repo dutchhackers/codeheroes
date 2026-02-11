@@ -1,4 +1,4 @@
-import { Component, input, computed } from '@angular/core';
+import { Component, input, computed, signal, effect } from '@angular/core';
 import { DailyProgress } from '../../../core/services/hq-data.service';
 
 @Component({
@@ -16,10 +16,10 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
         <div
           class="circular-progress"
           role="progressbar"
-          [attr.aria-valuenow]="roundedPercent()"
+          [attr.aria-valuenow]="ariaPercent()"
           aria-valuemin="0"
           aria-valuemax="100"
-          [attr.aria-label]="'Daily progress: ' + roundedPercent() + '% of goal'"
+          [attr.aria-label]="'Daily progress: ' + ariaPercent() + '% of goal'"
         >
           <svg class="progress-ring" viewBox="0 0 120 120" aria-hidden="true">
             <circle class="progress-ring-bg" cx="60" cy="60" r="52" />
@@ -206,19 +206,35 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
 export class DailyProgressComponent {
   progress = input<DailyProgress | null>(null);
 
+  // Delayed progress value that drives the SVG stroke and text display.
+  // Starts at 0 and updates via requestAnimationFrame so the CSS transition animates.
+  private readonly displayPercent = signal(0);
+
   progressPercent = computed(() => {
     const p = this.progress();
     if (!p || !p.goal) return 0;
     return Math.min(100, (p.xpEarned / p.goal) * 100);
   });
 
-  roundedPercent = computed(() => Math.round(this.progressPercent()));
+  ariaPercent = computed(() => Math.round(this.progressPercent()));
+  roundedPercent = computed(() => Math.round(this.displayPercent()));
 
   getStrokeDashoffset = computed(() => {
     const circumference = 2 * Math.PI * 52;
-    const percent = this.progressPercent();
+    const percent = this.displayPercent();
     return circumference - (percent / 100) * circumference;
   });
+
+  constructor() {
+    // When progressPercent changes, delay the update by two frames
+    // so the browser paints the 0 state first, then the CSS transition animates to the target.
+    effect(() => {
+      const target = this.progressPercent();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => this.displayPercent.set(target));
+      });
+    });
+  }
 
   activitiesCount = computed(() => this.progress()?.activitiesCount ?? 0);
 
