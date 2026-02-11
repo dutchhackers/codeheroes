@@ -1,4 +1,4 @@
-import { Component, input, computed, signal, effect, untracked } from '@angular/core';
+import { Component, input, computed, signal, effect } from '@angular/core';
 import { DailyProgress } from '../../../core/services/hq-data.service';
 
 @Component({
@@ -206,14 +206,9 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
 export class DailyProgressComponent {
   progress = input<DailyProgress | null>(null);
 
-  // Animated progress value that transitions from 0 to actual value
-  // Initialized to 0 so the circle animates on first render
-  animatedProgress = signal(0);
-
-  // Minimum percentage point difference to trigger animation update
-  // (0.01 percentage points = changes < 0.01% are ignored)
-  // This prevents unnecessary re-renders from floating-point precision issues
-  private readonly PROGRESS_CHANGE_THRESHOLD = 0.01;
+  // Delayed progress value that drives the SVG stroke and text display.
+  // Starts at 0 and updates via requestAnimationFrame so the CSS transition animates.
+  private readonly displayPercent = signal(0);
 
   progressPercent = computed(() => {
     const p = this.progress();
@@ -221,24 +216,22 @@ export class DailyProgressComponent {
     return Math.min(100, (p.xpEarned / p.goal) * 100);
   });
 
-  roundedPercent = computed(() => Math.round(this.animatedProgress()));
+  roundedPercent = computed(() => Math.round(this.displayPercent()));
 
   getStrokeDashoffset = computed(() => {
     const circumference = 2 * Math.PI * 52;
-    const percent = this.animatedProgress();
+    const percent = this.displayPercent();
     return circumference - (percent / 100) * circumference;
   });
 
   constructor() {
-    // Animate progress when it changes
+    // When progressPercent changes, delay the update by two frames
+    // so the browser paints the 0 state first, then the CSS transition animates to the target.
     effect(() => {
-      const targetPercent = this.progressPercent();
-      // Read current value without tracking it to avoid circular dependency
-      const current = untracked(() => this.animatedProgress());
-      // Only update if the value has meaningfully changed (avoid floating-point precision issues)
-      if (Math.abs(current - targetPercent) >= this.PROGRESS_CHANGE_THRESHOLD) {
-        this.animatedProgress.set(targetPercent);
-      }
+      const target = this.progressPercent();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => this.displayPercent.set(target));
+      });
     });
   }
 
