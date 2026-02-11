@@ -13,5 +13,6 @@ export enum Collections {
   Rewards = 'rewards',
   Settings = 'settings',
   Stats = 'stats',
+  UnmatchedEvents = 'unmatchedEvents',
   Users = 'users',
 }

@@ -30,5 +30,7 @@ export * from './game/metrics.types';
 // export * from './api/responses.types';
 // export * from './api/dto.types';
 
+export * from './unmatched-event/unmatched-event.types';
+
 export * from './utils/time.types';
 export * from './utils/pagination.types';
