@@ -16,10 +16,10 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
         <div
           class="circular-progress"
           role="progressbar"
-          [attr.aria-valuenow]="roundedPercent()"
+          [attr.aria-valuenow]="ariaPercent()"
           aria-valuemin="0"
           aria-valuemax="100"
-          [attr.aria-label]="'Daily progress: ' + roundedPercent() + '% of goal'"
+          [attr.aria-label]="'Daily progress: ' + ariaPercent() + '% of goal'"
         >
           <svg class="progress-ring" viewBox="0 0 120 120" aria-hidden="true">
             <circle class="progress-ring-bg" cx="60" cy="60" r="52" />
@@ -216,6 +216,7 @@ export class DailyProgressComponent {
     return Math.min(100, (p.xpEarned / p.goal) * 100);
   });
 
+  ariaPercent = computed(() => Math.round(this.progressPercent()));
   roundedPercent = computed(() => Math.round(this.displayPercent()));
 
   getStrokeDashoffset = computed(() => {
