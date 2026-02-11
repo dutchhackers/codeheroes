@@ -9,6 +9,7 @@ import { authMiddleware } from './middleware/auth.middleware';
 import { GameController } from './controllers/game-controller';
 import { GamesController } from './controllers/games-controller';
 import { LeaderboardsController } from './controllers/leaderboards-controller';
+import { NotificationsController } from './controllers/notifications-controller';
 import { ProjectsController } from './controllers/projects-controller';
 import { ScoresController } from './controllers/scores-controller';
 import { UserController } from './controllers/user-controller';
@@ -78,5 +79,6 @@ app.use('/game', GameController);
 app.use('/scores', ScoresController);
 app.use('/leaderboards', LeaderboardsController);
 app.use('/projects', ProjectsController);
+app.use('/notifications', NotificationsController);
 
 export { app as defaultApi };

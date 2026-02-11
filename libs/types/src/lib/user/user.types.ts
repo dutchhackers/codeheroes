@@ -13,6 +13,11 @@ export interface UserDto extends BaseDocument {
   lastLogin: string; // ISO timestamp
   uid?: string; // Firebase Auth UID
   userType: UserType;
+  preferences?: UserPreferences;
+}
+
+export interface UserPreferences {
+  notificationsEnabled?: boolean;
 }
 
 export interface CreateUserDto {
@@ -30,6 +35,7 @@ export interface UpdateUserDto {
   photoUrl?: string;
   active?: boolean;
   userType?: UserType;
+  preferences?: UserPreferences;
 }
 
 export interface UserProfileDto extends UserDto {

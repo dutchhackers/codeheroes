@@ -21,6 +21,9 @@ const updateUserSchema = z.object({
   displayName: z.string().min(1).max(100).optional(),
   active: z.boolean().optional(),
   userType: z.enum(['user', 'bot', 'system']).optional(),
+  preferences: z.object({
+    notificationsEnabled: z.boolean().optional(),
+  }).optional(),
 });
 
 const addConnectedAccountSchema = z.object({
