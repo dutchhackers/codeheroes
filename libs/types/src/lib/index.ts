@@ -5,6 +5,8 @@ export * from './core/providers';
 
 export * from './collections/collections';
 
+export * from './notifications/notification.types';
+
 export * from './user/user.types';
 export * from './user/stats.types';
 // export * from './user/settings.types';

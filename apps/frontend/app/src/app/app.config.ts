@@ -1,13 +1,15 @@
 import { ApplicationConfig, isDevMode, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
 import { connectFirestoreEmulator, getFirestore, provideFirestore } from '@angular/fire/firestore';
 
 import { environment } from '../environments/environment';
 import { appRoutes } from './app.routes';
+import { apiBaseUrlInterceptor } from './core/interceptors/api-base-url.interceptor';
+import { authTokenInterceptor } from './core/interceptors/auth-token.interceptor';
 
 // Track emulator connections to prevent multiple calls
 let authEmulatorConnected = false;
@@ -17,7 +19,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(appRoutes, withComponentInputBinding()),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([apiBaseUrlInterceptor, authTokenInterceptor])),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
