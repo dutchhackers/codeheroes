@@ -211,7 +211,7 @@ export class DailyProgressComponent {
   animatedProgress = signal(0);
 
   // Threshold for considering progress change significant enough to animate
-  private readonly ANIMATION_THRESHOLD = 0.01;
+  private readonly PROGRESS_CHANGE_THRESHOLD = 0.01;
 
   progressPercent = computed(() => {
     const p = this.progress();
@@ -234,7 +234,7 @@ export class DailyProgressComponent {
       // Read current value without tracking it to avoid circular dependency
       const current = untracked(() => this.animatedProgress());
       // Only update if the value has meaningfully changed (avoid floating-point precision issues)
-      if (Math.abs(current - targetPercent) > this.ANIMATION_THRESHOLD) {
+      if (Math.abs(current - targetPercent) > this.PROGRESS_CHANGE_THRESHOLD) {
         this.animatedProgress.set(targetPercent);
       }
     });
