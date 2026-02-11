@@ -1,4 +1,4 @@
-import { Component, input, computed, signal, effect } from '@angular/core';
+import { Component, input, computed, signal, effect, afterNextRender } from '@angular/core';
 import { DailyProgress } from '../../../core/services/hq-data.service';
 
 @Component({
@@ -224,13 +224,13 @@ export class DailyProgressComponent {
   });
 
   constructor() {
-    // Animate progress when it changes
+    // Animate progress when it changes, ensuring DOM is ready
     effect(() => {
       const targetPercent = this.progressPercent();
-      // Small delay to ensure the component is rendered before animating
-      setTimeout(() => {
+      // Use afterNextRender to ensure the component is rendered before animating
+      afterNextRender(() => {
         this.animatedProgress.set(targetPercent);
-      }, 50);
+      });
     });
   }
 
