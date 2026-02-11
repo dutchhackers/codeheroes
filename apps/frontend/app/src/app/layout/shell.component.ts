@@ -13,14 +13,16 @@ import {
 import { Subscription, filter } from 'rxjs';
 import { BottomNavComponent } from './bottom-nav.component';
 import { EnvironmentBannerComponent, showEnvironmentIndicator } from './environment-banner.component';
+import { NotificationManagerComponent } from '../components/notification-manager.component';
 import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, BottomNavComponent, EnvironmentBannerComponent],
+  imports: [RouterOutlet, BottomNavComponent, EnvironmentBannerComponent, NotificationManagerComponent],
   template: `
     <app-environment-banner />
+    <app-notification-manager />
     <div class="min-h-screen cyber-grid-bg text-white relative" [class.pt-6]="showBanner">
       @if (!isAuthenticated() && !isLoading()) {
         <!-- Login screen -->
