@@ -210,7 +210,8 @@ export class DailyProgressComponent {
   // Initialized to 0 so the circle animates on first render
   animatedProgress = signal(0);
 
-  // Minimum percentage difference (0.01%) to trigger animation update
+  // Minimum percentage point difference to trigger animation update
+  // (0.01 percentage points = changes < 0.01% are ignored)
   // This prevents unnecessary re-renders from floating-point precision issues
   private readonly PROGRESS_CHANGE_THRESHOLD = 0.01;
 
