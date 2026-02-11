@@ -16,6 +16,12 @@ export class ProjectsService {
     );
   }
 
+  createProject(data: any): Observable<ProjectDetailDto> {
+    return this.#withAuth((headers) =>
+      this.#http.post<ProjectDetailDto>(`${environment.apiUrl}/projects`, data, { headers }),
+    );
+  }
+
   getProject(id: string): Observable<ProjectDetailDto> {
     return this.#withAuth((headers) =>
       this.#http.get<ProjectDetailDto>(`${environment.apiUrl}/projects/${id}`, { headers }),

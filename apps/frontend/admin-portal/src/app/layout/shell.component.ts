@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { AuthService } from '../core/services/auth.service';
+import { UnmatchedEventsService } from '../core/services/unmatched-events.service';
 
 @Component({
   selector: 'admin-shell',
@@ -48,6 +49,21 @@ import { AuthService } from '../core/services/auth.service';
               <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
             Users
+          </a>
+          <a
+            routerLink="/unmatched"
+            routerLinkActive="nav-item--active"
+            class="nav-item"
+          >
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            Unmatched
+            @if (unmatchedCount() > 0) {
+              <span class="nav-badge">{{ unmatchedCount() }}</span>
+            }
           </a>
           <a
             routerLink="/leaderboard"
@@ -169,6 +185,21 @@ import { AuthService } from '../core/services/auth.service';
         flex-shrink: 0;
       }
 
+      .nav-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 9px;
+        background: var(--theme-color-bg-brand-default);
+        color: white;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: auto;
+      }
+
       .sidebar-footer {
         padding: 12px 16px;
         border-top: 1px solid var(--theme-color-border-default-default);
@@ -218,9 +249,21 @@ import { AuthService } from '../core/services/auth.service';
     `,
   ],
 })
-export class ShellComponent {
+export class ShellComponent implements OnInit {
   readonly auth = inject(AuthService);
   readonly #router = inject(Router);
+  readonly #unmatchedEventsService = inject(UnmatchedEventsService);
+
+  readonly unmatchedCount = signal(0);
+
+  ngOnInit(): void {
+    this.#unmatchedEventsService.getSummary().subscribe({
+      next: (summary) => {
+        this.unmatchedCount.set(summary.unknownUserCount + summary.unlinkedRepoCount);
+      },
+      error: () => {},
+    });
+  }
 
   async onSignOut(): Promise<void> {
     await this.auth.signOut();

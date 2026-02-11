@@ -35,6 +35,12 @@ export class UsersService {
     });
   }
 
+  createUser(data: { displayName: string; email: string; name?: string }): Observable<UserDto> {
+    return this.#withAuth((headers) =>
+      this.#http.post<UserDto>(`${environment.apiUrl}/users`, data, { headers }),
+    );
+  }
+
   getUser(id: string): Observable<UserDto> {
     return this.#withAuth((headers) =>
       this.#http.get<UserDto>(`${environment.apiUrl}/users/${id}`, { headers }),
