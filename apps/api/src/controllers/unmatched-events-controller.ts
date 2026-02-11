@@ -76,7 +76,7 @@ router.post('/:id/resolve', validate(resolveSchema), async (req, res) => {
     }
 
     await repo.resolve(id, {
-      resolvedBy: (req as any).user?.uid,
+      resolvedBy: req.user!.uid,
       resolutionAction,
       resolutionTargetId,
     });
