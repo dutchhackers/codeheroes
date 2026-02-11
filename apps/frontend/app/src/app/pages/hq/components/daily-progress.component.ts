@@ -1,4 +1,4 @@
-import { Component, input, computed, signal, effect, afterNextRender } from '@angular/core';
+import { Component, input, computed, signal, effect, untracked } from '@angular/core';
 import { DailyProgress } from '../../../core/services/hq-data.service';
 
 @Component({
@@ -224,22 +224,17 @@ export class DailyProgressComponent {
   });
 
   constructor() {
-    let isInitialRender = true;
-    
-    // Ensure first animation happens after initial render
-    afterNextRender(() => {
-      if (isInitialRender) {
-        this.animatedProgress.set(this.progressPercent());
-        isInitialRender = false;
-      }
-    });
-    
-    // Animate progress when it changes after initial render
+    // Animate progress when it changes
     effect(() => {
       const targetPercent = this.progressPercent();
-      if (!isInitialRender) {
-        this.animatedProgress.set(targetPercent);
-      }
+      // Use untracked to avoid infinite loops when updating animatedProgress
+      untracked(() => {
+        // Only animate if currently at 0 (initial state) or different from target
+        const current = this.animatedProgress();
+        if (current !== targetPercent) {
+          this.animatedProgress.set(targetPercent);
+        }
+      });
     });
   }
 
