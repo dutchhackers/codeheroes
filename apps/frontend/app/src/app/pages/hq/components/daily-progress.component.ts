@@ -1,4 +1,4 @@
-import { Component, input, computed } from '@angular/core';
+import { Component, input, computed, signal, effect } from '@angular/core';
 import { DailyProgress } from '../../../core/services/hq-data.service';
 
 @Component({
@@ -206,19 +206,33 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
 export class DailyProgressComponent {
   progress = input<DailyProgress | null>(null);
 
+  // Animated progress value that transitions from 0 to actual value
+  animatedProgress = signal(0);
+
   progressPercent = computed(() => {
     const p = this.progress();
     if (!p || !p.goal) return 0;
     return Math.min(100, (p.xpEarned / p.goal) * 100);
   });
 
-  roundedPercent = computed(() => Math.round(this.progressPercent()));
+  roundedPercent = computed(() => Math.round(this.animatedProgress()));
 
   getStrokeDashoffset = computed(() => {
     const circumference = 2 * Math.PI * 52;
-    const percent = this.progressPercent();
+    const percent = this.animatedProgress();
     return circumference - (percent / 100) * circumference;
   });
+
+  constructor() {
+    // Animate progress when it changes
+    effect(() => {
+      const targetPercent = this.progressPercent();
+      // Small delay to ensure the component is rendered before animating
+      setTimeout(() => {
+        this.animatedProgress.set(targetPercent);
+      }, 50);
+    });
+  }
 
   activitiesCount = computed(() => this.progress()?.activitiesCount ?? 0);
 
