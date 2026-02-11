@@ -229,8 +229,8 @@ export class DailyProgressComponent {
       const targetPercent = this.progressPercent();
       // Read current value without tracking it to avoid circular dependency
       const current = untracked(() => this.animatedProgress());
-      // Only update if the value has changed
-      if (current !== targetPercent) {
+      // Only update if the value has meaningfully changed (avoid floating-point precision issues)
+      if (Math.abs(current - targetPercent) > 0.01) {
         this.animatedProgress.set(targetPercent);
       }
     });
