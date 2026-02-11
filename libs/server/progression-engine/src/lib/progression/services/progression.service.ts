@@ -1,4 +1,4 @@
-import { logger } from '@codeheroes/common';
+import { logger, UnmatchedEventRepository } from '@codeheroes/common';
 import { GameAction, ActionResult, GameActionActivity, GameActionContext } from '@codeheroes/types';
 
 import { ProgressionRepository } from '../repositories/progression.repository';
@@ -23,6 +23,7 @@ export class ProgressionService {
     private activityRecorder: ActivityRecorderService,
     private eventPublisher: EventPublisherService,
     private projectRepository: ProjectRepository,
+    private unmatchedEventRepository: UnmatchedEventRepository,
   ) {}
 
   /**
@@ -199,7 +200,17 @@ export class ProgressionService {
 
       const mapping = await this.projectRepository.resolveProjectForRepo(action.provider, repo.owner, repo.name);
       if (!mapping) {
-        return; // Repo not assigned to any project — skip silently
+        try {
+          await this.unmatchedEventRepository.recordUnlinkedRepo({
+            provider: action.provider,
+            owner: repo.owner,
+            repoName: repo.name,
+            eventType: action.type,
+          });
+        } catch (err) {
+          logger.warn('Failed to record unlinked repo event', { error: err });
+        }
+        return;
       }
 
       await this.projectRepository.updateProjectStats({

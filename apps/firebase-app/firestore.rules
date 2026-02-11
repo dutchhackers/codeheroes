@@ -135,6 +135,11 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Unmatched events - server processing only (admin portal reads via API)
+    match /unmatchedEvents/{eventId} {
+      allow read, write: if false;
+    }
+
     // ============================================
     // DENY ALL OTHER ACCESS
     // Catch-all rule for any undefined paths
