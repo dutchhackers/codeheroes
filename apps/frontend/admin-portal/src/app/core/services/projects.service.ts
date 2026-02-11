@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, from, switchMap } from 'rxjs';
-import { ProjectSummaryDto, ProjectDetailDto, UpdateProjectDto } from '@codeheroes/types';
+import { CreateProjectDto, ProjectSummaryDto, ProjectDetailDto, UpdateProjectDto } from '@codeheroes/types';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -16,7 +16,7 @@ export class ProjectsService {
     );
   }
 
-  createProject(data: any): Observable<ProjectDetailDto> {
+  createProject(data: CreateProjectDto): Observable<ProjectDetailDto> {
     return this.#withAuth((headers) =>
       this.#http.post<ProjectDetailDto>(`${environment.apiUrl}/projects`, data, { headers }),
     );

@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, from, switchMap, tap } from 'rxjs';
-import { UnmatchedEvent, UnmatchedEventCategory, UnmatchedEventStatus } from '@codeheroes/types';
+import { UnmatchedEvent, UnmatchedEventCategory, UnmatchedEventResolutionAction, UnmatchedEventStatus } from '@codeheroes/types';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
 
@@ -45,7 +45,7 @@ export class UnmatchedEventsService {
 
   resolve(
     id: string,
-    data: { resolutionAction: string; resolutionTargetId?: string },
+    data: { resolutionAction: UnmatchedEventResolutionAction; resolutionTargetId?: string },
   ): Observable<UnmatchedEvent> {
     return this.#withAuth((headers) =>
       this.#http.post<UnmatchedEvent>(`${environment.apiUrl}/unmatched-events/${id}/resolve`, data, {

@@ -1,13 +1,20 @@
 import { DatabaseInstance, logger, UnmatchedEventRepository } from '@codeheroes/common';
-import { UnmatchedEventCategory, UnmatchedEventStatus } from '@codeheroes/types';
+import { UnmatchedEventCategory, UnmatchedEventResolutionAction, UnmatchedEventStatus } from '@codeheroes/types';
 import * as express from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.middleware';
 
 const router = express.Router();
 
+const RESOLUTION_ACTIONS: readonly [UnmatchedEventResolutionAction, ...UnmatchedEventResolutionAction[]] = [
+  'created_user',
+  'linked_to_user',
+  'linked_to_project',
+  'created_project',
+];
+
 const resolveSchema = z.object({
-  resolutionAction: z.string().min(1),
+  resolutionAction: z.enum(RESOLUTION_ACTIONS),
   resolutionTargetId: z.string().optional(),
 });
 

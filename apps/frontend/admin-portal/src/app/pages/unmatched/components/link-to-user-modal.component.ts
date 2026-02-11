@@ -265,7 +265,7 @@ export class LinkToUserModalComponent implements OnInit, OnDestroy {
       .addConnectedAccount(userId, {
         provider: this.event.provider,
         externalUserId: this.event.externalUserId!,
-        externalUserName: this.event.externalUserName,
+        externalUserName: this.event.externalUserName || undefined,
       })
       .pipe(
         switchMap(() =>

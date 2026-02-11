@@ -197,8 +197,8 @@ export class CreateProjectModalComponent implements OnInit {
       repositories: [
         {
           provider: this.event.provider,
-          owner: this.event.repoOwner,
-          name: this.event.repoName,
+          owner: this.event.repoOwner!,
+          name: this.event.repoName!,
           fullName: this.event.repoFullName || `${this.event.repoOwner}/${this.event.repoName}`,
         },
       ],

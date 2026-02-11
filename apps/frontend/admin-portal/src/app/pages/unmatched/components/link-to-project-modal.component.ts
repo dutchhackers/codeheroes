@@ -188,12 +188,20 @@ export class LinkToProjectModalComponent implements OnInit {
       .pipe(
         switchMap((project) => {
           const repositories = [...(project.repositories || [])];
-          repositories.push({
+          const newRepo = {
             provider: this.event.provider,
             owner: this.event.repoOwner!,
             name: this.event.repoName!,
             fullName: this.event.repoFullName || `${this.event.repoOwner}/${this.event.repoName}`,
-          });
+          };
+          const existingIndex = repositories.findIndex(
+            (r) => r.provider === newRepo.provider && r.owner === newRepo.owner && r.name === newRepo.name,
+          );
+          if (existingIndex !== -1) {
+            repositories[existingIndex] = { ...repositories[existingIndex], ...newRepo };
+          } else {
+            repositories.push(newRepo);
+          }
           return this.#projectsService.updateProject(projectId, { repositories });
         }),
         switchMap(() =>

@@ -4,11 +4,11 @@ import {
   ConnectedAccountProvider,
   UnmatchedEvent,
   UnmatchedEventCategory,
+  UnmatchedEventResolutionAction,
   UnmatchedEventStatus,
 } from '@codeheroes/types';
 import { BaseRepository } from './base-repository';
 import { getCurrentTimeAsISO } from '../firebase/time.utils';
-import { logger } from '../firebase/logger.util';
 
 interface RecordUnknownUserInput {
   provider: ConnectedAccountProvider;
@@ -26,7 +26,7 @@ interface RecordUnlinkedRepoInput {
 
 interface ResolveInput {
   resolvedBy: string;
-  resolutionAction: string;
+  resolutionAction: UnmatchedEventResolutionAction;
   resolutionTargetId?: string;
 }
 
@@ -42,36 +42,40 @@ export class UnmatchedEventRepository extends BaseRepository<UnmatchedEvent> {
     const docRef = this.getCollectionRef().doc(docId);
     const now = getCurrentTimeAsISO();
 
-    const existing = await docRef.get();
+    const createData = {
+      category: 'unknown_user' as UnmatchedEventCategory,
+      status: 'pending' as UnmatchedEventStatus,
+      provider: input.provider,
+      externalUserId: input.externalUserId,
+      externalUserName: input.externalUserName || null,
+      eventCount: 1,
+      lastSeenAt: now,
+      lastEventType: input.eventType || null,
+      sampleEventTypes: input.eventType ? [input.eventType] : [],
+      createdAt: now,
+      updatedAt: now,
+    };
 
-    if (existing.exists) {
-      const updateData: Record<string, any> = {
-        eventCount: FieldValue.increment(1),
-        lastSeenAt: now,
-        updatedAt: now,
-      };
-      if (input.eventType) {
-        updateData.lastEventType = input.eventType;
-        updateData.sampleEventTypes = FieldValue.arrayUnion(input.eventType);
+    try {
+      await docRef.create(createData);
+    } catch (error: any) {
+      if (error?.code === 6 || error?.code === 'already-exists') {
+        const updateData: Record<string, any> = {
+          eventCount: FieldValue.increment(1),
+          lastSeenAt: now,
+          updatedAt: now,
+        };
+        if (input.eventType) {
+          updateData.lastEventType = input.eventType;
+          updateData.sampleEventTypes = FieldValue.arrayUnion(input.eventType);
+        }
+        if (input.externalUserName) {
+          updateData.externalUserName = input.externalUserName;
+        }
+        await docRef.update(updateData);
+      } else {
+        throw error;
       }
-      if (input.externalUserName) {
-        updateData.externalUserName = input.externalUserName;
-      }
-      await docRef.update(updateData);
-    } else {
-      await docRef.set({
-        category: 'unknown_user',
-        status: 'pending',
-        provider: input.provider,
-        externalUserId: input.externalUserId,
-        externalUserName: input.externalUserName || null,
-        eventCount: 1,
-        lastSeenAt: now,
-        lastEventType: input.eventType || null,
-        sampleEventTypes: input.eventType ? [input.eventType] : [],
-        createdAt: now,
-        updatedAt: now,
-      });
     }
   }
 
@@ -80,34 +84,38 @@ export class UnmatchedEventRepository extends BaseRepository<UnmatchedEvent> {
     const docRef = this.getCollectionRef().doc(docId);
     const now = getCurrentTimeAsISO();
 
-    const existing = await docRef.get();
+    const createData = {
+      category: 'unlinked_repo' as UnmatchedEventCategory,
+      status: 'pending' as UnmatchedEventStatus,
+      provider: input.provider,
+      repoOwner: input.owner,
+      repoName: input.repoName,
+      repoFullName: `${input.owner}/${input.repoName}`,
+      eventCount: 1,
+      lastSeenAt: now,
+      lastEventType: input.eventType || null,
+      sampleEventTypes: input.eventType ? [input.eventType] : [],
+      createdAt: now,
+      updatedAt: now,
+    };
 
-    if (existing.exists) {
-      const updateData: Record<string, any> = {
-        eventCount: FieldValue.increment(1),
-        lastSeenAt: now,
-        updatedAt: now,
-      };
-      if (input.eventType) {
-        updateData.lastEventType = input.eventType;
-        updateData.sampleEventTypes = FieldValue.arrayUnion(input.eventType);
+    try {
+      await docRef.create(createData);
+    } catch (error: any) {
+      if (error?.code === 6 || error?.code === 'already-exists') {
+        const updateData: Record<string, any> = {
+          eventCount: FieldValue.increment(1),
+          lastSeenAt: now,
+          updatedAt: now,
+        };
+        if (input.eventType) {
+          updateData.lastEventType = input.eventType;
+          updateData.sampleEventTypes = FieldValue.arrayUnion(input.eventType);
+        }
+        await docRef.update(updateData);
+      } else {
+        throw error;
       }
-      await docRef.update(updateData);
-    } else {
-      await docRef.set({
-        category: 'unlinked_repo',
-        status: 'pending',
-        provider: input.provider,
-        repoOwner: input.owner,
-        repoName: input.repoName,
-        repoFullName: `${input.owner}/${input.repoName}`,
-        eventCount: 1,
-        lastSeenAt: now,
-        lastEventType: input.eventType || null,
-        sampleEventTypes: input.eventType ? [input.eventType] : [],
-        createdAt: now,
-        updatedAt: now,
-      });
     }
   }
 
