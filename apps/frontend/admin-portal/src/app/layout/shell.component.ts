@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { AuthService } from '../core/services/auth.service';
@@ -254,13 +254,10 @@ export class ShellComponent implements OnInit {
   readonly #router = inject(Router);
   readonly #unmatchedEventsService = inject(UnmatchedEventsService);
 
-  readonly unmatchedCount = signal(0);
+  readonly unmatchedCount = this.#unmatchedEventsService.pendingCount;
 
   ngOnInit(): void {
     this.#unmatchedEventsService.getSummary().subscribe({
-      next: (summary) => {
-        this.unmatchedCount.set(summary.unknownUserCount + summary.unlinkedRepoCount);
-      },
       error: () => {},
     });
   }

@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { Observable, from, switchMap } from 'rxjs';
+import { Injectable, inject, signal } from '@angular/core';
+import { Observable, from, switchMap, tap } from 'rxjs';
 import { UnmatchedEvent, UnmatchedEventCategory, UnmatchedEventStatus } from '@codeheroes/types';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
@@ -9,6 +9,9 @@ import { environment } from '../../../environments/environment';
 export class UnmatchedEventsService {
   readonly #http = inject(HttpClient);
   readonly #auth = inject(AuthService);
+
+  /** Shared signal for total pending unmatched events (used by shell badge) */
+  readonly pendingCount = signal(0);
 
   getEvents(params?: {
     category?: UnmatchedEventCategory;
@@ -35,6 +38,8 @@ export class UnmatchedEventsService {
         `${environment.apiUrl}/unmatched-events/summary`,
         { headers },
       ),
+    ).pipe(
+      tap((summary) => this.pendingCount.set(summary.unknownUserCount + summary.unlinkedRepoCount)),
     );
   }
 

@@ -18,7 +18,12 @@ import { switchMap } from 'rxjs';
 
         <div class="form-group">
           <label class="form-label">Project Name *</label>
-          <input class="form-input" type="text" [(ngModel)]="projectName" placeholder="Project name" />
+          <input class="form-input" type="text" [(ngModel)]="projectName" (ngModelChange)="onNameChange($event)" placeholder="Project name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Slug *</label>
+          <input class="form-input" type="text" [(ngModel)]="slug" placeholder="project-slug" />
+          <span class="form-hint">Lowercase alphanumeric with hyphens</span>
         </div>
         <div class="form-group">
           <label class="form-label">Description</label>
@@ -46,7 +51,7 @@ import { switchMap } from 'rxjs';
             color="brand"
             size="sm"
             (click)="save()"
-            [disabled]="isSaving() || !projectName"
+            [disabled]="isSaving() || !projectName || !slug"
           >
             {{ isSaving() ? 'Creating...' : 'Create Project' }}
           </sui-button>
@@ -109,6 +114,12 @@ import { switchMap } from 'rxjs';
         outline: none;
         border-color: var(--theme-color-border-brand-default);
       }
+      .form-hint {
+        display: block;
+        font-size: 12px;
+        color: var(--theme-color-text-neutral-tertiary);
+        margin-top: 4px;
+      }
       .form-textarea {
         min-height: 80px;
         resize: vertical;
@@ -148,23 +159,40 @@ export class CreateProjectModalComponent implements OnInit {
   readonly #unmatchedEventsService = inject(UnmatchedEventsService);
 
   projectName = '';
+  slug = '';
   description = '';
+  slugManuallyEdited = false;
 
   readonly isSaving = signal(false);
   readonly errorMsg = signal<string | null>(null);
 
   ngOnInit(): void {
     this.projectName = this.event.repoName || '';
+    this.slug = this.#toSlug(this.projectName);
+  }
+
+  onNameChange(name: string): void {
+    if (!this.slugManuallyEdited) {
+      this.slug = this.#toSlug(name);
+    }
+  }
+
+  #toSlug(value: string): string {
+    return value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 
   save(): void {
-    if (!this.projectName) return;
+    if (!this.projectName || !this.slug) return;
 
     this.isSaving.set(true);
     this.errorMsg.set(null);
 
     const projectData = {
       name: this.projectName,
+      slug: this.slug,
       description: this.description || undefined,
       repositories: [
         {
