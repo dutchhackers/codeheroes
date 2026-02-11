@@ -120,7 +120,7 @@ async function processEvent(webhookEvent: WebhookEvent): Promise<WebhookProcessR
 
   try {
     // Check for duplicate events
-    const existingEvent = await eventService.findByEventId(webhookEvent.eventId);
+    const existingEvent = await eventService.findByEventId(webhookEvent.eventId, webhookEvent.provider);
     if (existingEvent) {
       logger.info(`Event ${webhookEvent.eventId} already processed`);
       return {

@@ -23,8 +23,12 @@ export class EventService extends BaseFirestoreService<Event> {
     });
   }
 
-  async findByEventId(eventId: string): Promise<Event | null> {
-    const snapshot = await this.collection.where('source.id', '==', eventId).limit(1).get();
+  async findByEventId(eventId: string, provider: string): Promise<Event | null> {
+    const snapshot = await this.collection
+      .where('source.id', '==', eventId)
+      .where('provider', '==', provider)
+      .limit(1)
+      .get();
 
     if (snapshot.empty) {
       return null;
