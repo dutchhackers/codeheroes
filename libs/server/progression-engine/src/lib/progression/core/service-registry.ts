@@ -1,4 +1,4 @@
-import { DatabaseInstance } from '@codeheroes/common';
+import { DatabaseInstance, UnmatchedEventRepository } from '@codeheroes/common';
 import { EventPublisherService } from '../events/event-publisher.service';
 import { ActionHandlerFactory } from '../handlers/action-handler.factory';
 import { ActivityRepository } from '../repositories/activity.repository';
@@ -18,6 +18,7 @@ export interface ServiceRegistry {
   activityRepository: ActivityRepository;
   gameActionRepository: GameActionRepository;
   projectRepository: ProjectRepository;
+  unmatchedEventRepository: UnmatchedEventRepository;
   xpCalculatorService: XpCalculatorService;
   activityRecorderService: ActivityRecorderService;
   eventPublisherService: EventPublisherService;
@@ -37,6 +38,7 @@ export function createServiceRegistry(): ServiceRegistry {
   const activityRepository = new ActivityRepository(db);
   const gameActionRepository = new GameActionRepository(db);
   const projectRepository = new ProjectRepository(db);
+  const unmatchedEventRepository = new UnmatchedEventRepository(db);
 
   // Create supporting services
   const xpCalculatorService = new XpCalculatorService();
@@ -52,6 +54,7 @@ export function createServiceRegistry(): ServiceRegistry {
     activityRecorderService,
     eventPublisherService,
     projectRepository,
+    unmatchedEventRepository,
   );
 
   // Initialize action handlers
@@ -63,6 +66,7 @@ export function createServiceRegistry(): ServiceRegistry {
     activityRepository,
     gameActionRepository,
     projectRepository,
+    unmatchedEventRepository,
     xpCalculatorService,
     activityRecorderService,
     eventPublisherService,

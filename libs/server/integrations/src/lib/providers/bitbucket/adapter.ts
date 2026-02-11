@@ -52,6 +52,10 @@ export class BitbucketAdapter implements ProviderAdapter {
     return eventData?.actor?.account_id;
   }
 
+  extractUserName(eventData: any): string | undefined {
+    return eventData?.actor?.display_name || eventData?.actor?.nickname;
+  }
+
   mapEventToGameAction(eventType: string, eventData: any, userId: string): GameActionResult {
     const handlers: Record<string, (data: any, uid: string) => GameActionResult> = {
       'repo:push': this.handlePushWebhook.bind(this),

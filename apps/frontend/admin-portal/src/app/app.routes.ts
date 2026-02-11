@@ -29,6 +29,11 @@ export const appRoutes: Routes = [
           import('./pages/users/user-detail.component').then((m) => m.UserDetailComponent),
       },
       {
+        path: 'unmatched',
+        loadComponent: () =>
+          import('./pages/unmatched/unmatched.component').then((m) => m.UnmatchedComponent),
+      },
+      {
         path: 'leaderboard',
         loadComponent: () =>
           import('./pages/leaderboard/leaderboard.component').then((m) => m.LeaderboardComponent),

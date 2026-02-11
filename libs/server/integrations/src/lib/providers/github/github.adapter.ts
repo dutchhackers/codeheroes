@@ -120,6 +120,10 @@ export class GitHubAdapter implements ProviderAdapter {
     return eventData?.sender?.id?.toString();
   }
 
+  extractUserName(eventData: any): string | undefined {
+    return eventData?.sender?.login;
+  }
+
   private verifySignature(payload: string | Buffer, signature: string, secret: string): boolean {
     const expected = 'sha256=' + createHmac('sha256', secret).update(payload).digest('hex');
     try {

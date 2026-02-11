@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { DatabaseService, logger, WebhookService } from '@codeheroes/common';
+import { DatabaseService, logger, WebhookService, UnmatchedEventRepository, DatabaseInstance } from '@codeheroes/common';
 import { CreateEventInput, EventService } from '@codeheroes/event';
 import { ConnectedAccountProvider } from '@codeheroes/types';
 import { ProviderFactory } from '../providers/provider.factory';
@@ -48,6 +48,7 @@ export async function processWebhook({ req, res, provider, secret }: WebhookPipe
 
     // Step 3: Extract user ID using provider adapter
     const externalUserId = providerAdapter.extractUserId(req.body);
+    const externalUserName = providerAdapter.extractUserName?.(req.body);
 
     if (!externalUserId) {
       logger.warn('No sender ID in webhook payload', { provider });
@@ -80,6 +81,17 @@ export async function processWebhook({ req, res, provider, secret }: WebhookPipe
 
     if (!userId) {
       logger.warn('No matching user found for webhook', { provider, externalUserId });
+      try {
+        const unmatchedEventRepo = new UnmatchedEventRepository(DatabaseInstance.getInstance());
+        await unmatchedEventRepo.recordUnknownUser({
+          provider,
+          externalUserId,
+          externalUserName,
+          eventType,
+        });
+      } catch (err) {
+        logger.warn('Failed to record unmatched user event', { error: err });
+      }
       res.status(200).send('Event processed successfully');
       return;
     }

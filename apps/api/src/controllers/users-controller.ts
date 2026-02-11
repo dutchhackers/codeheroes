@@ -11,7 +11,7 @@ import { validate } from '../middleware/validate.middleware';
 const router = express.Router();
 
 const createUserSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
+  name: z.string().min(1).max(100),
   displayName: z.string().min(1).max(100),
   email: z.string().email(),
 });

@@ -74,6 +74,14 @@ export class AzureDevOpsProviderAdapter implements ProviderAdapter {
            eventData?.resource?.createdBy?.id;
   }
 
+  extractUserName(eventData: any): string | undefined {
+    return (
+      eventData?.resource?.pushedBy?.displayName ||
+      eventData?.resource?.closedBy?.displayName ||
+      eventData?.resource?.createdBy?.displayName
+    );
+  }
+
   private handlePushWebhook(webhook: AzurePushWebhook, uid: string): GameActionResult {
     const { resource } = webhook;
     
