@@ -6,12 +6,19 @@ import { validate } from '../middleware/validate.middleware';
 
 const router = express.Router();
 
+const CATEGORIES: readonly [UnmatchedEventCategory, ...UnmatchedEventCategory[]] = ['unknown_user', 'unlinked_repo'];
+const STATUSES: readonly [UnmatchedEventStatus, ...UnmatchedEventStatus[]] = ['pending', 'resolved', 'dismissed'];
 const RESOLUTION_ACTIONS: readonly [UnmatchedEventResolutionAction, ...UnmatchedEventResolutionAction[]] = [
   'created_user',
   'linked_to_user',
   'linked_to_project',
   'created_project',
 ];
+
+const querySchema = z.object({
+  category: z.enum(CATEGORIES),
+  status: z.enum(STATUSES).optional(),
+});
 
 const resolveSchema = z.object({
   resolutionAction: z.enum(RESOLUTION_ACTIONS),
@@ -37,14 +44,13 @@ router.get('/', async (req, res) => {
   logger.debug('GET /unmatched-events', req.query);
 
   try {
-    const category = req.query.category as UnmatchedEventCategory | undefined;
-    const status = req.query.status as UnmatchedEventStatus | undefined;
-
-    if (!category) {
-      res.status(400).json({ error: 'Query parameter "category" is required' });
+    const parsed = querySchema.safeParse(req.query);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid query parameters' });
       return;
     }
 
+    const { category, status } = parsed.data;
     const repo = new UnmatchedEventRepository(DatabaseInstance.getInstance());
     const events = await repo.getByCategory(category, status);
     res.json(events);
@@ -70,7 +76,7 @@ router.post('/:id/resolve', validate(resolveSchema), async (req, res) => {
     }
 
     await repo.resolve(id, {
-      resolvedBy: (req as any).user?.uid || 'admin',
+      resolvedBy: (req as any).user?.uid,
       resolutionAction,
       resolutionTargetId,
     });
