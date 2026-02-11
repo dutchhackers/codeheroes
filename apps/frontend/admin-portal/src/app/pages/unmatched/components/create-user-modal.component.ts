@@ -142,7 +142,8 @@ export class CreateUserModalComponent implements OnInit {
     this.displayName = this.event.externalUserName || '';
 
     if (this.event.provider === 'github' && this.event.externalUserName?.endsWith('[bot]')) {
-      this.email = `${this.event.externalUserId}+${this.event.externalUserName}@users.noreply.github.com`;
+      const sanitized = this.event.externalUserName.replace('[bot]', '');
+      this.email = `${this.event.externalUserId}+${sanitized}@users.noreply.github.com`;
     }
   }
 
