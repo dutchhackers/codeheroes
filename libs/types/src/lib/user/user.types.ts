@@ -1,6 +1,7 @@
 import { BaseDocument } from '../core/base.types';
 
 export type UserType = 'user' | 'bot' | 'system';
+export type UserRole = 'admin' | 'user';
 
 export interface UserDto extends BaseDocument {
   name: string;
@@ -13,6 +14,7 @@ export interface UserDto extends BaseDocument {
   lastLogin: string; // ISO timestamp
   uid?: string; // Firebase Auth UID
   userType: UserType;
+  role?: UserRole;
 }
 
 export interface CreateUserDto {
@@ -22,6 +24,7 @@ export interface CreateUserDto {
   displayName: string;
   photoUrl?: string | null;
   userType?: UserType; // Default to 'user' if not specified
+  role?: UserRole;
 }
 
 export interface UpdateUserDto {
@@ -30,6 +33,7 @@ export interface UpdateUserDto {
   photoUrl?: string;
   active?: boolean;
   userType?: UserType;
+  role?: UserRole;
 }
 
 export interface UserProfileDto extends UserDto {

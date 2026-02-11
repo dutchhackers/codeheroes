@@ -1,3 +1,5 @@
+import { UserRole } from '@codeheroes/types';
+
 export interface CreateUserInput {
   uid?: string;
   email: string | null;
@@ -5,6 +7,7 @@ export interface CreateUserInput {
   displayName: string | null;
   photoUrl: string | null;
   userType?: 'user' | 'bot' | 'system';
+  role?: UserRole;
 }
 
 export interface UpdateUserInput {
@@ -14,4 +17,5 @@ export interface UpdateUserInput {
   photoUrl?: string;
   active?: boolean;
   userType?: 'user' | 'bot' | 'system';
+  role?: UserRole;
 }
