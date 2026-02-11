@@ -227,14 +227,12 @@ export class DailyProgressComponent {
     // Animate progress when it changes
     effect(() => {
       const targetPercent = this.progressPercent();
-      // Use untracked to avoid infinite loops when updating animatedProgress
-      untracked(() => {
-        // Only animate if currently at 0 (initial state) or different from target
-        const current = this.animatedProgress();
-        if (current !== targetPercent) {
-          this.animatedProgress.set(targetPercent);
-        }
-      });
+      // Read current value without tracking it to avoid circular dependency
+      const current = untracked(() => this.animatedProgress());
+      // Only update if the value has changed
+      if (current !== targetPercent) {
+        this.animatedProgress.set(targetPercent);
+      }
     });
   }
 
