@@ -210,7 +210,8 @@ export class DailyProgressComponent {
   // Initialized to 0 so the circle animates on first render
   animatedProgress = signal(0);
 
-  // Threshold for considering progress change significant enough to animate
+  // Minimum percentage difference (0.01%) to trigger animation update
+  // This prevents unnecessary re-renders from floating-point precision issues
   private readonly PROGRESS_CHANGE_THRESHOLD = 0.01;
 
   progressPercent = computed(() => {
@@ -234,7 +235,7 @@ export class DailyProgressComponent {
       // Read current value without tracking it to avoid circular dependency
       const current = untracked(() => this.animatedProgress());
       // Only update if the value has meaningfully changed (avoid floating-point precision issues)
-      if (Math.abs(current - targetPercent) > this.PROGRESS_CHANGE_THRESHOLD) {
+      if (Math.abs(current - targetPercent) >= this.PROGRESS_CHANGE_THRESHOLD) {
         this.animatedProgress.set(targetPercent);
       }
     });
