@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { AuthService } from '../core/services/auth.service';
-import { ThemePreference, ThemeService } from '../core/services/theme.service';
+import { ThemeService } from '../core/services/theme.service';
 import { UnmatchedEventsService } from '../core/services/unmatched-events.service';
 
 @Component({
@@ -80,48 +80,6 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
           </a>
         </nav>
         <div class="sidebar-footer">
-          <div class="theme-toggle">
-            <button
-              class="theme-btn"
-              [class.theme-btn--active]="themeService.themePreference() === 'light'"
-              (click)="setTheme('light')"
-              title="Light"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-                <circle cx="12" cy="12" r="5" />
-                <line x1="12" y1="1" x2="12" y2="3" />
-                <line x1="12" y1="21" x2="12" y2="23" />
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                <line x1="1" y1="12" x2="3" y2="12" />
-                <line x1="21" y1="12" x2="23" y2="12" />
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-              </svg>
-            </button>
-            <button
-              class="theme-btn"
-              [class.theme-btn--active]="themeService.themePreference() === 'system'"
-              (click)="setTheme('system')"
-              title="System"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                <line x1="8" y1="21" x2="16" y2="21" />
-                <line x1="12" y1="17" x2="12" y2="21" />
-              </svg>
-            </button>
-            <button
-              class="theme-btn"
-              [class.theme-btn--active]="themeService.themePreference() === 'dark'"
-              (click)="setTheme('dark')"
-              title="Dark"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-              </svg>
-            </button>
-          </div>
           <div class="user-info">
             <div class="user-avatar">
               {{ auth.currentUser()?.email?.charAt(0)?.toUpperCase() }}
@@ -134,6 +92,25 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
         </div>
       </aside>
       <main class="main-content">
+        <button class="theme-toggle" (click)="themeService.toggle()" [title]="themeService.isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
+          @if (themeService.isDark()) {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </svg>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          }
+        </button>
         <div class="content-wrapper">
           <router-outlet />
         </div>
@@ -280,36 +257,25 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
       }
 
       .theme-toggle {
-        display: flex;
-        gap: 4px;
-        padding: 4px;
-        background: var(--theme-color-bg-neutral-secondary);
-        border-radius: 6px;
-        margin-bottom: 8px;
-      }
-
-      .theme-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 1;
-        padding: 6px;
-        border: none;
-        border-radius: 4px;
-        background: transparent;
+        width: 36px;
+        height: 36px;
+        border: 1px solid var(--theme-color-border-default-default);
+        border-radius: 8px;
+        background: var(--theme-color-bg-surface-default);
         color: var(--theme-color-text-neutral-tertiary);
         cursor: pointer;
         transition: all 0.15s ease;
       }
 
-      .theme-btn:hover {
+      .theme-toggle:hover {
         color: var(--theme-color-text-default);
-      }
-
-      .theme-btn--active {
-        background: var(--theme-color-bg-surface-default);
-        color: var(--theme-color-text-brand-default);
-        box-shadow: var(--theme-effect-styles-drop-shadow-200);
+        border-color: var(--theme-color-border-brand-default);
       }
 
       .main-content {
@@ -317,6 +283,7 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
         overflow-y: auto;
         background: var(--theme-color-bg-neutral-secondary);
         padding: 32px 48px;
+        position: relative;
       }
 
       .content-wrapper {
@@ -337,10 +304,6 @@ export class ShellComponent implements OnInit {
     this.#unmatchedEventsService.getSummary().subscribe({
       error: () => {},
     });
-  }
-
-  setTheme(pref: ThemePreference): void {
-    this.themeService.setPreference(pref);
   }
 
   async onSignOut(): Promise<void> {

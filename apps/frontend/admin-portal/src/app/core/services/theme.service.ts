@@ -1,52 +1,28 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
-
-export type ThemePreference = 'light' | 'dark' | 'system';
+import { Injectable, effect, signal } from '@angular/core';
 
 const STORAGE_KEY = 'theme-preference';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-  readonly themePreference = signal<ThemePreference>(this.#loadPreference());
-
-  readonly #systemDark = signal(
-    typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches,
-  );
-
-  readonly effectiveTheme = computed<'light' | 'dark'>(() => {
-    const pref = this.themePreference();
-    if (pref === 'system') {
-      return this.#systemDark() ? 'dark' : 'light';
-    }
-    return pref;
-  });
+  readonly isDark = signal(this.#loadIsDark());
 
   constructor() {
-    // Listen to OS preference changes
-    if (typeof window !== 'undefined') {
-      const mq = window.matchMedia('(prefers-color-scheme: dark)');
-      mq.addEventListener('change', (e) => this.#systemDark.set(e.matches));
-    }
-
-    // Apply theme class whenever effectiveTheme changes
     effect(() => {
-      const theme = this.effectiveTheme();
+      const dark = this.isDark();
       if (typeof document !== 'undefined') {
-        document.body.classList.toggle('dark-mode', theme === 'dark');
+        document.body.classList.toggle('dark-mode', dark);
       }
     });
   }
 
-  setPreference(pref: ThemePreference): void {
-    this.themePreference.set(pref);
-    localStorage.setItem(STORAGE_KEY, pref);
+  toggle(): void {
+    const dark = !this.isDark();
+    this.isDark.set(dark);
+    localStorage.setItem(STORAGE_KEY, dark ? 'dark' : 'light');
   }
 
-  #loadPreference(): ThemePreference {
-    if (typeof localStorage === 'undefined') return 'system';
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === 'light' || stored === 'dark' || stored === 'system') {
-      return stored;
-    }
-    return 'system';
+  #loadIsDark(): boolean {
+    if (typeof localStorage === 'undefined') return false;
+    return localStorage.getItem(STORAGE_KEY) === 'dark';
   }
 }

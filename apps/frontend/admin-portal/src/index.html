@@ -9,11 +9,7 @@
   </head>
   <body>
     <script>
-      (function() {
-        var pref = localStorage.getItem('theme-preference') || 'system';
-        var dark = pref === 'dark' || (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        if (dark) document.body.classList.add('dark-mode');
-      })();
+      if (localStorage.getItem('theme-preference') === 'dark') document.body.classList.add('dark-mode');
     </script>
     <admin-root></admin-root>
   </body>
