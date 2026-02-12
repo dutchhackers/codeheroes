@@ -3,7 +3,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { UserDto, UserStats } from '@codeheroes/types';
 import { UserStatsService } from '../../core/services/user-stats.service';
-import { UserCacheService } from '../../core/services/user-cache.service';
 import { UserBadge } from '../../core/models/user-badge.model';
 import { ProfileAvatarComponent } from '../profile/components/profile-avatar.component';
 import { XpProgressComponent } from '../profile/components/xp-progress.component';
@@ -119,7 +118,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   readonly #route = inject(ActivatedRoute);
   readonly #router = inject(Router);
   readonly #userStatsService = inject(UserStatsService);
-  readonly #userCacheService = inject(UserCacheService);
 
   #routeSubscription: Subscription | null = null;
   #profileSubscription: Subscription | null = null;
@@ -154,9 +152,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     this.#badgesSubscription?.unsubscribe();
   }
 
-  async #loadProfile(userId: string) {
-    await this.#userCacheService.loadUsers();
-
+  #loadProfile(userId: string) {
     // Subscribe to profile data
     this.#profileSubscription = this.#userStatsService.getAnyUserProfile(userId).subscribe({
       next: ({ user, stats }) => {

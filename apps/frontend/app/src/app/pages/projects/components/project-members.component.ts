@@ -12,7 +12,7 @@ import { UserInfo } from '../../../core/services/user-cache.service';
       } @else {
         <div class="members-grid">
           @for (member of members(); track member.id) {
-            <button type="button" class="member-chip" (click)="selectMember.emit(member.id)">
+            <button type="button" class="member-chip" (click)="selectMember.emit(member.id)" [attr.aria-label]="'View profile of ' + member.displayName">
               @if (member.photoUrl) {
                 <img
                   [src]="member.photoUrl"

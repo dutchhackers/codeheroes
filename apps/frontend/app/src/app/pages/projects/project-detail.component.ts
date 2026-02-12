@@ -236,6 +236,8 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
 
   async #loadProject(id: string) {
     this.isLoading.set(true);
+    this.#dataSub?.unsubscribe();
+    this.#activitySub?.unsubscribe();
     await this.#userCacheService.loadUsers();
 
     this.#dataSub = forkJoin({

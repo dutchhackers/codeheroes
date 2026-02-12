@@ -38,7 +38,7 @@ import { ProjectDataService } from '../../core/services/project-data.service';
                 type="button"
                 class="project-card"
                 (click)="openProject(project.id)"
-                (keydown.enter)="openProject(project.id)"
+                [attr.aria-label]="'View project ' + project.name"
               >
                 <div class="card-header">
                   <h3 class="project-name">{{ project.name }}</h3>
@@ -226,8 +226,9 @@ export class ProjectsListComponent implements OnInit, OnDestroy {
   }
 
   formatTimeAgo(timestamp: string): string {
-    const now = Date.now();
     const then = new Date(timestamp).getTime();
+    if (isNaN(then)) return 'Unknown';
+    const now = Date.now();
     const diffMs = now - then;
 
     const minutes = Math.floor(diffMs / 60000);

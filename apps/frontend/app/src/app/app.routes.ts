@@ -23,6 +23,7 @@ export const appRoutes: Routes = [
   {
     path: 'activity',
     redirectTo: 'projects',
+    pathMatch: 'full',
   },
   {
     path: 'profile',
