@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, combineLatest, take } from 'rxjs';
 import {
@@ -203,6 +204,7 @@ import { ProjectActivityFeedComponent } from './components/project-activity-feed
   ],
 })
 export class ProjectDetailComponent implements OnInit, OnDestroy {
+  readonly #location = inject(Location);
   readonly #route = inject(ActivatedRoute);
   readonly #router = inject(Router);
   readonly #projectDataService = inject(ProjectDataService);
@@ -339,6 +341,6 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
-    this.#router.navigate(['/projects']);
+    this.#location.back();
   }
 }
