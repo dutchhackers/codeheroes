@@ -92,25 +92,27 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
         </div>
       </aside>
       <main class="main-content">
-        <button class="theme-toggle" (click)="themeService.toggle()" [title]="themeService.isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
-          @if (themeService.isDark()) {
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-              <circle cx="12" cy="12" r="5" />
-              <line x1="12" y1="1" x2="12" y2="3" />
-              <line x1="12" y1="21" x2="12" y2="23" />
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-              <line x1="1" y1="12" x2="3" y2="12" />
-              <line x1="21" y1="12" x2="23" y2="12" />
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-            </svg>
-          } @else {
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-            </svg>
-          }
-        </button>
+        <div class="top-bar">
+          <button class="theme-toggle" (click)="themeService.toggle()" [title]="themeService.isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
+            @if (themeService.isDark()) {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg>
+            } @else {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            }
+          </button>
+        </div>
         <div class="content-wrapper">
           <router-outlet />
         </div>
@@ -256,26 +258,28 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
         white-space: nowrap;
       }
 
+      .top-bar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: -16px;
+      }
+
       .theme-toggle {
-        position: absolute;
-        top: 16px;
-        right: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
         width: 36px;
         height: 36px;
-        border: 1px solid var(--theme-color-border-default-default);
+        border: none;
         border-radius: 8px;
-        background: var(--theme-color-bg-surface-default);
+        background: transparent;
         color: var(--theme-color-text-neutral-tertiary);
         cursor: pointer;
-        transition: all 0.15s ease;
+        transition: color 0.15s ease;
       }
 
       .theme-toggle:hover {
         color: var(--theme-color-text-default);
-        border-color: var(--theme-color-border-brand-default);
       }
 
       .main-content {
@@ -283,7 +287,10 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
         overflow-y: auto;
         background: var(--theme-color-bg-neutral-secondary);
         padding: 32px 48px;
-        position: relative;
+      }
+
+      :host-context(body.dark-mode) .main-content {
+        background: var(--theme-color-bg-surface-sunken);
       }
 
       .content-wrapper {
