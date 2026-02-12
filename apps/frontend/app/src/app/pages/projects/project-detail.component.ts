@@ -236,40 +236,56 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
 
   async #loadProject(id: string) {
     this.isLoading.set(true);
+
+    // Clear previous project data to avoid showing stale state
+    this.project.set(null);
+    this.weeklyStats.set(null);
+    this.memberInfos.set([]);
+    this.projectActivities.set([]);
+
     this.#dataSub?.unsubscribe();
     this.#activitySub?.unsubscribe();
-    await this.#userCacheService.loadUsers();
 
-    this.#dataSub = combineLatest({
-      detail: this.#projectDataService.getProjectDetail(id),
-      weekly: this.#projectDataService.getProjectWeeklyStats(id),
-    }).pipe(take(1)).subscribe({
-      next: ({ detail, weekly }) => {
-        this.project.set(detail);
-        this.weeklyStats.set(weekly);
+    try {
+      await this.#userCacheService.loadUsers();
 
-        // Resolve member user infos
-        const memberIds = detail.stats?.activeMembers ?? [];
-        const infos = memberIds
-          .map((uid) => this.#userCacheService.getUserInfo(uid))
-          .filter((info): info is UserInfo => info !== null);
-        this.memberInfos.set(infos);
+      this.#dataSub = combineLatest({
+        detail: this.#projectDataService.getProjectDetail(id),
+        weekly: this.#projectDataService.getProjectWeeklyStats(id),
+      }).pipe(take(1)).subscribe({
+        next: ({ detail, weekly }) => {
+          this.project.set(detail);
+          this.weeklyStats.set(weekly);
 
-        // Load activities filtered to project repos
-        this.#loadProjectActivities(detail);
+          // Resolve member user infos
+          const memberIds = detail.stats?.activeMembers ?? [];
+          const infos = memberIds
+            .map((uid) => this.#userCacheService.getUserInfo(uid))
+            .filter((info): info is UserInfo => info !== null);
+          this.memberInfos.set(infos);
 
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        console.error('Failed to load project:', error);
-        this.isLoading.set(false);
-      },
-    });
+          // Load activities filtered to project repos
+          this.#loadProjectActivities(detail);
+
+          this.isLoading.set(false);
+        },
+        error: (error) => {
+          console.error('Failed to load project:', error);
+          this.isLoading.set(false);
+        },
+      });
+    } catch (error) {
+      console.error('Failed to load project data:', error);
+      this.isLoading.set(false);
+    }
   }
 
   #loadProjectActivities(project: ProjectDetailDto) {
     const repoFullNames = new Set(project.repositories.map((r) => r.fullName));
-    if (repoFullNames.size === 0) return;
+    if (repoFullNames.size === 0) {
+      this.projectActivities.set([]);
+      return;
+    }
 
     this.#activitySub = this.#activityFeedService.getGlobalActivities(100).subscribe({
       next: (activities) => {

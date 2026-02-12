@@ -1,8 +1,7 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { Activity } from '@codeheroes/types';
 import { ActivityItemComponent } from '../../../components/activity-item.component';
 import { UserInfo, UserCacheService } from '../../../core/services/user-cache.service';
-import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-project-activity-feed',
