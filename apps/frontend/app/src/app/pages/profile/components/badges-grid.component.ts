@@ -36,7 +36,7 @@ const VISIBLE_BADGES_COUNT = 5;
               [style.--badge-color]="item.color"
               role="listitem"
               (click)="onBadgeClick(item.badge)"
-              [attr.aria-label]="item.badge.name + ', ' + item.rarity.toLowerCase() + ' badge. Tap for details'"
+              [attr.aria-label]="item.badge.name + ', ' + item.rarity.toLowerCase() + ' badge. Press for details'"
             >
               <span class="badge-emoji" aria-hidden="true">{{ item.emoji }}</span>
               <span class="badge-name">{{ item.badge.name }}</span>
@@ -140,6 +140,11 @@ const VISIBLE_BADGES_COUNT = 5;
 
       .badge-card:active {
         transform: scale(0.96);
+      }
+
+      .badge-card:focus-visible {
+        outline: 2px solid var(--badge-color);
+        outline-offset: 2px;
       }
 
       .badge-card.legendary {
