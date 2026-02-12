@@ -1,4 +1,5 @@
 import { BaseFirestoreService, logger } from '@codeheroes/common';
+import { ConnectedAccountProvider } from '@codeheroes/types';
 import { CollectionReference } from 'firebase-admin/firestore';
 import { eventConverter } from './event.converter';
 import { CreateEventInput } from './event.dto';
@@ -23,7 +24,7 @@ export class EventService extends BaseFirestoreService<Event> {
     });
   }
 
-  async findByEventId(eventId: string, provider: string): Promise<Event | null> {
+  async findByEventId(eventId: string, provider: ConnectedAccountProvider): Promise<Event | null> {
     const snapshot = await this.collection
       .where('source.id', '==', eventId)
       .where('provider', '==', provider)
