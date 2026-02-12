@@ -8,8 +8,7 @@ export class SetAdminRoleMigration {
     const snapshot = await usersRef.where('email', '==', email).limit(1).get();
 
     if (snapshot.empty) {
-      console.error(`No user found with email: ${email}`);
-      process.exit(1);
+      throw new Error(`No user found with email: ${email}`);
     }
 
     const userDoc = snapshot.docs[0];
@@ -22,7 +21,9 @@ export class SetAdminRoleMigration {
     // Update Firebase Auth custom claims if user has a UID
     if (userData.uid) {
       try {
-        await getAuth().setCustomUserClaims(userData.uid, { role: 'admin' });
+        const userRecord = await getAuth().getUser(userData.uid);
+        const existingClaims = userRecord.customClaims || {};
+        await getAuth().setCustomUserClaims(userData.uid, { ...existingClaims, role: 'admin' });
         console.log(`Updated Firebase Auth custom claims for UID ${userData.uid}`);
       } catch (error) {
         console.warn('Could not set Firebase Auth custom claims (may not exist in Auth):', error);

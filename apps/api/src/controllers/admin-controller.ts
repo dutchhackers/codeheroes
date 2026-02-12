@@ -35,8 +35,12 @@ router.patch('/users/:id/role', validate(updateRoleSchema), async (req, res) => 
 
     // Sync custom claims to Firebase Auth if user has a Firebase Auth UID
     if (user.uid) {
-      await getAuth().setCustomUserClaims(user.uid, { role });
-      logger.info('Updated Firebase Auth custom claims', { uid: user.uid, role });
+      const auth = getAuth();
+      const userRecord = await auth.getUser(user.uid);
+      const existingClaims = userRecord.customClaims || {};
+      await auth.setCustomUserClaims(user.uid, { ...existingClaims, role });
+      await auth.revokeRefreshTokens(user.uid);
+      logger.info('Updated Firebase Auth custom claims and revoked refresh tokens', { uid: user.uid, role });
     }
 
     res.json({ id, role });

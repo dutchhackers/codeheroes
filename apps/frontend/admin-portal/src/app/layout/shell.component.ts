@@ -93,7 +93,7 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
       </aside>
       <main class="main-content">
         <div class="top-bar">
-          <button class="theme-toggle" (click)="themeService.toggle()" [title]="themeService.isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
+          <button class="theme-toggle" (click)="themeService.toggle()" [attr.aria-label]="themeService.isDark() ? 'Switch to light mode' : 'Switch to dark mode'" [attr.aria-pressed]="themeService.isDark()">
             @if (themeService.isDark()) {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
                 <circle cx="12" cy="12" r="5" />

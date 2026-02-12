@@ -18,7 +18,11 @@ export class ThemeService {
   toggle(): void {
     const dark = !this.isDark();
     this.isDark.set(dark);
-    localStorage.setItem(STORAGE_KEY, dark ? 'dark' : 'light');
+    try {
+      localStorage.setItem(STORAGE_KEY, dark ? 'dark' : 'light');
+    } catch {
+      // Ignore storage errors (e.g., privacy mode, quota exceeded)
+    }
   }
 
   #loadIsDark(): boolean {

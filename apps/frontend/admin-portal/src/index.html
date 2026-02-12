@@ -9,7 +9,7 @@
   </head>
   <body>
     <script>
-      if (localStorage.getItem('theme-preference') === 'dark') document.body.classList.add('dark-mode');
+      try { if (localStorage.getItem('theme-preference') === 'dark') document.body.classList.add('dark-mode'); } catch(e) {}
     </script>
     <admin-root></admin-root>
   </body>

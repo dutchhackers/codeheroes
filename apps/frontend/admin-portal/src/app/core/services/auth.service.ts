@@ -31,8 +31,12 @@ export class AuthService implements OnDestroy {
       this.currentUser.set(user);
 
       if (user) {
-        const tokenResult = await getIdTokenResult(user);
-        this.#claims.set(tokenResult.claims);
+        try {
+          const tokenResult = await getIdTokenResult(user);
+          this.#claims.set(tokenResult.claims);
+        } catch {
+          this.#claims.set({});
+        }
       } else {
         this.#claims.set({});
       }
