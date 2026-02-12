@@ -42,6 +42,14 @@
       ]
     },
     {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "source.id", "order": "ASCENDING" },
+        { "fieldPath": "provider", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "records",
       "queryScope": "COLLECTION",
       "fields": [

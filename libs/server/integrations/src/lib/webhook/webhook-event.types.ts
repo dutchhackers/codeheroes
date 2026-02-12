@@ -1,3 +1,4 @@
+import { ConnectedAccountProvider } from '@codeheroes/types';
 import { Event } from '@codeheroes/event';
 
 export interface WebhookEvent {
@@ -5,7 +6,7 @@ export interface WebhookEvent {
   eventType: string;
   payload: unknown;
   headers: Record<string, string | string[] | undefined>;
-  provider: string;
+  provider: ConnectedAccountProvider;
 }
 
 export interface WebhookProcessResult {

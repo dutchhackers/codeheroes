@@ -107,7 +107,7 @@ describe('processWebhook', () => {
     expect(res._status).toBe(200);
     expect(res._body).toBe('Event processed successfully');
     expect(mockStoreRawWebhook).toHaveBeenCalledWith(req, 'github', { eventType: 'push', eventId: 'delivery-123' });
-    expect(mockFindByEventId).toHaveBeenCalledWith('delivery-123');
+    expect(mockFindByEventId).toHaveBeenCalledWith('delivery-123', 'github');
     expect(mockCreateEvent).toHaveBeenCalled();
     expect(mockLookupUserId).toHaveBeenCalledWith({ sender: { id: 'ext-user-1' }, provider: 'github' });
     expect(mockGenerateGameActionFromWebhook).toHaveBeenCalledWith({
@@ -217,5 +217,45 @@ describe('processWebhook', () => {
       undefined,
       undefined
     );
+  });
+
+  it('should treat events with same ID but different providers as separate events', async () => {
+    // First, process an event from GitHub with ID 'event-123'
+    mockAdapter.validateWebhook.mockReturnValue({
+      isValid: true,
+      eventType: 'push',
+      eventId: 'event-123',
+    });
+    mockFindByEventId.mockResolvedValue(null);
+    mockCreateEvent.mockResolvedValue({ id: 'event-1', provider: 'github', source: { id: 'event-123', event: 'push' } });
+    
+    const res1 = createMockRes();
+    await processWebhook({ req: createMockReq(), res: res1, provider: 'github' });
+    
+    expect(res1._status).toBe(200);
+    expect(mockFindByEventId).toHaveBeenCalledWith('event-123', 'github');
+    expect(mockCreateEvent).toHaveBeenCalled();
+    
+    // Clear mocks for second call
+    jest.clearAllMocks();
+    
+    // Now process an event from Azure with the same ID 'event-123'
+    mockAdapter.validateWebhook.mockReturnValue({
+      isValid: true,
+      eventType: 'push',
+      eventId: 'event-123',
+    });
+    mockFindByEventId.mockResolvedValue(null);  // Should not find the GitHub event
+    mockCreateEvent.mockResolvedValue({ id: 'event-2', provider: 'azure', source: { id: 'event-123', event: 'push' } });
+    mockLookupUserId.mockResolvedValue('internal-user-1');
+    mockGenerateGameActionFromWebhook.mockResolvedValue({ id: 'ga-2', type: 'code_push' });
+    
+    const res2 = createMockRes();
+    await processWebhook({ req: createMockReq(), res: res2, provider: 'azure' });
+    
+    expect(res2._status).toBe(200);
+    expect(mockFindByEventId).toHaveBeenCalledWith('event-123', 'azure');
+    expect(mockCreateEvent).toHaveBeenCalled();
+    expect(mockGenerateGameActionFromWebhook).toHaveBeenCalled();
   });
 });
