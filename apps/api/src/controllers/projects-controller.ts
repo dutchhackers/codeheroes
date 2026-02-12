@@ -55,6 +55,7 @@ router.get('/', async (req, res) => {
           totalActions: stats?.totalActions ?? 0,
           activeMemberCount: stats?.activeMembers?.length ?? 0,
           activeRepoCount: stats?.activeRepos?.length ?? 0,
+          lastActivity: stats?.lastActivity,
         };
       }),
     );

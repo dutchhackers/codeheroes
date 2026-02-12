@@ -93,6 +93,11 @@ export interface ProjectSummaryDto {
   totalActions: number;
   activeMemberCount: number;
   activeRepoCount: number;
+  lastActivity?: {
+    type: GameActionType;
+    timestamp: string;
+    userId: string;
+  };
 }
 
 export interface ProjectDetailDto extends Project {
