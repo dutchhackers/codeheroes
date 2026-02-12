@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, from, switchMap } from 'rxjs';
-import { ConnectedAccountDto, ConnectedAccountProvider, UserDto, PaginatedResponse } from '@codeheroes/types';
+import { ConnectedAccountDto, ConnectedAccountProvider, UserDto, UserRole, PaginatedResponse } from '@codeheroes/types';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
 
@@ -73,6 +73,12 @@ export class UsersService {
   updateUser(id: string, data: { name?: string; displayName?: string; active?: boolean; userType?: string }): Observable<UserDto> {
     return this.#withAuth((headers) =>
       this.#http.patch<UserDto>(`${environment.apiUrl}/users/${id}`, data, { headers }),
+    );
+  }
+
+  updateUserRole(id: string, role: UserRole): Observable<{ id: string; role: UserRole }> {
+    return this.#withAuth((headers) =>
+      this.#http.patch<{ id: string; role: UserRole }>(`${environment.apiUrl}/admin/users/${id}/role`, { role }, { headers }),
     );
   }
 

@@ -138,6 +138,14 @@ export class LoginComponent {
     this.error = null;
     try {
       await this.#auth.signInWithGoogle();
+      await this.#auth.forceTokenRefresh();
+
+      if (!this.#auth.isAdmin()) {
+        this.error = 'Access denied. Your account does not have admin privileges.';
+        await this.#auth.signOut();
+        return;
+      }
+
       await this.#router.navigate(['/']);
     } catch (err) {
       this.error = 'Sign-in failed. Please try again.';

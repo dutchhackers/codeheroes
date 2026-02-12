@@ -10,9 +10,10 @@ import { LowercaseNamesMigration } from './lib/migrations/lowercase-names.migrat
 import { BackfillNameMigration } from './lib/migrations/backfill-name.migration';
 import { BackfillNameLowerMigration } from './lib/migrations/backfill-name-lower.migration';
 import { ClearLastLoginMigration } from './lib/migrations/clear-last-login.migration';
+import { SetAdminRoleMigration } from './lib/migrations/set-admin-role.migration';
 import { loadJsonData } from './lib/utils/file-loader';
 
-const VALID_COMMANDS = ['seed', 'reset-progression', 'discover-schema', 'backfill-lowercase-names', 'backfill-name', 'backfill-name-lower', 'clear-last-login'] as const;
+const VALID_COMMANDS = ['seed', 'reset-progression', 'discover-schema', 'backfill-lowercase-names', 'backfill-name', 'backfill-name-lower', 'clear-last-login', 'set-admin-role'] as const;
 type Command = (typeof VALID_COMMANDS)[number];
 
 function printUsage() {
@@ -27,6 +28,7 @@ Commands:
   backfill-name              Backfill name field from displayName on all user documents
   backfill-name-lower        Backfill nameLower field (and ensure name is set) on all user documents
   clear-last-login           Remove bogus lastLogin (2024-01-01) from seeded users
+  set-admin-role <email>     Set admin role on a user by email (Firestore + Firebase Auth)
 
 Environment Variables:
   FIREBASE_PROJECT_ID       Required. Firebase project ID (e.g., codeheroes-test)
@@ -154,6 +156,16 @@ async function main() {
       case 'clear-last-login':
         await runClearLastLogin(db);
         break;
+      case 'set-admin-role': {
+        const email = process.argv[3];
+        if (!email) {
+          console.error('Usage: node main.js set-admin-role <email>');
+          process.exit(1);
+        }
+        const migration = new SetAdminRoleMigration();
+        await migration.run(db, email);
+        break;
+      }
     }
     process.exit(0);
   } catch (error) {

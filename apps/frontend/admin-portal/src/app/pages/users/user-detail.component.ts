@@ -3,7 +3,7 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
-import { ConnectedAccountDto, ConnectedAccountProvider, CONNECTED_ACCOUNT_PROVIDERS, UserDto } from '@codeheroes/types';
+import { ConnectedAccountDto, ConnectedAccountProvider, CONNECTED_ACCOUNT_PROVIDERS, UserDto, UserRole } from '@codeheroes/types';
 import { UsersService } from '../../core/services/users.service';
 
 @Component({
@@ -38,6 +38,9 @@ import { UsersService } from '../../core/services/users.service';
             }
             <p class="user-meta">
               Type: <span class="user-type-badge" [class.user-type-bot]="u.userType !== 'user'">{{ u.userType }}</span>
+              @if (u.role === 'admin') {
+                · <span class="role-badge role-admin">Admin</span>
+              }
               · Joined: {{ u.createdAt | date: 'mediumDate' }}
             </p>
           </div>
@@ -89,6 +92,27 @@ import { UsersService } from '../../core/services/users.service';
                     {{ formActive ? 'Active' : 'Inactive' }}
                   </span>
                 </label>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-label">Role</div>
+              <div class="settings-value role-value">
+                <span class="role-badge" [class.role-admin]="u.role === 'admin'">{{ u.role || 'user' }}</span>
+                @if (!isRoleSaving()) {
+                  <sui-button
+                    variant="outline"
+                    color="neutral"
+                    size="sm"
+                    (click)="toggleRole()"
+                  >
+                    {{ u.role === 'admin' ? 'Demote to User' : 'Promote to Admin' }}
+                  </sui-button>
+                } @else {
+                  <span class="saving-label">Saving...</span>
+                }
+                @if (roleError()) {
+                  <span class="form-error">{{ roleError() }}</span>
+                }
               </div>
             </div>
             <div class="settings-row settings-actions">
@@ -501,6 +525,33 @@ import { UsersService } from '../../core/services/users.service';
       .status-inactive {
         color: var(--theme-color-text-neutral-tertiary);
       }
+
+      .role-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        background: var(--theme-color-bg-neutral-secondary);
+        color: var(--theme-color-text-neutral-secondary);
+        text-transform: capitalize;
+      }
+
+      .role-admin {
+        background: var(--theme-color-bg-brand-default);
+        color: #fff;
+      }
+
+      .role-value {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .saving-label {
+        font-size: 13px;
+        color: var(--theme-color-text-neutral-tertiary);
+      }
     `,
   ],
 })
@@ -519,6 +570,8 @@ export class UserDetailComponent implements OnInit {
   readonly addError = signal<string | null>(null);
   readonly isSaving = signal(false);
   readonly saveError = signal<string | null>(null);
+  readonly isRoleSaving = signal(false);
+  readonly roleError = signal<string | null>(null);
 
   readonly providers = CONNECTED_ACCOUNT_PROVIDERS.filter((p) => p !== 'system');
 
@@ -669,6 +722,26 @@ export class UserDetailComponent implements OnInit {
     this.newExternalUserId = '';
     this.newExternalUserName = '';
     this.addError.set(null);
+  }
+
+  toggleRole(): void {
+    const u = this.user();
+    if (!u) return;
+
+    const newRole: UserRole = u.role === 'admin' ? 'user' : 'admin';
+    this.isRoleSaving.set(true);
+    this.roleError.set(null);
+
+    this.#usersService.updateUserRole(u.id, newRole).subscribe({
+      next: () => {
+        this.user.update((current) => current ? { ...current, role: newRole } : current);
+        this.isRoleSaving.set(false);
+      },
+      error: () => {
+        this.roleError.set('Failed to update role.');
+        this.isRoleSaving.set(false);
+      },
+    });
   }
 
   goBack(): void {
