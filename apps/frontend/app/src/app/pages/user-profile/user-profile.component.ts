@@ -1,17 +1,15 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { Activity, UserDto, UserStats } from '@codeheroes/types';
-import { UserStatsService, WeeklyStatsRecord } from '../../core/services/user-stats.service';
+import { UserDto, UserStats } from '@codeheroes/types';
+import { UserStatsService } from '../../core/services/user-stats.service';
 import { UserCacheService } from '../../core/services/user-cache.service';
 import { UserBadge } from '../../core/models/user-badge.model';
 import { ProfileAvatarComponent } from '../profile/components/profile-avatar.component';
 import { XpProgressComponent } from '../profile/components/xp-progress.component';
 import { StatsGridComponent } from '../profile/components/stats-grid.component';
 import { BadgesGridComponent } from '../profile/components/badges-grid.component';
-import { ActivityItemComponent } from '../../components/activity-item.component';
 import { BadgesModalComponent } from '../profile/components/badges-modal.component';
-import { MyStatsComponent } from '../profile/components/my-stats.component';
 
 @Component({
   selector: 'app-user-profile',
@@ -21,9 +19,7 @@ import { MyStatsComponent } from '../profile/components/my-stats.component';
     XpProgressComponent,
     StatsGridComponent,
     BadgesGridComponent,
-    ActivityItemComponent,
     BadgesModalComponent,
-    MyStatsComponent,
   ],
   template: `
     <!-- Header -->
@@ -91,31 +87,8 @@ import { MyStatsComponent } from '../profile/components/my-stats.component';
           <!-- Stats Grid -->
           <app-stats-grid [stats]="stats()" />
 
-          <!-- Weekly Trends -->
-          <app-my-stats [weeklyHistory]="weeklyHistory()" />
-
           <!-- Badges -->
           <app-badges-grid [badges]="badges()" (viewAll)="showBadgesModal.set(true)" />
-
-          <!-- Recent Activity (Max 1 for security) -->
-          <div class="mt-8">
-            <h3 class="text-xs md:text-sm uppercase tracking-wider mb-4 text-cyan-400">Recent Activity</h3>
-            @if (activities().length > 0) {
-              <div class="flex flex-col gap-4">
-                @for (activity of activities(); track activity.id) {
-                  <app-activity-item
-                    [activity]="activity"
-                    [userInfo]="getUserInfo(activity.userId)"
-                    (selectActivity)="onSelectActivity($event)"
-                  />
-                }
-              </div>
-            } @else {
-              <div class="text-center py-8 text-slate-600 text-sm">
-                No recent activity yet.
-              </div>
-            }
-          </div>
         </div>
       }
     </main>
@@ -150,15 +123,11 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   #routeSubscription: Subscription | null = null;
   #profileSubscription: Subscription | null = null;
-  #activitiesSubscription: Subscription | null = null;
   #badgesSubscription: Subscription | null = null;
-  #weeklyHistorySubscription: Subscription | null = null;
 
   user = signal<UserDto | null>(null);
   stats = signal<UserStats | null>(null);
-  activities = signal<Activity[]>([]);
   badges = signal<UserBadge[]>([]);
-  weeklyHistory = signal<WeeklyStatsRecord[]>([]);
   isLoading = signal(true);
   showBadgesModal = signal(false);
 
@@ -182,13 +151,10 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   #cleanupProfileSubscriptions() {
     this.#profileSubscription?.unsubscribe();
-    this.#activitiesSubscription?.unsubscribe();
     this.#badgesSubscription?.unsubscribe();
-    this.#weeklyHistorySubscription?.unsubscribe();
   }
 
   async #loadProfile(userId: string) {
-    // Load user cache for activity items
     await this.#userCacheService.loadUsers();
 
     // Subscribe to profile data
@@ -204,16 +170,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       },
     });
 
-    // Subscribe to activities (max 1 for security)
-    this.#activitiesSubscription = this.#userStatsService.getUserActivities(userId, 1).subscribe({
-      next: (activities) => {
-        this.activities.set(activities);
-      },
-      error: (error) => {
-        console.error('Failed to load activities:', error);
-      },
-    });
-
     // Subscribe to badges
     this.#badgesSubscription = this.#userStatsService.getUserBadges(userId).subscribe({
       next: (badges) => {
@@ -221,16 +177,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Failed to load badges:', error);
-      },
-    });
-
-    // Subscribe to weekly stats history
-    this.#weeklyHistorySubscription = this.#userStatsService.getWeeklyStatsHistory(userId, 4).subscribe({
-      next: (history) => {
-        this.weeklyHistory.set(history);
-      },
-      error: (error) => {
-        console.error('Failed to load weekly history:', error);
       },
     });
   }
@@ -242,14 +188,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
       return '';
     }
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  }
-
-  getUserInfo(userId: string) {
-    return this.#userCacheService.getUserInfo(userId);
-  }
-
-  onSelectActivity(activity: Activity) {
-    console.log('Selected activity:', activity);
   }
 
   goBack() {
