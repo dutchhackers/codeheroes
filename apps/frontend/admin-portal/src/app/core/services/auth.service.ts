@@ -4,6 +4,7 @@ import {
   GoogleAuthProvider,
   User,
   createUserWithEmailAndPassword,
+  getIdTokenResult,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -20,12 +21,26 @@ export class AuthService implements OnDestroy {
   readonly currentUser = signal<User | null>(null);
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
   readonly isLoading = signal(true);
+  readonly #claims = signal<Record<string, unknown>>({});
+  readonly isAdmin = computed(() => this.#claims()['role'] === 'admin');
 
   constructor() {
     let autoLoginAttempted = false;
 
-    this.#unsubscribe = onAuthStateChanged(this.#auth, (user) => {
+    this.#unsubscribe = onAuthStateChanged(this.#auth, async (user) => {
       this.currentUser.set(user);
+
+      if (user) {
+        try {
+          const tokenResult = await getIdTokenResult(user);
+          this.#claims.set(tokenResult.claims);
+        } catch {
+          this.#claims.set({});
+        }
+      } else {
+        this.#claims.set({});
+      }
+
       this.isLoading.set(false);
 
       if (!user && !autoLoginAttempted && environment.useEmulators && environment.autoLogin) {
@@ -69,5 +84,12 @@ export class AuthService implements OnDestroy {
     const user = this.currentUser();
     if (!user) return null;
     return user.getIdToken();
+  }
+
+  async forceTokenRefresh(): Promise<void> {
+    const user = this.currentUser();
+    if (!user) return;
+    const tokenResult = await getIdTokenResult(user, true);
+    this.#claims.set(tokenResult.claims);
   }
 }

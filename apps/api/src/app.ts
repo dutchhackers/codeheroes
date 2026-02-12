@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import admin from 'firebase-admin';
 
+import { AdminController } from './controllers/admin-controller';
 import { CharactersController } from './controllers/characters-controller';
 import { authMiddleware } from './middleware/auth.middleware';
 import { GameController } from './controllers/game-controller';
@@ -71,6 +72,7 @@ app.use(
 // Require Firebase Auth for all routes
 app.use(authMiddleware);
 
+app.use('/admin', AdminController);
 app.use('/user', UserController);
 app.use('/users', UsersController);
 app.use('/characters', CharactersController);

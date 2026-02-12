@@ -8,6 +8,9 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
   </head>
   <body>
+    <script>
+      try { if (localStorage.getItem('theme-preference') === 'dark') document.body.classList.add('dark-mode'); } catch(e) {}
+    </script>
     <admin-root></admin-root>
   </body>
 </html>
