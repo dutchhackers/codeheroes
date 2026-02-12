@@ -11,14 +11,14 @@ export const appRoutes: Routes = [
     loadComponent: () => import('./pages/hq/hq.component').then((m) => m.HqComponent),
   },
   {
-    path: 'projects',
-    loadComponent: () =>
-      import('./pages/projects/projects-list.component').then((m) => m.ProjectsListComponent),
-  },
-  {
     path: 'projects/:id',
     loadComponent: () =>
       import('./pages/projects/project-detail.component').then((m) => m.ProjectDetailComponent),
+  },
+  {
+    path: 'projects',
+    loadComponent: () =>
+      import('./pages/projects/projects-list.component').then((m) => m.ProjectsListComponent),
   },
   {
     path: 'activity',
