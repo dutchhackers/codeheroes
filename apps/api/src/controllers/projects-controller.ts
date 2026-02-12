@@ -40,6 +40,9 @@ function getProjectRepository(): ProjectRepository {
 }
 
 // GET /projects/my-active — get projects the current user is active in this week
+// Note: This endpoint queries stats for all projects sequentially (N+1 pattern).
+// For better performance with many projects, consider implementing a database-level
+// query that filters by active members or batching the stats queries.
 router.get('/my-active', async (req, res) => {
   logger.debug('GET /projects/my-active');
 
@@ -95,6 +98,9 @@ router.get('/my-active', async (req, res) => {
 });
 
 // GET /projects/top — get top projects by weekly activity
+// Note: This endpoint fetches stats for all projects before sorting.
+// For better performance with many projects, consider implementing a database-level
+// query that sorts by XP or uses an index on xpGained.
 router.get('/top', async (req, res) => {
   logger.debug('GET /projects/top');
 
