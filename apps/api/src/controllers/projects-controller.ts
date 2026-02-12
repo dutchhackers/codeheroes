@@ -44,11 +44,22 @@ router.get('/my-active', async (req, res) => {
   logger.debug('GET /projects/my-active');
 
   try {
-    const userId = req.user?.id;
-    if (!userId) {
+    const firebaseUid = req.user?.uid;
+    if (!firebaseUid) {
       res.status(401).json({ error: 'Not authenticated' });
       return;
     }
+
+    // Find the user's Firestore document by Firebase UID
+    const db = DatabaseInstance.getInstance();
+    const userSnapshot = await db.collection('users').where('uid', '==', firebaseUid).limit(1).get();
+    
+    if (userSnapshot.empty) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+    
+    const userId = userSnapshot.docs[0].id;
 
     const repo = getProjectRepository();
     const projects = await repo.getAllProjects();
