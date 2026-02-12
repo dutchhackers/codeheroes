@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, forkJoin } from 'rxjs';
+import { Subscription, combineLatest, take } from 'rxjs';
 import {
   ProjectDetailDto,
   ProjectTimeBasedStats,
@@ -240,10 +240,10 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     this.#activitySub?.unsubscribe();
     await this.#userCacheService.loadUsers();
 
-    this.#dataSub = forkJoin({
+    this.#dataSub = combineLatest({
       detail: this.#projectDataService.getProjectDetail(id),
       weekly: this.#projectDataService.getProjectWeeklyStats(id),
-    }).subscribe({
+    }).pipe(take(1)).subscribe({
       next: ({ detail, weekly }) => {
         this.project.set(detail);
         this.weeklyStats.set(weekly);
