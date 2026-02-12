@@ -12,7 +12,7 @@ import {
 } from '@angular/fire/firestore';
 import { Auth, user } from '@angular/fire/auth';
 import { Observable, of, from, switchMap, map, catchError, combineLatest } from 'rxjs';
-import { Activity, TimeBasedActivityStats, UserDto } from '@codeheroes/types';
+import { Activity, TimeBasedActivityStats, UserDto, ProjectActivityDto } from '@codeheroes/types';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
@@ -344,5 +344,33 @@ export class HqDataService {
       issue_close: 'check-circle',
     };
     return iconMap[actionType] ?? 'activity';
+  }
+
+  /**
+   * Get projects the current user is active in this week
+   */
+  getMyActiveProjects(): Observable<ProjectActivityDto[]> {
+    return this.#withAuth((headers) =>
+      this.#http.get<ProjectActivityDto[]>(`${environment.apiUrl}/projects/my-active`, { headers }),
+    ).pipe(
+      catchError((error) => {
+        console.error('Error fetching my active projects:', error);
+        return of([]);
+      }),
+    );
+  }
+
+  /**
+   * Get top projects by weekly activity
+   */
+  getTopProjects(limit = 5): Observable<ProjectActivityDto[]> {
+    return this.#withAuth((headers) =>
+      this.#http.get<ProjectActivityDto[]>(`${environment.apiUrl}/projects/top?limit=${limit}`, { headers }),
+    ).pipe(
+      catchError((error) => {
+        console.error('Error fetching top projects:', error);
+        return of([]);
+      }),
+    );
   }
 }

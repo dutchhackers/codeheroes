@@ -7,11 +7,14 @@ import {
   LeaderboardEntry,
   Highlight,
 } from '../../core/services/hq-data.service';
+import { ProjectActivityDto } from '@codeheroes/types';
 import { DailyProgressComponent } from './components/daily-progress.component';
 import { WeeklyStatsComponent } from './components/weekly-stats.component';
 import { LeaderboardPreviewComponent } from './components/leaderboard-preview.component';
 import { LeaderboardModalComponent } from './components/leaderboard-modal.component';
 import { HighlightsComponent } from './components/highlights.component';
+import { MyActiveProjectsComponent } from './components/my-active-projects.component';
+import { TopProjectsComponent } from './components/top-projects.component';
 
 @Component({
   selector: 'app-hq',
@@ -22,6 +25,8 @@ import { HighlightsComponent } from './components/highlights.component';
     LeaderboardPreviewComponent,
     LeaderboardModalComponent,
     HighlightsComponent,
+    MyActiveProjectsComponent,
+    TopProjectsComponent,
   ],
   template: `
     <!-- Header (desktop only - bottom nav identifies the tab on mobile) -->
@@ -46,6 +51,12 @@ import { HighlightsComponent } from './components/highlights.component';
 
           <!-- Weekly Stats -->
           <app-weekly-stats [stats]="weeklyStats()" />
+
+          <!-- My Active Projects -->
+          <app-my-active-projects [projects]="myActiveProjects()" />
+
+          <!-- Top Projects -->
+          <app-top-projects [projects]="topProjects()" />
 
           <!-- Leaderboard Preview -->
           <app-leaderboard-preview
@@ -82,6 +93,8 @@ export class HqComponent implements OnInit, OnDestroy {
   #weeklyStatsSub: Subscription | null = null;
   #leaderboardSub: Subscription | null = null;
   #highlightsSub: Subscription | null = null;
+  #myActiveProjectsSub: Subscription | null = null;
+  #topProjectsSub: Subscription | null = null;
 
   isLoading = signal(true);
   dailyProgress = signal<DailyProgress | null>(null);
@@ -91,6 +104,8 @@ export class HqComponent implements OnInit, OnDestroy {
   currentUserRank = signal<number | null>(null);
   currentUserId = signal<string | null>(null);
   highlights = signal<Highlight[]>([]);
+  myActiveProjects = signal<ProjectActivityDto[]>([]);
+  topProjects = signal<ProjectActivityDto[]>([]);
   showLeaderboardModal = signal(false);
 
   ngOnInit() {
@@ -102,6 +117,8 @@ export class HqComponent implements OnInit, OnDestroy {
     this.#weeklyStatsSub?.unsubscribe();
     this.#leaderboardSub?.unsubscribe();
     this.#highlightsSub?.unsubscribe();
+    this.#myActiveProjectsSub?.unsubscribe();
+    this.#topProjectsSub?.unsubscribe();
   }
 
   #loadData() {
@@ -156,14 +173,38 @@ export class HqComponent implements OnInit, OnDestroy {
         this.#checkLoadingComplete();
       },
     });
+
+    // Load my active projects
+    this.#myActiveProjectsSub = this.#hqDataService.getMyActiveProjects().subscribe({
+      next: (projects) => {
+        this.myActiveProjects.set(projects);
+        this.#checkLoadingComplete();
+      },
+      error: (error) => {
+        console.error('Failed to load my active projects:', error);
+        this.#checkLoadingComplete();
+      },
+    });
+
+    // Load top projects
+    this.#topProjectsSub = this.#hqDataService.getTopProjects(5).subscribe({
+      next: (projects) => {
+        this.topProjects.set(projects);
+        this.#checkLoadingComplete();
+      },
+      error: (error) => {
+        console.error('Failed to load top projects:', error);
+        this.#checkLoadingComplete();
+      },
+    });
   }
 
   #loadCount = 0;
 
   #checkLoadingComplete() {
     this.#loadCount++;
-    // All 4 data sources have responded
-    if (this.#loadCount >= 4) {
+    // All 6 data sources have responded
+    if (this.#loadCount >= 6) {
       this.isLoading.set(false);
     }
   }

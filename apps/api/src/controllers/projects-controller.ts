@@ -1,6 +1,11 @@
 import { DatabaseInstance, logger } from '@codeheroes/common';
 import { ProjectRepository } from '@codeheroes/progression-engine';
-import { CONNECTED_ACCOUNT_PROVIDERS, ProjectDetailDto, ProjectSummaryDto } from '@codeheroes/types';
+import {
+  CONNECTED_ACCOUNT_PROVIDERS,
+  ProjectDetailDto,
+  ProjectSummaryDto,
+  ProjectActivityDto,
+} from '@codeheroes/types';
 import * as express from 'express';
 import { z } from 'zod';
 import { getTimePeriodIds } from '@codeheroes/progression-engine';
@@ -33,6 +38,89 @@ const updateProjectSchema = z.object({
 function getProjectRepository(): ProjectRepository {
   return new ProjectRepository(DatabaseInstance.getInstance());
 }
+
+// GET /projects/my-active — get projects the current user is active in this week
+router.get('/my-active', async (req, res) => {
+  logger.debug('GET /projects/my-active');
+
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
+    }
+
+    const repo = getProjectRepository();
+    const projects = await repo.getAllProjects();
+    const weekId = getTimePeriodIds().weekly;
+
+    const activeProjects: ProjectActivityDto[] = [];
+    
+    for (const project of projects) {
+      const weeklyStats = await repo.getProjectTimeBasedStats(project.id, 'weekly', weekId);
+      
+      // Check if user is in active members for this week
+      if (weeklyStats && weeklyStats.activeMembers.includes(userId)) {
+        activeProjects.push({
+          id: project.id,
+          name: project.name,
+          slug: project.slug,
+          description: project.description,
+          xpGained: weeklyStats.xpGained,
+          activeMembers: weeklyStats.activeMembers.length,
+          lastActivity: weeklyStats.lastActivity,
+        });
+      }
+    }
+
+    // Sort by XP gained (highest first)
+    activeProjects.sort((a, b) => b.xpGained - a.xpGained);
+
+    res.json(activeProjects);
+  } catch (error) {
+    logger.error('Error getting active projects for user', { error });
+    res.status(500).json({ error: 'Failed to get active projects' });
+  }
+});
+
+// GET /projects/top — get top projects by weekly activity
+router.get('/top', async (req, res) => {
+  logger.debug('GET /projects/top');
+
+  try {
+    const limitParam = req.query.limit as string | undefined;
+    const limit = limitParam ? parseInt(limitParam, 10) : 5;
+
+    const repo = getProjectRepository();
+    const projects = await repo.getAllProjects();
+    const weekId = getTimePeriodIds().weekly;
+
+    const projectsWithStats: ProjectActivityDto[] = await Promise.all(
+      projects.map(async (project) => {
+        const weeklyStats = await repo.getProjectTimeBasedStats(project.id, 'weekly', weekId);
+        return {
+          id: project.id,
+          name: project.name,
+          slug: project.slug,
+          description: project.description,
+          xpGained: weeklyStats?.xpGained ?? 0,
+          activeMembers: weeklyStats?.activeMembers.length ?? 0,
+          lastActivity: weeklyStats?.lastActivity,
+        };
+      }),
+    );
+
+    // Sort by XP gained (highest first) and take top N
+    const topProjects = projectsWithStats
+      .sort((a, b) => b.xpGained - a.xpGained)
+      .slice(0, limit);
+
+    res.json(topProjects);
+  } catch (error) {
+    logger.error('Error getting top projects', { error });
+    res.status(500).json({ error: 'Failed to get top projects' });
+  }
+});
 
 // GET /projects — list all projects with summary stats
 router.get('/', async (req, res) => {

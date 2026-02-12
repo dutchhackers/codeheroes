@@ -98,3 +98,17 @@ export interface ProjectSummaryDto {
 export interface ProjectDetailDto extends Project {
   stats?: ProjectStats;
 }
+
+export interface ProjectActivityDto {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  xpGained: number;
+  activeMembers: number;
+  lastActivity?: {
+    type: GameActionType;
+    timestamp: string;
+    userId: string;
+  };
+}
