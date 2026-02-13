@@ -200,7 +200,7 @@ export class ProjectsListComponent implements OnInit, OnDestroy {
     this.#subscription = this.#projectDataService.getProjects().subscribe({
       next: (projects) => {
         // Sort by totalXp descending
-        const sorted = [...projects].sort((a, b) => b.totalXp - a.totalXp);
+        const sorted = [...projects].sort((a, b) => a.name.localeCompare(b.name));
         this.projects.set(sorted);
         this.isLoading.set(false);
       },
