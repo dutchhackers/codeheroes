@@ -7,7 +7,7 @@ export * from './collections/collections';
 
 export * from './user/user.types';
 export * from './user/stats.types';
-// export * from './user/settings.types';
+export * from './user/settings.types';
 
 export * from './activity/activity.types';
 export * from './activity/time-based-activity.types';

@@ -27,7 +27,11 @@ import { UsersService } from '../../core/services/users.service';
         </div>
       } @else if (user(); as u) {
         <div class="user-header">
-          <div class="user-avatar-lg">{{ (u.name || u.displayName)?.charAt(0)?.toUpperCase() || '?' }}</div>
+          @if (u.photoUrl) {
+            <img class="user-avatar-lg-img" [src]="u.photoUrl" [alt]="(u.name || u.displayName) + ' avatar'" />
+          } @else {
+            <div class="user-avatar-lg">{{ (u.name || u.displayName)?.charAt(0)?.toUpperCase() || '?' }}</div>
+          }
           <div class="user-info">
             <h1 class="user-name">{{ u.name || u.displayName || 'Unknown' }}</h1>
             @if (u.name && u.displayName && u.name !== u.displayName) {
@@ -70,6 +74,17 @@ import { UsersService } from '../../core/services/users.service';
                   type="text"
                   [(ngModel)]="formDisplayName"
                   placeholder="Display Name"
+                />
+              </div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-label">Photo URL</div>
+              <div class="settings-value">
+                <input
+                  class="form-input settings-input settings-input-wide"
+                  type="url"
+                  [(ngModel)]="formPhotoUrl"
+                  placeholder="https://example.com/photo.jpg"
                 />
               </div>
             </div>
@@ -290,6 +305,14 @@ import { UsersService } from '../../core/services/users.service';
         flex-shrink: 0;
       }
 
+      .user-avatar-lg-img {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+      }
+
       .user-info .user-name {
         font-size: 24px;
         font-weight: 700;
@@ -494,6 +517,10 @@ import { UsersService } from '../../core/services/users.service';
         max-width: 280px;
       }
 
+      .settings-input-wide {
+        max-width: 440px;
+      }
+
       .settings-select {
         max-width: 160px;
         cursor: pointer;
@@ -583,6 +610,7 @@ export class UserDetailComponent implements OnInit {
   // User details form
   formName = '';
   formDisplayName = '';
+  formPhotoUrl = '';
   formUserType = 'user';
   formActive = true;
 
@@ -603,6 +631,7 @@ export class UserDetailComponent implements OnInit {
     return (
       trimmedName !== (u.name || '') ||
       trimmedDisplayName !== (u.displayName || '') ||
+      this.formPhotoUrl.trim() !== (u.photoUrl || '') ||
       this.formUserType !== (u.userType || 'user') ||
       this.formActive !== u.active
     );
@@ -658,6 +687,10 @@ export class UserDetailComponent implements OnInit {
     }
     if (this.formDisplayName !== (u.displayName || '')) {
       updates['displayName'] = this.formDisplayName.trim();
+    }
+    const trimmedPhotoUrl = this.formPhotoUrl.trim();
+    if (trimmedPhotoUrl !== (u.photoUrl || '')) {
+      updates['photoUrl'] = trimmedPhotoUrl || null;
     }
     if (this.formUserType !== (u.userType || 'user')) {
       updates['userType'] = this.formUserType;
@@ -751,6 +784,7 @@ export class UserDetailComponent implements OnInit {
   #initForm(user: UserDto): void {
     this.formName = user.name || '';
     this.formDisplayName = user.displayName || '';
+    this.formPhotoUrl = user.photoUrl || '';
     this.formUserType = user.userType || 'user';
     this.formActive = user.active;
   }

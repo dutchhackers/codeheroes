@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { AuthService } from '../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'admin-login',
@@ -126,12 +127,25 @@ import { AuthService } from '../../core/services/auth.service';
     `,
   ],
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   readonly #auth = inject(AuthService);
   readonly #router = inject(Router);
 
   isSigningIn = false;
   error: string | null = null;
+
+  constructor() {
+    // In emulator mode with autoLogin, redirect once authenticated (skip admin check)
+    if (environment.useEmulators && environment.autoLogin) {
+      effect(() => {
+        if (!this.#auth.isLoading() && this.#auth.isAuthenticated()) {
+          this.#router.navigate(['/']);
+        }
+      });
+    }
+  }
+
+  ngOnInit(): void {}
 
   async signIn(): Promise<void> {
     this.isSigningIn = true;
@@ -140,7 +154,7 @@ export class LoginComponent {
       await this.#auth.signInWithGoogle();
       await this.#auth.forceTokenRefresh();
 
-      if (!this.#auth.isAdmin()) {
+      if (!environment.useEmulators && !this.#auth.isAdmin()) {
         this.error = 'Access denied. Your account does not have admin privileges.';
         await this.#auth.signOut();
         return;

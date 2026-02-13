@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, switchMap } from 'rxjs';
+import { UserSettingsService } from '../../core/services/user-settings.service';
 import {
   HqDataService,
   DailyProgress,
@@ -94,6 +95,7 @@ import { HighlightsComponent } from './components/highlights.component';
 })
 export class HqComponent implements OnInit, OnDestroy {
   readonly #hqDataService = inject(HqDataService);
+  readonly #userSettingsService = inject(UserSettingsService);
 
   #dailyProgressSub: Subscription | null = null;
   #weeklyStatsSub: Subscription | null = null;
@@ -127,8 +129,10 @@ export class HqComponent implements OnInit, OnDestroy {
   }
 
   #loadData() {
-    // Load daily progress
-    this.#dailyProgressSub = this.#hqDataService.getDailyProgress().subscribe({
+    // Load daily progress (using user's configured daily goal)
+    this.#dailyProgressSub = this.#userSettingsService.getDailyGoal().pipe(
+      switchMap((goal) => this.#hqDataService.getDailyProgress(goal)),
+    ).subscribe({
       next: (progress) => {
         this.dailyProgress.set(progress);
         this.#checkLoadingComplete();

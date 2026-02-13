@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { Auth, signOut } from '@angular/fire/auth';
 import { Subscription } from 'rxjs';
 import { UserDto, UserStats } from '@codeheroes/types';
@@ -28,21 +29,44 @@ import { BadgesModalComponent } from './components/badges-modal.component';
     <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-4 py-4 md:px-6 lg:px-8 md:py-5">
       <div class="flex items-center justify-between relative z-10">
         <h1 class="text-2xl md:text-4xl font-bold italic text-white">Profile</h1>
-        <button
-            type="button"
-            (click)="logout()"
-            aria-label="Sign out"
-            class="logout-button rounded bg-black/50 border border-white/20 text-slate-400 hover:text-white hover:border-white/40 transition-colors"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-          </button>
+        <div class="flex items-center gap-2">
+          <button
+              type="button"
+              (click)="openSettings()"
+              aria-label="Settings"
+              class="header-icon-button rounded bg-black/50 border border-white/20 text-slate-400 hover:text-white hover:border-white/40 transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </button>
+          <button
+              type="button"
+              (click)="logout()"
+              aria-label="Sign out"
+              class="header-icon-button rounded bg-black/50 border border-white/20 text-slate-400 hover:text-white hover:border-white/40 transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+            </button>
+        </div>
       </div>
     </header>
 
@@ -137,7 +161,7 @@ import { BadgesModalComponent } from './components/badges-modal.component';
         display: block;
       }
 
-      .logout-button {
+      .header-icon-button {
         padding: 0.625rem;
         min-width: 44px;
         min-height: 44px;
@@ -171,6 +195,7 @@ import { BadgesModalComponent } from './components/badges-modal.component';
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   readonly #auth = inject(Auth);
+  readonly #router = inject(Router);
   readonly #userStatsService = inject(UserStatsService);
   readonly #userCacheService = inject(UserCacheService);
 
@@ -236,6 +261,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Sign out failed:', error);
     }
+  }
+
+  openSettings() {
+    this.#router.navigate(['/settings']);
   }
 
   openEditModal() {
