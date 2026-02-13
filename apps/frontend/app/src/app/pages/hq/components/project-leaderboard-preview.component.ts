@@ -1,0 +1,327 @@
+import { Component, input, output } from '@angular/core';
+import { ProjectLeaderboardEntry } from '../../../core/services/hq-data.service';
+import * as LeaderboardUtils from '../utils/leaderboard.utils';
+
+@Component({
+  selector: 'app-project-leaderboard-preview',
+  standalone: true,
+  template: `
+    <div class="leaderboard-section">
+      <div class="section-header">
+        <h3 class="section-title">
+          <span class="folder-icon">📂</span>
+          Project Leaderboard
+        </h3>
+        <button type="button" class="view-all-btn" (click)="onViewAll()" aria-label="View full project leaderboard">
+          View all
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 4l4 4-4 4" />
+          </svg>
+        </button>
+      </div>
+
+      @if (isLoading()) {
+        <div class="loading-state">
+          @for (i of [1,2,3,4,5]; track i) {
+            <div class="skeleton-item"></div>
+          }
+        </div>
+      } @else if (entries().length === 0) {
+        <div class="empty-state">
+          <p>No project activity this week yet</p>
+          <span class="empty-subtitle">Projects will appear once they earn XP!</span>
+        </div>
+      } @else {
+        <div class="leaderboard-list">
+          @for (entry of entries(); track entry.projectId; let i = $index) {
+            <div class="leaderboard-item">
+              <div class="rank-badge" [class.top-three]="i < 3">
+                @if (i === 0) {
+                  <span class="medal gold" aria-label="First place">🥇</span>
+                } @else if (i === 1) {
+                  <span class="medal silver" aria-label="Second place">🥈</span>
+                } @else if (i === 2) {
+                  <span class="medal bronze" aria-label="Third place">🥉</span>
+                } @else {
+                  <span class="rank-number" [attr.aria-label]="'Rank ' + (i + 1)">#{{ i + 1 }}</span>
+                }
+              </div>
+              <div class="project-profile">
+                <div class="project-avatar-placeholder">
+                  {{ LeaderboardUtils.getInitials(entry.name) }}
+                </div>
+                <span class="project-name">{{ LeaderboardUtils.formatName(entry.name) }}</span>
+              </div>
+              <div class="xp-badge">
+                <span class="xp-value">+{{ LeaderboardUtils.formatXp(entry.xpGained) }}</span>
+                <span class="xp-label">XP</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  `,
+  styles: [
+    `
+      .leaderboard-section {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin: 1.25rem 0;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.875rem;
+      }
+
+      .section-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        letter-spacing: -0.02em;
+      }
+
+      .folder-icon {
+        font-size: 1.125rem;
+      }
+
+      .view-all-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: rgba(255, 255, 255, 0.7);
+        padding: 0.375rem 0.625rem;
+        font-size: 0.8125rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-weight: 500;
+      }
+
+      .view-all-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.95);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .loading-state {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .skeleton-item {
+        height: 48px;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.05) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 12px;
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .empty-state p {
+        font-size: 1rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 500;
+      }
+
+      .empty-subtitle {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.35);
+      }
+
+      .leaderboard-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .leaderboard-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.625rem 0.75rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        transition: all 0.2s;
+      }
+
+      .leaderboard-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .rank-badge {
+        min-width: 28px;
+        text-align: center;
+        font-weight: 600;
+      }
+
+      .medal {
+        font-size: 1.25rem;
+      }
+
+      .rank-number {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .project-profile {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .project-avatar-placeholder {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.7);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        flex-shrink: 0;
+      }
+
+      .project-name {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .xp-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.125rem;
+      }
+
+      .xp-value {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--neon-green);
+      }
+
+      .xp-label {
+        font-size: 0.5625rem;
+        color: rgba(255, 255, 255, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      @media (min-width: 640px) {
+        .leaderboard-section {
+          padding: 1.5rem;
+        }
+
+        .section-header {
+          margin-bottom: 1.25rem;
+        }
+
+        .section-title {
+          font-size: 1rem;
+        }
+
+        .leaderboard-list {
+          gap: 0.75rem;
+        }
+
+        .leaderboard-item {
+          gap: 1rem;
+          padding: 0.875rem 1rem;
+          border-radius: 12px;
+        }
+
+        .rank-badge {
+          min-width: 36px;
+        }
+
+        .medal {
+          font-size: 1.5rem;
+        }
+
+        .rank-number {
+          font-size: 1rem;
+        }
+
+        .project-profile {
+          gap: 0.75rem;
+        }
+
+        .project-avatar-placeholder {
+          width: 40px;
+          height: 40px;
+          font-size: 0.875rem;
+        }
+
+        .project-name {
+          font-size: 0.9375rem;
+        }
+
+        .xp-value {
+          font-size: 1rem;
+        }
+
+        .view-all-btn {
+          padding: 0.5rem 0.75rem;
+          font-size: 0.875rem;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .skeleton-item {
+          animation: none;
+        }
+      }
+    `,
+  ],
+})
+export class ProjectLeaderboardPreviewComponent {
+  entries = input<ProjectLeaderboardEntry[]>([]);
+  isLoading = input<boolean>(false);
+
+  viewAll = output<void>();
+
+  readonly LeaderboardUtils = LeaderboardUtils;
+
+  onViewAll() {
+    this.viewAll.emit();
+  }
+}

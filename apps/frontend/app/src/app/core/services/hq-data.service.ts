@@ -48,6 +48,17 @@ export interface LeaderboardEntry {
   rank?: number;
 }
 
+export interface ProjectLeaderboardEntry {
+  projectId: string;
+  name: string;
+  slug: string;
+  xpGained: number;
+  totalXp: number;
+  activeMemberCount: number;
+  activeRepoCount: number;
+  periodId: string;
+}
+
 export interface Highlight {
   id: string;
   type: 'activity' | 'milestone' | 'achievement';
@@ -294,6 +305,32 @@ export class HqDataService {
           map((activities) => this.#transformActivitiesToHighlights(activities as Activity[])),
           catchError(() => of([])),
         );
+      }),
+    );
+  }
+
+  /**
+   * Get the weekly project leaderboard
+   */
+  getWeeklyProjectLeaderboard(limitCount = 10): Observable<ProjectLeaderboardEntry[]> {
+    return this.#getProjectLeaderboard('week', limitCount);
+  }
+
+  /**
+   * Get the daily project leaderboard
+   */
+  getDailyProjectLeaderboard(limitCount = 10): Observable<ProjectLeaderboardEntry[]> {
+    return this.#getProjectLeaderboard('day', limitCount);
+  }
+
+  #getProjectLeaderboard(period: 'week' | 'day', limitCount: number): Observable<ProjectLeaderboardEntry[]> {
+    return this.#withAuth((headers) =>
+      this.#http.get<ProjectLeaderboardEntry[]>(`${environment.apiUrl}/leaderboards/projects/${period}`, { headers }),
+    ).pipe(
+      map((entries) => (limitCount > 0 ? entries.slice(0, limitCount) : entries)),
+      catchError((error) => {
+        console.error(`Error fetching ${period} project leaderboard:`, error);
+        return of([]);
       }),
     );
   }
