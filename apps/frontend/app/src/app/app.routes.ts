@@ -59,6 +59,12 @@ export const appRoutes: Routes = [
     ),
   },
   {
+    path: 'settings',
+    loadComponent: loadWithReload(() =>
+      import('./pages/settings/settings.component').then((m) => m.SettingsComponent),
+    ),
+  },
+  {
     path: 'search',
     loadComponent: loadWithReload(() =>
       import('./pages/user-search/user-search.component').then((m) => m.UserSearchComponent),
