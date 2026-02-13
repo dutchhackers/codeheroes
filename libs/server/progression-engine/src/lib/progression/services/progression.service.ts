@@ -1,5 +1,5 @@
 import { logger, UnmatchedEventRepository } from '@codeheroes/common';
-import { GameAction, ActionResult, GameActionActivity, GameActionContext } from '@codeheroes/types';
+import { GameAction, ActionResult, GameActionActivity, GameActionContext, RepoProjectMapping } from '@codeheroes/types';
 
 import { ProgressionRepository } from '../repositories/progression.repository';
 import { ActivityRepository } from '../repositories/activity.repository';
@@ -55,10 +55,16 @@ export class ProgressionService {
         breakdown: xpResult.breakdown,
       });
 
-      // 3. Create activity record
-      const activity = this.activityRecorder.createFromAction(action, xpResult);
+      // 3. Resolve project mapping (used for activity enrichment + project stats)
+      const repo = this.extractRepository(action.context);
+      const mapping = repo
+        ? await this.projectRepository.resolveProjectForRepo(action.provider, repo.owner, repo.name)
+        : null;
 
-      // 4. Update user's progression state (activity will be recorded within the transaction)
+      // 4. Create activity record (enriched with project if mapped)
+      const activity = this.activityRecorder.createFromAction(action, xpResult, mapping);
+
+      // 5. Update user's progression state (activity will be recorded within the transaction)
       const progressionUpdate: ProgressionUpdate = {
         xpGained: xpResult.total,
         activityType: action.type,
@@ -66,16 +72,16 @@ export class ProgressionService {
 
       const updateResult = await this.stateRepository.updateState(action.userId, progressionUpdate, activity);
 
-      // 5. Publish events based on state changes
+      // 6. Publish events based on state changes
       await this.publishProgressionEvents(action.userId, updateResult, activity);
 
-      // 6. Mark the game action as processed
+      // 7. Mark the game action as processed
       await this.gameActionRepository.markAsProcessed(action.id);
 
-      // 6b. Update project stats (best-effort, never blocks)
-      await this.updateProjectStats(action, xpResult.total);
+      // 7b. Update project stats (best-effort, reuse pre-resolved mapping)
+      await this.updateProjectStats(action, xpResult.total, mapping, repo);
 
-      // 7. Return the action result
+      // 8. Return the action result
       const result = {
         xpGained: xpResult.total,
         level: updateResult.state.level,
@@ -191,14 +197,23 @@ export class ProgressionService {
   /**
    * Update project stats for a game action (best-effort, never throws)
    */
-  private async updateProjectStats(action: GameAction, xpGained: number): Promise<void> {
+  private async updateProjectStats(
+    action: GameAction,
+    xpGained: number,
+    preResolvedMapping?: RepoProjectMapping | null,
+    preExtractedRepo?: { owner: string; name: string } | null,
+  ): Promise<void> {
     try {
-      const repo = this.extractRepository(action.context);
+      const repo = preExtractedRepo ?? this.extractRepository(action.context);
       if (!repo) {
         return; // No repository context (e.g., workout/manual actions)
       }
 
-      const mapping = await this.projectRepository.resolveProjectForRepo(action.provider, repo.owner, repo.name);
+      const mapping =
+        preResolvedMapping !== undefined
+          ? preResolvedMapping
+          : await this.projectRepository.resolveProjectForRepo(action.provider, repo.owner, repo.name);
+
       if (!mapping) {
         try {
           await this.unmatchedEventRepository.recordUnlinkedRepo({

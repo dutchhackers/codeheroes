@@ -52,6 +52,10 @@ export interface GameActionActivity extends BaseActivity {
       description: string;
     }>;
   };
+  project?: {
+    id: string;
+    name: string;
+  };
   processingResult?: unknown;
 }
 

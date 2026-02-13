@@ -500,9 +500,11 @@ export class ActivityItemComponent {
     const activity = this.activity();
     if (isGameActionActivity(activity)) {
       const context = activity.context;
-      if ('repository' in context && context.repository) {
-        return context.repository.name;
+      const repo = 'repository' in context && context.repository ? context.repository.name : '';
+      if (activity.project?.name) {
+        return repo ? `${activity.project.name} · ${repo}` : activity.project.name;
       }
+      return repo;
     }
     return '';
   });

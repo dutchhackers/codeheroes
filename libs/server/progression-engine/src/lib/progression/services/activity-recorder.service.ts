@@ -1,5 +1,5 @@
 import { getCurrentTimeAsISO } from '@codeheroes/common';
-import { GameActionActivity, GameAction, GameActionType, CodePushMetrics } from '@codeheroes/types';
+import { GameActionActivity, GameAction, GameActionType, CodePushMetrics, RepoProjectMapping } from '@codeheroes/types';
 import { ProgressionUpdate } from '../core/progression-state.model';
 import { XpCalculationResult } from '../core/xp-calculation.model';
 
@@ -13,7 +13,11 @@ export class ActivityRecorderService {
    * @param xpResult XP calculation result
    * @returns Game action activity record
    */
-  createFromAction(action: GameAction, xpResult: XpCalculationResult): GameActionActivity {
+  createFromAction(
+    action: GameAction,
+    xpResult: XpCalculationResult,
+    mapping?: RepoProjectMapping | null,
+  ): GameActionActivity {
     const now = getCurrentTimeAsISO();
 
     // Generate a unique ID
@@ -65,6 +69,10 @@ export class ActivityRecorderService {
         },
       },
     };
+
+    if (mapping) {
+      activity.project = { id: mapping.projectId, name: mapping.projectName };
+    }
 
     return activity;
   }
