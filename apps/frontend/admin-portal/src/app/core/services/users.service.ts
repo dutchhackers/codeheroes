@@ -70,7 +70,7 @@ export class UsersService {
     );
   }
 
-  updateUser(id: string, data: { name?: string; displayName?: string; active?: boolean; userType?: string }): Observable<UserDto> {
+  updateUser(id: string, data: { name?: string; displayName?: string; active?: boolean; userType?: string; photoUrl?: string | null }): Observable<UserDto> {
     return this.#withAuth((headers) =>
       this.#http.patch<UserDto>(`${environment.apiUrl}/users/${id}`, data, { headers }),
     );

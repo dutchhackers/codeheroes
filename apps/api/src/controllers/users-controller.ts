@@ -21,6 +21,7 @@ const updateUserSchema = z.object({
   displayName: z.string().min(1).max(100).optional(),
   active: z.boolean().optional(),
   userType: z.enum(['user', 'bot', 'system']).optional(),
+  photoUrl: z.string().url().max(500).nullable().optional(),
 });
 
 const addConnectedAccountSchema = z.object({
