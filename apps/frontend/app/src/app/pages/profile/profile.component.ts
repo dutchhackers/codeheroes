@@ -279,7 +279,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.showBadgesModal.set(true);
   }
 
-
   closeBadgesModal() {
     this.showBadgesModal.set(false);
     this.selectedBadgeId.set(null);

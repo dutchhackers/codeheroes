@@ -74,7 +74,7 @@ interface BadgeDisplay {
                   [style.--badge-color]="item.color"
                   role="listitem"
                   (click)="selectBadge(item)"
-                  [attr.aria-label]="item.badge.name + ', ' + item.rarity.toLowerCase() + ' badge. Tap for details'"
+                  [attr.aria-label]="item.badge.name + ', ' + item.rarity.toLowerCase() + ' badge. Press for details'"
                 >
                   <span class="badge-emoji" aria-hidden="true">{{ item.emoji }}</span>
                   <span class="badge-name">{{ item.badge.name }}</span>

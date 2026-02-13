@@ -125,6 +125,7 @@ const VISIBLE_BADGES_COUNT = 5;
         align-items: center;
         gap: 0.25rem;
         transition: all 0.2s ease;
+        cursor: pointer;
         box-shadow:
           0 0 8px var(--badge-color),
           0 0 16px color-mix(in srgb, var(--badge-color) 30%, transparent),
