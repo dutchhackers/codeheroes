@@ -29,12 +29,14 @@ const VISIBLE_BADGES_COUNT = 5;
       @if (badgeDisplays.length > 0) {
         <div class="badges-grid" role="list">
           @for (item of visibleBadges; track item.badge.id) {
-            <div
+            <button
+              type="button"
               class="badge-card"
               [class.legendary]="item.rarity === 'LEGENDARY'"
               [style.--badge-color]="item.color"
               role="listitem"
-              [attr.aria-label]="item.badge.name + ', ' + item.rarity.toLowerCase() + ' badge'"
+              (click)="onBadgeClick(item.badge)"
+              [attr.aria-label]="item.badge.name + ', ' + item.rarity.toLowerCase() + ' badge. Press for details'"
             >
               <span class="badge-emoji" aria-hidden="true">{{ item.emoji }}</span>
               <span class="badge-name">{{ item.badge.name }}</span>
@@ -44,7 +46,7 @@ const VISIBLE_BADGES_COUNT = 5;
               @if (item.badge.xp) {
                 <span class="badge-xp">+{{ item.badge.xp }} XP</span>
               }
-            </div>
+            </button>
           }
 
           @if (hiddenCount > 0) {
@@ -123,6 +125,7 @@ const VISIBLE_BADGES_COUNT = 5;
         align-items: center;
         gap: 0.25rem;
         transition: all 0.2s ease;
+        cursor: pointer;
         box-shadow:
           0 0 8px var(--badge-color),
           0 0 16px color-mix(in srgb, var(--badge-color) 30%, transparent),
@@ -134,6 +137,15 @@ const VISIBLE_BADGES_COUNT = 5;
           0 0 12px var(--badge-color),
           0 0 24px color-mix(in srgb, var(--badge-color) 40%, transparent),
           inset 0 0 16px color-mix(in srgb, var(--badge-color) 8%, transparent);
+      }
+
+      .badge-card:active {
+        transform: scale(0.96);
+      }
+
+      .badge-card:focus-visible {
+        outline: 2px solid var(--badge-color);
+        outline-offset: 2px;
       }
 
       .badge-card.legendary {
@@ -267,6 +279,7 @@ export class BadgesGridComponent {
   private _badgeDisplays: BadgeDisplay[] = [];
 
   viewAll = output<void>();
+  badgeClick = output<UserBadge>();
 
   @Input()
   set badges(value: UserBadge[]) {
@@ -309,5 +322,9 @@ export class BadgesGridComponent {
 
   onViewAllClick(): void {
     this.viewAll.emit();
+  }
+
+  onBadgeClick(badge: UserBadge): void {
+    this.badgeClick.emit(badge);
   }
 }

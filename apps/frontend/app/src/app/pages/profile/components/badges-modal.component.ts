@@ -1,4 +1,4 @@
-import { Component, HostListener, input, output, signal } from '@angular/core';
+import { Component, HostListener, input, output, signal, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { BadgeRarity } from '@codeheroes/types';
 import { UserBadge, getBadgeRarity, getBadgeEmoji, getBadgeRarityColor } from '../../../core/models/user-badge.model';
@@ -57,7 +57,7 @@ interface BadgeDisplay {
               @if (selected.badge.earnedAt) {
                 <div class="detail-earned">
                   <span class="detail-label">Earned</span>
-                  <span class="detail-value">{{ selected.badge.earnedAt | date: 'MMMM yyyy' }}</span>
+                  <span class="detail-value">{{ selected.badge.earnedAt | date: 'd MMMM yyyy' }}</span>
                 </div>
               }
               @if (selected.badge.xp) {
@@ -74,7 +74,7 @@ interface BadgeDisplay {
                   [style.--badge-color]="item.color"
                   role="listitem"
                   (click)="selectBadge(item)"
-                  [attr.aria-label]="item.badge.name + ', ' + item.rarity.toLowerCase() + ' badge. Tap for details'"
+                  [attr.aria-label]="item.badge.name + ', ' + item.rarity.toLowerCase() + ' badge. Press for details'"
                 >
                   <span class="badge-emoji" aria-hidden="true">{{ item.emoji }}</span>
                   <span class="badge-name">{{ item.badge.name }}</span>
@@ -400,8 +400,9 @@ interface BadgeDisplay {
     `,
   ],
 })
-export class BadgesModalComponent {
+export class BadgesModalComponent implements OnInit {
   badges = input<UserBadge[]>([]);
+  initialSelectedBadgeId = input<string | null>(null);
   dismiss = output<void>();
   selectedBadge = signal<BadgeDisplay | null>(null);
 
@@ -415,6 +416,17 @@ export class BadgesModalComponent {
         color: getBadgeRarityColor(rarity),
       };
     });
+  }
+
+  ngOnInit() {
+    // If an initial badge ID is provided, select it
+    const initialId = this.initialSelectedBadgeId();
+    if (initialId) {
+      const badgeDisplay = this.badgeDisplays.find((item) => item.badge.id === initialId);
+      if (badgeDisplay) {
+        this.selectedBadge.set(badgeDisplay);
+      }
+    }
   }
 
   @HostListener('document:keydown.escape')

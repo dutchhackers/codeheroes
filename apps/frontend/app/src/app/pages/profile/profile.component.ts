@@ -101,14 +101,23 @@ import { BadgesModalComponent } from './components/badges-modal.component';
           <app-stats-grid [stats]="stats()" />
 
           <!-- Badges -->
-          <app-badges-grid [badges]="badges()" (viewAll)="showBadgesModal.set(true)" />
+          <app-badges-grid
+            [badges]="badges()"
+            (viewAll)="showBadgesModal.set(true)"
+            (badgeClick)="onBadgeClick($event)"
+          />
+
         </div>
       }
     </main>
 
     <!-- Badges Modal -->
     @if (showBadgesModal()) {
-      <app-badges-modal [badges]="badges()" (dismiss)="showBadgesModal.set(false)" />
+      <app-badges-modal
+        [badges]="badges()"
+        [initialSelectedBadgeId]="selectedBadgeId()"
+        (dismiss)="closeBadgesModal()"
+      />
     }
 
     <!-- Edit Profile Modal -->
@@ -174,6 +183,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   isLoading = signal(true);
   showEditModal = signal(false);
   showBadgesModal = signal(false);
+  selectedBadgeId = signal<string | null>(null);
   isSavingProfile = signal(false);
   profileSaveError = signal<string | null>(null);
 
@@ -262,5 +272,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
     } finally {
       this.isSavingProfile.set(false);
     }
+  }
+
+  onBadgeClick(badge: UserBadge) {
+    this.selectedBadgeId.set(badge.id);
+    this.showBadgesModal.set(true);
+  }
+
+  closeBadgesModal() {
+    this.showBadgesModal.set(false);
+    this.selectedBadgeId.set(null);
   }
 }
