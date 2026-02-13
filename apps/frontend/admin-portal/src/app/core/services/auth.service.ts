@@ -37,15 +37,18 @@ export class AuthService implements OnDestroy {
         } catch {
           this.#claims.set({});
         }
+        this.isLoading.set(false);
       } else {
         this.#claims.set({});
-      }
 
-      this.isLoading.set(false);
-
-      if (!user && !autoLoginAttempted && environment.useEmulators && environment.autoLogin) {
-        autoLoginAttempted = true;
-        this.#autoLogin(environment.autoLogin.email, environment.autoLogin.password);
+        if (!autoLoginAttempted && environment.useEmulators && environment.autoLogin) {
+          autoLoginAttempted = true;
+          // Keep isLoading true while auto-login is in progress so guards wait
+          await this.#autoLogin(environment.autoLogin.email, environment.autoLogin.password);
+          // onAuthStateChanged will fire again with the new user, setting isLoading there
+        } else {
+          this.isLoading.set(false);
+        }
       }
     });
   }
