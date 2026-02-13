@@ -44,8 +44,9 @@ export const appRoutes: Routes = [
   },
   {
     path: 'activity',
-    redirectTo: 'projects',
-    pathMatch: 'full',
+    loadComponent: loadWithReload(() =>
+      import('./pages/activity-wall/activity-wall.component').then((m) => m.ActivityWallComponent),
+    ),
   },
   {
     path: 'profile',
