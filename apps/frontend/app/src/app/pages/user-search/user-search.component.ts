@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnDestroy, AfterViewInit, ElementRef, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -29,6 +29,7 @@ import { UserSearchService } from '../../core/services/user-search.service';
               [(ngModel)]="searchTerm"
               (ngModelChange)="onSearchChange($event)"
               placeholder="Search for heroes..."
+              #searchInput
               class="search-input w-full px-4 py-3 pl-12 bg-black/50 border border-purple-500/30 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-colors"
               aria-label="Search for users"
             />
@@ -156,9 +157,11 @@ import { UserSearchService } from '../../core/services/user-search.service';
     `,
   ],
 })
-export class UserSearchComponent implements OnDestroy {
+export class UserSearchComponent implements OnDestroy, AfterViewInit {
   readonly #userSearchService = inject(UserSearchService);
   readonly #router = inject(Router);
+
+  readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput');
 
   searchTerm = '';
   users = signal<UserDto[]>([]);
@@ -180,6 +183,10 @@ export class UserSearchComponent implements OnDestroy {
 
     // Load initial users
     this.#loadInitialUsers();
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => this.searchInputRef()?.nativeElement.focus(), 50);
   }
 
   ngOnDestroy() {
