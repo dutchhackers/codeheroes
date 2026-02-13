@@ -57,7 +57,7 @@ interface BadgeDisplay {
               @if (selected.badge.earnedAt) {
                 <div class="detail-earned">
                   <span class="detail-label">Earned</span>
-                  <span class="detail-value">{{ selected.badge.earnedAt | date: 'MMMM yyyy' }}</span>
+                  <span class="detail-value">{{ selected.badge.earnedAt | date: 'd MMMM yyyy' }}</span>
                 </div>
               }
               @if (selected.badge.xp) {
