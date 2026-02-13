@@ -70,7 +70,7 @@ import { ProjectActivityFeedComponent } from './components/project-activity-feed
               colorClass="text-purple-400"
             />
             <app-project-stats-card
-              [value]="(project()?.stats?.activeRepos?.length ?? 0).toString()"
+              [value]="(project()?.repositories?.length ?? 0).toString()"
               label="Repos"
               colorClass="text-orange-400"
             />
