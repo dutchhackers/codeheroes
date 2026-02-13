@@ -20,6 +20,12 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </svg>
         <span class="nav-label">ACTIVITY</span>
       </a>
+      <a routerLink="/projects" routerLinkActive="active" class="nav-item" aria-label="Projects">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+        </svg>
+        <span class="nav-label">PROJECTS</span>
+      </a>
       <a routerLink="/search" routerLinkActive="active" class="nav-item" aria-label="Search users">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8" />
@@ -61,9 +67,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         align-items: center;
         justify-content: center;
         gap: 0.25rem;
-        padding: 0.5rem 1.5rem;
+        padding: 0.5rem 0.75rem;
         min-height: 44px;
-        min-width: 64px;
+        min-width: 52px;
         color: rgba(255, 255, 255, 0.5);
         text-decoration: none;
         transition: all 0.2s ease;

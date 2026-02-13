@@ -5,12 +5,15 @@ import {
   DailyProgress,
   WeeklyStats,
   LeaderboardEntry,
+  ProjectLeaderboardEntry,
   Highlight,
 } from '../../core/services/hq-data.service';
 import { DailyProgressComponent } from './components/daily-progress.component';
 import { WeeklyStatsComponent } from './components/weekly-stats.component';
 import { LeaderboardPreviewComponent } from './components/leaderboard-preview.component';
 import { LeaderboardModalComponent } from './components/leaderboard-modal.component';
+import { ProjectLeaderboardPreviewComponent } from './components/project-leaderboard-preview.component';
+import { ProjectLeaderboardModalComponent } from './components/project-leaderboard-modal.component';
 import { HighlightsComponent } from './components/highlights.component';
 
 @Component({
@@ -21,6 +24,8 @@ import { HighlightsComponent } from './components/highlights.component';
     WeeklyStatsComponent,
     LeaderboardPreviewComponent,
     LeaderboardModalComponent,
+    ProjectLeaderboardPreviewComponent,
+    ProjectLeaderboardModalComponent,
     HighlightsComponent,
   ],
   template: `
@@ -56,6 +61,13 @@ import { HighlightsComponent } from './components/highlights.component';
             (viewAll)="showLeaderboardModal.set(true)"
           />
 
+          <!-- Project Leaderboard Preview -->
+          <app-project-leaderboard-preview
+            [entries]="projectLeaderboardEntries()"
+            [isLoading]="projectLeaderboardLoading()"
+            (viewAll)="showProjectLeaderboardModal.set(true)"
+          />
+
           <!-- Recent Highlights -->
           <app-highlights [highlights]="highlights()" />
         </div>
@@ -65,6 +77,11 @@ import { HighlightsComponent } from './components/highlights.component';
     <!-- Leaderboard Modal -->
     @if (showLeaderboardModal()) {
       <app-leaderboard-modal (dismiss)="showLeaderboardModal.set(false)" />
+    }
+
+    <!-- Project Leaderboard Modal -->
+    @if (showProjectLeaderboardModal()) {
+      <app-project-leaderboard-modal (dismiss)="showProjectLeaderboardModal.set(false)" />
     }
   `,
   styles: [
@@ -81,6 +98,7 @@ export class HqComponent implements OnInit, OnDestroy {
   #dailyProgressSub: Subscription | null = null;
   #weeklyStatsSub: Subscription | null = null;
   #leaderboardSub: Subscription | null = null;
+  #projectLeaderboardSub: Subscription | null = null;
   #highlightsSub: Subscription | null = null;
 
   isLoading = signal(true);
@@ -90,8 +108,11 @@ export class HqComponent implements OnInit, OnDestroy {
   leaderboardLoading = signal(true);
   currentUserRank = signal<number | null>(null);
   currentUserId = signal<string | null>(null);
+  projectLeaderboardEntries = signal<ProjectLeaderboardEntry[]>([]);
+  projectLeaderboardLoading = signal(true);
   highlights = signal<Highlight[]>([]);
   showLeaderboardModal = signal(false);
+  showProjectLeaderboardModal = signal(false);
 
   ngOnInit() {
     this.#loadData();
@@ -101,6 +122,7 @@ export class HqComponent implements OnInit, OnDestroy {
     this.#dailyProgressSub?.unsubscribe();
     this.#weeklyStatsSub?.unsubscribe();
     this.#leaderboardSub?.unsubscribe();
+    this.#projectLeaderboardSub?.unsubscribe();
     this.#highlightsSub?.unsubscribe();
   }
 
@@ -145,6 +167,20 @@ export class HqComponent implements OnInit, OnDestroy {
       },
     });
 
+    // Load project leaderboard
+    this.#projectLeaderboardSub = this.#hqDataService.getWeeklyProjectLeaderboard(5).subscribe({
+      next: (entries) => {
+        this.projectLeaderboardEntries.set(entries);
+        this.projectLeaderboardLoading.set(false);
+        this.#checkLoadingComplete();
+      },
+      error: (error) => {
+        console.error('Failed to load project leaderboard:', error);
+        this.projectLeaderboardLoading.set(false);
+        this.#checkLoadingComplete();
+      },
+    });
+
     // Load highlights
     this.#highlightsSub = this.#hqDataService.getRecentHighlights(5).subscribe({
       next: (highlights) => {
@@ -162,8 +198,8 @@ export class HqComponent implements OnInit, OnDestroy {
 
   #checkLoadingComplete() {
     this.#loadCount++;
-    // All 4 data sources have responded
-    if (this.#loadCount >= 4) {
+    // All 5 data sources have responded
+    if (this.#loadCount >= 5) {
       this.isLoading.set(false);
     }
   }

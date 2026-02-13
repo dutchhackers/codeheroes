@@ -132,6 +132,94 @@ async function getXpLeaderboard(
   return results.sort((a, b) => b.xpGained - a.xpGained);
 }
 
+interface ProjectLeaderboardEntry {
+  projectId: string;
+  name: string;
+  slug: string;
+  xpGained: number;
+  totalXp: number;
+  activeMemberCount: number;
+  activeRepoCount: number;
+  periodId: string;
+}
+
+async function getProjectXpLeaderboard(
+  periodType: 'daily' | 'weekly',
+  periodId?: string,
+): Promise<ProjectLeaderboardEntry[]> {
+  const db = getFirestore();
+  const recordId = periodId || getTimePeriodIds()[periodType];
+
+  const projectsSnapshot = await db.collection(Collections.Projects).get();
+
+  const projectPromises = projectsSnapshot.docs.map(async (projectDoc) => {
+    const projectId = projectDoc.id;
+    const projectData = projectDoc.data();
+
+    const periodStatDoc = await db
+      .collection(Collections.Projects)
+      .doc(projectId)
+      .collection('activityStats')
+      .doc(periodType)
+      .collection('records')
+      .doc(recordId)
+      .get();
+
+    const currentStatsDoc = await db
+      .collection(Collections.Projects)
+      .doc(projectId)
+      .collection(Collections.Stats)
+      .doc('current')
+      .get();
+
+    const periodStats = periodStatDoc.exists ? (periodStatDoc.data() as TimeBasedActivityStats) : null;
+    const currentStats = currentStatsDoc.exists ? currentStatsDoc.data() : null;
+
+    return {
+      projectId,
+      name: projectData.name || projectId,
+      slug: projectData.slug || projectId,
+      xpGained: periodStats?.xpGained || 0,
+      totalXp: currentStats?.xp || 0,
+      activeMemberCount: projectData.activeMemberCount || 0,
+      activeRepoCount: projectData.repositoryCount || 0,
+      periodId: recordId,
+    };
+  });
+
+  let results = await Promise.all(projectPromises);
+  results = results.filter((entry) => entry.xpGained > 0);
+  return results.sort((a, b) => b.xpGained - a.xpGained);
+}
+
+// Weekly project leaderboard endpoint
+router.get('/projects/week/:weekId?', async (req, res) => {
+  const weekId = req.params.weekId;
+  logger.debug(`GET /leaderboards/projects/week${weekId ? `/${weekId}` : ''}`);
+
+  try {
+    const leaderboard = await getProjectXpLeaderboard('weekly', weekId);
+    res.json(leaderboard);
+  } catch (error) {
+    logger.error('Error getting weekly project leaderboard:', error);
+    res.status(500).json({ error: 'Failed to retrieve weekly project leaderboard' });
+  }
+});
+
+// Daily project leaderboard endpoint
+router.get('/projects/day/:dayId?', async (req, res) => {
+  const dayId = req.params.dayId;
+  logger.debug(`GET /leaderboards/projects/day${dayId ? `/${dayId}` : ''}`);
+
+  try {
+    const leaderboard = await getProjectXpLeaderboard('daily', dayId);
+    res.json(leaderboard);
+  } catch (error) {
+    logger.error('Error getting daily project leaderboard:', error);
+    res.status(500).json({ error: 'Failed to retrieve daily project leaderboard' });
+  }
+});
+
 // Weekly leaderboard endpoint
 router.get('/week/:weekId?', async (req, res) => {
   const weekId = req.params.weekId;
