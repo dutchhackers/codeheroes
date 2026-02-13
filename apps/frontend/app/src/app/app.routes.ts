@@ -10,9 +10,13 @@ function loadWithReload<T>(importFn: () => Promise<T>): () => Promise<T> {
       const chunkFailedMessage = /Loading chunk [\w-]+ failed|Failed to fetch dynamically imported module/;
       if (chunkFailedMessage.test(error?.message)) {
         const reloadKey = 'chunk-reload';
-        if (!sessionStorage.getItem(reloadKey)) {
+        const hasReloaded = sessionStorage.getItem(reloadKey);
+        if (!hasReloaded) {
           sessionStorage.setItem(reloadKey, 'true');
           window.location.reload();
+          return new Promise<never>(() => {
+            // Intentionally left empty — page is about to reload.
+          });
         }
         sessionStorage.removeItem(reloadKey);
       }

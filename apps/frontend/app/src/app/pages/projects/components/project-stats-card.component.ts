@@ -5,7 +5,7 @@ import { Component, input } from '@angular/core';
   standalone: true,
   template: `
     <div class="stat-card">
-      <span class="stat-value" [class]="colorClass()">{{ value() }}</span>
+      <span [class]="'stat-value ' + colorClass()">{{ value() }}</span>
       <span class="stat-label">{{ label() }}</span>
     </div>
   `,
