@@ -3,7 +3,7 @@ import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { UserDto, UserSettings, DEFAULT_DAILY_GOAL } from '@codeheroes/types';
+import { DEFAULT_DAILY_GOAL } from '@codeheroes/types';
 import { UserSettingsService } from '../../core/services/user-settings.service';
 import { UserStatsService } from '../../core/services/user-stats.service';
 
@@ -89,11 +89,17 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
             @if (goalSaveSuccess()) {
               <p class="save-success">Goal updated!</p>
             }
+            @if (goalSaveError()) {
+              <p class="save-error">Failed to save goal. Please try again.</p>
+            }
           </section>
 
           <!-- Notifications Section -->
           <section class="settings-section">
             <h2 class="section-title">Notifications</h2>
+            @if (notificationSaveError()) {
+              <p class="save-error" style="margin-bottom: 0.75rem">Failed to update notification setting. Please try again.</p>
+            }
             <div class="toggle-row">
               <div>
                 <p class="toggle-label">Enable Notifications</p>
@@ -247,6 +253,12 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
         margin-top: 0.5rem;
       }
 
+      .save-error {
+        font-size: 0.875rem;
+        color: rgb(239, 68, 68);
+        margin-top: 0.5rem;
+      }
+
       .toggle-row {
         display: flex;
         align-items: center;
@@ -326,12 +338,15 @@ export class SettingsComponent implements OnInit, OnDestroy {
   isSavingGoal = signal(false);
   isSavingNotifications = signal(false);
   goalSaveSuccess = signal(false);
+  goalSaveError = signal(false);
+  notificationSaveError = signal(false);
 
   #userId: string | null = null;
   #originalGoal = DEFAULT_DAILY_GOAL;
   #originalNotifications = true;
   #userSub: Subscription | null = null;
   #successTimeout: ReturnType<typeof setTimeout> | null = null;
+  #errorTimeout: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit() {
     this.#userSub = this.#userStatsService.getCurrentUserDoc().subscribe({
@@ -350,6 +365,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.#userSub?.unsubscribe();
     if (this.#successTimeout) clearTimeout(this.#successTimeout);
+    if (this.#errorTimeout) clearTimeout(this.#errorTimeout);
   }
 
   #loadSettings(userId: string) {
@@ -405,7 +421,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
         this.goalSaveSuccess.set(true);
         this.#successTimeout = setTimeout(() => this.goalSaveSuccess.set(false), 3000);
       },
-      error: () => this.isSavingGoal.set(false),
+      error: () => {
+        this.isSavingGoal.set(false);
+        this.goalSaveError.set(true);
+        this.#errorTimeout = setTimeout(() => this.goalSaveError.set(false), 5000);
+      },
     });
   }
 
@@ -421,7 +441,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
         this.#originalNotifications = newValue;
         this.isSavingNotifications.set(false);
       },
-      error: () => this.isSavingNotifications.set(false),
+      error: () => {
+        this.isSavingNotifications.set(false);
+        this.notificationSaveError.set(true);
+        this.#errorTimeout = setTimeout(() => this.notificationSaveError.set(false), 5000);
+      },
     });
   }
 

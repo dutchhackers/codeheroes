@@ -230,6 +230,7 @@ router.get('/:userId/settings', async (req, res) => {
         userId,
         dailyGoal: DEFAULT_DAILY_GOAL,
         notificationsEnabled: true,
+        updatedAt: getCurrentTimeAsISO(),
       });
       return;
     }
