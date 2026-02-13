@@ -1,5 +1,5 @@
 import { getCurrentTimeAsISO, logger, UserService } from '@codeheroes/common';
-import { Collections, CONNECTED_ACCOUNT_PROVIDERS } from '@codeheroes/types';
+import { Collections, CONNECTED_ACCOUNT_PROVIDERS, DEFAULT_DAILY_GOAL } from '@codeheroes/types';
 import * as express from 'express';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { z } from 'zod';
@@ -196,6 +196,82 @@ router.delete('/:userId/connected-accounts/:accountId', async (req, res) => {
   } catch (error) {
     logger.error('Error removing connected account:', error);
     res.status(500).json({ error: 'Failed to remove connected account' });
+  }
+});
+
+// --- User Settings ---
+
+const updateSettingsSchema = z.object({
+  dailyGoal: z.number().int().min(1000).max(50000).optional(),
+  notificationsEnabled: z.boolean().optional(),
+});
+
+router.get('/:userId/settings', async (req, res) => {
+  const { userId } = req.params;
+  logger.debug('GET /users/:userId/settings', { userId });
+
+  try {
+    const db = getFirestore();
+    const userDoc = await db.collection(Collections.Users).doc(userId).get();
+    if (!userDoc.exists) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const settingsDoc = await db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.Settings)
+      .doc('preferences')
+      .get();
+
+    if (!settingsDoc.exists) {
+      res.json({
+        userId,
+        dailyGoal: DEFAULT_DAILY_GOAL,
+        notificationsEnabled: true,
+      });
+      return;
+    }
+
+    res.json({ userId, ...settingsDoc.data() });
+  } catch (error) {
+    logger.error('Error fetching user settings:', error);
+    res.status(500).json({ error: 'Failed to fetch user settings' });
+  }
+});
+
+router.patch('/:userId/settings', validate(updateSettingsSchema), async (req, res) => {
+  const { userId } = req.params;
+  logger.debug('PATCH /users/:userId/settings', { userId, body: req.body });
+
+  try {
+    const db = getFirestore();
+    const userDoc = await db.collection(Collections.Users).doc(userId).get();
+    if (!userDoc.exists) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const settingsRef = db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.Settings)
+      .doc('preferences');
+
+    const updates = {
+      ...req.body,
+      userId,
+      updatedAt: getCurrentTimeAsISO(),
+    };
+
+    await settingsRef.set(updates, { merge: true });
+
+    const updated = await settingsRef.get();
+    res.json({ userId, ...updated.data() });
+  } catch (error) {
+    logger.error('Error updating user settings:', error);
+    res.status(500).json({ error: 'Failed to update user settings' });
   }
 });
 
