@@ -57,9 +57,20 @@ export class ProgressionService {
 
       // 3. Resolve project mapping (used for activity enrichment + project stats)
       const repo = this.extractRepository(action.context);
-      const mapping = repo
-        ? await this.projectRepository.resolveProjectForRepo(action.provider, repo.owner, repo.name)
-        : null;
+      let mapping: RepoProjectMapping | null = null;
+      if (repo) {
+        try {
+          mapping = await this.projectRepository.resolveProjectForRepo(action.provider, repo.owner, repo.name);
+        } catch (error) {
+          logger.warn('Failed to resolve project for repo; continuing without project enrichment', {
+            actionId: action.id,
+            provider: action.provider,
+            repoOwner: repo.owner,
+            repoName: repo.name,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
 
       // 4. Create activity record (enriched with project if mapped)
       const activity = this.activityRecorder.createFromAction(action, xpResult, mapping);
