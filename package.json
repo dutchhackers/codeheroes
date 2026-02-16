@@ -63,7 +63,7 @@
     "@schematics/angular": "21.1.2",
     "@simondotm/nx-firebase": "^22.3.3",
     "@swc-node/register": "~1.10.9",
-    "@swc/core": "~1.11.13",
+    "@swc/core": "~1.15.11",
     "@swc/helpers": "~0.5.11",
     "@types/jest": "30.0.0",
     "@types/node": "^24.0.0",
