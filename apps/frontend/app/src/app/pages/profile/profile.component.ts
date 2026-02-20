@@ -2,7 +2,9 @@ import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth, signOut } from '@angular/fire/auth';
 import { Subscription } from 'rxjs';
-import { UserDto, UserStats } from '@codeheroes/types';
+import { Firestore, collection, collectionData } from '@angular/fire/firestore';
+import { Injector, runInInjectionContext } from '@angular/core';
+import { UserDto, UserStats, ConnectedAccountDto, Collections } from '@codeheroes/types';
 import { UserStatsService } from '../../core/services/user-stats.service';
 import { UserCacheService } from '../../core/services/user-cache.service';
 import { UserBadge } from '../../core/models/user-badge.model';
@@ -12,6 +14,7 @@ import { StatsGridComponent } from './components/stats-grid.component';
 import { BadgesGridComponent } from './components/badges-grid.component';
 import { ProfileEditModalComponent } from './components/profile-edit-modal.component';
 import { BadgesModalComponent } from './components/badges-modal.component';
+import { ConnectedAccountsComponent } from './components/connected-accounts.component';
 
 @Component({
   selector: 'app-profile',
@@ -23,6 +26,7 @@ import { BadgesModalComponent } from './components/badges-modal.component';
     BadgesGridComponent,
     ProfileEditModalComponent,
     BadgesModalComponent,
+    ConnectedAccountsComponent,
   ],
   template: `
     <!-- Header -->
@@ -92,21 +96,20 @@ import { BadgesModalComponent } from './components/badges-modal.component';
 
           <!-- Name and Level -->
           <div class="text-center mb-4">
-            <div class="inline-flex items-center gap-2">
-              <h2 class="text-xl md:text-2xl font-bold text-white">
-                {{ user()?.displayName || 'Unknown' }}
-              </h2>
-              <button type="button" class="edit-button" (click)="openEditModal()" aria-label="Edit profile">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                  />
-                </svg>
-              </button>
-            </div>
+            <h2 class="text-xl md:text-2xl font-bold text-white mb-2">
+              {{ user()?.displayName || 'Unknown' }}
+            </h2>
+            <button type="button" class="edit-profile-button" (click)="openEditModal()" aria-label="Edit profile">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
+              </svg>
+              Edit Profile
+            </button>
             <p
               class="text-sm md:text-base text-purple-400 mt-1"
               aria-label="Current level {{ stats()?.level ?? 1 }}"
@@ -130,6 +133,9 @@ import { BadgesModalComponent } from './components/badges-modal.component';
             (viewAll)="showBadgesModal.set(true)"
             (badgeClick)="onBadgeClick($event)"
           />
+
+          <!-- Connected Accounts -->
+          <app-connected-accounts [accounts]="connectedAccounts()" />
 
         </div>
       }
@@ -170,22 +176,23 @@ import { BadgesModalComponent } from './components/badges-modal.component';
         justify-content: center;
       }
 
-      .edit-button {
+      .edit-profile-button {
         background: transparent;
         border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 6px;
-        padding: 0.625rem;
-        min-width: 44px;
-        min-height: 44px;
-        color: rgba(255, 255, 255, 0.5);
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        min-height: 40px;
+        color: rgba(255, 255, 255, 0.6);
         cursor: pointer;
         transition: all 0.2s;
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
+        gap: 0.375rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
       }
 
-      .edit-button:hover {
+      .edit-profile-button:hover {
         color: var(--neon-cyan);
         border-color: var(--neon-cyan);
         box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
@@ -196,15 +203,19 @@ import { BadgesModalComponent } from './components/badges-modal.component';
 export class ProfileComponent implements OnInit, OnDestroy {
   readonly #auth = inject(Auth);
   readonly #router = inject(Router);
+  readonly #firestore = inject(Firestore);
+  readonly #injector = inject(Injector);
   readonly #userStatsService = inject(UserStatsService);
   readonly #userCacheService = inject(UserCacheService);
 
   #profileSubscription: Subscription | null = null;
   #badgesSubscription: Subscription | null = null;
+  #connectedAccountsSub: Subscription | null = null;
 
   user = signal<UserDto | null>(null);
   stats = signal<UserStats | null>(null);
   badges = signal<UserBadge[]>([]);
+  connectedAccounts = signal<ConnectedAccountDto[]>([]);
   isLoading = signal(true);
   showEditModal = signal(false);
   showBadgesModal = signal(false);
@@ -219,6 +230,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.#profileSubscription?.unsubscribe();
     this.#badgesSubscription?.unsubscribe();
+    this.#connectedAccountsSub?.unsubscribe();
   }
 
   #loadProfile() {
@@ -228,6 +240,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.user.set(user);
         this.stats.set(stats);
         this.isLoading.set(false);
+
+        // Load connected accounts once we have the user
+        if (user) {
+          this.#loadConnectedAccounts(user.id);
+        }
       },
       error: (error) => {
         console.error('Failed to load profile:', error);
@@ -243,6 +260,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Failed to load badges:', error);
       },
+    });
+  }
+
+  #loadConnectedAccounts(userId: string) {
+    this.#connectedAccountsSub?.unsubscribe();
+    const accountsRef = collection(this.#firestore, `users/${userId}/${Collections.ConnectedAccounts}`);
+    this.#connectedAccountsSub = runInInjectionContext(this.#injector, () =>
+      collectionData(accountsRef, { idField: 'id' }),
+    ).subscribe({
+      next: (accounts) => this.connectedAccounts.set(accounts as ConnectedAccountDto[]),
+      error: (error) => console.error('Failed to load connected accounts:', error),
     });
   }
 

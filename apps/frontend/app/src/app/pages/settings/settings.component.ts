@@ -1,18 +1,20 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, Injector, runInInjectionContext } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { DEFAULT_DAILY_GOAL } from '@codeheroes/types';
+import { Firestore, collection, collectionData } from '@angular/fire/firestore';
+import { DEFAULT_DAILY_GOAL, ConnectedAccountDto, Collections } from '@codeheroes/types';
 import { UserSettingsService } from '../../core/services/user-settings.service';
 import { UserStatsService } from '../../core/services/user-stats.service';
+import { ConnectedAccountsComponent } from '../profile/components/connected-accounts.component';
 
 const GOAL_PRESETS = [4000, 8000, 12000, 16000];
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [DecimalPipe, FormsModule],
+  imports: [DecimalPipe, FormsModule, ConnectedAccountsComponent],
   template: `
     <!-- Header -->
     <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-4 py-4 md:px-6 lg:px-8 md:py-5">
@@ -114,6 +116,32 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
                 />
                 <span class="toggle-slider"></span>
               </label>
+            </div>
+          </section>
+
+          <!-- Connected Accounts Section -->
+          <section class="settings-section">
+            <h2 class="section-title">Connected Accounts</h2>
+            <p class="section-description">Accounts linked to your profile</p>
+            <app-connected-accounts [accounts]="connectedAccounts()" />
+          </section>
+
+          <!-- Account Section -->
+          <section class="settings-section">
+            <h2 class="section-title">Account</h2>
+            <div class="account-info-grid">
+              @if (userEmail()) {
+                <div class="account-info-row">
+                  <span class="account-info-label">Email</span>
+                  <span class="account-info-value">{{ userEmail() }}</span>
+                </div>
+              }
+              @if (memberSince()) {
+                <div class="account-info-row">
+                  <span class="account-info-label">Member Since</span>
+                  <span class="account-info-value">{{ memberSince() }}</span>
+                </div>
+              }
             </div>
           </section>
         }
@@ -335,11 +363,40 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
       .toggle-switch input:checked + .toggle-slider::before {
         transform: translateX(20px);
       }
+
+      .account-info-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .account-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.625rem 0.75rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+      }
+
+      .account-info-label {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .account-info-value {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+      }
     `,
   ],
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   readonly #router = inject(Router);
+  readonly #firestore = inject(Firestore);
+  readonly #injector = inject(Injector);
   readonly #settingsService = inject(UserSettingsService);
   readonly #userStatsService = inject(UserStatsService);
 
@@ -356,10 +413,15 @@ export class SettingsComponent implements OnInit, OnDestroy {
   goalSaveError = signal(false);
   notificationSaveError = signal(false);
 
+  connectedAccounts = signal<ConnectedAccountDto[]>([]);
+  userEmail = signal<string | null>(null);
+  memberSince = signal<string | null>(null);
+
   #userId: string | null = null;
   #originalGoal = DEFAULT_DAILY_GOAL;
   #originalNotifications = true;
   #userSub: Subscription | null = null;
+  #connectedAccountsSub: Subscription | null = null;
   #successTimeout: ReturnType<typeof setTimeout> | null = null;
   #errorTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -372,6 +434,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
         }
         this.#userId = userDoc.id;
         this.#loadSettings(userDoc.id);
+        this.#loadConnectedAccounts(userDoc.id);
+
+        // Set account info
+        this.userEmail.set(userDoc.email);
+        const date = new Date(userDoc.createdAt);
+        if (!isNaN(date.getTime())) {
+          this.memberSince.set(date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+        }
       },
       error: () => this.isLoading.set(false),
     });
@@ -379,8 +449,19 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.#userSub?.unsubscribe();
+    this.#connectedAccountsSub?.unsubscribe();
     if (this.#successTimeout) clearTimeout(this.#successTimeout);
     if (this.#errorTimeout) clearTimeout(this.#errorTimeout);
+  }
+
+  #loadConnectedAccounts(userId: string) {
+    const accountsRef = collection(this.#firestore, `users/${userId}/${Collections.ConnectedAccounts}`);
+    this.#connectedAccountsSub = runInInjectionContext(this.#injector, () =>
+      collectionData(accountsRef, { idField: 'id' }),
+    ).subscribe({
+      next: (accounts) => this.connectedAccounts.set(accounts as ConnectedAccountDto[]),
+      error: (error) => console.error('Failed to load connected accounts:', error),
+    });
   }
 
   #loadSettings(userId: string) {
