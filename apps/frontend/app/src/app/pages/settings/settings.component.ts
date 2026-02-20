@@ -69,7 +69,7 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
                   class="custom-input"
                   [(ngModel)]="customGoalValue"
                   [min]="1000"
-                  [max]="50000"
+                  [max]="100000"
                   step="500"
                   placeholder="Enter XP goal..."
                 />
@@ -230,7 +230,7 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
         padding: 0.625rem 1.5rem;
         border-radius: 8px;
         border: none;
-        background: linear-gradient(135deg, rgba(6, 182, 212, 0.8), rgba(139, 92, 246, 0.8));
+        background: linear-gradient(135deg, rgb(6, 182, 212), rgb(139, 92, 246));
         color: white;
         font-size: 0.875rem;
         font-weight: 600;
@@ -250,13 +250,28 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
       .save-success {
         font-size: 0.875rem;
         color: rgb(34, 197, 94);
-        margin-top: 0.5rem;
+        margin-top: 0.75rem;
+        padding: 0.625rem 1rem;
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        border-radius: 8px;
+        animation: fadeIn 0.3s ease;
       }
 
       .save-error {
         font-size: 0.875rem;
         color: rgb(239, 68, 68);
-        margin-top: 0.5rem;
+        margin-top: 0.75rem;
+        padding: 0.625rem 1rem;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 8px;
+        animation: fadeIn 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
       }
 
       .toggle-row {
@@ -403,7 +418,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   hasGoalChanges(): boolean {
     const current = this.isCustom() ? this.customGoalValue : this.selectedGoal();
-    return current !== this.#originalGoal && current >= 1000 && current <= 50000;
+    return current !== this.#originalGoal && current >= 1000 && current <= 100000;
   }
 
   saveGoal() {

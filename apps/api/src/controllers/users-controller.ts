@@ -202,7 +202,7 @@ router.delete('/:userId/connected-accounts/:accountId', async (req, res) => {
 // --- User Settings ---
 
 const updateSettingsSchema = z.object({
-  dailyGoal: z.number().int().min(1000).max(50000).optional(),
+  dailyGoal: z.number().int().min(1000).max(100000).optional(),
   notificationsEnabled: z.boolean().optional(),
 });
 
