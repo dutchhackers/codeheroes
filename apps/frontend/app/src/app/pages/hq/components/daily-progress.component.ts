@@ -8,7 +8,7 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
     <div class="daily-progress-card">
       <div class="card-header">
         <h3 class="card-title">Today's Goal</h3>
-        <span class="activities-badge">{{ activitiesCount() }} {{ activitiesCount() === 1 ? 'activity' : 'activities' }} today</span>
+        <span class="activities-badge">{{ activitiesCount() }} {{ activitiesCount() === 1 ? 'activity' : 'activities' }} completed</span>
       </div>
 
       <div class="progress-container">
