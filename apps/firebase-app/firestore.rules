@@ -8,8 +8,10 @@ service cloud.firestore {
     }
 
     // Helper function: Check if user is accessing their own data
+    // Note: userId in path is the custom user ID (e.g., "1000002"), not Firebase Auth UID
     function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+      return isAuthenticated()
+        && request.auth.uid == get(/databases/$(database)/documents/users/$(userId)).data.uid;
     }
 
     // ============================================
