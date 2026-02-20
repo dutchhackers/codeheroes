@@ -17,6 +17,18 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
         </div>
       </div>
 
+      <div class="filters">
+        <div class="filter-group">
+          <button class="filter-pill" [class.filter-pill--active]="userTypeFilter() === null" (click)="setUserTypeFilter(null)">All</button>
+          <button class="filter-pill" [class.filter-pill--active]="userTypeFilter() === 'user'" (click)="setUserTypeFilter('user')">Users</button>
+          <button class="filter-pill" [class.filter-pill--active]="userTypeFilter() === 'bot'" (click)="setUserTypeFilter('bot')">Bots</button>
+        </div>
+        <label class="toggle-label">
+          <input type="checkbox" [checked]="showZeroXp()" (change)="toggleShowZeroXp()" />
+          Show zero-XP participants
+        </label>
+      </div>
+
       @if (isLoading()) {
         <div class="loading-state">
           <p>Loading leaderboard...</p>
@@ -179,6 +191,58 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
         color: var(--theme-color-text-brand-default);
         font-weight: 600;
       }
+
+      .filters {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        gap: 16px;
+      }
+
+      .filter-group {
+        display: flex;
+        gap: 4px;
+      }
+
+      .filter-pill {
+        padding: 6px 14px;
+        border: 1px solid var(--theme-color-border-default-default);
+        border-radius: 20px;
+        background: var(--theme-color-bg-surface-default);
+        color: var(--theme-color-text-neutral-tertiary);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s ease;
+      }
+
+      .filter-pill:hover {
+        border-color: var(--theme-color-border-brand-default);
+        color: var(--theme-color-text-default);
+      }
+
+      .filter-pill--active {
+        background: var(--theme-color-bg-brand-default);
+        border-color: var(--theme-color-bg-brand-default);
+        color: #fff;
+      }
+
+      .toggle-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--theme-color-text-neutral-tertiary);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .toggle-label input[type="checkbox"] {
+        accent-color: var(--theme-color-bg-brand-default);
+        cursor: pointer;
+      }
     `,
   ],
 })
@@ -188,6 +252,8 @@ export class LeaderboardComponent implements OnInit {
   readonly entries = signal<LeaderboardEntry[]>([]);
   readonly isLoading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly showZeroXp = signal(false);
+  readonly userTypeFilter = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadLeaderboard();
@@ -196,7 +262,15 @@ export class LeaderboardComponent implements OnInit {
   loadLeaderboard(): void {
     this.isLoading.set(true);
     this.error.set(null);
-    this.#dashboardService.getWeeklyLeaderboard().subscribe({
+
+    const params: { includeZeroXp?: boolean; userType?: string } = {
+      includeZeroXp: this.showZeroXp(),
+    };
+    if (this.userTypeFilter()) {
+      params.userType = this.userTypeFilter()!;
+    }
+
+    this.#dashboardService.getWeeklyLeaderboard(params).subscribe({
       next: (entries) => {
         this.entries.set(entries);
         this.isLoading.set(false);
@@ -207,5 +281,15 @@ export class LeaderboardComponent implements OnInit {
         console.error('Failed to load leaderboard:', err);
       },
     });
+  }
+
+  toggleShowZeroXp(): void {
+    this.showZeroXp.update((v) => !v);
+    this.loadLeaderboard();
+  }
+
+  setUserTypeFilter(type: string | null): void {
+    this.userTypeFilter.set(type);
+    this.loadLeaderboard();
   }
 }
