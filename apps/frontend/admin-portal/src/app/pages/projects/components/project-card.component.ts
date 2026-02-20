@@ -1,23 +1,21 @@
 import { Component, input, output } from '@angular/core';
-import { SuiBadgeComponent } from '@move4mobile/stride-ui';
 import { ProjectSummaryDto } from '@codeheroes/types';
 
 @Component({
   selector: 'admin-project-card',
   standalone: true,
-  imports: [SuiBadgeComponent],
+  imports: [],
   template: `
-    <div class="card">
+    <div class="card" (click)="viewClick.emit()">
       <div class="card-top">
         <div class="card-icon">{{ project().name.charAt(0).toUpperCase() }}</div>
-        <sui-badge variant="soft" color="success" [compact]="true">Active</sui-badge>
       </div>
       <h3 class="card-title">{{ project().name }}</h3>
       <p class="card-subtitle">
-        {{ project().activeMemberCount }} members &middot; {{ project().repositoryCount }} repos
+        {{ project().activeMemberCount }} member{{ project().activeMemberCount !== 1 ? 's' : '' }} &middot; {{ project().repositoryCount }} repo{{ project().repositoryCount !== 1 ? 's' : '' }}
       </p>
       <button type="button" class="card-view-link" (click)="viewClick.emit()">
-        View
+        View details
         <span class="arrow">&rarr;</span>
       </button>
     </div>
@@ -32,6 +30,7 @@ import { ProjectSummaryDto } from '@codeheroes/types';
         transition: box-shadow 0.15s ease;
         display: flex;
         flex-direction: column;
+        cursor: pointer;
       }
 
       .card:hover {

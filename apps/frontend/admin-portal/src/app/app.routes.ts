@@ -20,7 +20,12 @@ export const appRoutes: Routes = [
         path: 'projects',
         loadComponent: () => import('./pages/projects/projects.component').then((m) => m.ProjectsComponent),
       },
-{
+      {
+        path: 'projects/:id',
+        loadComponent: () =>
+          import('./pages/projects/project-detail.component').then((m) => m.ProjectDetailComponent),
+      },
+      {
         path: 'users',
         loadComponent: () => import('./pages/users/users.component').then((m) => m.UsersComponent),
       },
