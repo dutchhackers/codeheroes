@@ -4,6 +4,7 @@ export interface PaginationParams {
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
   search?: string;
+  userType?: string;
 }
 
 export interface PaginatedResponse<T> {

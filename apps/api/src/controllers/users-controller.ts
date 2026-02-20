@@ -56,6 +56,7 @@ router.get('/', async (req, res) => {
     sortBy: req.query.sortBy as string | undefined,
     sortDirection,
     search: req.query.search as string | undefined,
+    userType: req.query.userType as string | undefined,
   };
 
   const users = await userService.getUsers(params);
