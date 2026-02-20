@@ -24,7 +24,8 @@ export function buildActivityDescription(activity: Activity): string {
   }
 
   // Fallback
-  return (activity as any).userFacingDescription || 'performed an action';
+  // All known Activity subtypes are handled above; this fallback guards against future types
+  return (activity as unknown as { userFacingDescription?: string }).userFacingDescription || 'performed an action';
 }
 
 function buildGameActionSentence(actionType: GameActionType, activity: Activity): string {

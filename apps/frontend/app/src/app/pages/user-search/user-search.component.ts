@@ -393,7 +393,11 @@ export class UserSearchComponent implements OnDestroy, AfterViewInit {
 
   #loadStatsForUsers(users: UserDto[]) {
     this.#statsSubscription?.unsubscribe();
-    if (users.length === 0) return;
+    if (users.length === 0) {
+      this.#userStatsMap.set(new Map());
+      this.isLoadingStats.set(false);
+      return;
+    }
 
     this.isLoadingStats.set(true);
     const statRequests = users.slice(0, 20).map((u) =>

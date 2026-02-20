@@ -6,7 +6,7 @@ import { Activity } from '@codeheroes/types';
 import { ActivityFeedService, LoadMoreResult } from '../../core/services/activity-feed.service';
 import { UserCacheService } from '../../core/services/user-cache.service';
 import { ActivityStackerService } from '../../core/services/activity-stacker.service';
-import { FeedItem, DateSeparator, isActivityStack, isSingleActivity, isDateSeparator } from '../../core/models/activity-stack.model';
+import { FeedItem, isActivityStack, isSingleActivity, isDateSeparator } from '../../core/models/activity-stack.model';
 import { ActivityItemComponent } from '../../components/activity-item.component';
 import { ActivityStackComponent } from '../../components/activity-stack/activity-stack.component';
 import { DebugPanelComponent } from '../../components/debug-panel.component';
@@ -86,12 +86,12 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
                   <span class="date-separator-label">{{ item.label }}</span>
                 </div>
               } @else if (isStack(item)) {
-                <app-activity-stack [stack]="item" [isNew]="i === 0" (selectActivity)="onSelectActivity($event)" />
+                <app-activity-stack [stack]="item" [isNew]="i === 0 || (i === 1 && isDateSep(displayItems()[0]))" (selectActivity)="onSelectActivity($event)" />
               } @else if (isSingle(item)) {
                 <app-activity-item
                   [activity]="item.activity"
                   [userInfo]="getUserInfo(item.activity.userId)"
-                  [isNew]="i === 0"
+                  [isNew]="i === 0 || (i === 1 && isDateSep(displayItems()[0]))"
                   (selectActivity)="onSelectActivity($event)"
                 />
               }
@@ -279,12 +279,16 @@ export class ActivityWallComponent implements OnInit, OnDestroy {
 
     // Apply filter
     let filtered = items;
-    if (filter === 'mine' && currentUserId) {
-      filtered = items.filter((item) => {
-        if (isSingleActivity(item)) return item.activity.userId === currentUserId;
-        if (isActivityStack(item)) return item.activities.some((a) => a.userId === currentUserId);
-        return false;
-      });
+    if (filter === 'mine') {
+      if (!currentUserId) {
+        filtered = [];
+      } else {
+        filtered = items.filter((item) => {
+          if (isSingleActivity(item)) return item.activity.userId === currentUserId;
+          if (isActivityStack(item)) return item.activities.some((a) => a.userId === currentUserId);
+          return false;
+        });
+      }
     }
 
     // Filter out bot activities when showBots is false
