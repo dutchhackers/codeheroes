@@ -34,6 +34,48 @@ function getProjectRepository(): ProjectRepository {
   return new ProjectRepository(DatabaseInstance.getInstance());
 }
 
+// GET /projects/search — search projects by name
+router.get('/search', async (req, res) => {
+  const searchTerm = (req.query.q as string || '').trim().toLowerCase();
+  logger.debug('GET /projects/search', { q: searchTerm });
+
+  if (!searchTerm) {
+    res.json([]);
+    return;
+  }
+
+  try {
+    const repo = getProjectRepository();
+    const projects = await repo.getAllProjects();
+
+    const filtered = projects.filter((p) => p.name.toLowerCase().includes(searchTerm));
+    const limited = filtered.slice(0, 20);
+
+    const summaries: ProjectSummaryDto[] = await Promise.all(
+      limited.map(async (project) => {
+        const stats = await repo.getProjectStats(project.id);
+        return {
+          id: project.id,
+          name: project.name,
+          slug: project.slug,
+          description: project.description,
+          repositoryCount: project.repositories.length,
+          totalXp: stats?.totalXp ?? 0,
+          totalActions: stats?.totalActions ?? 0,
+          activeMemberCount: stats?.activeMembers?.length ?? 0,
+          activeRepoCount: stats?.activeRepos?.length ?? 0,
+          lastActivity: stats?.lastActivity,
+        };
+      }),
+    );
+
+    res.json(summaries);
+  } catch (error) {
+    logger.error('Error searching projects', { error });
+    res.status(500).json({ error: 'Failed to search projects' });
+  }
+});
+
 // GET /projects — list all projects with summary stats
 router.get('/', async (req, res) => {
   logger.debug('GET /projects');
