@@ -2,8 +2,8 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ProjectsService } from '../../core/services/projects.service';
-import { UsersService } from '../../core/services/users.service';
 import { DashboardService, LeaderboardEntry } from '../../core/services/dashboard.service';
+import { UnmatchedEventsService } from '../../core/services/unmatched-events.service';
 
 @Component({
   selector: 'admin-home',
@@ -17,7 +17,7 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
       @if (isLoading()) {
         <!-- Skeleton: stat cards -->
         <div class="stats-grid">
-          @for (_ of [1, 2, 3, 4]; track $index) {
+          @for (_ of [1, 2, 3, 4, 5]; track $index) {
             <div class="stat-card">
               <div class="skeleton skeleton-label"></div>
               <div class="skeleton skeleton-value"></div>
@@ -65,6 +65,10 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
             <span class="stat-label">Total Actions (all projects)</span>
             <span class="stat-value">{{ formatNumber(totalActions()) }}</span>
           </div>
+          <a class="stat-card stat-card--link" routerLink="/unmatched">
+            <span class="stat-label">Unmatched Events</span>
+            <span class="stat-value">{{ unmatchedCount() }}</span>
+          </a>
         </div>
 
         @if (leaderboardTop().length > 0) {
@@ -89,7 +93,7 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
                     <td class="rank-cell">{{ i + 1 }}</td>
                     <td>
                       <div class="user-cell">
-                        <div class="user-avatar">{{ entry.displayName?.charAt(0)?.toUpperCase() || '?' }}</div>
+                        <div class="user-avatar">{{ entry.displayName.charAt(0).toUpperCase() || '?' }}</div>
                         <span class="user-name">{{ entry.displayName }}</span>
                       </div>
                     </td>
@@ -134,6 +138,16 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
         display: flex;
         flex-direction: column;
         gap: 8px;
+      }
+
+      .stat-card--link {
+        text-decoration: none;
+        cursor: pointer;
+        transition: box-shadow 0.15s ease;
+      }
+
+      .stat-card--link:hover {
+        box-shadow: var(--theme-effect-styles-drop-shadow-200);
       }
 
       .stat-label {
@@ -326,13 +340,14 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
 })
 export class HomeComponent implements OnInit {
   readonly #projectsService = inject(ProjectsService);
-  readonly #usersService = inject(UsersService);
   readonly #dashboardService = inject(DashboardService);
+  readonly #unmatchedEventsService = inject(UnmatchedEventsService);
 
   readonly projectCount = signal(0);
   readonly userCountLabel = signal('0');
   readonly totalXp = signal(0);
   readonly totalActions = signal(0);
+  readonly unmatchedCount = signal(0);
   readonly leaderboard = signal<LeaderboardEntry[]>([]);
   readonly leaderboardTop = computed(() => this.leaderboard().slice(0, 5));
   readonly isLoading = signal(true);
@@ -341,18 +356,16 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     forkJoin({
       projects: this.#projectsService.getProjects(),
-      users: this.#usersService.getUsers({ limit: 100 }),
       leaderboard: this.#dashboardService.getWeeklyLeaderboard(),
+      unmatched: this.#unmatchedEventsService.getSummary(),
     }).subscribe({
-      next: ({ projects, users, leaderboard }) => {
+      next: ({ projects, leaderboard, unmatched }) => {
         this.projectCount.set(projects.length);
         this.totalXp.set(projects.reduce((sum, p) => sum + p.totalXp, 0));
         this.totalActions.set(projects.reduce((sum, p) => sum + p.totalActions, 0));
-
-        const userItems = users.items.length;
-        this.userCountLabel.set(users.hasMore ? `${userItems}+` : `${userItems}`);
-
+        this.userCountLabel.set(String(leaderboard.length));
         this.leaderboard.set(leaderboard);
+        this.unmatchedCount.set(unmatched.unknownUserCount + unmatched.unlinkedRepoCount);
         this.isLoading.set(false);
       },
       error: (err) => {

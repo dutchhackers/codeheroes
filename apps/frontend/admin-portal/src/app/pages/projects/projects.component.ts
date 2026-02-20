@@ -1,23 +1,34 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { SuiButtonComponent } from '@move4mobile/stride-ui';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ProjectCardComponent } from './components/project-card.component';
-import { EditProjectModalComponent } from './components/edit-project-modal.component';
 import { ProjectsService } from '../../core/services/projects.service';
 import { ProjectSummaryDto } from '@codeheroes/types';
 
 @Component({
   selector: 'admin-projects',
   standalone: true,
-  imports: [ProjectCardComponent, EditProjectModalComponent, SuiButtonComponent],
+  imports: [FormsModule, ProjectCardComponent],
   template: `
     <div>
       <div class="page-header">
         <div>
           <h1 class="page-title">Projects</h1>
           @if (!isLoading() && !error()) {
-            <p class="page-subtitle">{{ projects().length }} projects</p>
+            <p class="page-subtitle">{{ filteredProjects().length }} projects</p>
           }
         </div>
+        @if (!isLoading() && !error() && projects().length > 0) {
+          <div class="search-container">
+            <input
+              class="search-input"
+              type="text"
+              placeholder="Search projects..."
+              [ngModel]="searchTerm()"
+              (ngModelChange)="searchTerm.set($event)"
+            />
+          </div>
+        }
       </div>
 
       @if (isLoading()) {
@@ -27,30 +38,28 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       } @else if (error()) {
         <div class="error-state">
           <p>{{ error() }}</p>
-          <sui-button variant="outline" color="neutral" size="sm" (click)="loadProjects()">
-            Try again
-          </sui-button>
+          <button class="retry-button" (click)="loadProjects()">Try again</button>
         </div>
       } @else if (projects().length === 0) {
         <div class="empty-state">
           <p>No projects found.</p>
         </div>
+      } @else if (filteredProjects().length === 0) {
+        <div class="empty-state">
+          @if (searchTerm()) {
+            <p>No projects matching "{{ searchTerm() }}".</p>
+          } @else {
+            <p>No projects found.</p>
+          }
+        </div>
       } @else {
         <div class="projects-grid">
-          @for (project of projects(); track project.id) {
-            <admin-project-card [project]="project" (viewClick)="openEditModal(project)" />
+          @for (project of filteredProjects(); track project.id) {
+            <admin-project-card [project]="project" (viewClick)="openProject(project)" />
           }
         </div>
       }
     </div>
-
-    @if (editingProject()) {
-      <admin-edit-project-modal
-        [project]="editingProject()!"
-        (cancel)="closeEditModal()"
-        (save)="saveProject($event)"
-      />
-    }
   `,
   styles: [
     `
@@ -73,6 +82,30 @@ import { ProjectSummaryDto } from '@codeheroes/types';
         color: var(--theme-color-text-neutral-tertiary);
       }
 
+      .search-container {
+        flex-shrink: 0;
+      }
+
+      .search-input {
+        padding: 8px 12px;
+        border: 1px solid var(--theme-color-border-default-default);
+        border-radius: 6px;
+        font-size: 14px;
+        color: var(--theme-color-text-default);
+        background: var(--theme-color-bg-surface-default);
+        min-width: 240px;
+        font-family: inherit;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: var(--theme-color-border-brand-default);
+      }
+
+      .search-input::placeholder {
+        color: var(--theme-color-text-neutral-tertiary);
+      }
+
       .loading-state,
       .empty-state {
         text-align: center;
@@ -91,6 +124,17 @@ import { ProjectSummaryDto } from '@codeheroes/types';
         gap: 12px;
         color: var(--theme-color-feedback-text-error-default);
         font-size: 14px;
+      }
+
+      .retry-button {
+        padding: 6px 12px;
+        border: 1px solid var(--theme-color-border-default-default);
+        border-radius: 6px;
+        background: var(--theme-color-bg-surface-default);
+        color: var(--theme-color-text-default);
+        font-size: 13px;
+        cursor: pointer;
+        font-family: inherit;
       }
 
       .projects-grid {
@@ -115,11 +159,20 @@ import { ProjectSummaryDto } from '@codeheroes/types';
 })
 export class ProjectsComponent implements OnInit {
   readonly #projectsService = inject(ProjectsService);
+  readonly #router = inject(Router);
 
   readonly projects = signal<ProjectSummaryDto[]>([]);
   readonly isLoading = signal(true);
   readonly error = signal<string | null>(null);
-  readonly editingProject = signal<ProjectSummaryDto | null>(null);
+  readonly searchTerm = signal('');
+
+  readonly filteredProjects = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) return this.projects();
+    return this.projects().filter(
+      (p) => p.name.toLowerCase().includes(term) || p.slug.toLowerCase().includes(term),
+    );
+  });
 
   ngOnInit(): void {
     this.loadProjects();
@@ -141,28 +194,7 @@ export class ProjectsComponent implements OnInit {
     });
   }
 
-  openEditModal(project: ProjectSummaryDto): void {
-    this.editingProject.set(project);
-  }
-
-  closeEditModal(): void {
-    this.editingProject.set(null);
-  }
-
-  saveProject(newName: string): void {
-    const project = this.editingProject();
-    if (!project) return;
-
-    this.#projectsService.updateProject(project.id, { name: newName }).subscribe({
-      next: () => {
-        this.projects.update((list) =>
-          list.map((p) => (p.id === project.id ? { ...p, name: newName } : p)),
-        );
-        this.closeEditModal();
-      },
-      error: (err) => {
-        console.error('Failed to update project:', err);
-      },
-    });
+  openProject(project: ProjectSummaryDto): void {
+    this.#router.navigate(['/projects', project.id]);
   }
 }

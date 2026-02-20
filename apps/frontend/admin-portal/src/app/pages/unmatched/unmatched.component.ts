@@ -286,7 +286,7 @@ type TabType = 'unknown_user' | 'unlinked_repo';
         background: var(--theme-color-bg-surface-default);
         border: 1px solid var(--theme-color-border-default-default);
         border-radius: 8px;
-        overflow: hidden;
+        overflow-x: auto;
       }
 
       .data-table {
@@ -355,6 +355,7 @@ type TabType = 'unknown_user' | 'unlinked_repo';
       .action-buttons {
         display: flex;
         gap: 4px;
+        white-space: nowrap;
       }
     `,
   ],

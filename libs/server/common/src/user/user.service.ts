@@ -1,5 +1,5 @@
 import { PaginatedResponse, PaginationParams } from '@codeheroes/types';
-import { CollectionReference } from 'firebase-admin/firestore';
+import { CollectionReference, Query } from 'firebase-admin/firestore';
 import { getCurrentTimeAsISO } from '../core/firebase';
 import { BaseFirestoreService, CounterService } from '../core/services';
 import { userConverter } from './user.converter';
@@ -68,7 +68,12 @@ export class UserService extends BaseFirestoreService<User> {
       orderField = allowedSortFields[params.sortBy];
     }
 
-    let query = this.collection.orderBy(orderField, sortDirection).limit(limit + 1);
+    let baseQuery: Query<User> = this.collection;
+    if (params.userType) {
+      baseQuery = baseQuery.where('userType', '==', params.userType);
+    }
+
+    let query = baseQuery.orderBy(orderField, sortDirection).limit(limit + 1);
 
     if (searchTerm && !params.startAfterId) {
       // First page of search: use value-based range
