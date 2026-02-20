@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import {
   LeaderboardService,
@@ -301,7 +302,7 @@ type LeaderboardType = 'heroes' | 'bots' | 'projects';
 export class FullLeaderboardComponent implements OnInit, OnDestroy {
   readonly #leaderboardService = inject(LeaderboardService);
   readonly #route = inject(ActivatedRoute);
-  readonly #router = inject(Router);
+  readonly #location = inject(Location);
 
   leaderboardType: LeaderboardType = 'heroes';
   activePeriod = signal<LeaderboardPeriod>('week');
@@ -343,7 +344,7 @@ export class FullLeaderboardComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
-    this.#router.navigate(['/leaderboard']);
+    this.#location.back();
   }
 
   #loadData() {

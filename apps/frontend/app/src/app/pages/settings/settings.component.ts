@@ -1,6 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy, Injector, runInInjectionContext } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { DecimalPipe, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { Firestore, collection, collectionData } from '@angular/fire/firestore';
@@ -394,7 +393,7 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
   ],
 })
 export class SettingsComponent implements OnInit, OnDestroy {
-  readonly #router = inject(Router);
+  readonly #location = inject(Location);
   readonly #firestore = inject(Firestore);
   readonly #injector = inject(Injector);
   readonly #settingsService = inject(UserSettingsService);
@@ -546,6 +545,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
-    this.#router.navigate(['/profile']);
+    this.#location.back();
   }
 }
