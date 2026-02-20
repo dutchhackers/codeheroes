@@ -299,8 +299,12 @@ export class ActivityWallComponent implements OnInit, OnDestroy {
           return !userInfo || userInfo.userType !== 'bot';
         }
         if (isActivityStack(item)) {
-          const userInfo = this.#userCacheService.getUserInfo(item.activities[0]?.userId);
-          return !userInfo || userInfo.userType !== 'bot';
+          // Hide stack only if ALL activities are from bots (mixed stacks with human activity are kept)
+          const allBots = item.activities.every((a) => {
+            const userInfo = this.#userCacheService.getUserInfo(a.userId);
+            return userInfo?.userType === 'bot';
+          });
+          return !allBots;
         }
         return true;
       });
