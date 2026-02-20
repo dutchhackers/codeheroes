@@ -65,7 +65,7 @@
     "@nx/js": "22.4.4",
     "@nx/node": "22.4.4",
     "@nx/web": "22.4.4",
-    "@nx/workspace": "22.4.4",
+    "@nx/workspace": "22.5.1",
     "@schematics/angular": "21.1.2",
     "@simondotm/nx-firebase": "^22.3.3",
     "@swc-node/register": "~1.10.9",
