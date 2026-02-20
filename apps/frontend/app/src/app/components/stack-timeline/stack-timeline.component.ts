@@ -1,4 +1,5 @@
 import { Component, input, computed, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Activity, GameActionActivity, isGameActionActivity } from '@codeheroes/types';
 import { getActionTypeDisplay } from '../../core/mappings/action-type.mapping';
@@ -18,6 +19,17 @@ interface TimelineEvent {
 @Component({
   selector: 'app-stack-timeline',
   standalone: true,
+  styles: [`
+    .timeline-user-link {
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .timeline-user-link:hover {
+      color: var(--neon-cyan) !important;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  `],
   template: `
     <div class="relative pl-6">
       <!-- Vertical connecting line -->
@@ -42,7 +54,7 @@ interface TimelineEvent {
             <!-- Event content -->
             <div class="flex-1 min-w-0 flex items-center gap-2">
               <span class="text-slate-500 text-xs">{{ event.formattedTime }}</span>
-              <span class="text-slate-400 text-sm font-medium">{{ event.userInfo?.displayName || 'Unknown' }}</span>
+              <span class="timeline-user-link text-slate-400 text-sm font-medium" (click)="navigateToProfile(event.activity.userId, $event)">{{ event.userInfo?.displayName || 'Unknown' }}</span>
               <span [class]="event.textColor" class="text-sm">{{ event.actionLabel }}</span>
               @if (!last) {
                 <!-- Subtle XP badge -->
@@ -58,6 +70,7 @@ interface TimelineEvent {
 export class StackTimelineComponent {
   readonly #sanitizer = inject(DomSanitizer);
   readonly #userCacheService = inject(UserCacheService);
+  readonly #router = inject(Router);
 
   /** Activities sorted oldest to newest for timeline display */
   activities = input.required<Activity[]>();
@@ -125,5 +138,12 @@ export class StackTimelineComponent {
       }
     }
     return 'reviewed';
+  }
+
+  navigateToProfile(userId: string, event: Event) {
+    event.stopPropagation();
+    if (userId) {
+      this.#router.navigate(['/users', userId]);
+    }
   }
 }

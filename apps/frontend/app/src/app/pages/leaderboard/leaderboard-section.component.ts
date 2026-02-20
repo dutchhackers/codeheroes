@@ -1,5 +1,5 @@
-import { Component, input, output } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject, input } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { LeaderboardEntry, ProjectLeaderboardEntry } from '../../core/services/leaderboard.service';
 import * as LeaderboardUtils from '../hq/utils/leaderboard.utils';
 
@@ -49,7 +49,7 @@ import * as LeaderboardUtils from '../hq/utils/leaderboard.utils';
                   <span class="rank-number" [attr.aria-label]="'Rank ' + (i + 1)">#{{ i + 1 }}</span>
                 }
               </div>
-              <div class="user-profile">
+              <div class="user-profile profile-link" (click)="navigateToUser(entry.userId)">
                 @if (entry.photoUrl) {
                   <img [src]="entry.photoUrl" [alt]="entry.displayName" class="user-avatar" loading="lazy" />
                 } @else {
@@ -81,7 +81,7 @@ import * as LeaderboardUtils from '../hq/utils/leaderboard.utils';
                   <span class="rank-number" [attr.aria-label]="'Rank ' + (i + 1)">#{{ i + 1 }}</span>
                 }
               </div>
-              <div class="user-profile">
+              <div class="user-profile profile-link" (click)="navigateToProject(entry.projectId)">
                 <div class="project-avatar-placeholder">
                   {{ getInitials(entry.name) }}
                 </div>
@@ -272,6 +272,28 @@ import * as LeaderboardUtils from '../hq/utils/leaderboard.utils';
         text-overflow: ellipsis;
       }
 
+      .profile-link {
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+
+      .profile-link:hover .user-name {
+        color: var(--neon-cyan);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+
+      .profile-link:hover .user-avatar {
+        border-color: var(--neon-cyan);
+        box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+      }
+
+      .profile-link:hover .user-avatar-placeholder,
+      .profile-link:hover .project-avatar-placeholder {
+        border-color: var(--neon-cyan);
+        box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+      }
+
       .xp-badge {
         display: flex;
         flex-direction: column;
@@ -310,6 +332,8 @@ import * as LeaderboardUtils from '../hq/utils/leaderboard.utils';
   ],
 })
 export class LeaderboardSectionComponent {
+  readonly #router = inject(Router);
+
   title = input.required<string>();
   icon = input<string>('🏆');
   viewAllRoute = input<string | null>(null);
@@ -324,4 +348,12 @@ export class LeaderboardSectionComponent {
   getInitials = LeaderboardUtils.getInitials;
   formatName = LeaderboardUtils.formatName;
   formatXp = LeaderboardUtils.formatXp;
+
+  navigateToUser(userId: string) {
+    this.#router.navigate(['/users', userId]);
+  }
+
+  navigateToProject(projectId: string) {
+    this.#router.navigate(['/projects', projectId]);
+  }
 }

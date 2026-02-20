@@ -1,5 +1,5 @@
-import { Component, input, output, computed } from '@angular/core';
-
+import { Component, inject, input, output, computed } from '@angular/core';
+import { Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
   Activity,
@@ -43,7 +43,7 @@ import { buildActivityDescription } from '../core/utils/activity-description.uti
 
         <!-- Avatar on LEFT (when icon is on right) -->
         @if (iconPosition() === 'right') {
-          <div class="activity-avatar-wrapper">
+          <div class="activity-avatar-wrapper activity-avatar-link" (click)="navigateToProfile($event)">
             @if (userInfo()?.photoUrl) {
               <div class="activity-avatar-container" [style.--border-color]="actionDisplay().borderColor">
                 <img
@@ -65,14 +65,14 @@ import { buildActivityDescription } from '../core/utils/activity-description.uti
         <div class="activity-text" [class]="actionDisplay().textColor">
           <p class="activity-description">
             <span class="activity-time">[{{ formattedTime() }}]</span>
-            <span class="activity-user">{{ userInfo()?.displayName || 'UNKNOWN' }}</span>
+            <span class="activity-user activity-user-link" (click)="navigateToProfile($event)">{{ userInfo()?.displayName || 'UNKNOWN' }}</span>
             <span>{{ descriptionText() }}</span>
           </p>
         </div>
 
         <!-- Avatar on RIGHT (when icon is on left) -->
         @if (iconPosition() === 'left') {
-          <div class="activity-avatar-wrapper">
+          <div class="activity-avatar-wrapper activity-avatar-link" (click)="navigateToProfile($event)">
             @if (userInfo()?.photoUrl) {
               <div class="activity-avatar-container" [style.--border-color]="actionDisplay().borderColor">
                 <img
@@ -230,6 +230,36 @@ import { buildActivityDescription } from '../core/utils/activity-description.uti
         margin-right: 0.5rem;
       }
 
+      .activity-user-link {
+        cursor: pointer;
+        transition: color 0.15s;
+      }
+
+      .activity-user-link:hover {
+        color: var(--neon-cyan);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+
+      .activity-avatar-link {
+        cursor: pointer;
+        transition: transform 0.15s;
+      }
+
+      .activity-avatar-link:hover {
+        transform: scale(1.1);
+      }
+
+      .activity-avatar-link:hover .activity-avatar-container {
+        border-color: var(--neon-cyan) !important;
+        box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+      }
+
+      .activity-avatar-link:hover .activity-avatar-placeholder {
+        border-color: var(--neon-cyan);
+        box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+      }
+
       .activity-footer {
         display: flex;
         justify-content: space-between;
@@ -294,6 +324,8 @@ import { buildActivityDescription } from '../core/utils/activity-description.uti
   ],
 })
 export class ActivityItemComponent {
+  readonly #router = inject(Router);
+
   activity = input.required<Activity>();
   userInfo = input<UserInfo | null>(null);
   isNew = input<boolean>(false);
@@ -418,4 +450,12 @@ export class ActivityItemComponent {
     }
     return 0;
   });
+
+  navigateToProfile(event: Event) {
+    event.stopPropagation();
+    const userId = this.activity().userId;
+    if (userId) {
+      this.#router.navigate(['/users', userId]);
+    }
+  }
 }
