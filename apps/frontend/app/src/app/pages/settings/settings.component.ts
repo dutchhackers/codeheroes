@@ -1,18 +1,19 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { Component, inject, signal, OnInit, OnDestroy, Injector, runInInjectionContext } from '@angular/core';
+import { DecimalPipe, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { DEFAULT_DAILY_GOAL } from '@codeheroes/types';
+import { Firestore, collection, collectionData } from '@angular/fire/firestore';
+import { DEFAULT_DAILY_GOAL, ConnectedAccountDto, Collections } from '@codeheroes/types';
 import { UserSettingsService } from '../../core/services/user-settings.service';
 import { UserStatsService } from '../../core/services/user-stats.service';
+import { ConnectedAccountsComponent } from '../profile/components/connected-accounts.component';
 
 const GOAL_PRESETS = [4000, 8000, 12000, 16000];
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [DecimalPipe, FormsModule],
+  imports: [DecimalPipe, FormsModule, ConnectedAccountsComponent],
   template: `
     <!-- Header -->
     <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-4 py-4 md:px-6 lg:px-8 md:py-5">
@@ -69,7 +70,7 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
                   class="custom-input"
                   [(ngModel)]="customGoalValue"
                   [min]="1000"
-                  [max]="50000"
+                  [max]="100000"
                   step="500"
                   placeholder="Enter XP goal..."
                 />
@@ -114,6 +115,32 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
                 />
                 <span class="toggle-slider"></span>
               </label>
+            </div>
+          </section>
+
+          <!-- Connected Accounts Section -->
+          <section class="settings-section">
+            <h2 class="section-title">Connected Accounts</h2>
+            <p class="section-description">Accounts linked to your profile</p>
+            <app-connected-accounts [accounts]="connectedAccounts()" />
+          </section>
+
+          <!-- Account Section -->
+          <section class="settings-section">
+            <h2 class="section-title">Account</h2>
+            <div class="account-info-grid">
+              @if (userEmail()) {
+                <div class="account-info-row">
+                  <span class="account-info-label">Email</span>
+                  <span class="account-info-value">{{ userEmail() }}</span>
+                </div>
+              }
+              @if (memberSince()) {
+                <div class="account-info-row">
+                  <span class="account-info-label">Member Since</span>
+                  <span class="account-info-value">{{ memberSince() }}</span>
+                </div>
+              }
             </div>
           </section>
         }
@@ -230,7 +257,7 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
         padding: 0.625rem 1.5rem;
         border-radius: 8px;
         border: none;
-        background: linear-gradient(135deg, rgba(6, 182, 212, 0.8), rgba(139, 92, 246, 0.8));
+        background: linear-gradient(135deg, rgb(6, 182, 212), rgb(139, 92, 246));
         color: white;
         font-size: 0.875rem;
         font-weight: 600;
@@ -250,13 +277,28 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
       .save-success {
         font-size: 0.875rem;
         color: rgb(34, 197, 94);
-        margin-top: 0.5rem;
+        margin-top: 0.75rem;
+        padding: 0.625rem 1rem;
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        border-radius: 8px;
+        animation: fadeIn 0.3s ease;
       }
 
       .save-error {
         font-size: 0.875rem;
         color: rgb(239, 68, 68);
-        margin-top: 0.5rem;
+        margin-top: 0.75rem;
+        padding: 0.625rem 1rem;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 8px;
+        animation: fadeIn 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
       }
 
       .toggle-row {
@@ -320,11 +362,40 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
       .toggle-switch input:checked + .toggle-slider::before {
         transform: translateX(20px);
       }
+
+      .account-info-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .account-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.625rem 0.75rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+      }
+
+      .account-info-label {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .account-info-value {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+      }
     `,
   ],
 })
 export class SettingsComponent implements OnInit, OnDestroy {
-  readonly #router = inject(Router);
+  readonly #location = inject(Location);
+  readonly #firestore = inject(Firestore);
+  readonly #injector = inject(Injector);
   readonly #settingsService = inject(UserSettingsService);
   readonly #userStatsService = inject(UserStatsService);
 
@@ -341,10 +412,15 @@ export class SettingsComponent implements OnInit, OnDestroy {
   goalSaveError = signal(false);
   notificationSaveError = signal(false);
 
+  connectedAccounts = signal<ConnectedAccountDto[]>([]);
+  userEmail = signal<string | null>(null);
+  memberSince = signal<string | null>(null);
+
   #userId: string | null = null;
   #originalGoal = DEFAULT_DAILY_GOAL;
   #originalNotifications = true;
   #userSub: Subscription | null = null;
+  #connectedAccountsSub: Subscription | null = null;
   #successTimeout: ReturnType<typeof setTimeout> | null = null;
   #errorTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -357,6 +433,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
         }
         this.#userId = userDoc.id;
         this.#loadSettings(userDoc.id);
+        this.#loadConnectedAccounts(userDoc.id);
+
+        // Set account info
+        this.userEmail.set(userDoc.email);
+        const date = new Date(userDoc.createdAt);
+        if (!isNaN(date.getTime())) {
+          this.memberSince.set(date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+        }
       },
       error: () => this.isLoading.set(false),
     });
@@ -364,8 +448,19 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.#userSub?.unsubscribe();
+    this.#connectedAccountsSub?.unsubscribe();
     if (this.#successTimeout) clearTimeout(this.#successTimeout);
     if (this.#errorTimeout) clearTimeout(this.#errorTimeout);
+  }
+
+  #loadConnectedAccounts(userId: string) {
+    const accountsRef = collection(this.#firestore, `users/${userId}/${Collections.ConnectedAccounts}`);
+    this.#connectedAccountsSub = runInInjectionContext(this.#injector, () =>
+      collectionData(accountsRef, { idField: 'id' }),
+    ).subscribe({
+      next: (accounts) => this.connectedAccounts.set(accounts as ConnectedAccountDto[]),
+      error: (error) => console.error('Failed to load connected accounts:', error),
+    });
   }
 
   #loadSettings(userId: string) {
@@ -403,7 +498,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   hasGoalChanges(): boolean {
     const current = this.isCustom() ? this.customGoalValue : this.selectedGoal();
-    return current !== this.#originalGoal && current >= 1000 && current <= 50000;
+    return current !== this.#originalGoal && current >= 1000 && current <= 100000;
   }
 
   saveGoal() {
@@ -450,6 +545,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
-    this.#router.navigate(['/profile']);
+    this.#location.back();
   }
 }

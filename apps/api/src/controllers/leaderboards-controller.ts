@@ -57,6 +57,7 @@ interface LeaderboardEntry {
   totalXp: number;
   currentLevelXp: number;
   xpToNextLevel: number;
+  userType: string;
 }
 
 interface LeaderboardOptions {
@@ -117,6 +118,7 @@ async function getXpLeaderboard(
       totalXp: userStats?.xp || 0,
       currentLevelXp: userStats?.currentLevelXp || 0,
       xpToNextLevel: userStats?.xpToNextLevel || 0,
+      userType: userData.userType || 'user',
     };
   });
 
@@ -224,11 +226,15 @@ router.get('/projects/day/:dayId?', async (req, res) => {
 router.get('/week/:weekId?', async (req, res) => {
   const weekId = req.params.weekId;
   const includeZeroXp = req.query.includeZeroXp === 'true';
+  const userType = req.query.userType as string | undefined;
 
-  logger.debug(`GET /leaderboards/week${weekId ? `/${weekId}` : ''}`, { includeZeroXp });
+  logger.debug(`GET /leaderboards/week${weekId ? `/${weekId}` : ''}`, { includeZeroXp, userType });
 
   try {
-    const leaderboard = await getXpLeaderboard('weekly', weekId, { includeZeroXp });
+    let leaderboard = await getXpLeaderboard('weekly', weekId, { includeZeroXp });
+    if (userType) {
+      leaderboard = leaderboard.filter((entry) => entry.userType === userType);
+    }
     res.json(leaderboard);
   } catch (error) {
     logger.error('Error getting weekly leaderboard:', error);
@@ -240,11 +246,15 @@ router.get('/week/:weekId?', async (req, res) => {
 router.get('/day/:dayId?', async (req, res) => {
   const dayId = req.params.dayId;
   const includeZeroXp = req.query.includeZeroXp === 'true';
+  const userType = req.query.userType as string | undefined;
 
-  logger.debug(`GET /leaderboards/day${dayId ? `/${dayId}` : ''}`, { includeZeroXp });
+  logger.debug(`GET /leaderboards/day${dayId ? `/${dayId}` : ''}`, { includeZeroXp, userType });
 
   try {
-    const leaderboard = await getXpLeaderboard('daily', dayId, { includeZeroXp });
+    let leaderboard = await getXpLeaderboard('daily', dayId, { includeZeroXp });
+    if (userType) {
+      leaderboard = leaderboard.filter((entry) => entry.userType === userType);
+    }
     res.json(leaderboard);
   } catch (error) {
     logger.error('Error getting daily leaderboard:', error);
