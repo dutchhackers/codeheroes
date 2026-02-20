@@ -16,7 +16,13 @@ import { UsersService } from '../../core/services/users.service';
         <div>
           <h1 class="page-title">Users</h1>
           @if (!isLoading() && !error()) {
-            <p class="page-subtitle">Showing {{ users().length }} users</p>
+            <p class="page-subtitle">
+              @if (pageHistory().length > 0) {
+                Page {{ pageHistory().length + 1 }}
+              } @else {
+                {{ users().length }}{{ hasMore() ? '+' : '' }} users
+              }
+            </p>
           }
         </div>
         <div class="search-container">
@@ -28,6 +34,12 @@ import { UsersService } from '../../core/services/users.service';
             (ngModelChange)="onSearchChange($event)"
           />
         </div>
+      </div>
+
+      <div class="filters">
+        <button class="filter-pill" [class.filter-pill--active]="userTypeFilter() === null" (click)="setUserTypeFilter(null)">All</button>
+        <button class="filter-pill" [class.filter-pill--active]="userTypeFilter() === 'user'" (click)="setUserTypeFilter('user')">Users</button>
+        <button class="filter-pill" [class.filter-pill--active]="userTypeFilter() === 'bot'" (click)="setUserTypeFilter('bot')">Bots</button>
       </div>
 
       @if (isLoading()) {
@@ -64,7 +76,6 @@ import { UsersService } from '../../core/services/users.service';
                   }
                 </th>
                 <th>Type</th>
-                <th>Last Login</th>
                 <th class="sortable-header" tabindex="0" role="button" [attr.aria-sort]="sortBy() === 'createdAt' ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : null" (click)="toggleSort('createdAt')" (keydown.enter)="toggleSort('createdAt')" (keydown.space)="$event.preventDefault(); toggleSort('createdAt')">
                   Joined
                   @if (sortBy() === 'createdAt') {
@@ -78,18 +89,15 @@ import { UsersService } from '../../core/services/users.service';
                 <tr class="clickable-row" [class.inactive-row]="!user.active" tabindex="0" role="link" (click)="openUser(user.id)" (keydown.enter)="openUser(user.id)" (keyup.space)="$event.preventDefault(); openUser(user.id)">
                   <td>
                     <div class="user-cell">
-                      <div class="user-avatar">{{ (user.name || user.displayName)?.charAt(0)?.toUpperCase() || '?' }}</div>
+                      <div class="user-avatar">{{ (user.displayName || user.name)?.charAt(0)?.toUpperCase() || '?' }}</div>
                       <div>
                         <div class="user-name">
-                          {{ user.name || user.displayName || 'Unknown' }}
+                          {{ user.displayName || user.name || 'Unknown' }}
                           @if (user.active === false) {
                             <span class="inactive-badge">Inactive</span>
                           }
                         </div>
-                        @if (user.name && user.displayName && user.name !== user.displayName) {
-                          <div class="user-email">{{ user.displayName }}</div>
-                        }
-                        @if (user.email) {
+                        @if (user.email && user.email !== user.displayName && user.email !== user.name) {
                           <div class="user-email">{{ user.email }}</div>
                         }
                       </div>
@@ -100,7 +108,6 @@ import { UsersService } from '../../core/services/users.service';
                       {{ user.userType }}
                     </span>
                   </td>
-                  <td>{{ user.lastLogin | date: 'mediumDate' }}</td>
                   <td>{{ user.createdAt | date: 'mediumDate' }}</td>
                 </tr>
               }
@@ -318,6 +325,36 @@ import { UsersService } from '../../core/services/users.service';
         font-size: 11px;
       }
 
+      .filters {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 16px;
+      }
+
+      .filter-pill {
+        padding: 6px 14px;
+        border: 1px solid var(--theme-color-border-default-default);
+        border-radius: 20px;
+        background: var(--theme-color-bg-surface-default);
+        color: var(--theme-color-text-neutral-tertiary);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s ease;
+      }
+
+      .filter-pill:hover {
+        border-color: var(--theme-color-border-brand-default);
+        color: var(--theme-color-text-default);
+      }
+
+      .filter-pill--active {
+        background: var(--theme-color-bg-brand-default);
+        border-color: var(--theme-color-bg-brand-default);
+        color: #fff;
+      }
+
       .pagination-controls {
         display: flex;
         justify-content: flex-end;
@@ -339,6 +376,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   readonly sortBy = signal<string>('name');
   readonly sortDirection = signal<'asc' | 'desc'>('asc');
   readonly searchTerm = signal<string>('');
+  readonly userTypeFilter = signal<string | null>(null);
 
   searchInput = '';
   #searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -359,7 +397,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.error.set(null);
 
-    const params: { limit: number; startAfterId?: string; sortBy?: string; sortDirection?: string; search?: string } = {
+    const params: { limit: number; startAfterId?: string; sortBy?: string; sortDirection?: string; search?: string; userType?: string } = {
       limit: this.#pageSize,
       sortBy: this.sortBy(),
       sortDirection: this.sortDirection(),
@@ -369,6 +407,9 @@ export class UsersComponent implements OnInit, OnDestroy {
     }
     if (this.searchTerm()) {
       params.search = this.searchTerm();
+    }
+    if (this.userTypeFilter()) {
+      params.userType = this.userTypeFilter()!;
     }
 
     this.#usersService.getUsers(params).subscribe({
@@ -397,6 +438,13 @@ export class UsersComponent implements OnInit, OnDestroy {
       this.pageHistory.set([]);
       this.loadUsers();
     }, 300);
+  }
+
+  setUserTypeFilter(type: string | null): void {
+    this.userTypeFilter.set(type);
+    this.#currentLastId = null;
+    this.pageHistory.set([]);
+    this.loadUsers();
   }
 
   clearSearch(): void {
