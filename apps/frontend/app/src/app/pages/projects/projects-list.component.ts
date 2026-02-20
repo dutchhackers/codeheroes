@@ -37,6 +37,7 @@ import { ProjectDataService } from '../../core/services/project-data.service';
               <button
                 type="button"
                 class="project-card"
+                [class.project-card-inactive]="isInactiveProject(project)"
                 (click)="openProject(project.id)"
                 [attr.aria-label]="'View project ' + project.name"
               >
@@ -105,6 +106,10 @@ import { ProjectDataService } from '../../core/services/project-data.service';
       .project-card:focus {
         outline: 2px solid rgba(255, 255, 255, 0.3);
         outline-offset: 2px;
+      }
+
+      .project-card-inactive {
+        opacity: 0.5;
       }
 
       .card-header {
@@ -199,8 +204,13 @@ export class ProjectsListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.#subscription = this.#projectDataService.getProjects().subscribe({
       next: (projects) => {
-        // Sort by totalXp descending
-        const sorted = [...projects].sort((a, b) => a.name.localeCompare(b.name));
+        // Sort: active projects first (alphabetically), then inactive (alphabetically)
+        const sorted = [...projects].sort((a, b) => {
+          const aInactive = this.isInactiveProject(a);
+          const bInactive = this.isInactiveProject(b);
+          if (aInactive !== bInactive) return aInactive ? 1 : -1;
+          return a.name.localeCompare(b.name);
+        });
         this.projects.set(sorted);
         this.isLoading.set(false);
       },
@@ -213,6 +223,10 @@ export class ProjectsListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.#subscription?.unsubscribe();
+  }
+
+  isInactiveProject(project: ProjectSummaryDto): boolean {
+    return project.totalXp === 0 && project.totalActions === 0;
   }
 
   openProject(id: string) {

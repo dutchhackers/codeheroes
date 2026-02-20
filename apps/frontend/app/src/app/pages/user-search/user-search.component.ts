@@ -1,10 +1,11 @@
 import { Component, inject, signal, OnDestroy, AfterViewInit, ElementRef, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
-import { UserDto } from '@codeheroes/types';
+import { Subscription, forkJoin, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subject, catchError, take } from 'rxjs';
+import { UserDto, UserStats } from '@codeheroes/types';
 import { UserSearchService } from '../../core/services/user-search.service';
+import { UserStatsService } from '../../core/services/user-stats.service';
 
 @Component({
   selector: 'app-user-search',
@@ -74,11 +75,12 @@ import { UserSearchService } from '../../core/services/user-search.service';
                 <div class="flex items-center gap-4">
                   <!-- Avatar -->
                   <div class="flex-shrink-0">
-                    @if (user.photoUrl) {
+                    @if (user.photoUrl && !hasImageError(user.id)) {
                       <img
                         [src]="user.photoUrl"
                         [alt]="user.displayName + ' avatar'"
                         class="w-12 h-12 rounded-full border-2 border-purple-500/30"
+                        (error)="onImageError(user.id)"
                       />
                     } @else {
                       <div
@@ -96,6 +98,11 @@ import { UserSearchService } from '../../core/services/user-search.service';
                     <h3 class="text-white font-semibold truncate">
                       {{ user.displayName }}
                     </h3>
+                    @if (getUserStats(user.id); as stats) {
+                      <p class="user-level">Level {{ stats.level }}</p>
+                    } @else if (isLoadingStats()) {
+                      <p class="user-level user-level-loading">Loading...</p>
+                    }
                   </div>
 
                   <!-- Arrow -->
@@ -154,11 +161,28 @@ import { UserSearchService } from '../../core/services/user-search.service';
         outline: 2px solid var(--neon-cyan);
         outline-offset: 2px;
       }
+
+      .user-level {
+        font-size: 0.75rem;
+        color: var(--neon-cyan);
+        margin-top: 0.125rem;
+      }
+
+      .user-level-loading {
+        color: rgba(255, 255, 255, 0.3);
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 0.6; }
+      }
     `,
   ],
 })
 export class UserSearchComponent implements OnDestroy, AfterViewInit {
   readonly #userSearchService = inject(UserSearchService);
+  readonly #userStatsService = inject(UserStatsService);
   readonly #router = inject(Router);
 
   readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput');
@@ -166,6 +190,10 @@ export class UserSearchComponent implements OnDestroy, AfterViewInit {
   searchTerm = '';
   users = signal<UserDto[]>([]);
   isSearching = signal(false);
+  isLoadingStats = signal(false);
+  #failedImageIds = signal<Set<string>>(new Set());
+  #userStatsMap = signal<Map<string, UserStats>>(new Map());
+  #statsSubscription: Subscription | null = null;
 
   #searchSubject = new Subject<string>();
   #searchSubscription: Subscription;
@@ -191,6 +219,7 @@ export class UserSearchComponent implements OnDestroy, AfterViewInit {
 
   ngOnDestroy() {
     this.#searchSubscription?.unsubscribe();
+    this.#statsSubscription?.unsubscribe();
   }
 
   #loadInitialUsers() {
@@ -199,6 +228,7 @@ export class UserSearchComponent implements OnDestroy, AfterViewInit {
       next: (users) => {
         this.users.set(users);
         this.isSearching.set(false);
+        this.#loadStatsForUsers(users);
       },
       error: (error) => {
         console.error('Failed to load users:', error);
@@ -218,6 +248,7 @@ export class UserSearchComponent implements OnDestroy, AfterViewInit {
       next: (users) => {
         this.users.set(users);
         this.isSearching.set(false);
+        this.#loadStatsForUsers(users);
       },
       error: (error) => {
         console.error('Search failed:', error);
@@ -226,12 +257,49 @@ export class UserSearchComponent implements OnDestroy, AfterViewInit {
     });
   }
 
+  #loadStatsForUsers(users: UserDto[]) {
+    this.#statsSubscription?.unsubscribe();
+    if (users.length === 0) return;
+
+    this.isLoadingStats.set(true);
+    const statRequests = users.slice(0, 20).map((u) =>
+      this.#userStatsService.getUserStats(u.id).pipe(
+        take(1),
+        catchError(() => of(null)),
+      ),
+    );
+
+    this.#statsSubscription = forkJoin(statRequests).subscribe({
+      next: (results) => {
+        const statsMap = new Map<string, UserStats>();
+        results.forEach((stats, i) => {
+          if (stats) statsMap.set(users[i].id, stats);
+        });
+        this.#userStatsMap.set(statsMap);
+        this.isLoadingStats.set(false);
+      },
+      error: () => this.isLoadingStats.set(false),
+    });
+  }
+
+  getUserStats(userId: string): UserStats | null {
+    return this.#userStatsMap().get(userId) ?? null;
+  }
+
   onSearchChange(term: string) {
     this.#searchSubject.next(term);
   }
 
   viewProfile(userId: string) {
     this.#router.navigate(['/users', userId]);
+  }
+
+  hasImageError(userId: string): boolean {
+    return this.#failedImageIds().has(userId);
+  }
+
+  onImageError(userId: string): void {
+    this.#failedImageIds.update((set) => new Set(set).add(userId));
   }
 
   getInitials(name: string): string {

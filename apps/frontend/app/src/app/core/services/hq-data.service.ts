@@ -15,6 +15,7 @@ import { Observable, of, from, switchMap, map, catchError, combineLatest } from 
 import { Activity, TimeBasedActivityStats, UserDto } from '@codeheroes/types';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { buildActivityDescription } from '../utils/activity-description.util';
 
 export interface DailyProgress {
   xpEarned: number;
@@ -337,13 +338,15 @@ export class HqDataService {
 
   #transformActivitiesToHighlights(activities: Activity[]): Highlight[] {
     return activities.map((activity) => {
+      const message = buildActivityDescription(activity);
+
       // Handle different activity types
       if (activity.type === 'game-action') {
         return {
           id: activity.id,
           type: 'activity' as const,
           icon: this.#getIconForActionType(activity.sourceActionType),
-          message: activity.userFacingDescription,
+          message,
           xp: activity.xp?.earned,
           timestamp: activity.createdAt,
         };
@@ -352,7 +355,7 @@ export class HqDataService {
           id: activity.id,
           type: 'activity' as const,
           icon: 'award',
-          message: activity.userFacingDescription,
+          message,
           xp: undefined,
           timestamp: activity.createdAt,
         };
@@ -362,7 +365,7 @@ export class HqDataService {
           id: activity.id,
           type: 'activity' as const,
           icon: 'trending-up',
-          message: activity.userFacingDescription,
+          message,
           xp: undefined,
           timestamp: activity.createdAt,
         };
