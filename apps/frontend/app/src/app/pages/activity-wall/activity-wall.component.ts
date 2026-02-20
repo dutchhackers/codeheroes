@@ -1,8 +1,9 @@
 import { Component, inject, signal, computed, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Auth, user } from '@angular/fire/auth';
+import { QueryDocumentSnapshot, DocumentData } from '@angular/fire/firestore';
 import { Activity } from '@codeheroes/types';
-import { ActivityFeedService } from '../../core/services/activity-feed.service';
+import { ActivityFeedService, LoadMoreResult } from '../../core/services/activity-feed.service';
 import { UserCacheService } from '../../core/services/user-cache.service';
 import { ActivityStackerService } from '../../core/services/activity-stacker.service';
 import { FeedItem, DateSeparator, isActivityStack, isSingleActivity, isDateSeparator } from '../../core/models/activity-stack.model';
@@ -46,15 +47,36 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
               [class.filter-tab-active]="activeFilter() === 'mine'"
               (click)="activeFilter.set('mine')"
             >My Activity</button>
+            <button
+              type="button"
+              class="bot-toggle"
+              [class.bot-toggle-hidden]="!showBots()"
+              (click)="toggleBots()"
+              [attr.aria-label]="showBots() ? 'Hide bot activity' : 'Show bot activity'"
+              [attr.title]="showBots() ? 'Hide bots' : 'Show bots'"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="8" width="18" height="12" rx="2" stroke-width="2" />
+                <circle cx="9" cy="14" r="1.5" fill="currentColor" stroke="none" />
+                <circle cx="15" cy="14" r="1.5" fill="currentColor" stroke="none" />
+                <path stroke-linecap="round" stroke-width="2" d="M12 2v6M7 2h10" />
+              </svg>
+            </button>
           </div>
         </div>
 
         @if (displayItems().length === 0) {
           <div class="flex flex-col items-center justify-center py-20 md:py-32">
-            <p class="text-lg md:text-2xl text-slate-500">No activities yet</p>
-            <p class="text-sm md:text-lg mt-3 text-slate-600">
-              {{ activeFilter() === 'mine' ? 'You haven\'t logged any activities yet' : 'Awaiting activity stream...' }}
-            </p>
+            @if (activeFilter() === 'mine') {
+              <p class="text-lg md:text-2xl text-slate-500">No activity yet</p>
+              <p class="text-sm md:text-lg mt-3 text-slate-600">Start coding to see your activity here!</p>
+            } @else if (!showBots()) {
+              <p class="text-lg md:text-2xl text-slate-500">No human activity yet</p>
+              <p class="text-sm md:text-lg mt-3 text-slate-600">Toggle the bot filter to see all activity</p>
+            } @else {
+              <p class="text-lg md:text-2xl text-slate-500">No activities yet</p>
+              <p class="text-sm md:text-lg mt-3 text-slate-600">Awaiting activity stream...</p>
+            }
           </div>
         } @else {
           <div class="max-w-2xl mx-auto py-6 flex flex-col gap-6 md:gap-8 lg:gap-10">
@@ -73,6 +95,19 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
                   (selectActivity)="onSelectActivity($event)"
                 />
               }
+            }
+
+            @if (hasMore() && !isLoadingMore()) {
+              <div class="flex justify-center pt-4 pb-2">
+                <button type="button" class="load-more-button" (click)="loadMore()">
+                  Load More
+                </button>
+              </div>
+            }
+            @if (isLoadingMore()) {
+              <div class="flex justify-center pt-4 pb-2">
+                <div class="text-sm text-purple-400/70 animate-pulse">Loading more...</div>
+              </div>
             }
           </div>
         }
@@ -122,6 +157,33 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
         box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
       }
 
+      .bot-toggle {
+        margin-left: auto;
+        padding: 0.5rem;
+        border-radius: 9999px;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        background: rgba(6, 182, 212, 0.15);
+        color: var(--neon-cyan);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        min-height: 36px;
+      }
+
+      .bot-toggle:hover {
+        border-color: var(--neon-cyan);
+        box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+      }
+
+      .bot-toggle-hidden {
+        background: rgba(0, 0, 0, 0.3);
+        color: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
       .date-separator {
         display: flex;
         align-items: center;
@@ -145,6 +207,24 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
         letter-spacing: 0.05em;
         white-space: nowrap;
       }
+
+      .load-more-button {
+        padding: 0.625rem 1.5rem;
+        border-radius: 9999px;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        background: rgba(0, 0, 0, 0.3);
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .load-more-button:hover {
+        border-color: var(--neon-cyan);
+        color: var(--neon-cyan);
+        box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+      }
     `,
   ],
 })
@@ -154,20 +234,39 @@ export class ActivityWallComponent implements OnInit, OnDestroy {
   readonly #activityStacker = inject(ActivityStackerService);
   readonly #auth = inject(Auth);
 
+  readonly #INITIAL_LIMIT = 200;
+  readonly #LOAD_MORE_LIMIT = 100;
+
   #activitiesSubscription: Subscription | null = null;
   #authSubscription: Subscription | null = null;
   #isLoadingData = false;
+  #lastDoc: QueryDocumentSnapshot<DocumentData> | null = null;
 
   #activities = signal<Activity[]>([]);
+  #olderActivities = signal<Activity[]>([]);
   #currentUserId = signal<string | null>(null);
   selectedActivity = signal<Activity | null>(null);
   debugPanelOpen = signal(false);
   isLoading = signal(true);
+  isLoadingMore = signal(false);
+  hasMore = signal(true);
   activeFilter = signal<'all' | 'mine'>('all');
+  showBots = signal(true);
+
+  // Combined activities (real-time + loaded more)
+  #allActivities = computed(() => {
+    const realtime = this.#activities();
+    const older = this.#olderActivities();
+    if (older.length === 0) return realtime;
+    // Deduplicate by id, real-time takes priority
+    const seenIds = new Set(realtime.map((a) => a.id));
+    const uniqueOlder = older.filter((a) => !seenIds.has(a.id));
+    return [...realtime, ...uniqueOlder];
+  });
 
   // Computed stacked feed items
   feedItems = computed(() => {
-    const activities = this.#activities();
+    const activities = this.#allActivities();
     return this.#activityStacker.stackActivities(activities);
   });
 
@@ -176,6 +275,7 @@ export class ActivityWallComponent implements OnInit, OnDestroy {
     const items = this.feedItems();
     const filter = this.activeFilter();
     const currentUserId = this.#currentUserId();
+    const includeBots = this.showBots();
 
     // Apply filter
     let filtered = items;
@@ -184,6 +284,21 @@ export class ActivityWallComponent implements OnInit, OnDestroy {
         if (isSingleActivity(item)) return item.activity.userId === currentUserId;
         if (isActivityStack(item)) return item.activities.some((a) => a.userId === currentUserId);
         return false;
+      });
+    }
+
+    // Filter out bot activities when showBots is false
+    if (!includeBots) {
+      filtered = filtered.filter((item) => {
+        if (isSingleActivity(item)) {
+          const userInfo = this.#userCacheService.getUserInfo(item.activity.userId);
+          return !userInfo || userInfo.userType !== 'bot';
+        }
+        if (isActivityStack(item)) {
+          const userInfo = this.#userCacheService.getUserInfo(item.activities[0]?.userId);
+          return !userInfo || userInfo.userType !== 'bot';
+        }
+        return true;
       });
     }
 
@@ -222,9 +337,13 @@ export class ActivityWallComponent implements OnInit, OnDestroy {
         this.#activitiesSubscription.unsubscribe();
       }
 
-      this.#activitiesSubscription = this.#activityFeedService.getGlobalActivities(100).subscribe({
+      this.#activitiesSubscription = this.#activityFeedService.getGlobalActivities(this.#INITIAL_LIMIT).subscribe({
         next: (activities) => {
           this.#activities.set(activities);
+          // If we got fewer than the limit, there are no more to load
+          if (activities.length < this.#INITIAL_LIMIT) {
+            this.hasMore.set(false);
+          }
         },
         error: (error) => {
           console.error('Failed to load activities:', error);
@@ -246,8 +365,39 @@ export class ActivityWallComponent implements OnInit, OnDestroy {
     this.selectedActivity.set(activity);
   }
 
+  toggleBots() {
+    this.showBots.update((v) => !v);
+  }
+
   toggleDebugPanel() {
     this.debugPanelOpen.update((open) => !open);
+  }
+
+  async loadMore() {
+    if (this.isLoadingMore() || !this.hasMore()) return;
+
+    // Get the last activity from real-time list to use as cursor
+    const allActivities = this.#allActivities();
+    const lastActivity = allActivities[allActivities.length - 1];
+    if (!lastActivity) return;
+
+    this.isLoadingMore.set(true);
+    try {
+      // Get the document snapshot for the last activity
+      const lastDoc = await this.#activityFeedService.getDocumentForActivity(lastActivity.id, lastActivity.userId);
+      if (!lastDoc) {
+        this.hasMore.set(false);
+        return;
+      }
+
+      const result = await this.#activityFeedService.loadMoreActivities(lastDoc, this.#LOAD_MORE_LIMIT);
+      this.#olderActivities.update((existing) => [...existing, ...result.activities]);
+      this.hasMore.set(result.hasMore);
+    } catch (error) {
+      console.error('Failed to load more activities:', error);
+    } finally {
+      this.isLoadingMore.set(false);
+    }
   }
 
   trackFeedItem(item: FeedItem): string {
