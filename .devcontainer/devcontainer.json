@@ -11,14 +11,18 @@
   "features": {
     "ghcr.io/devcontainers/features/git:1": {}
   },
-  "forwardPorts": [4000, 4200, 5001, 8080, 9099],
+  "forwardPorts": [4000, 4201, 4202, 5001, 8080, 9099],
   "portsAttributes": {
     "4000": {
       "label": "Firebase Emulator UI",
       "onAutoForward": "notify"
     },
-    "4200": {
-      "label": "Angular Dev Server",
+    "4201": {
+      "label": "Angular Dev Server (app)",
+      "onAutoForward": "notify"
+    },
+    "4202": {
+      "label": "Angular Dev Server (admin-portal)",
       "onAutoForward": "notify"
     },
     "5001": {
