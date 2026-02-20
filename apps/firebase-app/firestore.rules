@@ -8,8 +8,10 @@ service cloud.firestore {
     }
 
     // Helper function: Check if user is accessing their own data
+    // Uses customUserId claim set on the Firebase Auth token during sign-in/creation
     function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+      return isAuthenticated()
+        && request.auth.token.customUserId == userId;
     }
 
     // ============================================
@@ -20,10 +22,8 @@ service cloud.firestore {
       // (displayName, photoUrl needed for app)
       allow read: if isAuthenticated();
 
-      // User can only update their own profile (match auth UID to document's uid field)
-      // Note: userId in path is the custom user ID (e.g., "1000002"), not Firebase Auth UID
-      allow update: if isAuthenticated()
-        && request.auth.uid == resource.data.uid
+      // User can only update their own profile
+      allow update: if isOwner(userId)
         // Only allow specific fields to be modified
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'displayNameLower', 'updatedAt'])
         // Validate displayName. Note: size() uses the untrimmed value; trimming and final

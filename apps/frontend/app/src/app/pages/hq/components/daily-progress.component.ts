@@ -8,7 +8,7 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
     <div class="daily-progress-card">
       <div class="card-header">
         <h3 class="card-title">Today's Goal</h3>
-        <span class="activities-badge">{{ activitiesCount() }} activities</span>
+        <span class="activities-badge">{{ activitiesCount() }} {{ activitiesCount() === 1 ? 'activity' : 'activities' }} completed</span>
       </div>
 
       <div class="progress-container">
@@ -251,10 +251,10 @@ export class DailyProgressComponent {
     const percent = this.progressPercent();
 
     if (percent >= 100) return '🎉 Daily goal achieved!';
-    if (percent >= 75) return `Almost there! ${remaining} XP to go`;
-    if (percent >= 50) return `Halfway! ${remaining} XP remaining`;
-    if (percent >= 25) return `Keep it up! ${remaining} XP to your goal`;
-    if (percent > 0) return `Great start! ${remaining} XP to reach your goal`;
+    if (percent >= 75) return `Almost there! ${this.formatNumber(remaining)} XP to go`;
+    if (percent >= 50) return `Halfway! ${this.formatNumber(remaining)} XP remaining`;
+    if (percent >= 25) return `Keep it up! ${this.formatNumber(remaining)} XP to your goal`;
+    if (percent > 0) return `Great start! ${this.formatNumber(remaining)} XP to reach your goal`;
     return 'Ready to start your day?';
   });
 

@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { UserDto, UserStats } from '@codeheroes/types';
 import { UserStatsService } from '../../core/services/user-stats.service';
@@ -116,7 +117,7 @@ import { BadgesModalComponent } from '../profile/components/badges-modal.compone
 })
 export class UserProfileComponent implements OnInit, OnDestroy {
   readonly #route = inject(ActivatedRoute);
-  readonly #router = inject(Router);
+  readonly #location = inject(Location);
   readonly #userStatsService = inject(UserStatsService);
 
   #routeSubscription: Subscription | null = null;
@@ -187,6 +188,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   goBack() {
-    this.#router.navigate(['/search']);
+    this.#location.back();
   }
 }

@@ -1,5 +1,5 @@
-import { Component, input, output, computed } from '@angular/core';
-
+import { Component, inject, input, output, computed } from '@angular/core';
+import { Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
   Activity,
@@ -10,6 +10,7 @@ import {
 } from '@codeheroes/types';
 import { getActivityTypeDisplay } from '../core/mappings/action-type.mapping';
 import { UserInfo } from '../core/services/user-cache.service';
+import { buildActivityDescription } from '../core/utils/activity-description.util';
 
 @Component({
   selector: 'app-activity-item',
@@ -20,6 +21,7 @@ import { UserInfo } from '../core/services/user-cache.service';
       class="activity-card"
       [class]="actionDisplay().cardGlowClass"
       [class.activity-item-enter]="isNew()"
+      [class.bot-activity]="isBot()"
       tabindex="0"
       role="button"
       (click)="selectActivity.emit(activity())"
@@ -41,7 +43,7 @@ import { UserInfo } from '../core/services/user-cache.service';
 
         <!-- Avatar on LEFT (when icon is on right) -->
         @if (iconPosition() === 'right') {
-          <div class="activity-avatar-wrapper">
+          <div class="activity-avatar-wrapper activity-avatar-link" (click)="navigateToProfile($event)">
             @if (userInfo()?.photoUrl) {
               <div class="activity-avatar-container" [style.--border-color]="actionDisplay().borderColor">
                 <img
@@ -63,14 +65,14 @@ import { UserInfo } from '../core/services/user-cache.service';
         <div class="activity-text" [class]="actionDisplay().textColor">
           <p class="activity-description">
             <span class="activity-time">[{{ formattedTime() }}]</span>
-            <span class="activity-user">{{ userInfo()?.displayName || 'UNKNOWN' }}</span>
+            <span class="activity-user activity-user-link" (click)="navigateToProfile($event)">{{ userInfo()?.displayName || 'UNKNOWN' }}</span>
             <span>{{ descriptionText() }}</span>
           </p>
         </div>
 
         <!-- Avatar on RIGHT (when icon is on left) -->
         @if (iconPosition() === 'left') {
-          <div class="activity-avatar-wrapper">
+          <div class="activity-avatar-wrapper activity-avatar-link" (click)="navigateToProfile($event)">
             @if (userInfo()?.photoUrl) {
               <div class="activity-avatar-container" [style.--border-color]="actionDisplay().borderColor">
                 <img
@@ -132,6 +134,15 @@ import { UserInfo } from '../core/services/user-cache.service';
       .activity-card:focus {
         outline: 2px solid rgba(255, 255, 255, 0.3);
         outline-offset: 2px;
+      }
+
+      .activity-card.bot-activity {
+        opacity: 0.5;
+        transform: scale(0.97);
+      }
+
+      .activity-card.bot-activity:hover {
+        opacity: 0.7;
       }
 
       .activity-content {
@@ -219,6 +230,36 @@ import { UserInfo } from '../core/services/user-cache.service';
         margin-right: 0.5rem;
       }
 
+      .activity-user-link {
+        cursor: pointer;
+        transition: color 0.15s;
+      }
+
+      .activity-user-link:hover {
+        color: var(--neon-cyan);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+
+      .activity-avatar-link {
+        cursor: pointer;
+        transition: transform 0.15s;
+      }
+
+      .activity-avatar-link:hover {
+        transform: scale(1.1);
+      }
+
+      .activity-avatar-link:hover .activity-avatar-container {
+        border-color: var(--neon-cyan) !important;
+        box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+      }
+
+      .activity-avatar-link:hover .activity-avatar-placeholder {
+        border-color: var(--neon-cyan);
+        box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+      }
+
       .activity-footer {
         display: flex;
         justify-content: space-between;
@@ -283,12 +324,17 @@ import { UserInfo } from '../core/services/user-cache.service';
   ],
 })
 export class ActivityItemComponent {
+  readonly #router = inject(Router);
+
   activity = input.required<Activity>();
   userInfo = input<UserInfo | null>(null);
   isNew = input<boolean>(false);
   selectActivity = output<Activity>();
 
   constructor(private sanitizer: DomSanitizer) {}
+
+  // Bot detection
+  isBot = computed(() => this.userInfo()?.userType === 'bot');
 
   // Check activity type
   isBadgeActivity = computed(() => isBadgeEarnedActivity(this.activity()));
@@ -373,119 +419,7 @@ export class ActivityItemComponent {
   });
 
   // Plain text description (no HTML, single color)
-  descriptionText = computed((): string => {
-    const activity = this.activity();
-
-    // Handle badge-earned activities
-    if (isBadgeEarnedActivity(activity)) {
-      return `earned ${activity.badge.icon} ${activity.badge.name}!`;
-    }
-
-    // Handle level-up activities
-    if (isLevelUpActivity(activity)) {
-      if (activity.level.new - activity.level.previous > 1) {
-        return `leveled up to ${activity.level.new}!`;
-      }
-      return `reached level ${activity.level.new}!`;
-    }
-
-    // Handle game action activities
-    if (isGameActionActivity(activity)) {
-      return this.buildSentence(activity.sourceActionType, activity);
-    }
-
-    // Fallback - this shouldn't happen with the current union types
-    return (activity as Activity).userFacingDescription || 'performed an action';
-  });
-
-  private buildSentence(actionType: GameActionType, activity: Activity): string {
-    if (!isGameActionActivity(activity)) {
-      return activity.userFacingDescription;
-    }
-
-    const desc = activity.userFacingDescription;
-
-    // Extract useful info from description
-    const prMatch = desc.match(/#(\d+)/);
-    const prNumber = prMatch ? prMatch[1] : '';
-
-    // Extract quoted title if present
-    const titleMatch = desc.match(/"([^"]+)"/);
-    const title = titleMatch ? titleMatch[1] : '';
-
-    // Extract repo name
-    const repoMatch = desc.match(/in (\S+)$/);
-    const repo = repoMatch ? repoMatch[1] : '';
-
-    switch (actionType) {
-      case 'code_push': {
-        const branchMatch = desc.match(/to (\S+)\s+in/);
-        const branch = branchMatch ? branchMatch[1] : 'main';
-        return `pushed to \`${branch}\`${repo ? ` in \`${repo}\`` : ''}`;
-      }
-
-      case 'pull_request_create':
-        return `opened PR #${prNumber}${title ? `: \`${title}\`` : ''}${repo ? ` in \`${repo}\`` : ''}`;
-
-      case 'pull_request_merge':
-        return `merged PR #${prNumber}${title ? `: \`${title}\`` : ''}${repo ? ` into \`${repo}\`` : ''}`;
-
-      case 'pull_request_close':
-        return `closed PR #${prNumber}${title ? `: \`${title}\`` : ''}`;
-
-      case 'code_review_submit':
-        return `reviewed PR #${prNumber}${repo ? ` in \`${repo}\`` : ''}`;
-
-      case 'code_review_comment':
-        return `commented on PR #${prNumber}${repo ? ` in \`${repo}\`` : ''}`;
-
-      case 'review_comment_create':
-        return `added review comment${prNumber ? ` on #${prNumber}` : ''}${repo ? ` in \`${repo}\`` : ''}`;
-
-      case 'issue_create':
-        return `opened Issue #${prNumber}${title ? `: \`${title}\`` : ''}${repo ? ` in \`${repo}\`` : ''}`;
-
-      case 'issue_close':
-        return `closed Issue #${prNumber}${title ? `: \`${title}\`` : ''}`;
-
-      case 'issue_reopen':
-        return `reopened Issue #${prNumber}`;
-
-      case 'comment_create':
-        return `commented${prNumber ? ` on #${prNumber}` : ''}${repo ? ` in \`${repo}\`` : ''}`;
-
-      case 'release_publish': {
-        const versionMatch = desc.match(/v?(\d+\.\d+\.\d+)/);
-        const version = versionMatch ? versionMatch[1] : '';
-        return `published release${version ? ` v${version}` : ''}${repo ? ` in \`${repo}\`` : ''}`;
-      }
-
-      case 'user_registration':
-        return `joined Code Heroes!`;
-
-      case 'ci_success': {
-        const context = activity.context;
-        const branch = 'workflow' in context && context.workflow?.headBranch ? context.workflow.headBranch : '';
-        return `CI passed${branch ? ` on \`${branch}\`` : ''}`;
-      }
-
-      case 'discussion_create':
-        return `started a discussion${repo ? ` in \`${repo}\`` : ''}`;
-
-      case 'discussion_comment':
-        return `commented on a discussion${repo ? ` in \`${repo}\`` : ''}`;
-
-      case 'workout_complete':
-        return `completed a workout`;
-
-      case 'manual_update':
-        return desc;
-
-      default:
-        // Fallback: clean up the original description
-        return desc.replace(/^(Created|Merged|Approved|Closed|Pushed|Commented)\s+/i, '');
-    }
-  }
+  descriptionText = computed((): string => buildActivityDescription(this.activity()));
 
   formattedTime = computed(() => {
     const date = new Date(this.activity().createdAt);
@@ -516,4 +450,12 @@ export class ActivityItemComponent {
     }
     return 0;
   });
+
+  navigateToProfile(event: Event) {
+    event.stopPropagation();
+    const userId = this.activity().userId;
+    if (userId) {
+      this.#router.navigate(['/users', userId]);
+    }
+  }
 }

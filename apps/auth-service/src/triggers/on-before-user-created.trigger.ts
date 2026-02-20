@@ -56,7 +56,9 @@ export const onBeforeUserCreated = beforeUserCreated(
           photoUrl: user.photoURL || existingUser.photoUrl,
           displayName: user.displayName || existingUser.displayName,
         });
-        return;
+
+        // Set custom claim so Firestore rules can map auth UID to custom user ID
+        return { customClaims: { customUserId: existingUser.id } };
       }
 
       // Create new user if none exists
@@ -79,6 +81,9 @@ export const onBeforeUserCreated = beforeUserCreated(
         xpGained: 100,
         activityType: 'user_registration',
       });
+
+      // Set custom claim so Firestore rules can map auth UID to custom user ID
+      return { customClaims: { customUserId: newUser.id } };
     } catch (error) {
       const message = 'User creation failed';
       logger.error('User creation failed:', error);

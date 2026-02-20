@@ -34,6 +34,18 @@ export const onBeforeUserSignIn = beforeUserSignedIn(
             uid: user.uid,
           });
         }
+
+        // Ensure customUserId claim is set (backfills existing users on next sign-in)
+        if (existingUser && user.customClaims?.customUserId !== existingUser.id) {
+          logger.info('Setting customUserId claim on sign-in:', {
+            userId: existingUser.id,
+            uid: user.uid,
+          });
+          return {
+            customClaims: { customUserId: existingUser.id },
+            sessionClaims: { customUserId: existingUser.id },
+          };
+        }
       }
 
       // Allow the sign-in to proceed

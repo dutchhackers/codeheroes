@@ -3,7 +3,13 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "setup": "node scripts/setup-firebase.js"
+    "setup": "node scripts/setup-firebase.js",
+    "dev": "nx run-many -t serve -p app,admin-portal",
+    "dev:test": "nx run-many -t serve -p app,admin-portal -c test",
+    "dev:app": "nx serve app",
+    "dev:app:test": "nx serve app -c test",
+    "dev:admin": "nx serve admin-portal",
+    "dev:admin:test": "nx serve admin-portal -c test"
   },
   "private": true,
   "dependencies": {
