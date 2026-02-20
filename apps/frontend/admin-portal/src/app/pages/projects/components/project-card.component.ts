@@ -14,7 +14,7 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       <p class="card-subtitle">
         {{ project().activeMemberCount }} member{{ project().activeMemberCount !== 1 ? 's' : '' }} &middot; {{ project().repositoryCount }} repo{{ project().repositoryCount !== 1 ? 's' : '' }}
       </p>
-      <button type="button" class="card-view-link" (click)="viewClick.emit()">
+      <button type="button" class="card-view-link" (click)="$event.stopPropagation(); viewClick.emit()">
         View details
         <span class="arrow">&rarr;</span>
       </button>

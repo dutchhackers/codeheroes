@@ -17,10 +17,9 @@ import { UsersService } from '../../core/services/users.service';
           <h1 class="page-title">Users</h1>
           @if (!isLoading() && !error()) {
             <p class="page-subtitle">
+              {{ users().length }}{{ hasMore() ? '+' : '' }} users
               @if (pageHistory().length > 0) {
-                Page {{ pageHistory().length + 1 }}
-              } @else {
-                {{ users().length }}{{ hasMore() ? '+' : '' }} users
+                · Page {{ pageHistory().length + 1 }}
               }
             </p>
           }
