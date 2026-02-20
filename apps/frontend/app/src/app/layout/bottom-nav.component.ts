@@ -20,11 +20,14 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </svg>
         <span class="nav-label">ACTIVITY</span>
       </a>
-      <a routerLink="/projects" routerLinkActive="active" class="nav-item" aria-label="Projects">
+      <a routerLink="/leaderboard" routerLinkActive="active" class="nav-item" aria-label="Leaderboard rankings">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+          <rect x="4" y="14" width="4" height="8" rx="1" />
+          <rect x="10" y="8" width="4" height="14" rx="1" />
+          <rect x="16" y="11" width="4" height="11" rx="1" />
+          <path d="M12 2l1.5 3 3.5.5-2.5 2.5.5 3.5L12 9.5 9 11.5l.5-3.5L7 5.5l3.5-.5z" />
         </svg>
-        <span class="nav-label">PROJECTS</span>
+        <span class="nav-label">RANKS</span>
       </a>
       <a routerLink="/search" routerLinkActive="active" class="nav-item" aria-label="Search users">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

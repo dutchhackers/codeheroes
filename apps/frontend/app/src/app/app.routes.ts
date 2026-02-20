@@ -35,6 +35,33 @@ export const appRoutes: Routes = [
     loadComponent: loadWithReload(() => import('./pages/hq/hq.component').then((m) => m.HqComponent)),
   },
   {
+    path: 'leaderboard/heroes',
+    loadComponent: loadWithReload(() =>
+      import('./pages/leaderboard/full-leaderboard.component').then((m) => m.FullLeaderboardComponent),
+    ),
+    data: { type: 'heroes' },
+  },
+  {
+    path: 'leaderboard/bots',
+    loadComponent: loadWithReload(() =>
+      import('./pages/leaderboard/full-leaderboard.component').then((m) => m.FullLeaderboardComponent),
+    ),
+    data: { type: 'bots' },
+  },
+  {
+    path: 'leaderboard/projects',
+    loadComponent: loadWithReload(() =>
+      import('./pages/leaderboard/full-leaderboard.component').then((m) => m.FullLeaderboardComponent),
+    ),
+    data: { type: 'projects' },
+  },
+  {
+    path: 'leaderboard',
+    loadComponent: loadWithReload(() =>
+      import('./pages/leaderboard/leaderboard.component').then((m) => m.LeaderboardComponent),
+    ),
+  },
+  {
     path: 'projects/:id',
     loadComponent: loadWithReload(() =>
       import('./pages/projects/project-detail.component').then((m) => m.ProjectDetailComponent),
