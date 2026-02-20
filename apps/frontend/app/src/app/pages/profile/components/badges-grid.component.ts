@@ -109,6 +109,8 @@ const VISIBLE_BADGES_COUNT = 5;
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 0.75rem;
+        width: 100%;
+        overflow-x: hidden;
       }
 
       @media (min-width: 480px) {
@@ -121,7 +123,7 @@ const VISIBLE_BADGES_COUNT = 5;
         background: rgba(0, 0, 0, 0.6);
         border: 2px solid var(--badge-color);
         border-radius: 8px;
-        padding: 1rem 0.5rem;
+        padding: 1rem 0.75rem;
         text-align: center;
         display: flex;
         flex-direction: column;
@@ -129,6 +131,7 @@ const VISIBLE_BADGES_COUNT = 5;
         gap: 0.25rem;
         transition: all 0.2s ease;
         cursor: pointer;
+        min-width: 0;
         box-shadow:
           0 0 8px var(--badge-color),
           0 0 16px color-mix(in srgb, var(--badge-color) 30%, transparent),
@@ -193,6 +196,11 @@ const VISIBLE_BADGES_COUNT = 5;
         text-transform: uppercase;
         letter-spacing: 0.03em;
         line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+        padding: 0 0.25rem;
       }
 
       .badge-description {
