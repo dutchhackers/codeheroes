@@ -11,9 +11,10 @@ import { BackfillNameMigration } from './lib/migrations/backfill-name.migration'
 import { BackfillNameLowerMigration } from './lib/migrations/backfill-name-lower.migration';
 import { ClearLastLoginMigration } from './lib/migrations/clear-last-login.migration';
 import { SetAdminRoleMigration } from './lib/migrations/set-admin-role.migration';
+import { BackfillCustomClaimsMigration } from './lib/migrations/backfill-custom-claims.migration';
 import { loadJsonData } from './lib/utils/file-loader';
 
-const VALID_COMMANDS = ['seed', 'reset-progression', 'discover-schema', 'backfill-lowercase-names', 'backfill-name', 'backfill-name-lower', 'clear-last-login', 'set-admin-role'] as const;
+const VALID_COMMANDS = ['seed', 'reset-progression', 'discover-schema', 'backfill-lowercase-names', 'backfill-name', 'backfill-name-lower', 'backfill-custom-claims', 'clear-last-login', 'set-admin-role'] as const;
 type Command = (typeof VALID_COMMANDS)[number];
 
 function printUsage() {
@@ -27,6 +28,7 @@ Commands:
   backfill-lowercase-names   Backfill displayNameLower field on all user documents
   backfill-name              Backfill name field from displayName on all user documents
   backfill-name-lower        Backfill nameLower field (and ensure name is set) on all user documents
+  backfill-custom-claims     Set customUserId claim on Firebase Auth for all users
   clear-last-login           Remove bogus lastLogin (2024-01-01) from seeded users
   set-admin-role <email>     Set admin role on a user by email (Firestore + Firebase Auth)
 
@@ -153,6 +155,11 @@ async function main() {
       case 'backfill-name-lower':
         await runBackfillNameLower(db);
         break;
+      case 'backfill-custom-claims': {
+        const claimsMigration = new BackfillCustomClaimsMigration();
+        await claimsMigration.run(db);
+        break;
+      }
       case 'clear-last-login':
         await runClearLastLogin(db);
         break;
