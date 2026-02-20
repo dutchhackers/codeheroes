@@ -36,9 +36,18 @@ export interface SingleActivity {
 }
 
 /**
+ * Represents a date separator between activity groups
+ */
+export interface DateSeparator {
+  type: 'date-separator';
+  date: string;
+  label: string;
+}
+
+/**
  * Union type for items in the activity feed
  */
-export type FeedItem = ActivityStack | SingleActivity;
+export type FeedItem = ActivityStack | SingleActivity | DateSeparator;
 
 /**
  * Type guard to check if a feed item is a stack
@@ -52,4 +61,11 @@ export function isActivityStack(item: FeedItem): item is ActivityStack {
  */
 export function isSingleActivity(item: FeedItem): item is SingleActivity {
   return item.type === 'single';
+}
+
+/**
+ * Type guard to check if a feed item is a date separator
+ */
+export function isDateSeparator(item: FeedItem): item is DateSeparator {
+  return item.type === 'date-separator';
 }

@@ -1,12 +1,13 @@
 import { inject, Injectable, signal, computed } from '@angular/core';
 import { collection, Firestore, getDocs } from '@angular/fire/firestore';
-import { UserDto } from '@codeheroes/types';
+import { UserDto, UserType } from '@codeheroes/types';
 
 export interface UserInfo {
   id: string;
   name: string | null;
   displayName: string;
   photoUrl: string | null;
+  userType: UserType;
 }
 
 @Injectable({
@@ -36,6 +37,7 @@ export class UserCacheService {
         name: data.name ?? null,
         displayName: data.displayName,
         photoUrl: data.photoUrl,
+        userType: data.userType ?? 'user',
       });
     });
 

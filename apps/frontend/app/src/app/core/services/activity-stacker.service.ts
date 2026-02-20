@@ -260,6 +260,9 @@ export class ActivityStackerService {
     if (item.type === 'stack') {
       return item.lastUpdatedAt;
     }
+    if (item.type === 'date-separator') {
+      return item.date;
+    }
     return item.activity.createdAt;
   }
 }
