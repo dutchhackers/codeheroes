@@ -40,9 +40,6 @@ const VISIBLE_BADGES_COUNT = 5;
             >
               <span class="badge-emoji" aria-hidden="true">{{ item.emoji }}</span>
               <span class="badge-name">{{ item.badge.name }}</span>
-              @if (item.badge.description) {
-                <span class="badge-description">{{ item.badge.description }}</span>
-              }
               @if (item.badge.earnedAt) {
                 <span class="badge-date">{{ item.badge.earnedAt | date: 'MMM yyyy' }}</span>
               }
@@ -203,17 +200,6 @@ const VISIBLE_BADGES_COUNT = 5;
         padding: 0 0.25rem;
       }
 
-      .badge-description {
-        font-size: 0.625rem;
-        color: rgba(255, 255, 255, 0.4);
-        line-height: 1.3;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: 100%;
-        padding: 0 0.25rem;
-      }
-
       .badge-date {
         font-size: 0.625rem;
         color: rgba(255, 255, 255, 0.4);
@@ -238,7 +224,6 @@ const VISIBLE_BADGES_COUNT = 5;
 
       .more-card:hover {
         background: rgba(0, 255, 255, 0.1);
-        transform: scale(1.02);
       }
 
       .more-count {

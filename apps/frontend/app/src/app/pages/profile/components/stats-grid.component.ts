@@ -34,11 +34,12 @@ interface StatItem {
       }
 
       .section-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-family: inherit;
+        color: var(--neon-cyan);
         margin: 0 0 1rem 0;
-        letter-spacing: -0.02em;
       }
 
       .stats-grid {

@@ -11,10 +11,6 @@ import { UserStats } from '@codeheroes/types';
           <span class="xp-label">Total Experience</span>
           <span class="xp-total">{{ formatNumber(stats()?.xp ?? 0) }} XP</span>
         </div>
-        <div class="level-badge">
-          <span class="level-label">Level</span>
-          <span class="level-number">{{ stats()?.level ?? 1 }}</span>
-        </div>
       </div>
       <div class="progress-section">
         <div
@@ -47,9 +43,6 @@ import { UserStats } from '@codeheroes/types';
       }
 
       .xp-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
         margin-bottom: 1rem;
       }
 
@@ -69,31 +62,6 @@ import { UserStats } from '@codeheroes/types';
         font-size: 1.75rem;
         font-weight: 700;
         color: var(--neon-cyan);
-        line-height: 1;
-      }
-
-      .level-badge {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.25rem;
-        background: color-mix(in srgb, var(--neon-purple) 15%, transparent);
-        border: 1px solid color-mix(in srgb, var(--neon-purple) 30%, transparent);
-        border-radius: 12px;
-        padding: 0.5rem 1rem;
-      }
-
-      .level-label {
-        font-size: 0.625rem;
-        color: rgba(255, 255, 255, 0.5);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-
-      .level-number {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--neon-purple);
         line-height: 1;
       }
 

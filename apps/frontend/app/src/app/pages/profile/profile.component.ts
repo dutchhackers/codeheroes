@@ -2,9 +2,7 @@ import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth, signOut } from '@angular/fire/auth';
 import { Subscription } from 'rxjs';
-import { Firestore, collection, collectionData } from '@angular/fire/firestore';
-import { Injector, runInInjectionContext } from '@angular/core';
-import { UserDto, UserStats, ConnectedAccountDto, Collections } from '@codeheroes/types';
+import { UserDto, UserStats } from '@codeheroes/types';
 import { UserStatsService } from '../../core/services/user-stats.service';
 import { UserCacheService } from '../../core/services/user-cache.service';
 import { UserBadge } from '../../core/models/user-badge.model';
@@ -14,7 +12,6 @@ import { StatsGridComponent } from './components/stats-grid.component';
 import { BadgesGridComponent } from './components/badges-grid.component';
 import { ProfileEditModalComponent } from './components/profile-edit-modal.component';
 import { BadgesModalComponent } from './components/badges-modal.component';
-import { ConnectedAccountsComponent } from './components/connected-accounts.component';
 
 @Component({
   selector: 'app-profile',
@@ -26,7 +23,6 @@ import { ConnectedAccountsComponent } from './components/connected-accounts.comp
     BadgesGridComponent,
     ProfileEditModalComponent,
     BadgesModalComponent,
-    ConnectedAccountsComponent,
   ],
   template: `
     <!-- Header -->
@@ -133,10 +129,6 @@ import { ConnectedAccountsComponent } from './components/connected-accounts.comp
             (viewAll)="showBadgesModal.set(true)"
             (badgeClick)="onBadgeClick($event)"
           />
-
-          <!-- Connected Accounts -->
-          <app-connected-accounts [accounts]="connectedAccounts()" />
-
         </div>
       }
     </main>
@@ -203,19 +195,15 @@ import { ConnectedAccountsComponent } from './components/connected-accounts.comp
 export class ProfileComponent implements OnInit, OnDestroy {
   readonly #auth = inject(Auth);
   readonly #router = inject(Router);
-  readonly #firestore = inject(Firestore);
-  readonly #injector = inject(Injector);
   readonly #userStatsService = inject(UserStatsService);
   readonly #userCacheService = inject(UserCacheService);
 
   #profileSubscription: Subscription | null = null;
   #badgesSubscription: Subscription | null = null;
-  #connectedAccountsSub: Subscription | null = null;
 
   user = signal<UserDto | null>(null);
   stats = signal<UserStats | null>(null);
   badges = signal<UserBadge[]>([]);
-  connectedAccounts = signal<ConnectedAccountDto[]>([]);
   isLoading = signal(true);
   showEditModal = signal(false);
   showBadgesModal = signal(false);
@@ -230,7 +218,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.#profileSubscription?.unsubscribe();
     this.#badgesSubscription?.unsubscribe();
-    this.#connectedAccountsSub?.unsubscribe();
   }
 
   #loadProfile() {
@@ -240,11 +227,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.user.set(user);
         this.stats.set(stats);
         this.isLoading.set(false);
-
-        // Load connected accounts once we have the user
-        if (user) {
-          this.#loadConnectedAccounts(user.id);
-        }
       },
       error: (error) => {
         console.error('Failed to load profile:', error);
@@ -260,17 +242,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Failed to load badges:', error);
       },
-    });
-  }
-
-  #loadConnectedAccounts(userId: string) {
-    this.#connectedAccountsSub?.unsubscribe();
-    const accountsRef = collection(this.#firestore, `users/${userId}/${Collections.ConnectedAccounts}`);
-    this.#connectedAccountsSub = runInInjectionContext(this.#injector, () =>
-      collectionData(accountsRef, { idField: 'id' }),
-    ).subscribe({
-      next: (accounts) => this.connectedAccounts.set(accounts as ConnectedAccountDto[]),
-      error: (error) => console.error('Failed to load connected accounts:', error),
     });
   }
 
