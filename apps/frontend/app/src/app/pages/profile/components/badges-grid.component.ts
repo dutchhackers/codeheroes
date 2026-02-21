@@ -224,7 +224,6 @@ const VISIBLE_BADGES_COUNT = 5;
 
       .more-card:hover {
         background: rgba(0, 255, 255, 0.1);
-        transform: scale(1.02);
       }
 
       .more-count {
