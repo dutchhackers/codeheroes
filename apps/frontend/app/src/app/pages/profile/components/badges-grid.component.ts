@@ -40,9 +40,6 @@ const VISIBLE_BADGES_COUNT = 5;
             >
               <span class="badge-emoji" aria-hidden="true">{{ item.emoji }}</span>
               <span class="badge-name">{{ item.badge.name }}</span>
-              @if (item.badge.description) {
-                <span class="badge-description">{{ item.badge.description }}</span>
-              }
               @if (item.badge.earnedAt) {
                 <span class="badge-date">{{ item.badge.earnedAt | date: 'MMM yyyy' }}</span>
               }
@@ -196,17 +193,6 @@ const VISIBLE_BADGES_COUNT = 5;
         text-transform: uppercase;
         letter-spacing: 0.03em;
         line-height: 1.2;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: 100%;
-        padding: 0 0.25rem;
-      }
-
-      .badge-description {
-        font-size: 0.625rem;
-        color: rgba(255, 255, 255, 0.4);
-        line-height: 1.3;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
