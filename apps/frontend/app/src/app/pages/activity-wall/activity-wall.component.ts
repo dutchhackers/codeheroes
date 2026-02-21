@@ -1,10 +1,10 @@
 import { Component, inject, signal, computed, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Auth, user } from '@angular/fire/auth';
 import { QueryDocumentSnapshot, DocumentData } from '@angular/fire/firestore';
 import { Activity } from '@codeheroes/types';
 import { ActivityFeedService, LoadMoreResult } from '../../core/services/activity-feed.service';
 import { UserCacheService } from '../../core/services/user-cache.service';
+import { UserStatsService } from '../../core/services/user-stats.service';
 import { ActivityStackerService } from '../../core/services/activity-stacker.service';
 import { FeedItem, isActivityStack, isSingleActivity, isDateSeparator } from '../../core/models/activity-stack.model';
 import { ActivityItemComponent } from '../../components/activity-item.component';
@@ -232,7 +232,7 @@ export class ActivityWallComponent implements OnInit, OnDestroy {
   readonly #activityFeedService = inject(ActivityFeedService);
   readonly #userCacheService = inject(UserCacheService);
   readonly #activityStacker = inject(ActivityStackerService);
-  readonly #auth = inject(Auth);
+  readonly #userStatsService = inject(UserStatsService);
 
   readonly #INITIAL_LIMIT = 200;
   readonly #LOAD_MORE_LIMIT = 100;
@@ -321,9 +321,9 @@ export class ActivityWallComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.#loadData();
-    // Track current user for "My Activity" filter
-    this.#authSubscription = user(this.#auth).subscribe((authUser) => {
-      this.#currentUserId.set(authUser?.uid ?? null);
+    // Track current user's Firestore doc ID for "My Activity" filter
+    this.#authSubscription = this.#userStatsService.getCurrentUserDoc().subscribe((userDoc) => {
+      this.#currentUserId.set(userDoc?.id ?? null);
     });
   }
 
