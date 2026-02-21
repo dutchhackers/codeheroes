@@ -1,4 +1,4 @@
-import { Component, HostListener, input, output, signal, OnInit } from '@angular/core';
+import { Component, HostListener, input, output, signal, computed, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { BadgeRarity } from '@codeheroes/types';
 import { UserBadge, getBadgeRarity, getBadgeEmoji, getBadgeRarityColor } from '../../../core/models/user-badge.model';
@@ -66,7 +66,7 @@ interface BadgeDisplay {
             </div>
           } @else {
             <div class="badges-grid" role="list">
-              @for (item of badgeDisplays; track item.badge.id) {
+              @for (item of badgeDisplays(); track item.badge.id) {
                 <button
                   type="button"
                   class="badge-card"
@@ -406,8 +406,8 @@ export class BadgesModalComponent implements OnInit {
   dismiss = output<void>();
   selectedBadge = signal<BadgeDisplay | null>(null);
 
-  get badgeDisplays(): BadgeDisplay[] {
-    return this.badges().map((badge) => {
+  badgeDisplays = computed<BadgeDisplay[]>(() =>
+    this.badges().map((badge) => {
       const rarity = getBadgeRarity(badge);
       return {
         badge,
@@ -415,14 +415,14 @@ export class BadgesModalComponent implements OnInit {
         rarity,
         color: getBadgeRarityColor(rarity),
       };
-    });
-  }
+    }),
+  );
 
   ngOnInit() {
     // If an initial badge ID is provided, select it
     const initialId = this.initialSelectedBadgeId();
     if (initialId) {
-      const badgeDisplay = this.badgeDisplays.find((item) => item.badge.id === initialId);
+      const badgeDisplay = this.badgeDisplays().find((item) => item.badge.id === initialId);
       if (badgeDisplay) {
         this.selectedBadge.set(badgeDisplay);
       }
