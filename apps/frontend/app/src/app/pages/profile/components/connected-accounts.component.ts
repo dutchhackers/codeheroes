@@ -6,7 +6,9 @@ import { ConnectedAccountDto, ConnectedAccountProvider } from '@codeheroes/types
   standalone: true,
   template: `
     <div class="accounts-section">
-      <h3 class="section-title">Connected Accounts</h3>
+      @if (showTitle()) {
+        <h3 class="section-title">Connected Accounts</h3>
+      }
 
       @if (accounts().length === 0) {
         <p class="empty-text">No connected accounts yet</p>
@@ -35,7 +37,7 @@ import { ConnectedAccountDto, ConnectedAccountProvider } from '@codeheroes/types
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 16px;
         padding: 1.25rem;
-        margin: 1.25rem 0;
+        margin: 0;
       }
 
       .section-title {
@@ -108,6 +110,7 @@ import { ConnectedAccountDto, ConnectedAccountProvider } from '@codeheroes/types
 })
 export class ConnectedAccountsComponent {
   accounts = input<ConnectedAccountDto[]>([]);
+  showTitle = input(true);
 
   getProviderLabel(provider: ConnectedAccountProvider): string {
     const labels: Record<string, string> = {

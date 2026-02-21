@@ -122,7 +122,7 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
           <section class="settings-section">
             <h2 class="section-title">Connected Accounts</h2>
             <p class="section-description">Accounts linked to your profile</p>
-            <app-connected-accounts [accounts]="connectedAccounts()" />
+            <app-connected-accounts [accounts]="connectedAccounts()" [showTitle]="false" />
           </section>
 
           <!-- Account Section -->
