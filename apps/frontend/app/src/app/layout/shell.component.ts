@@ -151,6 +151,8 @@ export class ShellComponent implements OnInit, OnDestroy {
   #authUnsubscribe: Unsubscribe | null = null;
   #updateSubscription: Subscription | null = null;
   #levelUpTimeout: ReturnType<typeof setTimeout> | null = null;
+  #updateCheckInterval: ReturnType<typeof setInterval> | null = null;
+  #visibilityHandler: (() => void) | null = null;
 
   isAuthenticated = signal(false);
   isLoading = signal(true);
@@ -175,6 +177,20 @@ export class ShellComponent implements OnInit, OnDestroy {
       this.#updateSubscription = this.#swUpdate.versionUpdates
         .pipe(filter((event): event is VersionReadyEvent => event.type === 'VERSION_READY'))
         .subscribe(() => this.updateAvailable.set(true));
+
+      // Periodic update check every 30 minutes
+      this.#updateCheckInterval = setInterval(
+        () => this.#swUpdate.checkForUpdate().catch(() => {}),
+        30 * 60 * 1000,
+      );
+
+      // Check when user returns to the app (e.g. switching back from another tab/app)
+      this.#visibilityHandler = () => {
+        if (!document.hidden) {
+          this.#swUpdate.checkForUpdate().catch(() => {});
+        }
+      };
+      document.addEventListener('visibilitychange', this.#visibilityHandler);
     }
 
     // Detect new LEVEL_UP notifications for celebration overlay
@@ -210,6 +226,8 @@ export class ShellComponent implements OnInit, OnDestroy {
       this.#authUnsubscribe();
     }
     this.#updateSubscription?.unsubscribe();
+    if (this.#updateCheckInterval) clearInterval(this.#updateCheckInterval);
+    if (this.#visibilityHandler) document.removeEventListener('visibilitychange', this.#visibilityHandler);
     if (this.#levelUpTimeout) clearTimeout(this.#levelUpTimeout);
   }
 
