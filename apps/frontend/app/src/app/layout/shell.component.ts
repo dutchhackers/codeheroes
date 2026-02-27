@@ -152,6 +152,7 @@ export class ShellComponent implements OnInit, OnDestroy {
   #updateSubscription: Subscription | null = null;
   #updateCheckInterval: ReturnType<typeof setInterval> | null = null;
   #visibilityHandler: (() => void) | null = null;
+  #levelUpNotificationIds: string[] = [];
 
   isAuthenticated = signal(false);
   isLoading = signal(true);
@@ -208,6 +209,7 @@ export class ShellComponent implements OnInit, OnDestroy {
       .subscribe((newLevelUps) => {
         const level = (newLevelUps[0].metadata?.['newLevel'] as number) ?? 0;
         if (level > 0) {
+          this.#levelUpNotificationIds = newLevelUps.map((n) => n.id);
           this.levelUpLevel.set(level);
           this.showLevelUp.set(true);
         }
@@ -229,6 +231,10 @@ export class ShellComponent implements OnInit, OnDestroy {
 
   dismissLevelUp(): void {
     this.showLevelUp.set(false);
+    if (this.#levelUpNotificationIds.length > 0) {
+      this.#notificationService.markAsRead(this.#levelUpNotificationIds);
+      this.#levelUpNotificationIds = [];
+    }
   }
 
   async #autoLogin(email: string, password: string): Promise<void> {
