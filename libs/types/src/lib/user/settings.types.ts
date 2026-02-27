@@ -3,12 +3,14 @@ export interface UserSettings {
   userId: string;
   dailyGoal: number;
   notificationsEnabled: boolean;
+  fcmTokens?: string[];
   updatedAt: string;
 }
 
 export interface UpdateUserSettingsDto {
   dailyGoal?: number;
   notificationsEnabled?: boolean;
+  fcmTokens?: string[];
 }
 
 export const DEFAULT_DAILY_GOAL = 8000;
