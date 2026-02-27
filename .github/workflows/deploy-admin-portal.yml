@@ -68,6 +68,8 @@ jobs:
           echo "FIREBASE_PROD_APP_ID=${{ secrets.FIREBASE_PROD_APP_ID }}" >> .env
           echo "FIREBASE_PROD_APP_SITE=${{ secrets.FIREBASE_PROD_APP_SITE }}" >> .env
           echo "FIREBASE_PROD_ADMIN_PORTAL_SITE=${{ secrets.FIREBASE_PROD_ADMIN_PORTAL_SITE }}" >> .env
+          echo "FIREBASE_TEST_MEASUREMENT_ID=${{ secrets.FIREBASE_TEST_MEASUREMENT_ID }}" >> .env
+          echo "FIREBASE_PROD_MEASUREMENT_ID=${{ secrets.FIREBASE_PROD_MEASUREMENT_ID }}" >> .env
 
       - name: Generate config files
         run: npm run setup

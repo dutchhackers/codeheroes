@@ -48,6 +48,7 @@ const appTestConfig = appTestTemplate
   .replace('${FIREBASE_TEST_STORAGE_BUCKET}', process.env.FIREBASE_TEST_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET)
   .replace('${FIREBASE_TEST_MESSAGING_SENDER_ID}', process.env.FIREBASE_TEST_MESSAGING_SENDER_ID || process.env.FIREBASE_MESSAGING_SENDER_ID)
   .replace('${FIREBASE_TEST_APP_ID}', process.env.FIREBASE_TEST_APP_ID || process.env.FIREBASE_APP_ID)
+  .replace('${FIREBASE_TEST_MEASUREMENT_ID}', process.env.FIREBASE_TEST_MEASUREMENT_ID || process.env.FIREBASE_MEASUREMENT_ID || '')
   .replace('${FIREBASE_TEST_VAPID_KEY}', process.env.FIREBASE_TEST_VAPID_KEY || process.env.FIREBASE_VAPID_KEY || '')
   .replace('${APP_VERSION}', appVersion);
 fs.writeFileSync('apps/frontend/app/src/environments/environment.test.ts', appTestConfig);
@@ -61,6 +62,7 @@ const appProdConfig = appProdTemplate
   .replace('${FIREBASE_PROD_STORAGE_BUCKET}', process.env.FIREBASE_PROD_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET)
   .replace('${FIREBASE_PROD_MESSAGING_SENDER_ID}', process.env.FIREBASE_PROD_MESSAGING_SENDER_ID || process.env.FIREBASE_MESSAGING_SENDER_ID)
   .replace('${FIREBASE_PROD_APP_ID}', process.env.FIREBASE_PROD_APP_ID || process.env.FIREBASE_APP_ID)
+  .replace('${FIREBASE_PROD_MEASUREMENT_ID}', process.env.FIREBASE_PROD_MEASUREMENT_ID || process.env.FIREBASE_MEASUREMENT_ID || '')
   .replace('${FIREBASE_PROD_VAPID_KEY}', process.env.FIREBASE_PROD_VAPID_KEY || process.env.FIREBASE_VAPID_KEY || '')
   .replace('${APP_VERSION}', appVersion);
 fs.writeFileSync('apps/frontend/app/src/environments/environment.prod.ts', appProdConfig);
@@ -83,7 +85,8 @@ const adminTestConfig = adminTestTemplate
   .replaceAll('${FIREBASE_TEST_PROJECT_ID}', process.env.FIREBASE_TEST_PROJECT_ID || process.env.FIREBASE_PROJECT_ID)
   .replace('${FIREBASE_TEST_STORAGE_BUCKET}', process.env.FIREBASE_TEST_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET)
   .replace('${FIREBASE_TEST_MESSAGING_SENDER_ID}', process.env.FIREBASE_TEST_MESSAGING_SENDER_ID || process.env.FIREBASE_MESSAGING_SENDER_ID)
-  .replace('${FIREBASE_TEST_APP_ID}', process.env.FIREBASE_TEST_APP_ID || process.env.FIREBASE_APP_ID);
+  .replace('${FIREBASE_TEST_APP_ID}', process.env.FIREBASE_TEST_APP_ID || process.env.FIREBASE_APP_ID)
+  .replace('${FIREBASE_TEST_MEASUREMENT_ID}', process.env.FIREBASE_TEST_MEASUREMENT_ID || process.env.FIREBASE_MEASUREMENT_ID || '');
 fs.writeFileSync('apps/frontend/admin-portal/src/environments/environment.test.ts', adminTestConfig);
 
 const adminProdTemplate = fs.readFileSync('apps/frontend/admin-portal/src/environments/environment.prod.ts.template', 'utf8');
@@ -93,7 +96,8 @@ const adminProdConfig = adminProdTemplate
   .replaceAll('${FIREBASE_PROD_PROJECT_ID}', process.env.FIREBASE_PROD_PROJECT_ID || process.env.FIREBASE_PROJECT_ID)
   .replace('${FIREBASE_PROD_STORAGE_BUCKET}', process.env.FIREBASE_PROD_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET)
   .replace('${FIREBASE_PROD_MESSAGING_SENDER_ID}', process.env.FIREBASE_PROD_MESSAGING_SENDER_ID || process.env.FIREBASE_MESSAGING_SENDER_ID)
-  .replace('${FIREBASE_PROD_APP_ID}', process.env.FIREBASE_PROD_APP_ID || process.env.FIREBASE_APP_ID);
+  .replace('${FIREBASE_PROD_APP_ID}', process.env.FIREBASE_PROD_APP_ID || process.env.FIREBASE_APP_ID)
+  .replace('${FIREBASE_PROD_MEASUREMENT_ID}', process.env.FIREBASE_PROD_MEASUREMENT_ID || process.env.FIREBASE_MEASUREMENT_ID || '');
 fs.writeFileSync('apps/frontend/admin-portal/src/environments/environment.prod.ts', adminProdConfig);
 
 // Generate Firebase Messaging service worker (uses base FIREBASE_* vars — matches local/CI target)

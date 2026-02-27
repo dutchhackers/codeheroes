@@ -5,6 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { connectAuthEmulator, getAuth, provideAuth } from '@angular/fire/auth';
 import { connectFirestoreEmulator, getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
 
 import { environment } from '../environments/environment';
 import { appRoutes } from './app.routes';
@@ -39,5 +40,6 @@ export const appConfig: ApplicationConfig = {
       }
       return firestore;
     }),
+    ...(environment.firebase.measurementId ? [provideAnalytics(() => getAnalytics())] : []),
   ],
 };
