@@ -1,6 +1,8 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription, switchMap } from 'rxjs';
 import { UserSettingsService } from '../../core/services/user-settings.service';
+import { NotificationDataService } from '../../core/services/notification-data.service';
 import {
   HqDataService,
   DailyProgress,
@@ -22,15 +24,23 @@ import { HighlightsComponent } from './components/highlights.component';
     HighlightsComponent,
   ],
   template: `
-    <!-- Header (desktop only - bottom nav identifies the tab on mobile) -->
-    <header class="hidden md:block sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-6 lg:px-8 py-5">
-      <div class="relative z-10">
-        <h1 class="text-4xl font-bold italic text-white">HQ</h1>
+    <!-- Header -->
+    <header class="sticky top-0 z-20 bg-black/90 backdrop-blur-sm px-4 md:px-6 lg:px-8 py-3 md:py-5">
+      <div class="relative z-10 flex items-center justify-between">
+        <h1 class="text-2xl md:text-4xl font-bold italic text-white">HQ</h1>
+        <button type="button" class="bell-button" (click)="openNotifications()" aria-label="Notifications">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+          </svg>
+          @if (unreadCount() > 0) {
+            <span class="badge">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
+          }
+        </button>
       </div>
     </header>
 
     <!-- Main Content -->
-    <main class="relative z-10 px-4 pt-4 md:px-6 md:pt-0 lg:px-8 pb-24">
+    <main class="relative z-10 px-4 md:px-6 lg:px-8 pb-24">
       @if (isLoading()) {
         <div class="flex items-center justify-center py-20">
           <div class="text-xl md:text-2xl text-purple-400/70 animate-pulse" role="status" aria-live="polite">
@@ -64,19 +74,61 @@ import { HighlightsComponent } from './components/highlights.component';
       :host {
         display: block;
       }
+
+      .bell-button {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .bell-button:hover {
+        color: white;
+        border-color: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 9px;
+        background: rgb(239, 68, 68);
+        color: white;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        line-height: 18px;
+        text-align: center;
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+      }
     `,
   ],
 })
 export class HqComponent implements OnInit, OnDestroy {
   readonly #hqDataService = inject(HqDataService);
   readonly #userSettingsService = inject(UserSettingsService);
+  readonly #notificationService = inject(NotificationDataService);
+  readonly #router = inject(Router);
 
   #dailyProgressSub: Subscription | null = null;
   #weeklyStatsSub: Subscription | null = null;
   #leaderboardSub: Subscription | null = null;
   #highlightsSub: Subscription | null = null;
+  #notificationSub: Subscription | null = null;
 
   isLoading = signal(true);
+  unreadCount = signal(0);
   dailyProgress = signal<DailyProgress | null>(null);
   weeklyStats = signal<WeeklyStats | null>(null);
   leaderboardLoading = signal(true);
@@ -84,6 +136,9 @@ export class HqComponent implements OnInit, OnDestroy {
   highlights = signal<Highlight[]>([]);
 
   ngOnInit() {
+    this.#notificationSub = this.#notificationService.unreadCount$.subscribe((count) =>
+      this.unreadCount.set(count),
+    );
     this.#loadData();
   }
 
@@ -92,6 +147,11 @@ export class HqComponent implements OnInit, OnDestroy {
     this.#weeklyStatsSub?.unsubscribe();
     this.#leaderboardSub?.unsubscribe();
     this.#highlightsSub?.unsubscribe();
+    this.#notificationSub?.unsubscribe();
+  }
+
+  openNotifications(): void {
+    this.#router.navigate(['/notifications']);
   }
 
   #loadData() {
