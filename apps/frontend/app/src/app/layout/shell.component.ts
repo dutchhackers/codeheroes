@@ -150,7 +150,6 @@ export class ShellComponent implements OnInit, OnDestroy {
 
   #authUnsubscribe: Unsubscribe | null = null;
   #updateSubscription: Subscription | null = null;
-  #levelUpTimeout: ReturnType<typeof setTimeout> | null = null;
   #updateCheckInterval: ReturnType<typeof setInterval> | null = null;
   #visibilityHandler: (() => void) | null = null;
 
@@ -209,16 +208,8 @@ export class ShellComponent implements OnInit, OnDestroy {
       .subscribe((newLevelUps) => {
         const level = (newLevelUps[0].metadata?.['newLevel'] as number) ?? 0;
         if (level > 0) {
-          if (this.#levelUpTimeout) {
-            clearTimeout(this.#levelUpTimeout);
-            this.#levelUpTimeout = null;
-          }
           this.levelUpLevel.set(level);
           this.showLevelUp.set(true);
-          this.#levelUpTimeout = setTimeout(() => {
-            this.showLevelUp.set(false);
-            this.#levelUpTimeout = null;
-          }, 5000);
         }
       });
   }
@@ -230,7 +221,6 @@ export class ShellComponent implements OnInit, OnDestroy {
     this.#updateSubscription?.unsubscribe();
     if (this.#updateCheckInterval) clearInterval(this.#updateCheckInterval);
     if (this.#visibilityHandler) document.removeEventListener('visibilitychange', this.#visibilityHandler);
-    if (this.#levelUpTimeout) clearTimeout(this.#levelUpTimeout);
   }
 
   applyUpdate(): void {
@@ -239,10 +229,6 @@ export class ShellComponent implements OnInit, OnDestroy {
 
   dismissLevelUp(): void {
     this.showLevelUp.set(false);
-    if (this.#levelUpTimeout) {
-      clearTimeout(this.#levelUpTimeout);
-      this.#levelUpTimeout = null;
-    }
   }
 
   async #autoLogin(email: string, password: string): Promise<void> {
