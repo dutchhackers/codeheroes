@@ -32,5 +32,7 @@ export * from './game/metrics.types';
 
 export * from './unmatched-event/unmatched-event.types';
 
+export * from './notifications/notification.types';
+
 export * from './utils/time.types';
 export * from './utils/pagination.types';

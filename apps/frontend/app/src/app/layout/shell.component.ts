@@ -10,15 +10,18 @@ import {
   signInWithPopup,
   Unsubscribe,
 } from '@angular/fire/auth';
-import { Subscription, filter } from 'rxjs';
+import { Subscription, filter, pairwise, map } from 'rxjs';
+import { NotificationType } from '@codeheroes/types';
 import { BottomNavComponent } from './bottom-nav.component';
 import { EnvironmentBannerComponent, showEnvironmentIndicator } from './environment-banner.component';
+import { LevelUpCelebrationComponent } from '../shared/components/level-up-celebration.component';
+import { NotificationDataService } from '../core/services/notification-data.service';
 import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, BottomNavComponent, EnvironmentBannerComponent],
+  imports: [RouterOutlet, BottomNavComponent, EnvironmentBannerComponent, LevelUpCelebrationComponent],
   template: `
     <app-environment-banner />
     <div class="min-h-screen cyber-grid-bg text-white relative" [class.pt-6]="showBanner">
@@ -76,6 +79,11 @@ import { environment } from '../../environments/environment';
         <!-- Authenticated content -->
         <router-outlet />
         <app-bottom-nav />
+
+        <!-- Level-up celebration overlay -->
+        @if (showLevelUp()) {
+          <app-level-up-celebration [level]="levelUpLevel()" (dismissed)="dismissLevelUp()" />
+        }
       }
 
       <!-- Update available banner -->
@@ -130,20 +138,25 @@ import { environment } from '../../environments/environment';
       .update-banner button:hover {
         opacity: 0.85;
       }
+
     `,
   ],
 })
 export class ShellComponent implements OnInit, OnDestroy {
   readonly #auth = inject(Auth);
   readonly #swUpdate = inject(SwUpdate);
+  readonly #notificationService = inject(NotificationDataService);
   readonly showBanner = showEnvironmentIndicator;
 
   #authUnsubscribe: Unsubscribe | null = null;
   #updateSubscription: Subscription | null = null;
+  #levelUpTimeout: ReturnType<typeof setTimeout> | null = null;
 
   isAuthenticated = signal(false);
   isLoading = signal(true);
   updateAvailable = signal(false);
+  showLevelUp = signal(false);
+  levelUpLevel = signal(0);
 
   ngOnInit() {
     let autoLoginAttempted = false;
@@ -163,6 +176,33 @@ export class ShellComponent implements OnInit, OnDestroy {
         .pipe(filter((event): event is VersionReadyEvent => event.type === 'VERSION_READY'))
         .subscribe(() => this.updateAvailable.set(true));
     }
+
+    // Detect new LEVEL_UP notifications for celebration overlay
+    this.#notificationService.notifications$
+      .pipe(
+        pairwise(),
+        map(([prev, curr]) => {
+          // Find notifications in curr that weren't in prev (new arrivals)
+          const prevIds = new Set(prev.map((n) => n.id));
+          return curr.filter((n) => !prevIds.has(n.id) && n.type === NotificationType.LEVEL_UP);
+        }),
+        filter((newLevelUps) => newLevelUps.length > 0),
+      )
+      .subscribe((newLevelUps) => {
+        const level = (newLevelUps[0].metadata?.['newLevel'] as number) ?? 0;
+        if (level > 0) {
+          if (this.#levelUpTimeout) {
+            clearTimeout(this.#levelUpTimeout);
+            this.#levelUpTimeout = null;
+          }
+          this.levelUpLevel.set(level);
+          this.showLevelUp.set(true);
+          this.#levelUpTimeout = setTimeout(() => {
+            this.showLevelUp.set(false);
+            this.#levelUpTimeout = null;
+          }, 5000);
+        }
+      });
   }
 
   ngOnDestroy() {
@@ -170,10 +210,19 @@ export class ShellComponent implements OnInit, OnDestroy {
       this.#authUnsubscribe();
     }
     this.#updateSubscription?.unsubscribe();
+    if (this.#levelUpTimeout) clearTimeout(this.#levelUpTimeout);
   }
 
   applyUpdate(): void {
     location.reload();
+  }
+
+  dismissLevelUp(): void {
+    this.showLevelUp.set(false);
+    if (this.#levelUpTimeout) {
+      clearTimeout(this.#levelUpTimeout);
+      this.#levelUpTimeout = null;
+    }
   }
 
   async #autoLogin(email: string, password: string): Promise<void> {

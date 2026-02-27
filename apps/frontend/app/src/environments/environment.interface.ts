@@ -13,6 +13,8 @@ export interface Environment {
     messagingSenderId: string;
     appId: string;
   };
+  appVersion: string;
+  vapidKey?: string;
   autoLogin?: {
     email: string;
     password: string;

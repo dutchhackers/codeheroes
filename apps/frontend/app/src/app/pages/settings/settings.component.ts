@@ -6,7 +6,9 @@ import { Firestore, collection, collectionData } from '@angular/fire/firestore';
 import { DEFAULT_DAILY_GOAL, ConnectedAccountDto, Collections } from '@codeheroes/types';
 import { UserSettingsService } from '../../core/services/user-settings.service';
 import { UserStatsService } from '../../core/services/user-stats.service';
+import { PushNotificationService } from '../../core/services/push-notification.service';
 import { ConnectedAccountsComponent } from '../profile/components/connected-accounts.component';
+import { environment } from '../../../environments/environment';
 
 const GOAL_PRESETS = [4000, 8000, 12000, 16000];
 
@@ -104,7 +106,7 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
             <div class="toggle-row">
               <div>
                 <p class="toggle-label">Enable Notifications</p>
-                <p class="toggle-description">Receive updates about your progress</p>
+                <p class="toggle-description">Push notifications for achievements and level ups</p>
               </div>
               <label class="toggle-switch">
                 <input
@@ -170,6 +172,7 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
             <div class="about-branding">
               <span class="about-name">Code Heroes</span>
               <span class="about-tagline">Level up your dev game</span>
+              <span class="about-version">v{{ appVersion }}</span>
             </div>
           </section>
         }
@@ -505,6 +508,13 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
         font-size: 0.75rem;
         color: rgba(255, 255, 255, 0.35);
       }
+
+      .about-version {
+        font-size: 0.6875rem;
+        color: rgba(255, 255, 255, 0.2);
+        font-family: monospace;
+        margin-top: 0.25rem;
+      }
     `,
   ],
 })
@@ -514,8 +524,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
   readonly #injector = inject(Injector);
   readonly #settingsService = inject(UserSettingsService);
   readonly #userStatsService = inject(UserStatsService);
+  readonly #pushService = inject(PushNotificationService);
 
   readonly goalPresets = GOAL_PRESETS;
+  readonly appVersion = environment.appVersion;
 
   isLoading = signal(true);
   selectedGoal = signal(DEFAULT_DAILY_GOAL);
@@ -647,9 +659,27 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.isSavingNotifications.set(true);
 
     this.#settingsService.updateSettings(this.#userId, { notificationsEnabled: newValue }).subscribe({
-      next: () => {
+      next: async () => {
         this.notificationsEnabled.set(newValue);
         this.#originalNotifications = newValue;
+
+        // Wire push notification service
+        try {
+          if (newValue) {
+            await this.#pushService.requestPermission();
+          } else {
+            await this.#pushService.removeToken();
+          }
+        } catch (error) {
+          console.error('Push notification toggle failed:', error);
+          // Revert settings since push service failed
+          this.notificationsEnabled.set(!newValue);
+          this.#originalNotifications = !newValue;
+          this.#settingsService.updateSettings(this.#userId!, { notificationsEnabled: !newValue }).subscribe();
+          this.notificationSaveError.set(true);
+          this.#errorTimeout = setTimeout(() => this.notificationSaveError.set(false), 5000);
+        }
+
         this.isSavingNotifications.set(false);
       },
       error: () => {
