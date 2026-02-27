@@ -70,6 +70,9 @@ export class PushNotificationService implements OnDestroy {
       this.#setupForegroundHandler();
 
       // Refresh token every 24h
+      if (this.#refreshInterval) {
+        clearInterval(this.#refreshInterval);
+      }
       this.#refreshInterval = setInterval(() => this.#refreshToken(), 24 * 60 * 60 * 1000);
 
       return true;

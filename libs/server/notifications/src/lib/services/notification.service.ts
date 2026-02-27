@@ -74,10 +74,12 @@ export class NotificationService {
     if (response.failureCount > 0) {
       const staleTokens: string[] = [];
       response.responses.forEach((resp, idx) => {
-        if (
-          !resp.success &&
-          resp.error?.code === 'messaging/registration-token-not-registered'
-        ) {
+        const invalidTokenCodes = [
+          'messaging/registration-token-not-registered',
+          'messaging/invalid-registration-token',
+          'messaging/mismatched-credential',
+        ];
+        if (!resp.success && invalidTokenCodes.includes(resp.error?.code ?? '')) {
           staleTokens.push(settings.fcmTokens![idx]);
         }
       });

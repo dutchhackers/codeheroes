@@ -662,6 +662,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
           }
         } catch (error) {
           console.error('Push notification toggle failed:', error);
+          // Revert settings since push service failed
+          this.notificationsEnabled.set(!newValue);
+          this.#originalNotifications = !newValue;
+          this.#settingsService.updateSettings(this.#userId!, { notificationsEnabled: !newValue }).subscribe();
+          this.notificationSaveError.set(true);
+          this.#errorTimeout = setTimeout(() => this.notificationSaveError.set(false), 5000);
         }
 
         this.isSavingNotifications.set(false);

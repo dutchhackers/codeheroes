@@ -250,9 +250,16 @@ export class ShellComponent implements OnInit, OnDestroy {
       .subscribe((newLevelUps) => {
         const level = (newLevelUps[0].metadata?.['newLevel'] as number) ?? 0;
         if (level > 0) {
+          if (this.#levelUpTimeout) {
+            clearTimeout(this.#levelUpTimeout);
+            this.#levelUpTimeout = null;
+          }
           this.levelUpLevel.set(level);
           this.showLevelUp.set(true);
-          this.#levelUpTimeout = setTimeout(() => this.showLevelUp.set(false), 5000);
+          this.#levelUpTimeout = setTimeout(() => {
+            this.showLevelUp.set(false);
+            this.#levelUpTimeout = null;
+          }, 5000);
         }
       });
   }
