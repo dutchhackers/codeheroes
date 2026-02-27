@@ -10,7 +10,7 @@ import {
   signInWithPopup,
   Unsubscribe,
 } from '@angular/fire/auth';
-import { Subscription, filter, pairwise, map } from 'rxjs';
+import { Subscription, filter, pairwise, map, startWith } from 'rxjs';
 import { NotificationType } from '@codeheroes/types';
 import { BottomNavComponent } from './bottom-nav.component';
 import { EnvironmentBannerComponent, showEnvironmentIndicator } from './environment-banner.component';
@@ -194,13 +194,15 @@ export class ShellComponent implements OnInit, OnDestroy {
     }
 
     // Detect new LEVEL_UP notifications for celebration overlay
+    // startWith([]) ensures the first emission is compared against empty,
+    // so unread level-ups are shown even when opening the app after the event.
     this.#notificationService.notifications$
       .pipe(
+        startWith([]),
         pairwise(),
         map(([prev, curr]) => {
-          // Find notifications in curr that weren't in prev (new arrivals)
           const prevIds = new Set(prev.map((n) => n.id));
-          return curr.filter((n) => !prevIds.has(n.id) && n.type === NotificationType.LEVEL_UP);
+          return curr.filter((n) => !prevIds.has(n.id) && !n.read && n.type === NotificationType.LEVEL_UP);
         }),
         filter((newLevelUps) => newLevelUps.length > 0),
       )
