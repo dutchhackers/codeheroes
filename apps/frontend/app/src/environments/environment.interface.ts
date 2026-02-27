@@ -12,6 +12,7 @@ export interface Environment {
     storageBucket: string;
     messagingSenderId: string;
     appId: string;
+    measurementId?: string;
   };
   appVersion: string;
   vapidKey?: string;
