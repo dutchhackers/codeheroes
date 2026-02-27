@@ -92,6 +92,12 @@ export const appRoutes: Routes = [
     ),
   },
   {
+    path: 'notifications',
+    loadComponent: loadWithReload(() =>
+      import('./pages/notifications/notifications.component').then((m) => m.NotificationsComponent),
+    ),
+  },
+  {
     path: 'search',
     loadComponent: loadWithReload(() =>
       import('./pages/user-search/user-search.component').then((m) => m.UserSearchComponent),

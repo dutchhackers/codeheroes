@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import {
   Auth,
@@ -10,15 +10,18 @@ import {
   signInWithPopup,
   Unsubscribe,
 } from '@angular/fire/auth';
-import { Subscription, filter } from 'rxjs';
+import { Subscription, filter, pairwise, map } from 'rxjs';
+import { NotificationType } from '@codeheroes/types';
 import { BottomNavComponent } from './bottom-nav.component';
 import { EnvironmentBannerComponent, showEnvironmentIndicator } from './environment-banner.component';
+import { LevelUpCelebrationComponent } from '../shared/components/level-up-celebration.component';
+import { NotificationDataService } from '../core/services/notification-data.service';
 import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, BottomNavComponent, EnvironmentBannerComponent],
+  imports: [RouterOutlet, BottomNavComponent, EnvironmentBannerComponent, LevelUpCelebrationComponent],
   template: `
     <app-environment-banner />
     <div class="min-h-screen cyber-grid-bg text-white relative" [class.pt-6]="showBanner">
@@ -73,9 +76,24 @@ import { environment } from '../../environments/environment';
           </div>
         </div>
       } @else {
+        <!-- Notification bell -->
+        <button type="button" class="bell-button" (click)="openNotifications()" aria-label="Notifications">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+          </svg>
+          @if (unreadCount() > 0) {
+            <span class="badge">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
+          }
+        </button>
+
         <!-- Authenticated content -->
         <router-outlet />
         <app-bottom-nav />
+
+        <!-- Level-up celebration overlay -->
+        @if (showLevelUp()) {
+          <app-level-up-celebration [level]="levelUpLevel()" (dismissed)="dismissLevelUp()" />
+        }
       }
 
       <!-- Update available banner -->
@@ -130,20 +148,69 @@ import { environment } from '../../environments/environment';
       .update-banner button:hover {
         opacity: 0.85;
       }
+
+      .bell-button {
+        position: fixed;
+        top: 0.875rem;
+        right: 1rem;
+        z-index: 60;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .bell-button:hover {
+        color: white;
+        border-color: rgba(255, 255, 255, 0.3);
+        background: rgba(0, 0, 0, 0.8);
+      }
+
+      .badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 9px;
+        background: rgb(239, 68, 68);
+        color: white;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        line-height: 18px;
+        text-align: center;
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+      }
     `,
   ],
 })
 export class ShellComponent implements OnInit, OnDestroy {
   readonly #auth = inject(Auth);
   readonly #swUpdate = inject(SwUpdate);
+  readonly #router = inject(Router);
+  readonly #notificationService = inject(NotificationDataService);
   readonly showBanner = showEnvironmentIndicator;
 
   #authUnsubscribe: Unsubscribe | null = null;
   #updateSubscription: Subscription | null = null;
+  #notificationSub: Subscription | null = null;
+  #levelUpTimeout: ReturnType<typeof setTimeout> | null = null;
 
   isAuthenticated = signal(false);
   isLoading = signal(true);
   updateAvailable = signal(false);
+  unreadCount = signal(0);
+  showLevelUp = signal(false);
+  levelUpLevel = signal(0);
 
   ngOnInit() {
     let autoLoginAttempted = false;
@@ -163,6 +230,31 @@ export class ShellComponent implements OnInit, OnDestroy {
         .pipe(filter((event): event is VersionReadyEvent => event.type === 'VERSION_READY'))
         .subscribe(() => this.updateAvailable.set(true));
     }
+
+    // Subscribe to unread count
+    this.#notificationSub = this.#notificationService.unreadCount$.subscribe((count) =>
+      this.unreadCount.set(count),
+    );
+
+    // Detect new LEVEL_UP notifications for celebration overlay
+    this.#notificationService.notifications$
+      .pipe(
+        pairwise(),
+        map(([prev, curr]) => {
+          // Find notifications in curr that weren't in prev (new arrivals)
+          const prevIds = new Set(prev.map((n) => n.id));
+          return curr.filter((n) => !prevIds.has(n.id) && n.type === NotificationType.LEVEL_UP);
+        }),
+        filter((newLevelUps) => newLevelUps.length > 0),
+      )
+      .subscribe((newLevelUps) => {
+        const level = (newLevelUps[0].metadata?.['newLevel'] as number) ?? 0;
+        if (level > 0) {
+          this.levelUpLevel.set(level);
+          this.showLevelUp.set(true);
+          this.#levelUpTimeout = setTimeout(() => this.showLevelUp.set(false), 5000);
+        }
+      });
   }
 
   ngOnDestroy() {
@@ -170,10 +262,24 @@ export class ShellComponent implements OnInit, OnDestroy {
       this.#authUnsubscribe();
     }
     this.#updateSubscription?.unsubscribe();
+    this.#notificationSub?.unsubscribe();
+    if (this.#levelUpTimeout) clearTimeout(this.#levelUpTimeout);
   }
 
   applyUpdate(): void {
     location.reload();
+  }
+
+  openNotifications(): void {
+    this.#router.navigate(['/notifications']);
+  }
+
+  dismissLevelUp(): void {
+    this.showLevelUp.set(false);
+    if (this.#levelUpTimeout) {
+      clearTimeout(this.#levelUpTimeout);
+      this.#levelUpTimeout = null;
+    }
   }
 
   async #autoLogin(email: string, password: string): Promise<void> {
