@@ -258,7 +258,10 @@ export class HqDataService {
     return combineLatest([
       this.#getCurrentUserDoc(),
       this.#withAuth((headers) =>
-        this.#http.get<LeaderboardEntry[]>(`${environment.apiUrl}/leaderboards/${period}`, { headers }),
+        this.#http.get<LeaderboardEntry[]>(`${environment.apiUrl}/leaderboards/${period}`, {
+          headers,
+          params: { userType: 'user' },
+        }),
       ),
     ]).pipe(
       map(([userDoc, leaderboard]) => {
