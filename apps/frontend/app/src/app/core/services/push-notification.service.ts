@@ -52,12 +52,10 @@ export class PushNotificationService implements OnDestroy {
     if (permission !== 'granted') return false;
 
     try {
-      // Use the existing combined service worker (registered by Angular via provideServiceWorker)
-      const registration = await navigator.serviceWorker.getRegistration('/');
-      if (!registration) {
-        console.error('No service worker registration found');
-        return false;
-      }
+      // Register dedicated Firebase Messaging SW at its own scope (separate from Angular's ngsw-worker.js at '/')
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+        scope: '/firebase-cloud-messaging-push-scope/',
+      });
 
       const token = await getToken(this.#getMessaging(), {
         vapidKey: environment.vapidKey,
@@ -126,7 +124,7 @@ export class PushNotificationService implements OnDestroy {
   async #refreshToken(): Promise<void> {
     if (!environment.vapidKey) return;
     try {
-      const registration = await navigator.serviceWorker.getRegistration('/');
+      const registration = await navigator.serviceWorker.getRegistration('/firebase-cloud-messaging-push-scope/');
       if (!registration) return;
 
       const newToken = await getToken(this.#getMessaging(), {

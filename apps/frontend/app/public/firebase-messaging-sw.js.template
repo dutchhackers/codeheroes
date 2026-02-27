@@ -1,8 +1,6 @@
 /* eslint-disable no-undef */
-// Import Angular service worker (PWA update detection + caching)
-importScripts('/ngsw-worker.js');
-
-// Import Firebase messaging (push notifications)
+// Firebase Messaging service worker — runs at its own scope (/firebase-cloud-messaging-push-scope)
+// Angular's ngsw-worker.js runs separately at scope '/' for PWA caching/updates.
 importScripts('https://www.gstatic.com/firebasejs/12.9.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/12.9.0/firebase-messaging-compat.js');
 
