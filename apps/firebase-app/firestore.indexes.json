@@ -102,6 +102,14 @@
       "collectionGroup": "users",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "userType", "order": "ASCENDING" },
+        { "fieldPath": "nameLower", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
         { "fieldPath": "active", "order": "ASCENDING" },
         { "fieldPath": "id", "order": "ASCENDING" }
       ]
