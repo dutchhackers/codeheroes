@@ -8,6 +8,7 @@ import { UserSettingsService } from '../../core/services/user-settings.service';
 import { UserStatsService } from '../../core/services/user-stats.service';
 import { PushNotificationService } from '../../core/services/push-notification.service';
 import { ConnectedAccountsComponent } from '../profile/components/connected-accounts.component';
+import { environment } from '../../../environments/environment';
 
 const GOAL_PRESETS = [4000, 8000, 12000, 16000];
 
@@ -171,6 +172,7 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
             <div class="about-branding">
               <span class="about-name">Code Heroes</span>
               <span class="about-tagline">Level up your dev game</span>
+              <span class="about-version">v{{ appVersion }}</span>
             </div>
           </section>
         }
@@ -506,6 +508,13 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
         font-size: 0.75rem;
         color: rgba(255, 255, 255, 0.35);
       }
+
+      .about-version {
+        font-size: 0.6875rem;
+        color: rgba(255, 255, 255, 0.2);
+        font-family: monospace;
+        margin-top: 0.25rem;
+      }
     `,
   ],
 })
@@ -518,6 +527,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   readonly #pushService = inject(PushNotificationService);
 
   readonly goalPresets = GOAL_PRESETS;
+  readonly appVersion = environment.appVersion;
 
   isLoading = signal(true);
   selectedGoal = signal(DEFAULT_DAILY_GOAL);

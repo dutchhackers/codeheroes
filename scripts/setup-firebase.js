@@ -1,5 +1,17 @@
 require('dotenv').config();
 const fs = require('fs');
+const { execSync } = require('child_process');
+
+// Generate app version: semver+gitHash
+const packageVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version || '0.0.0';
+let gitHash = 'unknown';
+try {
+  gitHash = execSync('git rev-parse --short HEAD', { encoding: 'utf-8' }).trim();
+} catch {
+  // git not available (e.g. in containerized builds without .git)
+}
+const appVersion = `${packageVersion}+${gitHash}`;
+console.log(`App version: ${appVersion}`);
 
 // Generate .firebaserc file (multi-project setup)
 const firebasercTemplate = fs.readFileSync('.firebaserc.template', 'utf8');
@@ -23,7 +35,8 @@ const appLocalConfig = appLocalTemplate
   .replace('${FIREBASE_STORAGE_BUCKET}', process.env.FIREBASE_STORAGE_BUCKET)
   .replace('${FIREBASE_MESSAGING_SENDER_ID}', process.env.FIREBASE_MESSAGING_SENDER_ID)
   .replace('${FIREBASE_APP_ID}', process.env.FIREBASE_APP_ID)
-  .replace('${FIREBASE_VAPID_KEY}', process.env.FIREBASE_VAPID_KEY || '');
+  .replace('${FIREBASE_VAPID_KEY}', process.env.FIREBASE_VAPID_KEY || '')
+  .replace('${APP_VERSION}', appVersion);
 fs.writeFileSync('apps/frontend/app/src/environments/environment.local.ts', appLocalConfig);
 
 // Generate app test environment (uses FIREBASE_TEST_* vars, falls back to regular vars)
@@ -35,7 +48,8 @@ const appTestConfig = appTestTemplate
   .replace('${FIREBASE_TEST_STORAGE_BUCKET}', process.env.FIREBASE_TEST_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET)
   .replace('${FIREBASE_TEST_MESSAGING_SENDER_ID}', process.env.FIREBASE_TEST_MESSAGING_SENDER_ID || process.env.FIREBASE_MESSAGING_SENDER_ID)
   .replace('${FIREBASE_TEST_APP_ID}', process.env.FIREBASE_TEST_APP_ID || process.env.FIREBASE_APP_ID)
-  .replace('${FIREBASE_TEST_VAPID_KEY}', process.env.FIREBASE_TEST_VAPID_KEY || process.env.FIREBASE_VAPID_KEY || '');
+  .replace('${FIREBASE_TEST_VAPID_KEY}', process.env.FIREBASE_TEST_VAPID_KEY || process.env.FIREBASE_VAPID_KEY || '')
+  .replace('${APP_VERSION}', appVersion);
 fs.writeFileSync('apps/frontend/app/src/environments/environment.test.ts', appTestConfig);
 
 // Generate app prod environment (uses FIREBASE_PROD_* vars, falls back to regular vars)
@@ -47,7 +61,8 @@ const appProdConfig = appProdTemplate
   .replace('${FIREBASE_PROD_STORAGE_BUCKET}', process.env.FIREBASE_PROD_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET)
   .replace('${FIREBASE_PROD_MESSAGING_SENDER_ID}', process.env.FIREBASE_PROD_MESSAGING_SENDER_ID || process.env.FIREBASE_MESSAGING_SENDER_ID)
   .replace('${FIREBASE_PROD_APP_ID}', process.env.FIREBASE_PROD_APP_ID || process.env.FIREBASE_APP_ID)
-  .replace('${FIREBASE_PROD_VAPID_KEY}', process.env.FIREBASE_PROD_VAPID_KEY || process.env.FIREBASE_VAPID_KEY || '');
+  .replace('${FIREBASE_PROD_VAPID_KEY}', process.env.FIREBASE_PROD_VAPID_KEY || process.env.FIREBASE_VAPID_KEY || '')
+  .replace('${APP_VERSION}', appVersion);
 fs.writeFileSync('apps/frontend/app/src/environments/environment.prod.ts', appProdConfig);
 
 // Generate admin-portal environment files

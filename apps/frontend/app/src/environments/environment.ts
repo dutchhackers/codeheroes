@@ -12,5 +12,6 @@ export const environment: Environment = {
     messagingSenderId: '',
     appId: '',
   },
+  appVersion: 'dev',
   vapidKey: '',
 };
