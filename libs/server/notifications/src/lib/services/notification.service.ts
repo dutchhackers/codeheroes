@@ -1,7 +1,8 @@
 import { DatabaseInstance } from '@codeheroes/common';
-import { Firestore } from 'firebase-admin/firestore';
+import { Firestore, FieldValue } from 'firebase-admin/firestore';
+import { getMessaging } from 'firebase-admin/messaging';
 import { Notification } from '../interfaces/notification.interface';
-import { Collections } from '@codeheroes/types';
+import { Collections, UserSettings } from '@codeheroes/types';
 
 export class NotificationService {
   private db: Firestore;
@@ -34,7 +35,59 @@ export class NotificationService {
     };
 
     await notificationRef.set(newNotification);
+
+    // Send FCM push notification (fire-and-forget, don't block)
+    this.sendPushNotification(userId, newNotification).catch((error) =>
+      console.error('FCM push failed:', error),
+    );
+
     return newNotification;
+  }
+
+  private async sendPushNotification(userId: string, notification: Notification): Promise<void> {
+    const settingsRef = this.db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.Settings)
+      .doc('preferences');
+
+    const settingsSnap = await settingsRef.get();
+    if (!settingsSnap.exists) return;
+
+    const settings = settingsSnap.data() as UserSettings;
+    if (!settings.notificationsEnabled || !settings.fcmTokens?.length) return;
+
+    const message = {
+      tokens: settings.fcmTokens,
+      data: {
+        title: notification.title,
+        message: notification.message,
+        type: notification.type,
+        notificationId: notification.id,
+        ...(notification.metadata?.['url'] ? { url: String(notification.metadata['url']) } : {}),
+      },
+    };
+
+    const response = await getMessaging().sendEachForMulticast(message);
+
+    // Clean up stale tokens
+    if (response.failureCount > 0) {
+      const staleTokens: string[] = [];
+      response.responses.forEach((resp, idx) => {
+        if (
+          !resp.success &&
+          resp.error?.code === 'messaging/registration-token-not-registered'
+        ) {
+          staleTokens.push(settings.fcmTokens![idx]);
+        }
+      });
+
+      if (staleTokens.length > 0) {
+        await settingsRef.update({
+          fcmTokens: FieldValue.arrayRemove(...staleTokens),
+        });
+      }
+    }
   }
 
   async getUnreadNotifications(userId: string): Promise<Notification[]> {

@@ -6,6 +6,7 @@ import { Firestore, collection, collectionData } from '@angular/fire/firestore';
 import { DEFAULT_DAILY_GOAL, ConnectedAccountDto, Collections } from '@codeheroes/types';
 import { UserSettingsService } from '../../core/services/user-settings.service';
 import { UserStatsService } from '../../core/services/user-stats.service';
+import { PushNotificationService } from '../../core/services/push-notification.service';
 import { ConnectedAccountsComponent } from '../profile/components/connected-accounts.component';
 
 const GOAL_PRESETS = [4000, 8000, 12000, 16000];
@@ -104,7 +105,7 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
             <div class="toggle-row">
               <div>
                 <p class="toggle-label">Enable Notifications</p>
-                <p class="toggle-description">Receive updates about your progress</p>
+                <p class="toggle-description">Push notifications for achievements and level ups</p>
               </div>
               <label class="toggle-switch">
                 <input
@@ -514,6 +515,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   readonly #injector = inject(Injector);
   readonly #settingsService = inject(UserSettingsService);
   readonly #userStatsService = inject(UserStatsService);
+  readonly #pushService = inject(PushNotificationService);
 
   readonly goalPresets = GOAL_PRESETS;
 
@@ -647,9 +649,21 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.isSavingNotifications.set(true);
 
     this.#settingsService.updateSettings(this.#userId, { notificationsEnabled: newValue }).subscribe({
-      next: () => {
+      next: async () => {
         this.notificationsEnabled.set(newValue);
         this.#originalNotifications = newValue;
+
+        // Wire push notification service
+        try {
+          if (newValue) {
+            await this.#pushService.requestPermission();
+          } else {
+            await this.#pushService.removeToken();
+          }
+        } catch (error) {
+          console.error('Push notification toggle failed:', error);
+        }
+
         this.isSavingNotifications.set(false);
       },
       error: () => {

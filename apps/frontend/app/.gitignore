@@ -1,3 +1,4 @@
 src/environments/environment.local.ts
 src/environments/environment.test.ts
 src/environments/environment.prod.ts
+public/firebase-messaging-sw.js
