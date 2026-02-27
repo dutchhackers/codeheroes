@@ -27,7 +27,7 @@
     "@angular/service-worker": "21.1.5",
     "@move4mobile/stride-ui": "^1.17.0",
     "@move4mobile/theme-framna": "^0.3.12",
-    "@tailwindcss/postcss": "^4.1.18",
+    "@tailwindcss/postcss": "^4.2.1",
     "angular-svg-icon": "^19.1.1",
     "axios": "^1.6.0",
     "class-transformer": "^0.5.1",
