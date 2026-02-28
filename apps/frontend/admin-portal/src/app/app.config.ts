@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, ENVIRONMENT_INITIALIZER, inject, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
@@ -25,7 +25,11 @@ export const appConfig: ApplicationConfig = {
       return auth;
     }),
     ...(environment.firebase.measurementId
-      ? [provideAnalytics(() => getAnalytics()), ScreenTrackingService]
+      ? [
+          provideAnalytics(() => getAnalytics()),
+          ScreenTrackingService,
+          { provide: ENVIRONMENT_INITIALIZER, useValue: () => inject(ScreenTrackingService), multi: true },
+        ]
       : []),
   ],
 };

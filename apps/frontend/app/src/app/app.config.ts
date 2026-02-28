@@ -1,4 +1,4 @@
-import { ApplicationConfig, isDevMode, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, ENVIRONMENT_INITIALIZER, inject, isDevMode, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideHttpClient } from '@angular/common/http';
@@ -41,7 +41,11 @@ export const appConfig: ApplicationConfig = {
       return firestore;
     }),
     ...(environment.firebase.measurementId
-      ? [provideAnalytics(() => getAnalytics()), ScreenTrackingService]
+      ? [
+          provideAnalytics(() => getAnalytics()),
+          ScreenTrackingService,
+          { provide: ENVIRONMENT_INITIALIZER, useValue: () => inject(ScreenTrackingService), multi: true },
+        ]
       : []),
   ],
 };
