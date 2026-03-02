@@ -48,8 +48,31 @@ export abstract class BaseRepository<T extends { id: string }>
   protected toFirestore(data: Partial<T>): DocumentData {
     // Strip any properties we don't want to save directly
     const { createdAt, updatedAt, ...rest } = data as any;
-    // Remove undefined values — Firestore rejects them unless ignoreUndefinedProperties is set
-    return Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined));
+    return this.stripUndefined(rest);
+  }
+
+  /**
+   * Recursively strip undefined values from an object.
+   * Preserves Firestore sentinel values (FieldValue), Dates, and arrays.
+   */
+  private stripUndefined(obj: Record<string, any>): Record<string, any> {
+    return Object.fromEntries(
+      Object.entries(obj)
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => {
+          if (Array.isArray(v)) {
+            return [k, v.map((item) => (this.isPlainObject(item) ? this.stripUndefined(item) : item))];
+          }
+          if (this.isPlainObject(v)) {
+            return [k, this.stripUndefined(v)];
+          }
+          return [k, v];
+        }),
+    );
+  }
+
+  private isPlainObject(value: unknown): value is Record<string, any> {
+    return typeof value === 'object' && value !== null && !(value instanceof Date) && !(value instanceof FieldValue);
   }
 
   constructor(protected readonly db: Firestore) {}
