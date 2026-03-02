@@ -48,7 +48,8 @@ export abstract class BaseRepository<T extends { id: string }>
   protected toFirestore(data: Partial<T>): DocumentData {
     // Strip any properties we don't want to save directly
     const { createdAt, updatedAt, ...rest } = data as any;
-    return rest;
+    // Remove undefined values — Firestore rejects them unless ignoreUndefinedProperties is set
+    return Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined));
   }
 
   constructor(protected readonly db: Firestore) {}
