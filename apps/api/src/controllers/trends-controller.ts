@@ -7,7 +7,8 @@ import { getFirestore } from 'firebase-admin/firestore';
 const router = express.Router();
 
 router.get('/weekly', async (req, res) => {
-  const weeks = Math.min(Math.max(parseInt(req.query.weeks as string, 10) || 10, 1), 52);
+  const parsed = parseInt(req.query.weeks as string, 10);
+  const weeks = Math.min(Math.max(isNaN(parsed) ? 10 : parsed, 1), 52);
 
   logger.debug(`GET /trends/weekly?weeks=${weeks}`);
 
