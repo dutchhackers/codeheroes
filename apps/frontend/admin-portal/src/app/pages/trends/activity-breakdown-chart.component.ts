@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 import { TrendsEntityData, TrendsProjectData } from '@codeheroes/types';
@@ -56,7 +56,7 @@ export class ActivityBreakdownChartComponent {
     },
   };
 
-  chartData(): ChartConfiguration<'bar'>['data'] {
+  readonly chartData = computed<ChartConfiguration<'bar'>['data']>(() => {
     const labels = [...this.weekIds()].reverse();
     const entities = this.entities();
 
@@ -111,5 +111,5 @@ export class ActivityBreakdownChartComponent {
     }
 
     return { labels, datasets };
-  }
+  });
 }

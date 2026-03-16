@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
 import { TrendsEntityData, TrendsProjectData } from '@codeheroes/types';
@@ -54,7 +54,7 @@ export class XpTrendsChartComponent {
     },
   };
 
-  chartData(): ChartConfiguration<'line'>['data'] {
+  readonly chartData = computed<ChartConfiguration<'line'>['data']>(() => {
     const labels = [...this.weekIds()].reverse();
     const top10 = this.entities().slice(0, 10);
 
@@ -75,5 +75,5 @@ export class XpTrendsChartComponent {
         fill: false,
       })),
     };
-  }
+  });
 }

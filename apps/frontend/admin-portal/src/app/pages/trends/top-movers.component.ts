@@ -4,7 +4,7 @@ import { TrendsEntityData, TrendsProjectData } from '@codeheroes/types';
 export interface TopMoversData {
   biggestClimber: { name: string; rankChange: number } | null;
   mostConsistent: { name: string; activeWeeks: number; totalWeeks: number } | null;
-  newInTopTen: string[];
+  newInTopTen: { id: string; name: string }[];
 }
 
 export function computeTopMovers(
@@ -63,7 +63,9 @@ export function computeTopMovers(
   // New in top 10: in latest week's top 10 but not in earliest week's top 10
   const firstTop10Ids = new Set(firstWeekRanks.slice(0, 10).filter((r) => r.xp > 0).map((r) => r.entity.id));
   const lastTop10 = lastWeekRanks.slice(0, 10).filter((r) => r.xp > 0);
-  const newInTopTen = lastTop10.filter((r) => !firstTop10Ids.has(r.entity.id)).map((r) => getName(r.entity));
+  const newInTopTen = lastTop10
+    .filter((r) => !firstTop10Ids.has(r.entity.id))
+    .map((r) => ({ id: r.entity.id, name: getName(r.entity) }));
 
   return { biggestClimber, mostConsistent, newInTopTen };
 }
@@ -94,8 +96,8 @@ export function computeTopMovers(
       <div class="mover-card">
         <span class="mover-label">New in Top 10</span>
         @if (data().newInTopTen.length > 0) {
-          @for (name of data().newInTopTen; track name) {
-            <span class="mover-value">{{ name }}</span>
+          @for (entry of data().newInTopTen; track entry.id) {
+            <span class="mover-value">{{ entry.name }}</span>
           }
         } @else {
           <span class="mover-empty">No newcomers</span>
