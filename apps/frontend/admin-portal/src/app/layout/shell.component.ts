@@ -78,6 +78,16 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
             </svg>
             Leaderboard
           </a>
+          <a
+            routerLink="/trends"
+            routerLinkActive="nav-item--active"
+            class="nav-item"
+          >
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+            Trends
+          </a>
         </nav>
         <div class="sidebar-footer">
           <div class="user-info">

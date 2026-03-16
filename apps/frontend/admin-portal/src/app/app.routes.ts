@@ -45,6 +45,11 @@ export const appRoutes: Routes = [
           import('./pages/leaderboard/leaderboard.component').then((m) => m.LeaderboardComponent),
       },
       {
+        path: 'trends',
+        loadComponent: () =>
+          import('./pages/trends/trends.component').then((m) => m.TrendsComponent),
+      },
+      {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full',
