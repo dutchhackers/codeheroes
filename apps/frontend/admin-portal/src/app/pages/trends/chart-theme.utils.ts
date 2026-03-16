@@ -1,20 +1,26 @@
 import { ChartOptions } from 'chart.js';
 
-const CHART_COLORS = [
-  '#6366f1', // indigo
-  '#22c55e', // green
-  '#f59e0b', // amber
-  '#ef4444', // red
-  '#3b82f6', // blue
-  '#ec4899', // pink
-  '#14b8a6', // teal
-  '#f97316', // orange
-  '#8b5cf6', // violet
-  '#06b6d4', // cyan
+const DATAVIZ_VARS = [
+  '--theme-color-dataviz-categorical-1', // amber/secondary
+  '--theme-color-dataviz-categorical-2', // blue-base
+  '--theme-color-dataviz-categorical-3', // brand green
+  '--theme-color-dataviz-categorical-4', // sand
+  '--theme-color-dataviz-categorical-5', // info blue
+  '--theme-color-dataviz-categorical-6', // error orange
+  '--theme-color-dataviz-diverging-1',   // teal-blue
+  '--theme-color-dataviz-diverging-9',   // warm amber
+  '--theme-color-dataviz-diverging-3',   // light blue
+  '--theme-color-dataviz-diverging-8',   // peach
+];
+
+const DATAVIZ_FALLBACKS = [
+  '#ffb55d', '#a1c7ce', '#1bc866', '#dccfac', '#1ba1d1',
+  '#f7693e', '#1ba1d1', '#ffb55d', '#89d9ff', '#ffc27e',
 ];
 
 export function getChartColor(index: number): string {
-  return CHART_COLORS[index % CHART_COLORS.length];
+  const i = index % DATAVIZ_VARS.length;
+  return getCssVar(DATAVIZ_VARS[i]) || DATAVIZ_FALLBACKS[i];
 }
 
 function getCssVar(name: string): string {
