@@ -34,5 +34,7 @@ export * from './unmatched-event/unmatched-event.types';
 
 export * from './notifications/notification.types';
 
+export * from './trends/trends.types';
+
 export * from './utils/time.types';
 export * from './utils/pagination.types';

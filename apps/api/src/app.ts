@@ -12,6 +12,7 @@ import { GamesController } from './controllers/games-controller';
 import { LeaderboardsController } from './controllers/leaderboards-controller';
 import { ProjectsController } from './controllers/projects-controller';
 import { ScoresController } from './controllers/scores-controller';
+import { TrendsController } from './controllers/trends-controller';
 import { UnmatchedEventsController } from './controllers/unmatched-events-controller';
 import { UserController } from './controllers/user-controller';
 import { UsersController } from './controllers/users-controller';
@@ -81,6 +82,7 @@ app.use('/game', GameController);
 app.use('/scores', ScoresController);
 app.use('/leaderboards', LeaderboardsController);
 app.use('/projects', ProjectsController);
+app.use('/trends', TrendsController);
 app.use('/unmatched-events', UnmatchedEventsController);
 
 export { app as defaultApi };
