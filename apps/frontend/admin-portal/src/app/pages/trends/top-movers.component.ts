@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { TrendsEntityData, TrendsProjectData } from '@codeheroes/types';
 
 export interface TopMoversData {
@@ -78,8 +78,8 @@ export function computeTopMovers(
       <div class="mover-card">
         <span class="mover-label">Biggest Climber</span>
         @if (data().biggestClimber) {
-          <span class="mover-value">{{ data().biggestClimber!.name }}</span>
-          <span class="mover-detail">+{{ data().biggestClimber!.rankChange }} ranks</span>
+          <span class="mover-stat">+{{ data().biggestClimber!.rankChange }} ranks</span>
+          <span class="mover-name">{{ data().biggestClimber!.name }}</span>
         } @else {
           <span class="mover-empty">No data</span>
         }
@@ -87,8 +87,8 @@ export function computeTopMovers(
       <div class="mover-card">
         <span class="mover-label">Most Consistent</span>
         @if (data().mostConsistent) {
-          <span class="mover-value">{{ data().mostConsistent!.name }}</span>
-          <span class="mover-detail">{{ data().mostConsistent!.activeWeeks }}/{{ data().mostConsistent!.totalWeeks }} weeks active</span>
+          <span class="mover-stat">{{ data().mostConsistent!.activeWeeks }}/{{ data().mostConsistent!.totalWeeks }} weeks</span>
+          <span class="mover-name">{{ data().mostConsistent!.name }}</span>
         } @else {
           <span class="mover-empty">No data</span>
         }
@@ -96,9 +96,8 @@ export function computeTopMovers(
       <div class="mover-card">
         <span class="mover-label">New in Top 10</span>
         @if (data().newInTopTen.length > 0) {
-          @for (entry of data().newInTopTen; track entry.id) {
-            <span class="mover-value">{{ entry.name }}</span>
-          }
+          <span class="mover-stat">{{ data().newInTopTen.length }} newcomers</span>
+          <span class="mover-names">{{ topNewcomers() }}@if (overflowCount() > 0) {<span class="mover-overflow"> +{{ overflowCount() }} more</span>}</span>
         } @else {
           <span class="mover-empty">No newcomers</span>
         }
@@ -119,22 +118,30 @@ export function computeTopMovers(
         padding: 20px;
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 8px;
       }
       .mover-label {
         font-size: 13px;
         font-weight: 500;
         color: var(--theme-color-text-neutral-tertiary);
       }
-      .mover-value {
-        font-size: 18px;
+      .mover-stat {
+        font-size: 28px;
         font-weight: 700;
         color: var(--theme-color-text-default);
       }
-      .mover-detail {
-        font-size: 13px;
-        color: var(--theme-color-text-brand-default);
+      .mover-name {
+        font-size: 14px;
         font-weight: 500;
+        color: var(--theme-color-text-neutral-tertiary);
+      }
+      .mover-names {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--theme-color-text-neutral-tertiary);
+      }
+      .mover-overflow {
+        color: var(--theme-color-text-brand-default);
       }
       .mover-empty {
         font-size: 14px;
@@ -144,5 +151,15 @@ export function computeTopMovers(
   ],
 })
 export class TopMoversComponent {
+  private static readonly MAX_VISIBLE = 3;
+
   readonly data = input.required<TopMoversData>();
+
+  readonly topNewcomers = computed(() =>
+    this.data().newInTopTen.slice(0, TopMoversComponent.MAX_VISIBLE).map((e) => e.name).join(', '),
+  );
+
+  readonly overflowCount = computed(() =>
+    Math.max(0, this.data().newInTopTen.length - TopMoversComponent.MAX_VISIBLE),
+  );
 }
