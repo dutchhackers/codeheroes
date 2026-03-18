@@ -1,18 +1,17 @@
 import { Component, computed, input } from '@angular/core';
-import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration } from 'chart.js';
+import { NgxEchartsDirective } from 'ngx-echarts';
 import { TrendsEntityData, TrendsProjectData } from '@codeheroes/types';
-import { getChartColor, getDefaultChartOptions, getGridColor, getSubtleTextColor } from './chart-theme.utils';
+import { EChartsOption, getChartColor, getDefaultEChartsOptions } from './chart-theme.utils';
 
 @Component({
   selector: 'admin-activity-breakdown-chart',
   standalone: true,
-  imports: [BaseChartDirective],
+  imports: [NgxEchartsDirective],
   template: `
     <div class="chart-container">
       <h3 class="chart-title">Activity Breakdown</h3>
       <div class="chart-wrapper">
-        <canvas baseChart [data]="chartData()" [options]="chartOptions" type="bar"></canvas>
+        <div echarts [options]="chartOptions()" [autoResize]="true"></div>
       </div>
     </div>
   `,
@@ -31,6 +30,7 @@ import { getChartColor, getDefaultChartOptions, getGridColor, getSubtleTextColor
         margin-bottom: 16px;
       }
       .chart-wrapper { height: 320px; }
+      .chart-wrapper > div { height: 100%; }
     `,
   ],
 })
@@ -38,27 +38,10 @@ export class ActivityBreakdownChartComponent {
   readonly entities = input.required<(TrendsEntityData | TrendsProjectData)[]>();
   readonly weekIds = input.required<string[]>();
 
-  readonly chartOptions = {
-    ...getDefaultChartOptions(),
-    interaction: { mode: 'index' as const, intersect: false },
-    scales: {
-      x: {
-        stacked: true,
-        ticks: { color: getSubtleTextColor(), font: { size: 11 } },
-        grid: { color: getGridColor() },
-      },
-      y: {
-        stacked: true,
-        beginAtZero: true,
-        ticks: { color: getSubtleTextColor(), font: { size: 11 } },
-        grid: { color: getGridColor() },
-      },
-    },
-  };
-
-  readonly chartData = computed<ChartConfiguration<'bar'>['data']>(() => {
+  readonly chartOptions = computed<EChartsOption>(() => {
     const labels = [...this.weekIds()].reverse();
     const entities = this.entities();
+    const defaults = getDefaultEChartsOptions();
 
     // Aggregate counters per week across all entities
     const weekAggregates = new Map<string, Record<string, number>>();
@@ -90,26 +73,49 @@ export class ActivityBreakdownChartComponent {
     const topActions = sortedActions.slice(0, maxTypes).map(([action]) => action);
     const hasOther = sortedActions.length > maxTypes;
 
-    const datasets = topActions.map((action, i) => ({
-      label: action,
+    const series = topActions.map((action, i) => ({
+      name: action,
+      type: 'bar' as const,
+      stack: 'total',
       data: labels.map((weekId) => weekAggregates.get(weekId)?.[action] || 0),
-      backgroundColor: getChartColor(i),
-      borderRadius: 2,
+      itemStyle: {
+        color: getChartColor(i),
+        borderRadius: [2, 2, 0, 0] as [number, number, number, number],
+      },
     }));
 
     if (hasOther) {
       const otherActions = sortedActions.slice(maxTypes).map(([action]) => action);
-      datasets.push({
-        label: 'Other',
+      series.push({
+        name: 'Other',
+        type: 'bar' as const,
+        stack: 'total',
         data: labels.map((weekId) => {
           const agg = weekAggregates.get(weekId) || {};
           return otherActions.reduce((sum, action) => sum + (agg[action] || 0), 0);
         }),
-        backgroundColor: '#9ca3af',
-        borderRadius: 2,
+        itemStyle: {
+          color: '#9ca3af',
+          borderRadius: [2, 2, 0, 0] as [number, number, number, number],
+        },
       });
     }
 
-    return { labels, datasets };
+    return {
+      ...defaults,
+      tooltip: {
+        ...(defaults.tooltip as object),
+        axisPointer: { type: 'shadow' },
+      },
+      xAxis: {
+        ...(defaults.xAxis as object),
+        data: labels,
+      },
+      yAxis: {
+        ...(defaults.yAxis as object),
+        min: 0,
+      },
+      series,
+    };
   });
 }

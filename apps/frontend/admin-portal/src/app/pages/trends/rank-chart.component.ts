@@ -1,18 +1,17 @@
 import { Component, computed, input } from '@angular/core';
-import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration } from 'chart.js';
+import { NgxEchartsDirective } from 'ngx-echarts';
 import { TrendsEntityData, TrendsProjectData } from '@codeheroes/types';
-import { getChartColor, getDefaultChartOptions, getGridColor, getSubtleTextColor } from './chart-theme.utils';
+import { EChartsOption, getChartColor, getDefaultEChartsOptions, getSubtleTextColor } from './chart-theme.utils';
 
 @Component({
   selector: 'admin-rank-chart',
   standalone: true,
-  imports: [BaseChartDirective],
+  imports: [NgxEchartsDirective],
   template: `
     <div class="chart-container">
       <h3 class="chart-title">Rank Movement</h3>
       <div class="chart-wrapper">
-        <canvas baseChart [data]="chartData()" [options]="chartOptions" type="line"></canvas>
+        <div echarts [options]="chartOptions()" [autoResize]="true"></div>
       </div>
     </div>
   `,
@@ -31,6 +30,7 @@ import { getChartColor, getDefaultChartOptions, getGridColor, getSubtleTextColor
         margin-bottom: 16px;
       }
       .chart-wrapper { height: 320px; }
+      .chart-wrapper > div { height: 100%; }
     `,
   ],
 })
@@ -38,31 +38,10 @@ export class RankChartComponent {
   readonly entities = input.required<(TrendsEntityData | TrendsProjectData)[]>();
   readonly weekIds = input.required<string[]>();
 
-  readonly chartOptions = {
-    ...getDefaultChartOptions(),
-    interaction: { mode: 'index' as const, intersect: false },
-    scales: {
-      x: {
-        ticks: { color: getSubtleTextColor(), font: { size: 11 } },
-        grid: { color: getGridColor() },
-      },
-      y: {
-        reverse: true,
-        min: 1,
-        ticks: {
-          stepSize: 1,
-          color: getSubtleTextColor(),
-          font: { size: 11 },
-        },
-        grid: { color: getGridColor() },
-        title: { display: true, text: 'Rank', color: getSubtleTextColor() },
-      },
-    },
-  };
-
-  readonly chartData = computed<ChartConfiguration<'line'>['data']>(() => {
+  readonly chartOptions = computed<EChartsOption>(() => {
     const labels = [...this.weekIds()].reverse();
     const top10 = this.entities().slice(0, 10);
+    const defaults = getDefaultEChartsOptions();
 
     // Calculate rank per week
     const rankPerWeek = new Map<string, Map<string, number>>();
@@ -82,20 +61,32 @@ export class RankChartComponent {
     }
 
     return {
-      labels,
-      datasets: top10.map((entity, i) => ({
-        label: 'displayName' in entity ? entity.displayName : entity.name,
+      ...defaults,
+      xAxis: {
+        ...(defaults.xAxis as object),
+        data: labels,
+      },
+      yAxis: {
+        ...(defaults.yAxis as object),
+        inverse: true,
+        min: 1,
+        minInterval: 1,
+        name: 'Rank',
+        nameTextStyle: { color: getSubtleTextColor() },
+      },
+      series: top10.map((entity, i) => ({
+        name: 'displayName' in entity ? entity.displayName : entity.name,
+        type: 'line' as const,
+        smooth: 0.3,
+        connectNulls: true,
         data: labels.map((weekId) => {
           const rank = rankPerWeek.get(weekId)?.get(entity.id);
           return rank && !isNaN(rank) ? rank : null;
         }),
-        borderColor: getChartColor(i),
-        backgroundColor: getChartColor(i) + '20',
-        borderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        tension: 0.3,
-        spanGaps: true,
+        itemStyle: { color: getChartColor(i) },
+        lineStyle: { color: getChartColor(i), width: 2 },
+        symbolSize: 8,
+        symbol: 'circle',
       })),
     };
   });
