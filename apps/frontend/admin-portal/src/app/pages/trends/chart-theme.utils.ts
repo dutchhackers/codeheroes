@@ -1,4 +1,4 @@
-import { ChartOptions } from 'chart.js';
+import type { EChartsOption } from 'echarts';
 
 const DATAVIZ_VARS = [
   '--theme-color-dataviz-categorical-1', // amber/secondary
@@ -43,41 +43,46 @@ export function getSurfaceColor(): string {
   return getCssVar('--theme-color-bg-surface-default') || '#ffffff';
 }
 
-export function getDefaultChartOptions(): ChartOptions {
+export function getDefaultEChartsOptions(): EChartsOption {
   return {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: {
-          color: getTextColor(),
-          padding: 16,
-          usePointStyle: true,
-          pointStyleWidth: 8,
-          font: { size: 12 },
-        },
-      },
-      tooltip: {
-        backgroundColor: getSurfaceColor(),
-        titleColor: getTextColor(),
-        bodyColor: getSubtleTextColor(),
-        borderColor: getGridColor(),
-        borderWidth: 1,
-        padding: 10,
-        boxPadding: 4,
-        usePointStyle: true,
-      },
+    legend: {
+      bottom: 0,
+      textStyle: { color: getTextColor(), fontSize: 12 },
+      itemWidth: 8,
+      itemHeight: 8,
+      icon: 'circle',
+      padding: [16, 0, 0, 0],
     },
-    scales: {
-      x: {
-        ticks: { color: getSubtleTextColor(), font: { size: 11 } },
-        grid: { color: getGridColor() },
-      },
-      y: {
-        ticks: { color: getSubtleTextColor(), font: { size: 11 } },
-        grid: { color: getGridColor() },
-      },
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: getSurfaceColor(),
+      borderColor: getGridColor(),
+      borderWidth: 1,
+      padding: 10,
+      textStyle: { color: getTextColor(), fontSize: 12 },
+    },
+    grid: {
+      containLabel: true,
+      left: 12,
+      right: 12,
+      top: 12,
+      bottom: 48,
+    },
+    xAxis: {
+      type: 'category',
+      axisLine: { lineStyle: { color: getGridColor() } },
+      axisTick: { lineStyle: { color: getGridColor() } },
+      axisLabel: { color: getSubtleTextColor(), fontSize: 11 },
+      splitLine: { show: false },
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: getSubtleTextColor(), fontSize: 11 },
+      splitLine: { lineStyle: { color: getGridColor() } },
     },
   };
 }
+
+export type { EChartsOption };

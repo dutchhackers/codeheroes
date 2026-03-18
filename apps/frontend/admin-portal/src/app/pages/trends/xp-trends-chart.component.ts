@@ -1,18 +1,17 @@
 import { Component, computed, input } from '@angular/core';
-import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration } from 'chart.js';
+import { NgxEchartsDirective } from 'ngx-echarts';
 import { TrendsEntityData, TrendsProjectData } from '@codeheroes/types';
-import { getChartColor, getDefaultChartOptions, getGridColor, getSubtleTextColor } from './chart-theme.utils';
+import { EChartsOption, getChartColor, getDefaultEChartsOptions } from './chart-theme.utils';
 
 @Component({
   selector: 'admin-xp-trends-chart',
   standalone: true,
-  imports: [BaseChartDirective],
+  imports: [NgxEchartsDirective],
   template: `
     <div class="chart-container">
       <h3 class="chart-title">XP Trends</h3>
       <div class="chart-wrapper">
-        <canvas baseChart [data]="chartData()" [options]="chartOptions" type="line"></canvas>
+        <div echarts [options]="chartOptions()" [autoResize]="true"></div>
       </div>
     </div>
   `,
@@ -31,6 +30,7 @@ import { getChartColor, getDefaultChartOptions, getGridColor, getSubtleTextColor
         margin-bottom: 16px;
       }
       .chart-wrapper { height: 320px; }
+      .chart-wrapper > div { height: 100%; }
     `,
   ],
 })
@@ -38,41 +38,33 @@ export class XpTrendsChartComponent {
   readonly entities = input.required<(TrendsEntityData | TrendsProjectData)[]>();
   readonly weekIds = input.required<string[]>();
 
-  readonly chartOptions = {
-    ...getDefaultChartOptions(),
-    interaction: { mode: 'index' as const, intersect: false },
-    scales: {
-      x: {
-        ticks: { color: getSubtleTextColor(), font: { size: 11 } },
-        grid: { color: getGridColor() },
-      },
-      y: {
-        beginAtZero: true,
-        ticks: { color: getSubtleTextColor(), font: { size: 11 } },
-        grid: { color: getGridColor() },
-      },
-    },
-  };
-
-  readonly chartData = computed<ChartConfiguration<'line'>['data']>(() => {
+  readonly chartOptions = computed<EChartsOption>(() => {
     const labels = [...this.weekIds()].reverse();
     const top10 = this.entities().slice(0, 10);
+    const defaults = getDefaultEChartsOptions();
 
     return {
-      labels,
-      datasets: top10.map((entity, i) => ({
-        label: 'displayName' in entity ? entity.displayName : entity.name,
+      ...defaults,
+      xAxis: {
+        ...(defaults.xAxis as object),
+        data: labels,
+      },
+      yAxis: {
+        ...(defaults.yAxis as object),
+        min: 0,
+      },
+      series: top10.map((entity, i) => ({
+        name: 'displayName' in entity ? entity.displayName : entity.name,
+        type: 'line' as const,
+        smooth: 0.3,
         data: labels.map((weekId) => {
           const week = entity.weeklyData.find((w) => w.weekId === weekId);
           return week?.xpGained || 0;
         }),
-        borderColor: getChartColor(i),
-        backgroundColor: getChartColor(i) + '20',
-        borderWidth: 2,
-        pointRadius: 3,
-        pointHoverRadius: 5,
-        tension: 0.3,
-        fill: false,
+        itemStyle: { color: getChartColor(i) },
+        lineStyle: { color: getChartColor(i), width: 2 },
+        symbolSize: 6,
+        symbol: 'circle',
       })),
     };
   });
