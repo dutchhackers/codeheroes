@@ -24,7 +24,7 @@ type TabType = 'heroes' | 'bots' | 'projects';
       <div class="page-header">
         <div>
           <h1 class="page-title">Trends</h1>
-          <p class="page-subtitle">Weekly activity over the last {{ weekCount }} weeks</p>
+          <p class="page-subtitle">Weekly activity over the last {{ weekCount() }} weeks</p>
         </div>
       </div>
 
@@ -33,6 +33,11 @@ type TabType = 'heroes' | 'bots' | 'projects';
           <button class="filter-pill" [class.filter-pill--active]="selectedTab() === 'heroes'" (click)="selectedTab.set('heroes')">Heroes</button>
           <button class="filter-pill" [class.filter-pill--active]="selectedTab() === 'bots'" (click)="selectedTab.set('bots')">Bots</button>
           <button class="filter-pill" [class.filter-pill--active]="selectedTab() === 'projects'" (click)="selectedTab.set('projects')">Projects</button>
+        </div>
+        <div class="filter-group filter-group--weeks">
+          @for (w of weekOptions; track w) {
+            <button class="filter-pill filter-pill--sm" [class.filter-pill--active]="weekCount() === w" (click)="selectWeeks(w)">{{ w }}w</button>
+          }
         </div>
       </div>
 
@@ -84,11 +89,16 @@ type TabType = 'heroes' | 'bots' | 'projects';
       .filters {
         display: flex;
         align-items: center;
+        justify-content: space-between;
         margin-bottom: 20px;
       }
       .filter-group {
         display: flex;
         gap: 4px;
+      }
+      .filter-pill--sm {
+        padding: 4px 10px;
+        font-size: 12px;
       }
       .filter-pill {
         padding: 6px 14px;
@@ -148,7 +158,8 @@ type TabType = 'heroes' | 'bots' | 'projects';
 export class TrendsComponent implements OnInit {
   readonly #trendsService = inject(TrendsService);
 
-  readonly weekCount = 10;
+  readonly weekOptions = [4, 10, 26, 52] as const;
+  readonly weekCount = signal(10);
   readonly trendsData = signal<TrendsResponse | null>(null);
   readonly selectedTab = signal<TabType>('heroes');
   readonly isLoading = signal(true);
@@ -177,11 +188,18 @@ export class TrendsComponent implements OnInit {
     this.loadTrends();
   }
 
+  selectWeeks(weeks: number): void {
+    if (weeks !== this.weekCount()) {
+      this.weekCount.set(weeks);
+      this.loadTrends();
+    }
+  }
+
   loadTrends(): void {
     this.isLoading.set(true);
     this.error.set(null);
 
-    this.#trendsService.getTrends(this.weekCount).subscribe({
+    this.#trendsService.getTrends(this.weekCount()).subscribe({
       next: (data) => {
         this.trendsData.set(data);
         this.isLoading.set(false);
