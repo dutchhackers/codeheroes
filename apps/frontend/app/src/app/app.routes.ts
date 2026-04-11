@@ -86,6 +86,12 @@ export const appRoutes: Routes = [
     ),
   },
   {
+    path: 'repositories',
+    loadComponent: loadWithReload(() =>
+      import('./pages/repositories/repositories.component').then((m) => m.RepositoriesComponent),
+    ),
+  },
+  {
     path: 'settings',
     loadComponent: loadWithReload(() =>
       import('./pages/settings/settings.component').then((m) => m.SettingsComponent),

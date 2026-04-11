@@ -140,6 +140,11 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // GitHub App installations - server processing only (admin portal reads via API)
+    match /installations/{installationId} {
+      allow read, write: if false;
+    }
+
     // ============================================
     // DENY ALL OTHER ACCESS
     // Catch-all rule for any undefined paths

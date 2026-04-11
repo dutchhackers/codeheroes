@@ -4,6 +4,7 @@ import { CreateEventInput, EventService } from '@codeheroes/event';
 import { ConnectedAccountProvider } from '@codeheroes/types';
 import { ProviderFactory } from '../providers/provider.factory';
 import { GameActionService } from '../services/game-action.service';
+import { InstallationEventHandler } from '../services/installation-event.handler';
 import { WebhookEvent, WebhookProcessResult } from './webhook-event.types';
 
 export interface WebhookPipelineParams {
@@ -45,6 +46,14 @@ export async function processWebhook({ req, res, provider, secret }: WebhookPipe
     const eventId = validation.eventId;
 
     logger.log('Processing event:', `${provider}.${eventType}${req.body?.action ? `.${req.body.action}` : ''}`);
+
+    // Step 2.5: Handle GitHub App installation lifecycle events
+    if (eventType === 'installation' || eventType === 'installation_repositories') {
+      const handler = new InstallationEventHandler();
+      await handler.handle(eventType, req.body);
+      res.status(200).send('Installation event processed');
+      return;
+    }
 
     // Step 3: Extract user ID using provider adapter
     const externalUserId = providerAdapter.extractUserId(req.body);

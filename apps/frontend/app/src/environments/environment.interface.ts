@@ -16,6 +16,7 @@ export interface Environment {
   };
   appVersion: string;
   vapidKey?: string;
+  githubAppSlug?: string;
   autoLogin?: {
     email: string;
     password: string;

@@ -30,6 +30,8 @@ export * from './game/metrics.types';
 // export * from './api/responses.types';
 // export * from './api/dto.types';
 
+export * from './installation/installation.types';
+
 export * from './unmatched-event/unmatched-event.types';
 
 export * from './notifications/notification.types';
