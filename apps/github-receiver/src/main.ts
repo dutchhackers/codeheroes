@@ -11,7 +11,7 @@ setGlobalOptions({ region: DEFAULT_REGION, memory: '2GiB' });
 
 export const gitHubReceiver = onRequest(
   {
-    secrets: ['WEBHOOK_SECRET', 'GITHUB_APP_WEBHOOK_SECRET'],
+    secrets: ['GITHUB_APP_WEBHOOK_SECRET'],
   },
   App,
 );
