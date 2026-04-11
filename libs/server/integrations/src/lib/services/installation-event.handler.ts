@@ -41,8 +41,20 @@ export class InstallationEventHandler {
           status: 'active',
         };
 
-        await this.#repo.create(data, installationId);
-        logger.info('Installation created', { installationId, account: installation.account.login, repoCount: repos.length });
+        // Idempotent: if doc already exists (race with /installations/setup), merge without overwriting linkedUserId
+        const existing = await this.#repo.findById(installationId);
+        if (existing) {
+          await this.#repo.update(installationId, {
+            repositories: repos,
+            permissions: installation.permissions || {},
+            events: installation.events || [],
+            status: 'active',
+          } as Partial<GitHubInstallation>);
+          logger.info('Installation created event merged into existing doc', { installationId, account: installation.account.login, repoCount: repos.length });
+        } else {
+          await this.#repo.create(data, installationId);
+          logger.info('Installation created', { installationId, account: installation.account.login, repoCount: repos.length });
+        }
         break;
       }
 

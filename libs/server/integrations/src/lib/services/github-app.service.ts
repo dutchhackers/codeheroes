@@ -54,7 +54,6 @@ export class GitHubAppService {
       logger.error('Failed to generate GitHub App JWT', {
         appId: this.#appId,
         keyLength: this.#privateKey?.length,
-        keyStart: this.#privateKey?.substring(0, 30),
         errorMessage: error?.message,
       });
       throw error;
@@ -99,6 +98,7 @@ export class GitHubAppService {
    */
   async getInstallation(installationId: number): Promise<{
     id: number;
+    app_id: number;
     account: { login: string; id: number; type: string };
     permissions: Record<string, string>;
     events: string[];

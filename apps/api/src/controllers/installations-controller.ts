@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { DatabaseInstance, logger } from '@codeheroes/common';
 import { InstallationRepository } from '@codeheroes/common';
 import { GitHubAppService } from '@codeheroes/integrations';
-import { InstallationSummaryDto } from '@codeheroes/types';
+import { GitHubInstallation, InstallationSummaryDto } from '@codeheroes/types';
 import { validate } from '../middleware/validate.middleware';
 import { adminMiddleware } from '../middleware/admin.middleware';
 
@@ -47,7 +47,7 @@ router.post('/setup', validate(setupSchema), async (req, res) => {
         installation = await repo.create(
           {
             githubInstallationId: installationId,
-            appId: ghInstallation.id,
+            appId: ghInstallation.app_id,
             accountLogin: ghInstallation.account.login,
             accountId: ghInstallation.account.id,
             accountType: ghInstallation.account.type === 'Organization' ? 'Organization' : 'User',
@@ -123,6 +123,24 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * GET /installations/admin/all
+ * Admin overview of all installations.
+ */
+router.get('/admin/all', adminMiddleware, async (req, res) => {
+  logger.debug('GET /installations/admin/all');
+
+  try {
+    const repo = new InstallationRepository(DatabaseInstance.getInstance());
+    const installations = await repo.findAll(500);
+
+    res.json(installations.map(toSummary));
+  } catch (error) {
+    logger.error('Error listing all installations:', error);
+    res.status(500).json({ error: 'Failed to list installations' });
+  }
+});
+
+/**
  * GET /installations/:id
  * Get installation detail (owner or admin).
  */
@@ -192,25 +210,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-/**
- * GET /installations/admin/all
- * Admin overview of all installations.
- */
-router.get('/admin/all', adminMiddleware, async (req, res) => {
-  logger.debug('GET /installations/admin/all');
-
-  try {
-    const repo = new InstallationRepository(DatabaseInstance.getInstance());
-    const installations = await repo.findAll(500);
-
-    res.json(installations.map(toSummary));
-  } catch (error) {
-    logger.error('Error listing all installations:', error);
-    res.status(500).json({ error: 'Failed to list installations' });
-  }
-});
-
-function toSummary(installation: any): InstallationSummaryDto {
+function toSummary(installation: GitHubInstallation): InstallationSummaryDto {
   return {
     id: installation.id,
     accountLogin: installation.accountLogin,

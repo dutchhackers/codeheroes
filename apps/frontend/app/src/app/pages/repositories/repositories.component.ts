@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { InstallationSummaryDto } from '@codeheroes/types';
@@ -301,7 +301,6 @@ import { environment } from '../../../environments/environment';
 })
 export class RepositoriesComponent implements OnInit, OnDestroy {
   readonly #route = inject(ActivatedRoute);
-  readonly #router = inject(Router);
   readonly #location = inject(Location);
   readonly #installationsService = inject(InstallationsService);
 
@@ -364,8 +363,8 @@ export class RepositoriesComponent implements OnInit, OnDestroy {
     this.isSettingUp.set(true);
     this.isLoading.set(false);
 
-    // Clear query params from URL
-    this.#router.navigate([], { queryParams: {}, replaceUrl: true });
+    // Clear query params from URL without navigating away from current route
+    this.#location.replaceState(this.#location.path().split('?')[0]);
 
     this.#sub = this.#installationsService.setupInstallation(installationId, setupAction).subscribe({
       next: () => {

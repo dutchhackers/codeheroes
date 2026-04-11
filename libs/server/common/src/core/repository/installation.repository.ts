@@ -1,4 +1,4 @@
-import { Firestore } from 'firebase-admin/firestore';
+import { FieldValue, Firestore } from 'firebase-admin/firestore';
 import { Collections, GitHubInstallation, InstallationRepository as InstallationRepo } from '@codeheroes/types';
 import { BaseRepository } from './base-repository';
 import { getCurrentTimeAsISO } from '../firebase/time.utils';
@@ -35,12 +35,11 @@ export class InstallationRepository extends BaseRepository<GitHubInstallation> {
   }
 
   async unlinkUser(installationId: string): Promise<void> {
-    const now = getCurrentTimeAsISO();
     const docRef = this.getDocRef(installationId);
     await docRef.update({
-      linkedUserId: null,
-      linkedAt: null,
-      updatedAt: now,
+      linkedUserId: FieldValue.delete(),
+      linkedAt: FieldValue.delete(),
+      updatedAt: getCurrentTimeAsISO(),
     });
   }
 
