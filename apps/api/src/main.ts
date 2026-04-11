@@ -13,4 +13,11 @@ import { defaultApi } from './app';
 /**
  * HTTP trigger
  * */
-export const api = onRequest({ memory: '2GiB', timeoutSeconds: 120 }, defaultApi);
+export const api = onRequest(
+  {
+    memory: '2GiB',
+    timeoutSeconds: 120,
+    secrets: ['GITHUB_APP_ID', 'GITHUB_APP_PRIVATE_KEY'],
+  },
+  defaultApi,
+);
