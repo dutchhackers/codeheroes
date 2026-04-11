@@ -1,4 +1,4 @@
-import * as jwt from 'jsonwebtoken';
+import { sign as jwtSign } from 'jsonwebtoken';
 import { logger } from '@codeheroes/common';
 
 interface InstallationAccessToken {
@@ -18,9 +18,9 @@ export class GitHubAppService {
       throw new Error('GITHUB_APP_ID and GITHUB_APP_PRIVATE_KEY environment variables are required');
     }
 
-    this.#appId = appId;
+    this.#appId = appId.trim();
     // Private key may be stored with escaped newlines in env vars
-    this.#privateKey = privateKey.replace(/\\n/g, '\n');
+    this.#privateKey = privateKey.replace(/\\n/g, '\n').trim();
   }
 
   /**
@@ -31,7 +31,7 @@ export class GitHubAppService {
     const now = Math.floor(Date.now() / 1000);
 
     try {
-      return jwt.sign(
+      return jwtSign(
         {
           iat: now - 60, // 60 seconds in the past to account for clock drift
           exp: now + 600, // 10 minutes
