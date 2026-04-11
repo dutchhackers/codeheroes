@@ -37,6 +37,19 @@ export const SPECIAL_BADGES: Record<string, BadgeDefinition> = {
   },
 
   // ═══════════════════════════════════════════════════════════════════
+  // ONBOARDING BADGES
+  // ═══════════════════════════════════════════════════════════════════
+  connected: {
+    id: 'connected',
+    name: 'Connected',
+    description: 'Linked your first repository via the Code Heroes GitHub App',
+    icon: '🔗',
+    rarity: BadgeRarity.COMMON,
+    category: 'special',
+    metadata: { trigger: 'installation_setup' },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
   // STREAK BADGES (Future)
   // ═══════════════════════════════════════════════════════════════════
   // streak_master: {

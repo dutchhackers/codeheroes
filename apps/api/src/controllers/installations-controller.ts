@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { DatabaseInstance, logger } from '@codeheroes/common';
 import { InstallationRepository } from '@codeheroes/common';
 import { GitHubAppService } from '@codeheroes/integrations';
+import { BadgeService } from '@codeheroes/progression-engine';
 import { GitHubInstallation, InstallationSummaryDto } from '@codeheroes/types';
 import { validate } from '../middleware/validate.middleware';
 import { adminMiddleware } from '../middleware/admin.middleware';
@@ -65,6 +66,11 @@ router.post('/setup', validate(setupSchema), async (req, res) => {
           String(installationId),
         );
 
+        // Grant "Connected" badge for first repo link
+        new BadgeService().grantBadge(userId, 'connected').catch((err) =>
+          logger.warn('Failed to grant connected badge', { userId, error: err?.message }),
+        );
+
         res.status(201).json(toSummary(installation));
         return;
       } catch (fetchError: any) {
@@ -88,6 +94,11 @@ router.post('/setup', validate(setupSchema), async (req, res) => {
     if (!installation.linkedUserId) {
       await repo.linkToUser(installation.id, userId);
       installation.linkedUserId = userId;
+
+      // Grant "Connected" badge for first repo link
+      new BadgeService().grantBadge(userId, 'connected').catch((err) =>
+        logger.warn('Failed to grant connected badge', { userId, error: err?.message }),
+      );
     }
 
     res.json(toSummary(installation));
