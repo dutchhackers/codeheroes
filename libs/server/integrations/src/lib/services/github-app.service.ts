@@ -30,15 +30,25 @@ export class GitHubAppService {
   generateJwt(): string {
     const now = Math.floor(Date.now() / 1000);
 
-    return jwt.sign(
-      {
-        iat: now - 60, // 60 seconds in the past to account for clock drift
-        exp: now + 600, // 10 minutes
-        iss: this.#appId,
-      },
-      this.#privateKey,
-      { algorithm: 'RS256' },
-    );
+    try {
+      return jwt.sign(
+        {
+          iat: now - 60, // 60 seconds in the past to account for clock drift
+          exp: now + 600, // 10 minutes
+          iss: this.#appId,
+        },
+        this.#privateKey,
+        { algorithm: 'RS256' },
+      );
+    } catch (error: any) {
+      logger.error('Failed to generate GitHub App JWT', {
+        appId: this.#appId,
+        keyLength: this.#privateKey?.length,
+        keyStart: this.#privateKey?.substring(0, 30),
+        errorMessage: error?.message,
+      });
+      throw error;
+    }
   }
 
   /**

@@ -67,8 +67,12 @@ router.post('/setup', validate(setupSchema), async (req, res) => {
 
         res.status(201).json(toSummary(installation));
         return;
-      } catch (fetchError) {
-        logger.error('Failed to fetch installation from GitHub', { installationId, error: fetchError });
+      } catch (fetchError: any) {
+        logger.error('Failed to fetch installation from GitHub', {
+          installationId,
+          errorMessage: fetchError?.message,
+          errorStack: fetchError?.stack,
+        });
         res.status(404).json({ error: 'Installation not found. Please try again in a moment.' });
         return;
       }
