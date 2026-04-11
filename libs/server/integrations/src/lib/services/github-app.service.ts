@@ -1,4 +1,4 @@
-import { sign as jwtSign } from 'jsonwebtoken';
+import { createSign } from 'crypto';
 import { logger } from '@codeheroes/common';
 
 interface InstallationAccessToken {
@@ -31,15 +31,25 @@ export class GitHubAppService {
     const now = Math.floor(Date.now() / 1000);
 
     try {
-      return jwtSign(
-        {
-          iat: now - 60, // 60 seconds in the past to account for clock drift
-          exp: now + 600, // 10 minutes
-          iss: this.#appId,
-        },
-        this.#privateKey,
-        { algorithm: 'RS256' },
-      );
+      const header = { alg: 'RS256', typ: 'JWT' };
+      const payload = {
+        iat: now - 60,
+        exp: now + 600,
+        iss: this.#appId,
+      };
+
+      const encode = (obj: object) =>
+        Buffer.from(JSON.stringify(obj)).toString('base64url');
+
+      const headerB64 = encode(header);
+      const payloadB64 = encode(payload);
+      const signingInput = `${headerB64}.${payloadB64}`;
+
+      const signer = createSign('RSA-SHA256');
+      signer.update(signingInput);
+      const signature = signer.sign(this.#privateKey, 'base64url');
+
+      return `${signingInput}.${signature}`;
     } catch (error: any) {
       logger.error('Failed to generate GitHub App JWT', {
         appId: this.#appId,
