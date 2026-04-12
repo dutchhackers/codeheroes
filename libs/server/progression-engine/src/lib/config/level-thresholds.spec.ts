@@ -22,7 +22,7 @@ describe('Level Thresholds', () => {
       const level20Xp = calculateXpForLevel(20);
       const level21Xp = calculateXpForLevel(21);
       expect(level21Xp).toBeGreaterThan(level20Xp);
-      expect(level21Xp).toBe(1402500); // 1400000 + 2500 * 1^2
+      expect(level21Xp).toBe(1403500); // 1400000 + 3500 * 1^2
     });
 
     it('should have monotonic XP progression for levels 1-50', () => {
@@ -35,14 +35,14 @@ describe('Level Thresholds', () => {
     });
 
     it('should calculate correct XP for algorithmic levels', () => {
-      // Level 21: 1400000 + 2500 * 1^2 = 1402500
-      expect(calculateXpForLevel(21)).toBe(1402500);
-      // Level 22: 1400000 + 2500 * 2^2 = 1410000
-      expect(calculateXpForLevel(22)).toBe(1410000);
-      // Level 25: 1400000 + 2500 * 5^2 = 1462500
-      expect(calculateXpForLevel(25)).toBe(1462500);
-      // Level 30: 1400000 + 2500 * 10^2 = 1650000
-      expect(calculateXpForLevel(30)).toBe(1650000);
+      // Level 21: 1400000 + 3500 * 1^2 = 1403500
+      expect(calculateXpForLevel(21)).toBe(1403500);
+      // Level 22: 1400000 + 3500 * 2^2 = 1414000
+      expect(calculateXpForLevel(22)).toBe(1414000);
+      // Level 25: 1400000 + 3500 * 5^2 = 1487500
+      expect(calculateXpForLevel(25)).toBe(1487500);
+      // Level 30: 1400000 + 3500 * 10^2 = 1750000
+      expect(calculateXpForLevel(30)).toBe(1750000);
     });
 
     it('should return 0 for level 0 or negative', () => {
@@ -90,16 +90,16 @@ describe('Level Thresholds', () => {
     });
 
     it('should return correct algorithmic levels', () => {
-      expect(getLevelFromXp(1402500)).toBe(21);
-      expect(getLevelFromXp(1410000)).toBe(22);
-      expect(getLevelFromXp(1462500)).toBe(25);
-      expect(getLevelFromXp(1650000)).toBe(30);
+      expect(getLevelFromXp(1403500)).toBe(21);
+      expect(getLevelFromXp(1414000)).toBe(22);
+      expect(getLevelFromXp(1487500)).toBe(25);
+      expect(getLevelFromXp(1750000)).toBe(30);
     });
 
     it('should handle XP between algorithmic levels correctly', () => {
-      // Between Level 21 (1402500) and Level 22 (1410000)
-      expect(getLevelFromXp(1405000)).toBe(21);
-      expect(getLevelFromXp(1409999)).toBe(21);
+      // Between Level 21 (1403500) and Level 22 (1414000)
+      expect(getLevelFromXp(1407000)).toBe(21);
+      expect(getLevelFromXp(1413999)).toBe(21);
     });
   });
 
@@ -117,7 +117,7 @@ describe('Level Thresholds', () => {
       const level25 = getLevelRequirements(25);
       expect(level25).toBeDefined();
       expect(level25?.level).toBe(25);
-      expect(level25?.xpRequired).toBe(1462500);
+      expect(level25?.xpRequired).toBe(1487500);
       expect(level25?.rewards?.title).toBe('Code Virtuoso');
       expect(level25?.rewards?.badges).toContain('code_virtuoso');
     });
@@ -188,26 +188,34 @@ describe('Level Thresholds', () => {
         // Delta should be positive (monotonic)
         expect(delta).toBeGreaterThanOrEqual(0);
 
-        // Delta shouldn't be unreasonably large (<= 200k per level up to 50)
-        // After rebalancing, static levels have larger gaps (e.g., Level 19->20 = 200k)
+        // Delta shouldn't be unreasonably large (<= 210k per level up to 50)
+        // After rebalancing: static levels gap up to 200k, algorithmic levels at 3500 multiplier
+        // reach ~206.5k delta at level 50 (3500 * (2*30 - 1) = 206500)
         if (level > 1) {
-          expect(delta).toBeLessThanOrEqual(200000);
+          expect(delta).toBeLessThanOrEqual(210000);
         }
 
         prevXp = xp;
       }
     });
 
-    it('should have smooth transition from level 20 to 21', () => {
+    it('should have intentional reset at level 20-21 boundary within known ratio', () => {
       const level19Delta = calculateXpForLevel(20) - calculateXpForLevel(19);
       const level20Delta = calculateXpForLevel(21) - calculateXpForLevel(20);
 
-      // The transition should be smooth - level 21 delta shouldn't be drastically different
-      // Level 19->20 delta: 1400000 - 1200000 = 200000
-      // Level 20->21 delta: 1402500 - 1400000 = 2500
-      // The delta is smaller which is intentional for the quadratic formula starting fresh
+      // The algorithmic curve resets at L21 — this is by design.
+      // L19→20 delta: 200,000 XP (last static level, steep grind)
+      // L20→21 delta: 3,500 XP (quadratic formula starts fresh)
+      // The ~57x ratio is intentional: L20 is a "breakthrough" moment,
+      // and the quadratic ramp-up quickly steepens from there.
       expect(level20Delta).toBeGreaterThan(0);
       expect(level19Delta).toBeGreaterThan(0);
+
+      // Guard the known ratio so future multiplier changes are caught
+      const ratio = level19Delta / level20Delta;
+      expect(ratio).toBeGreaterThan(30);   // must be a significant reset
+      expect(ratio).toBeLessThan(100);     // but not absurdly large
+      expect(level20Delta).toBe(3500);     // exact value for current multiplier
     });
   });
 });

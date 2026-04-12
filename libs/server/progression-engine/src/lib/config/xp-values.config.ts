@@ -3,113 +3,122 @@
  *
  * Balanced for 80-level system with Level 80 achievable in ~3 years of active development.
  *
- * Rebalanced (2024): Reduced XP values ~50% and made bonuses harder to trigger.
- * Previous system was ~50x faster than intended due to 12x multiplier + easy bonuses.
+ * Rebalanced (2026-04): Reduced XP values ~40% overall. Biggest change: CI success
+ * reduced from 240 to 80 (passive XP was inflating progression 3-8x). Combined with
+ * steeper level curve (multiplier 2500→3500), targets a 3-year Level 80 for power users.
  *
- * Target progression:
- * - Level 15: ~2 weeks of active development
- * - Level 20: ~1 month
- * - Level 80: ~3 years
+ * Design principles:
+ * - Active > Passive: human judgment actions (reviews, issues) valued over automated events (CI)
+ * - Quality > Quantity: bonuses reward depth, not volume
+ * - Merge > Create: completing work is slightly more valuable than starting it
+ *
+ * Target progression (active developer ~10K XP/day, power user ~19K/day):
+ * - Level 10: ~1 month (active dev)
+ * - Level 15: ~3 months (active dev)
+ * - Level 20: ~6 months (active dev)
+ * - Level 80: ~3 years (power user)
  */
 export const XP_VALUES = {
   CODE_PUSH: {
-    BASE: 480,
+    BASE: 300,
     BONUSES: {
-      MULTIPLE_COMMITS: 480,
+      MULTIPLE_COMMITS: 300,
+      NEW_BRANCH: 100, // Creating a new branch
     },
   },
   PULL_REQUEST: {
     CREATE: {
-      BASE: 600,
+      BASE: 400,
       BONUSES: {
-        MULTIPLE_FILES: 300,
-        SIGNIFICANT_CHANGES: 600,
+        MULTIPLE_FILES: 200,
+        SIGNIFICANT_CHANGES: 400,
       },
     },
     MERGE: {
-      BASE: 600,
+      BASE: 500,
       BONUSES: {
-        MULTIPLE_FILES: 300,
-        SIGNIFICANT_CHANGES: 600,
+        MULTIPLE_FILES: 200,
+        SIGNIFICANT_CHANGES: 400,
       },
     },
     CLOSE: {
-      BASE: 300,
+      BASE: 200,
       BONUSES: {
-        MULTIPLE_FILES: 150,
-        SIGNIFICANT_CHANGES: 300,
+        MULTIPLE_FILES: 100,
+        SIGNIFICANT_CHANGES: 200,
       },
     },
   },
   ISSUE: {
     CREATE: {
-      BASE: 960,
+      BASE: 600,
       BONUSES: {
-        DETAILED_DESCRIPTION: 840, // For issues with detailed descriptions
-        WITH_LABELS: 360, // For issues with proper labeling
+        DETAILED_DESCRIPTION: 500, // For issues with detailed descriptions
+        WITH_LABELS: 200, // For issues with proper labeling
       },
     },
     CLOSE: {
-      BASE: 720,
+      BASE: 500,
       BONUSES: {
-        REFERENCED_IN_PR: 600, // For issues closed via PR references
+        REFERENCED_IN_PR: 400, // For issues closed via PR references
       },
     },
     REOPEN: {
-      BASE: 480,
+      BASE: 300,
       BONUSES: {
-        WITH_UPDATES: 360, // For reopening with additional information
+        WITH_UPDATES: 200, // For reopening with additional information
       },
     },
   },
   CODE_REVIEW: {
-    BASE: 800,
+    BASE: 600,
     BONUSES: {
-      DETAILED_REVIEW: 600, // For reviews with substantial comments
-      MULTIPLE_FILES: 400, // For reviewing changes across multiple files
-      THOROUGH_REVIEW: 800, // For reviews that include suggestions and code samples
+      DETAILED_REVIEW: 400, // For reviews with substantial comments
+      MULTIPLE_FILES: 300, // For reviewing changes across multiple files
+      THOROUGH_REVIEW: 500, // For reviews that include suggestions and code samples
+      APPROVAL: 50, // For approving the PR
     },
   },
   COMMENT: {
-    BASE: 360,
+    BASE: 200,
     BONUSES: {
-      DETAILED_COMMENT: 240, // For comments with bodyLength > 100
+      DETAILED_COMMENT: 150, // For comments with bodyLength > 100
     },
   },
   REVIEW_COMMENT: {
-    BASE: 480, // Higher than regular comments - inline code review is more valuable
+    BASE: 300, // Higher than regular comments - inline code review is more valuable
     BONUSES: {
-      WITH_SUGGESTION: 360, // Contains code suggestion (```suggestion block)
-      DETAILED: 240, // For comments with bodyLength > 150
+      WITH_SUGGESTION: 250, // Contains code suggestion (```suggestion block)
+      DETAILED: 150, // For comments with bodyLength > 150
     },
   },
   RELEASE: {
-    BASE: 2400, // High-impact milestone event
+    BASE: 2000, // High-impact milestone event
     BONUSES: {
-      MAJOR_VERSION: 1800, // Semver major bump (e.g., v2.0.0)
-      MINOR_VERSION: 600, // Semver minor bump (e.g., v1.1.0)
-      WITH_NOTES: 360, // Has release notes body
+      MAJOR_VERSION: 1500, // Semver major bump (e.g., v2.0.0)
+      MINOR_VERSION: 500, // Semver minor bump (e.g., v1.1.0)
+      WITH_NOTES: 300, // Has release notes body
     },
   },
   WORKFLOW: {
     SUCCESS: {
-      BASE: 240, // CI success
+      BASE: 80, // CI success — intentionally low, passive XP
       BONUSES: {
-        DEPLOYMENT: 400, // Workflow name contains 'deploy'
+        DEPLOYMENT: 200, // Workflow name contains 'deploy'
       },
     },
   },
   DISCUSSION: {
     CREATE: {
-      BASE: 720, // Creating a discussion
+      BASE: 500, // Creating a discussion
       BONUSES: {
-        DETAILED: 480, // For discussions with bodyLength > 300
+        DETAILED: 300, // For discussions with bodyLength > 300
       },
     },
     COMMENT: {
-      BASE: 360, // Commenting on a discussion
+      BASE: 250, // Commenting on a discussion
       BONUSES: {
-        ACCEPTED_ANSWER: 840, // For comments marked as the accepted answer
+        ACCEPTED_ANSWER: 600, // For comments marked as the accepted answer
       },
     },
   },

@@ -49,7 +49,7 @@ export class CodeReviewSubmitHandler extends AbstractActionHandler {
 
     // Additional bonuses for high quality reviews
     if (context.type === 'code_review' && context.review.state === 'approved') {
-      bonuses.approvalBonus = 50; // Bonus for approving the PR
+      bonuses.approvalBonus = XP_VALUES.CODE_REVIEW.BONUSES.APPROVAL;
       totalBonus += bonuses.approvalBonus;
     }
 
