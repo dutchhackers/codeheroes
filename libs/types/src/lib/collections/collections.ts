@@ -7,6 +7,7 @@ export enum Collections {
   Badges = 'badges',
   ConnectedAccounts = 'connectedAccounts',
   GameActions = 'gameActions',
+  Installations = 'installations',
   Notifications = 'notifications',
   Projects = 'projects',
   RepoProjectMap = 'repoProjectMap',

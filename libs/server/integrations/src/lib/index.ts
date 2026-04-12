@@ -4,5 +4,7 @@ export * from './providers/github/github.adapter';
 export * from './providers/azure-devops/adapter';
 export * from './providers/bitbucket/adapter';
 export * from './services/game-action.service';
+export * from './services/github-app.service';
+export * from './services/installation-event.handler';
 export * from './webhook/webhook-pipeline';
 export * from './webhook/webhook-event.types';

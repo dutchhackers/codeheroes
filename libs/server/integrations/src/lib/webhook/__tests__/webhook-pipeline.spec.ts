@@ -6,6 +6,13 @@ const mockFindByEventId = jest.fn();
 const mockCreateEvent = jest.fn();
 const mockLookupUserId = jest.fn();
 const mockGenerateGameActionFromWebhook = jest.fn().mockResolvedValue(null);
+const mockInstallationHandle = jest.fn().mockResolvedValue(undefined);
+
+jest.mock('../../services/installation-event.handler', () => ({
+  InstallationEventHandler: jest.fn().mockImplementation(() => ({
+    handle: mockInstallationHandle,
+  })),
+}));
 
 jest.mock('@codeheroes/common', () => ({
   logger: {
@@ -217,6 +224,76 @@ describe('processWebhook', () => {
       undefined,
       undefined
     );
+  });
+
+  describe('installation events', () => {
+    it('should route installation events to InstallationEventHandler', async () => {
+      mockAdapter.validateWebhook.mockReturnValue({
+        isValid: true,
+        eventType: 'installation',
+        eventId: 'delivery-456',
+      });
+      const body = { action: 'created', installation: { id: 123 } };
+      const req = createMockReq({ body });
+      const res = createMockRes();
+
+      await processWebhook({ req, res, provider: 'github' });
+
+      expect(res._status).toBe(200);
+      expect(res._body).toBe('Installation event processed');
+      expect(mockInstallationHandle).toHaveBeenCalledWith('installation', body);
+    });
+
+    it('should route installation_repositories events to InstallationEventHandler', async () => {
+      mockAdapter.validateWebhook.mockReturnValue({
+        isValid: true,
+        eventType: 'installation_repositories',
+        eventId: 'delivery-789',
+      });
+      const body = { action: 'added', installation: { id: 123 }, repositories_added: [{ id: 1 }] };
+      const req = createMockReq({ body });
+      const res = createMockRes();
+
+      await processWebhook({ req, res, provider: 'github' });
+
+      expect(res._status).toBe(200);
+      expect(res._body).toBe('Installation event processed');
+      expect(mockInstallationHandle).toHaveBeenCalledWith('installation_repositories', body);
+    });
+
+    it('should skip user lookup and game action creation for installation events', async () => {
+      mockAdapter.validateWebhook.mockReturnValue({
+        isValid: true,
+        eventType: 'installation',
+        eventId: 'delivery-456',
+      });
+      const req = createMockReq({ body: { action: 'created', installation: { id: 123 } } });
+      const res = createMockRes();
+
+      await processWebhook({ req, res, provider: 'github' });
+
+      expect(mockStoreRawWebhook).not.toHaveBeenCalled();
+      expect(mockFindByEventId).not.toHaveBeenCalled();
+      expect(mockCreateEvent).not.toHaveBeenCalled();
+      expect(mockLookupUserId).not.toHaveBeenCalled();
+      expect(mockGenerateGameActionFromWebhook).not.toHaveBeenCalled();
+    });
+
+    it('should return 500 when installation handler throws', async () => {
+      mockAdapter.validateWebhook.mockReturnValue({
+        isValid: true,
+        eventType: 'installation',
+        eventId: 'delivery-456',
+      });
+      mockInstallationHandle.mockRejectedValue(new Error('Firestore write failed'));
+      const req = createMockReq({ body: { action: 'created', installation: { id: 123 } } });
+      const res = createMockRes();
+
+      await processWebhook({ req, res, provider: 'github' });
+
+      expect(res._status).toBe(500);
+      expect(res._body).toBe('Internal server error processing webhook');
+    });
   });
 
   it('should treat events with same ID but different providers as separate events', async () => {

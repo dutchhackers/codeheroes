@@ -37,6 +37,37 @@ export const SPECIAL_BADGES: Record<string, BadgeDefinition> = {
   },
 
   // ═══════════════════════════════════════════════════════════════════
+  // ONBOARDING BADGES
+  // ═══════════════════════════════════════════════════════════════════
+  connected: {
+    id: 'connected',
+    name: 'Connected',
+    description: 'Linked your first repository via the Code Heroes GitHub App',
+    icon: '🔗',
+    rarity: BadgeRarity.COMMON,
+    category: 'special',
+    metadata: { trigger: 'installation_setup' },
+  },
+  fleet_commander: {
+    id: 'fleet_commander',
+    name: 'Fleet Commander',
+    description: 'Tracking 5 or more repositories via the Code Heroes GitHub App',
+    icon: '🚀',
+    rarity: BadgeRarity.UNCOMMON,
+    category: 'special',
+    metadata: { trigger: 'installation_repos', threshold: 5 },
+  },
+  mission_control: {
+    id: 'mission_control',
+    name: 'Mission Control',
+    description: 'Tracking 10 or more repositories via the Code Heroes GitHub App',
+    icon: '🛰️',
+    rarity: BadgeRarity.RARE,
+    category: 'special',
+    metadata: { trigger: 'installation_repos', threshold: 10 },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
   // STREAK BADGES (Future)
   // ═══════════════════════════════════════════════════════════════════
   // streak_master: {

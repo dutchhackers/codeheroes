@@ -9,4 +9,9 @@ import { App } from './app';
 
 setGlobalOptions({ region: DEFAULT_REGION, memory: '2GiB' });
 
-export const gitHubReceiver = onRequest(App);
+export const gitHubReceiver = onRequest(
+  {
+    secrets: ['GITHUB_APP_WEBHOOK_SECRET'],
+  },
+  App,
+);
