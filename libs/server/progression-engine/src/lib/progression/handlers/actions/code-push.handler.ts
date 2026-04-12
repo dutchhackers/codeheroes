@@ -40,7 +40,7 @@ export class CodePushHandler extends AbstractActionHandler {
 
     // Branch creation bonus
     if (context.type === 'code_push' && context.isNew) {
-      bonuses.newBranch = 100; // Bonus for creating a new branch
+      bonuses.newBranch = XP_VALUES.CODE_PUSH.BONUSES.NEW_BRANCH;
       totalBonus += bonuses.newBranch;
     }
 

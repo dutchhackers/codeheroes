@@ -23,6 +23,7 @@ export const XP_VALUES = {
     BASE: 300,
     BONUSES: {
       MULTIPLE_COMMITS: 300,
+      NEW_BRANCH: 100, // Creating a new branch
     },
   },
   PULL_REQUEST: {
@@ -75,6 +76,7 @@ export const XP_VALUES = {
       DETAILED_REVIEW: 400, // For reviews with substantial comments
       MULTIPLE_FILES: 300, // For reviewing changes across multiple files
       THOROUGH_REVIEW: 500, // For reviews that include suggestions and code samples
+      APPROVAL: 50, // For approving the PR
     },
   },
   COMMENT: {
