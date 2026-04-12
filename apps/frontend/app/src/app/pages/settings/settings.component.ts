@@ -631,6 +631,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
         this.#userId = userDoc.id;
         this.#loadSettings(userDoc.id);
         this.#loadConnectedAccounts(userDoc.id);
+        this.#completePendingGitHubLink();
 
         // Set account info
         this.userEmail.set(userDoc.email);
@@ -770,12 +771,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.isConnectingGitHub.set(true);
     this.connectGitHubError.set(null);
 
-    const userId = this.#userId;
-
     try {
-      // Get GitHub identity via OAuth popup. We extract the GitHub access token
-      // from the credential result and use it to call the GitHub API directly.
-      // This avoids Firebase Auth session switching issues.
+      // Step 1: GitHub OAuth popup to get access token
       const provider = new GithubAuthProvider();
       const result = await signInWithPopup(this.#auth, provider);
       const credential = GithubAuthProvider.credentialFromResult(result);
@@ -785,7 +782,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
         throw new Error('Could not retrieve GitHub access token');
       }
 
-      // Use the GitHub API to get the authenticated user's profile
+      // Step 2: Get GitHub user profile via API (before auth state changes)
       const ghResponse = await fetch('https://api.github.com/user', {
         headers: { Authorization: `Bearer ${githubAccessToken}`, Accept: 'application/vnd.github+json' },
       });
@@ -795,32 +792,16 @@ export class SettingsComponent implements OnInit, OnDestroy {
       }
 
       const ghUser = await ghResponse.json();
-      const githubUid = String(ghUser.id);
-      const githubUsername = ghUser.login;
 
-      // Re-authenticate with Google to restore the original session
+      // Step 3: Store GitHub info for after Google re-login
+      localStorage.setItem('pendingGitHubLink', JSON.stringify({
+        userId: this.#userId,
+        externalUserId: String(ghUser.id),
+        externalUserName: ghUser.login,
+      }));
+
+      // Step 4: Re-authenticate with Google (this will reload the component)
       await signInWithPopup(this.#auth, new GoogleAuthProvider());
-
-      // Create connected account via API
-      const token = await this.#auth.currentUser!.getIdToken();
-
-      const response = await fetch(`${environment.apiUrl}/users/${userId}/connected-accounts`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          provider: 'github',
-          externalUserId: githubUid,
-          externalUserName: githubUsername,
-        }),
-      });
-
-      if (!response.ok && response.status !== 409) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      // Refresh connected accounts list
-      this.#loadConnectedAccounts(userId);
-      this.isConnectingGitHub.set(false);
     } catch (error: any) {
       this.isConnectingGitHub.set(false);
 
@@ -834,6 +815,41 @@ export class SettingsComponent implements OnInit, OnDestroy {
       } else {
         this.connectGitHubError.set(`Failed to connect GitHub: ${code || error?.message || 'Unknown error'}`);
       }
+    }
+  }
+
+  /**
+   * Complete a pending GitHub link after Google re-login.
+   * Called from ngOnInit when localStorage contains pending data.
+   */
+  async #completePendingGitHubLink() {
+    const pending = localStorage.getItem('pendingGitHubLink');
+    if (!pending) return;
+
+    localStorage.removeItem('pendingGitHubLink');
+
+    try {
+      const { userId, externalUserId, externalUserName } = JSON.parse(pending);
+      const token = await this.#auth.currentUser?.getIdToken();
+      if (!token) return;
+
+      const response = await fetch(`${environment.apiUrl}/users/${userId}/connected-accounts`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: 'github',
+          externalUserId,
+          externalUserName,
+        }),
+      });
+
+      if (response.ok || response.status === 409) {
+        this.#loadConnectedAccounts(userId);
+      } else {
+        console.error('Failed to create connected account:', response.status);
+      }
+    } catch (error) {
+      console.error('Failed to complete GitHub link:', error);
     }
   }
 
