@@ -76,7 +76,9 @@ import { environment } from '../../../environments/environment';
                 </span>
               </div>
 
-              @if (installation.repositories.length === 0) {
+              @if (installation.repositorySelection === 'all') {
+                <p class="all-repos-text">All repositories enabled</p>
+              } @else if (installation.repositories.length === 0) {
                 <p class="text-sm text-white/40 py-2">No repositories selected</p>
               } @else {
                 <div class="repo-list">
@@ -227,6 +229,13 @@ import { environment } from '../../../environments/environment';
         color: rgb(239, 68, 68);
         background: rgba(239, 68, 68, 0.1);
         border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+
+      .all-repos-text {
+        font-size: 0.875rem;
+        color: var(--neon-cyan, rgb(6, 182, 212));
+        padding: 0.5rem 0;
+        margin: 0;
       }
 
       .repo-list {

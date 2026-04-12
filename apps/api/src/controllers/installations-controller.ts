@@ -76,6 +76,7 @@ router.post('/setup', validate(setupSchema), async (req, res) => {
           accountLogin: ghInstallation.account.login,
           accountId: ghInstallation.account.id,
           accountType: ghInstallation.account.type === 'Organization' ? 'Organization' : 'User',
+          repositorySelection: ghInstallation.repository_selection === 'all' ? 'all' : 'selected',
           repositories: ghRepos.map((r) => ({
             id: r.id,
             name: r.name,
@@ -246,12 +247,14 @@ router.delete('/:id', async (req, res) => {
 });
 
 function toSummary(installation: GitHubInstallation): InstallationSummaryDto {
+  const selection = installation.repositorySelection ?? 'selected';
   return {
     id: installation.id,
     accountLogin: installation.accountLogin,
     accountType: installation.accountType,
+    repositorySelection: selection,
     repositoryCount: installation.repositories?.length ?? 0,
-    repositories: installation.repositories ?? [],
+    repositories: selection === 'all' ? [] : (installation.repositories ?? []),
     status: installation.status,
     linkedUserId: installation.linkedUserId,
     linkedAt: installation.linkedAt,
