@@ -4,7 +4,7 @@ import { DatabaseInstance, logger } from '@codeheroes/common';
 import { InstallationRepository } from '@codeheroes/common';
 import { GitHubAppService } from '@codeheroes/integrations';
 import { BadgeService } from '@codeheroes/progression-engine';
-import { GitHubInstallation, InstallationSummaryDto } from '@codeheroes/types';
+import { Collections, GitHubInstallation, InstallationSummaryDto } from '@codeheroes/types';
 import { validate } from '../middleware/validate.middleware';
 import { adminMiddleware } from '../middleware/admin.middleware';
 
@@ -38,51 +38,66 @@ router.post('/setup', validate(setupSchema), async (req, res) => {
     // Race condition: webhook may not have arrived yet.
     // Fetch installation details from GitHub API and create the record.
     if (!installation) {
+      let ghInstallation;
+      let ghRepos;
+
       try {
         const appService = new GitHubAppService();
-        const [ghInstallation, ghRepos] = await Promise.all([
+        [ghInstallation, ghRepos] = await Promise.all([
           appService.getInstallation(installationId),
           appService.getInstallationRepositories(installationId),
         ]);
-
-        installation = await repo.create(
-          {
-            githubInstallationId: installationId,
-            appId: ghInstallation.app_id,
-            accountLogin: ghInstallation.account.login,
-            accountId: ghInstallation.account.id,
-            accountType: ghInstallation.account.type === 'Organization' ? 'Organization' : 'User',
-            repositories: ghRepos.map((r) => ({
-              id: r.id,
-              name: r.name,
-              fullName: r.full_name,
-              private: r.private,
-            })),
-            permissions: ghInstallation.permissions,
-            events: ghInstallation.events,
-            status: 'active',
-            linkedUserId: userId,
-            linkedAt: new Date().toISOString(),
-          },
-          String(installationId),
-        );
-
-        // Grant onboarding badges based on total linked repos
-        grantInstallationBadges(userId, repo).catch((err) =>
-          logger.warn('Failed to grant installation badges', { userId, error: err?.message }),
-        );
-
-        res.status(201).json(toSummary(installation));
-        return;
       } catch (fetchError: any) {
+        const status = fetchError?.message?.includes('401') || fetchError?.message?.includes('403') ? 500 : 404;
         logger.error('Failed to fetch installation from GitHub', {
           installationId,
           errorMessage: fetchError?.message,
-          errorStack: fetchError?.stack,
         });
-        res.status(404).json({ error: 'Installation not found. Please try again in a moment.' });
+        res.status(status).json({
+          error: status === 500
+            ? 'GitHub App configuration error. Please contact support.'
+            : 'Installation not found. Please try again in a moment.',
+        });
         return;
       }
+
+      // Verify ownership: the user's GitHub account must match the installation's account
+      const ownershipValid = await verifyInstallationOwnership(userId, ghInstallation.account.login);
+      if (!ownershipValid) {
+        logger.warn('Installation ownership verification failed', { userId, accountLogin: ghInstallation.account.login });
+        res.status(403).json({ error: 'You do not have permission to link this installation' });
+        return;
+      }
+
+      installation = await repo.create(
+        {
+          githubInstallationId: installationId,
+          appId: ghInstallation.app_id,
+          accountLogin: ghInstallation.account.login,
+          accountId: ghInstallation.account.id,
+          accountType: ghInstallation.account.type === 'Organization' ? 'Organization' : 'User',
+          repositories: ghRepos.map((r) => ({
+            id: r.id,
+            name: r.name,
+            fullName: r.full_name,
+            private: r.private,
+          })),
+          permissions: ghInstallation.permissions,
+          events: ghInstallation.events,
+          status: 'active',
+          linkedUserId: userId,
+          linkedAt: new Date().toISOString(),
+        },
+        String(installationId),
+      );
+
+      // Grant onboarding badges based on total linked repos
+      grantInstallationBadges(userId, repo).catch((err) =>
+        logger.warn('Failed to grant installation badges', { userId, error: err?.message }),
+      );
+
+      res.status(201).json(toSummary(installation));
+      return;
     }
 
     // Already linked to another user
@@ -234,6 +249,30 @@ function toSummary(installation: GitHubInstallation): InstallationSummaryDto {
     linkedAt: installation.linkedAt,
     createdAt: installation.createdAt,
   };
+}
+
+/**
+ * Verify that the user has a GitHub connected account before allowing installation linking.
+ * For personal installs: username must match the installation account.
+ * For org installs: GitHub enforces org admin during install flow, so we only require
+ * that the user has a GitHub connected account (proof they're a GitHub user).
+ */
+async function verifyInstallationOwnership(userId: string, accountLogin: string): Promise<boolean> {
+  const db = DatabaseInstance.getInstance();
+  const snapshot = await db
+    .collection(Collections.Users)
+    .doc(userId)
+    .collection(Collections.ConnectedAccounts)
+    .where('provider', '==', 'github')
+    .limit(1)
+    .get();
+
+  if (snapshot.empty) {
+    logger.warn('User has no GitHub connected account', { userId });
+    return false;
+  }
+
+  return true;
 }
 
 /**

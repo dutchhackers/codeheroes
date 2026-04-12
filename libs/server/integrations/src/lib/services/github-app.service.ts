@@ -134,10 +134,11 @@ export class GitHubAppService {
   > {
     const { token } = await this.getInstallationAccessToken(installationId);
     const perPage = 100;
+    const maxPages = 50;
     let page = 1;
     const repositories: Array<{ id: number; name: string; full_name: string; private: boolean }> = [];
 
-    while (true) {
+    while (page <= maxPages) {
       const response = await fetch(
         `https://api.github.com/installation/repositories?per_page=${perPage}&page=${page}`,
         {
@@ -164,6 +165,10 @@ export class GitHubAppService {
         break;
       }
       page += 1;
+    }
+
+    if (page > maxPages) {
+      logger.warn('Reached pagination cap for installation repositories', { installationId, fetched: repositories.length, maxPages });
     }
 
     return repositories;

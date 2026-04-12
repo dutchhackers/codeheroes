@@ -21,9 +21,15 @@ export class InstallationEventHandler {
 
   async #handleInstallation(payload: any): Promise<void> {
     const { action, installation, repositories } = payload;
+
+    if (!installation?.id || !installation?.account?.login) {
+      logger.error('Malformed installation event: missing installation.id or installation.account.login', { action });
+      return;
+    }
+
     const installationId = String(installation.id);
 
-    logger.info('Handling installation event', { action, installationId: installation.id, account: installation.account?.login });
+    logger.info('Handling installation event', { action, installationId: installation.id, account: installation.account.login });
 
     switch (action) {
       case 'created': {
