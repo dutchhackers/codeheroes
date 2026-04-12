@@ -3,7 +3,7 @@ import { DecimalPipe, Location } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { Auth, GithubAuthProvider, GoogleAuthProvider, linkWithPopup, signInWithCredential, signInWithPopup } from '@angular/fire/auth';
+import { Auth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
 import { Firestore, collection, collectionData } from '@angular/fire/firestore';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DEFAULT_DAILY_GOAL, ConnectedAccountDto, Collections } from '@codeheroes/types';
@@ -772,57 +772,27 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.connectGitHubError.set(null);
 
     try {
+      // Use signInWithPopup to get GitHub identity, then immediately
+      // re-authenticate with Google. We only need the GitHub user ID,
+      // not a persistent Firebase Auth link.
       const provider = new GithubAuthProvider();
-      let githubUid: string | undefined;
-      let githubUsername: string | undefined;
+      const result = await signInWithPopup(this.#auth, provider);
 
-      try {
-        // Try linking directly first
-        const result = await linkWithPopup(this.#auth.currentUser!, provider);
-        const githubProfile = result.user.providerData.find((p) => p.providerId === 'github.com');
-        githubUid = githubProfile?.uid;
-        githubUsername = githubProfile?.displayName || githubProfile?.email || undefined;
-      } catch (linkError: any) {
-        if (linkError?.code === 'auth/email-already-in-use' || linkError?.code === 'auth/credential-already-in-use') {
-          // Email conflict — extract GitHub info from the failed credential
-          const credential = GithubAuthProvider.credentialFromError(linkError);
-          if (credential) {
-            // Sign in with GitHub temporarily to get the profile, then sign back in with Google
-            const githubResult = await signInWithCredential(this.#auth, credential);
-            const githubProfile = githubResult.user.providerData.find((p) => p.providerId === 'github.com');
-            githubUid = githubProfile?.uid;
-            githubUsername = githubProfile?.displayName || githubProfile?.email || undefined;
-
-            // Sign back in as the original Google user
-            // The auth state listener will handle this
-            await signInWithPopup(this.#auth, new GoogleAuthProvider());
-          }
-
-          if (!githubUid) {
-            // Fallback: extract from the error's customData
-            const additionalInfo = linkError?.customData;
-            if (additionalInfo?.email) {
-              this.connectGitHubError.set(
-                'Email conflict: your GitHub email is associated with another account. Please use a different GitHub account or contact support.',
-              );
-              this.isConnectingGitHub.set(false);
-              return;
-            }
-            throw linkError;
-          }
-        } else {
-          throw linkError;
-        }
-      }
+      const githubProfile = result.user.providerData.find((p) => p.providerId === 'github.com');
+      const githubUid = githubProfile?.uid;
+      const githubUsername = githubProfile?.displayName || githubProfile?.email || undefined;
 
       if (!githubUid) {
         throw new Error('Could not retrieve GitHub profile');
       }
 
+      // Re-authenticate with Google to restore the original session
+      await signInWithPopup(this.#auth, new GoogleAuthProvider());
+
       // Create connected account via API
       const token = await this.#auth.currentUser!.getIdToken();
 
-      await fetch(`${environment.apiUrl}/users/${this.#userId}/connected-accounts`, {
+      const response = await fetch(`${environment.apiUrl}/users/${this.#userId}/connected-accounts`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -832,6 +802,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
         }),
       });
 
+      if (!response.ok && response.status !== 409) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
       // Refresh connected accounts list
       this.#loadConnectedAccounts(this.#userId);
       this.isConnectingGitHub.set(false);
@@ -839,10 +813,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
       this.isConnectingGitHub.set(false);
 
       const code = error?.code;
-      if (code === 'auth/provider-already-linked') {
-        this.connectGitHubError.set('GitHub is already connected.');
-      } else if (code === 'auth/popup-closed-by-user') {
+      if (code === 'auth/popup-closed-by-user') {
         // User closed popup — no error needed
+      } else if (code === 'auth/account-exists-with-different-credential') {
+        this.connectGitHubError.set('This GitHub email is linked to another login method. Please use a different GitHub account.');
       } else {
         this.connectGitHubError.set('Failed to connect GitHub. Please try again.');
         console.error('GitHub linking error:', error);
