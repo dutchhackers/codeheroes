@@ -41,6 +41,7 @@ export class InstallationEventHandler {
           accountLogin: installation.account.login,
           accountId: installation.account.id,
           accountType: installation.account.type === 'Organization' ? 'Organization' : 'User',
+          repositorySelection: installation.repository_selection === 'all' ? 'all' : 'selected',
           repositories: repos,
           permissions: installation.permissions || {},
           events: installation.events || [],

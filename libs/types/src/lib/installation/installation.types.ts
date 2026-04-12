@@ -5,6 +5,7 @@ export interface GitHubInstallation {
   accountLogin: string;
   accountId: number;
   accountType: 'User' | 'Organization';
+  repositorySelection: 'all' | 'selected';
   repositories: InstallationRepository[];
   permissions: Record<string, string>;
   events: string[];
@@ -31,6 +32,7 @@ export interface InstallationSummaryDto {
   id: string;
   accountLogin: string;
   accountType: 'User' | 'Organization';
+  repositorySelection: 'all' | 'selected';
   repositoryCount: number;
   repositories: InstallationRepository[];
   status: 'active' | 'suspended' | 'deleted';

@@ -100,6 +100,7 @@ export class GitHubAppService {
     id: number;
     app_id: number;
     account: { login: string; id: number; type: string };
+    repository_selection: string;
     permissions: Record<string, string>;
     events: string[];
   }> {
