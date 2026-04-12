@@ -62,7 +62,7 @@ router.post('/setup', validate(setupSchema), async (req, res) => {
       }
 
       // Verify ownership: the user's GitHub account must match the installation's account
-      const ownershipValid = await verifyInstallationOwnership(userId, ghInstallation.account.login);
+      const ownershipValid = await verifyInstallationOwnership(userId, ghInstallation.account.login, ghInstallation.account.type);
       if (!ownershipValid) {
         logger.warn('Installation ownership verification failed', { userId, accountLogin: ghInstallation.account.login });
         res.status(403).json({ error: 'You do not have permission to link this installation' });
@@ -108,6 +108,14 @@ router.post('/setup', validate(setupSchema), async (req, res) => {
 
     // Link to current user
     if (!installation.linkedUserId) {
+      // Verify ownership before linking existing installation
+      const ownershipValid = await verifyInstallationOwnership(userId, installation.accountLogin, installation.accountType);
+      if (!ownershipValid) {
+        logger.warn('Installation ownership verification failed', { userId, accountLogin: installation.accountLogin });
+        res.status(403).json({ error: 'You do not have permission to link this installation' });
+        return;
+      }
+
       await repo.linkToUser(installation.id, userId);
       installation.linkedUserId = userId;
 
@@ -252,12 +260,12 @@ function toSummary(installation: GitHubInstallation): InstallationSummaryDto {
 }
 
 /**
- * Verify that the user has a GitHub connected account before allowing installation linking.
- * For personal installs: username must match the installation account.
- * For org installs: GitHub enforces org admin during install flow, so we only require
- * that the user has a GitHub connected account (proof they're a GitHub user).
+ * Verify that the user has permission to link this installation.
+ * For personal installs (User): GitHub username must match the installation account.
+ * For org installs (Organization): GitHub enforces org admin during install flow,
+ * so we only require that the user has a GitHub connected account.
  */
-async function verifyInstallationOwnership(userId: string, accountLogin: string): Promise<boolean> {
+async function verifyInstallationOwnership(userId: string, accountLogin: string, accountType?: string): Promise<boolean> {
   const db = DatabaseInstance.getInstance();
   const snapshot = await db
     .collection(Collections.Users)
@@ -270,6 +278,19 @@ async function verifyInstallationOwnership(userId: string, accountLogin: string)
   if (snapshot.empty) {
     logger.warn('User has no GitHub connected account', { userId });
     return false;
+  }
+
+  // For personal accounts, verify the GitHub username matches
+  if (accountType === 'User') {
+    const connectedAccount = snapshot.docs[0].data();
+    if (connectedAccount.externalUserName?.toLowerCase() !== accountLogin.toLowerCase()) {
+      logger.warn('GitHub username does not match installation account', {
+        userId,
+        userGitHub: connectedAccount.externalUserName,
+        installationAccount: accountLogin,
+      });
+      return false;
+    }
   }
 
   return true;

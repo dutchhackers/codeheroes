@@ -142,7 +142,7 @@ import { environment } from '../../../environments/environment';
         height: 48px;
         color: rgba(255, 255, 255, 0.5);
       }
-      .github-icon-large :global(svg) { width: 48px; height: 48px; }
+      .github-icon-large svg { width: 48px; height: 48px; }
 
       .error-icon {
         width: 48px;
