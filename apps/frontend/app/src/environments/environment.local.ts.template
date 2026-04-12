@@ -13,5 +13,6 @@ export const environment: Environment = {
     appId: '${FIREBASE_APP_ID}',
   },
   appVersion: '${APP_VERSION}',
+  githubAppSlug: 'code-heroes-test',
   vapidKey: '${FIREBASE_VAPID_KEY}',
 };
