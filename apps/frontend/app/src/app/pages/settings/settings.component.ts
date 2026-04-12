@@ -3,7 +3,7 @@ import { DecimalPipe, Location } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { Auth, GithubAuthProvider, linkWithPopup } from '@angular/fire/auth';
+import { Auth, GithubAuthProvider, GoogleAuthProvider, linkWithPopup, signInWithCredential, signInWithPopup } from '@angular/fire/auth';
 import { Firestore, collection, collectionData } from '@angular/fire/firestore';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DEFAULT_DAILY_GOAL, ConnectedAccountDto, Collections } from '@codeheroes/types';
@@ -773,24 +773,62 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
     try {
       const provider = new GithubAuthProvider();
-      const result = await linkWithPopup(this.#auth.currentUser!, provider);
+      let githubUid: string | undefined;
+      let githubUsername: string | undefined;
 
-      const githubProfile = result.user.providerData.find((p) => p.providerId === 'github.com');
-      if (!githubProfile?.uid) {
+      try {
+        // Try linking directly first
+        const result = await linkWithPopup(this.#auth.currentUser!, provider);
+        const githubProfile = result.user.providerData.find((p) => p.providerId === 'github.com');
+        githubUid = githubProfile?.uid;
+        githubUsername = githubProfile?.displayName || githubProfile?.email || undefined;
+      } catch (linkError: any) {
+        if (linkError?.code === 'auth/email-already-in-use' || linkError?.code === 'auth/credential-already-in-use') {
+          // Email conflict — extract GitHub info from the failed credential
+          const credential = GithubAuthProvider.credentialFromError(linkError);
+          if (credential) {
+            // Sign in with GitHub temporarily to get the profile, then sign back in with Google
+            const githubResult = await signInWithCredential(this.#auth, credential);
+            const githubProfile = githubResult.user.providerData.find((p) => p.providerId === 'github.com');
+            githubUid = githubProfile?.uid;
+            githubUsername = githubProfile?.displayName || githubProfile?.email || undefined;
+
+            // Sign back in as the original Google user
+            // The auth state listener will handle this
+            await signInWithPopup(this.#auth, new GoogleAuthProvider());
+          }
+
+          if (!githubUid) {
+            // Fallback: extract from the error's customData
+            const additionalInfo = linkError?.customData;
+            if (additionalInfo?.email) {
+              this.connectGitHubError.set(
+                'Email conflict: your GitHub email is associated with another account. Please use a different GitHub account or contact support.',
+              );
+              this.isConnectingGitHub.set(false);
+              return;
+            }
+            throw linkError;
+          }
+        } else {
+          throw linkError;
+        }
+      }
+
+      if (!githubUid) {
         throw new Error('Could not retrieve GitHub profile');
       }
 
       // Create connected account via API
       const token = await this.#auth.currentUser!.getIdToken();
-      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
       await fetch(`${environment.apiUrl}/users/${this.#userId}/connected-accounts`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           provider: 'github',
-          externalUserId: githubProfile.uid,
-          externalUserName: githubProfile.displayName || githubProfile.email,
+          externalUserId: githubUid,
+          externalUserName: githubUsername,
         }),
       });
 
@@ -801,9 +839,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
       this.isConnectingGitHub.set(false);
 
       const code = error?.code;
-      if (code === 'auth/credential-already-in-use') {
-        this.connectGitHubError.set('This GitHub account is already linked to another user.');
-      } else if (code === 'auth/provider-already-linked') {
+      if (code === 'auth/provider-already-linked') {
         this.connectGitHubError.set('GitHub is already connected.');
       } else if (code === 'auth/popup-closed-by-user') {
         // User closed popup — no error needed
