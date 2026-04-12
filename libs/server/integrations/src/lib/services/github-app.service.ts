@@ -133,23 +133,39 @@ export class GitHubAppService {
     Array<{ id: number; name: string; full_name: string; private: boolean }>
   > {
     const { token } = await this.getInstallationAccessToken(installationId);
+    const perPage = 100;
+    let page = 1;
+    const repositories: Array<{ id: number; name: string; full_name: string; private: boolean }> = [];
 
-    const response = await fetch('https://api.github.com/installation/repositories?per_page=100', {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
-    });
+    while (true) {
+      const response = await fetch(
+        `https://api.github.com/installation/repositories?per_page=${perPage}&page=${page}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+          },
+        },
+      );
 
-    if (!response.ok) {
-      const error = await response.text();
-      logger.error('Failed to get installation repositories', { installationId, status: response.status, error });
-      throw new Error(`Failed to get installation repositories: ${response.status}`);
+      if (!response.ok) {
+        const error = await response.text();
+        logger.error('Failed to get installation repositories', { installationId, page, status: response.status, error });
+        throw new Error(`Failed to get installation repositories: ${response.status}`);
+      }
+
+      const data: { total_count?: number; repositories: Array<{ id: number; name: string; full_name: string; private: boolean }> } =
+        await response.json();
+      repositories.push(...data.repositories);
+
+      if (data.repositories.length < perPage || (typeof data.total_count === 'number' && repositories.length >= data.total_count)) {
+        break;
+      }
+      page += 1;
     }
 
-    const data = await response.json();
-    return data.repositories;
+    return repositories;
   }
 }

@@ -62,13 +62,14 @@ router.post('/setup', validate(setupSchema), async (req, res) => {
             events: ghInstallation.events,
             status: 'active',
             linkedUserId: userId,
+            linkedAt: new Date().toISOString(),
           },
           String(installationId),
         );
 
-        // Grant "Connected" badge for first repo link
-        new BadgeService().grantBadge(userId, 'connected').catch((err) =>
-          logger.warn('Failed to grant connected badge', { userId, error: err?.message }),
+        // Grant onboarding badges based on total linked repos
+        grantInstallationBadges(userId, repo).catch((err) =>
+          logger.warn('Failed to grant installation badges', { userId, error: err?.message }),
         );
 
         res.status(201).json(toSummary(installation));
@@ -95,9 +96,9 @@ router.post('/setup', validate(setupSchema), async (req, res) => {
       await repo.linkToUser(installation.id, userId);
       installation.linkedUserId = userId;
 
-      // Grant "Connected" badge for first repo link
-      new BadgeService().grantBadge(userId, 'connected').catch((err) =>
-        logger.warn('Failed to grant connected badge', { userId, error: err?.message }),
+      // Grant onboarding badges based on total linked repos
+      grantInstallationBadges(userId, repo).catch((err) =>
+        logger.warn('Failed to grant installation badges', { userId, error: err?.message }),
       );
     }
 
@@ -233,6 +234,24 @@ function toSummary(installation: GitHubInstallation): InstallationSummaryDto {
     linkedAt: installation.linkedAt,
     createdAt: installation.createdAt,
   };
+}
+
+/**
+ * Grant onboarding badges based on total repos linked via GitHub App installations.
+ */
+async function grantInstallationBadges(userId: string, repo: InstanceType<typeof InstallationRepository>): Promise<void> {
+  const badgeService = new BadgeService();
+  const installations = await repo.findByLinkedUserId(userId);
+  const totalRepos = installations.reduce((sum, inst) => sum + (inst.repositories?.length ?? 0), 0);
+
+  await badgeService.grantBadge(userId, 'connected');
+
+  if (totalRepos >= 5) {
+    await badgeService.grantBadge(userId, 'fleet_commander');
+  }
+  if (totalRepos >= 10) {
+    await badgeService.grantBadge(userId, 'mission_control');
+  }
 }
 
 export { router as InstallationsController };

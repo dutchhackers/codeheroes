@@ -101,7 +101,12 @@ export class InstallationEventHandler {
 
     if (action === 'added' && repositories_added) {
       const newRepos: InstallationRepo[] = repositories_added.map(this.#mapRepository);
-      updatedRepos = [...updatedRepos, ...newRepos];
+      // De-duplicate by repo ID to handle webhook retries
+      const reposById = new Map(updatedRepos.map((r) => [r.id, r]));
+      for (const repo of newRepos) {
+        reposById.set(repo.id, repo);
+      }
+      updatedRepos = Array.from(reposById.values());
     }
 
     if (action === 'removed' && repositories_removed) {
