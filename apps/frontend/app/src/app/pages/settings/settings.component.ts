@@ -3,7 +3,9 @@ import { DecimalPipe, Location } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { Auth, GithubAuthProvider, linkWithPopup } from '@angular/fire/auth';
 import { Firestore, collection, collectionData } from '@angular/fire/firestore';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DEFAULT_DAILY_GOAL, ConnectedAccountDto, Collections } from '@codeheroes/types';
 import { UserSettingsService } from '../../core/services/user-settings.service';
 import { UserStatsService } from '../../core/services/user-stats.service';
@@ -126,6 +128,23 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
             <h2 class="section-title">Connected Accounts</h2>
             <p class="section-description">Accounts linked to your profile</p>
             <app-connected-accounts [accounts]="connectedAccounts()" [showTitle]="false" />
+
+            @if (!hasGitHubAccount()) {
+              <button
+                type="button"
+                class="connect-github-button"
+                [disabled]="isConnectingGitHub()"
+                (click)="connectGitHub()"
+              >
+                <svg class="connect-github-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                </svg>
+                {{ isConnectingGitHub() ? 'Connecting...' : 'Connect GitHub' }}
+              </button>
+            }
+            @if (connectGitHubError()) {
+              <p class="save-error">{{ connectGitHubError() }}</p>
+            }
           </section>
 
           <!-- Repositories Section -->
@@ -320,6 +339,38 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
       .save-button:disabled {
         opacity: 0.4;
         cursor: not-allowed;
+      }
+
+      .connect-github-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        padding: 0.625rem 1.25rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .connect-github-button:hover:not(:disabled) {
+        border-color: var(--neon-cyan);
+        background: rgba(6, 182, 212, 0.1);
+        color: var(--neon-cyan);
+      }
+
+      .connect-github-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .connect-github-icon {
+        width: 18px;
+        height: 18px;
       }
 
       .save-success {
@@ -536,7 +587,9 @@ const GOAL_PRESETS = [4000, 8000, 12000, 16000];
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   readonly #location = inject(Location);
+  readonly #auth = inject(Auth);
   readonly #firestore = inject(Firestore);
+  readonly #http = inject(HttpClient);
   readonly #injector = inject(Injector);
   readonly #settingsService = inject(UserSettingsService);
   readonly #userStatsService = inject(UserStatsService);
@@ -557,6 +610,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
   notificationSaveError = signal(false);
 
   connectedAccounts = signal<ConnectedAccountDto[]>([]);
+  isConnectingGitHub = signal(false);
+  connectGitHubError = signal<string | null>(null);
   userEmail = signal<string | null>(null);
   memberSince = signal<string | null>(null);
 
@@ -704,6 +759,59 @@ export class SettingsComponent implements OnInit, OnDestroy {
         this.#errorTimeout = setTimeout(() => this.notificationSaveError.set(false), 5000);
       },
     });
+  }
+
+  hasGitHubAccount(): boolean {
+    return this.connectedAccounts().some((a) => a.provider === 'github');
+  }
+
+  async connectGitHub() {
+    if (!this.#userId || this.isConnectingGitHub()) return;
+
+    this.isConnectingGitHub.set(true);
+    this.connectGitHubError.set(null);
+
+    try {
+      const provider = new GithubAuthProvider();
+      const result = await linkWithPopup(this.#auth.currentUser!, provider);
+
+      const githubProfile = result.user.providerData.find((p) => p.providerId === 'github.com');
+      if (!githubProfile?.uid) {
+        throw new Error('Could not retrieve GitHub profile');
+      }
+
+      // Create connected account via API
+      const token = await this.#auth.currentUser!.getIdToken();
+      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+      await fetch(`${environment.apiUrl}/users/${this.#userId}/connected-accounts`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: 'github',
+          externalUserId: githubProfile.uid,
+          externalUserName: githubProfile.displayName || githubProfile.email,
+        }),
+      });
+
+      // Refresh connected accounts list
+      this.#loadConnectedAccounts(this.#userId);
+      this.isConnectingGitHub.set(false);
+    } catch (error: any) {
+      this.isConnectingGitHub.set(false);
+
+      const code = error?.code;
+      if (code === 'auth/credential-already-in-use') {
+        this.connectGitHubError.set('This GitHub account is already linked to another user.');
+      } else if (code === 'auth/provider-already-linked') {
+        this.connectGitHubError.set('GitHub is already connected.');
+      } else if (code === 'auth/popup-closed-by-user') {
+        // User closed popup — no error needed
+      } else {
+        this.connectGitHubError.set('Failed to connect GitHub. Please try again.');
+        console.error('GitHub linking error:', error);
+      }
+    }
   }
 
   goBack() {
