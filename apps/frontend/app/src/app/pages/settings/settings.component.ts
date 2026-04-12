@@ -812,14 +812,15 @@ export class SettingsComponent implements OnInit, OnDestroy {
     } catch (error: any) {
       this.isConnectingGitHub.set(false);
 
+      console.error('GitHub linking error:', error?.code, error?.message, error);
+
       const code = error?.code;
-      if (code === 'auth/popup-closed-by-user') {
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
         // User closed popup — no error needed
       } else if (code === 'auth/account-exists-with-different-credential') {
         this.connectGitHubError.set('This GitHub email is linked to another login method. Please use a different GitHub account.');
       } else {
-        this.connectGitHubError.set('Failed to connect GitHub. Please try again.');
-        console.error('GitHub linking error:', error);
+        this.connectGitHubError.set(`Failed to connect GitHub: ${code || error?.message || 'Unknown error'}`);
       }
     }
   }
