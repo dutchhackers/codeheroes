@@ -199,16 +199,23 @@ describe('Level Thresholds', () => {
       }
     });
 
-    it('should have smooth transition from level 20 to 21', () => {
+    it('should have intentional reset at level 20-21 boundary within known ratio', () => {
       const level19Delta = calculateXpForLevel(20) - calculateXpForLevel(19);
       const level20Delta = calculateXpForLevel(21) - calculateXpForLevel(20);
 
-      // The transition should be smooth - level 21 delta shouldn't be drastically different
-      // Level 19->20 delta: 1400000 - 1200000 = 200000
-      // Level 20->21 delta: 1403500 - 1400000 = 3500
-      // The delta is smaller which is intentional for the quadratic formula starting fresh
+      // The algorithmic curve resets at L21 — this is by design.
+      // L19→20 delta: 200,000 XP (last static level, steep grind)
+      // L20→21 delta: 3,500 XP (quadratic formula starts fresh)
+      // The ~57x ratio is intentional: L20 is a "breakthrough" moment,
+      // and the quadratic ramp-up quickly steepens from there.
       expect(level20Delta).toBeGreaterThan(0);
       expect(level19Delta).toBeGreaterThan(0);
+
+      // Guard the known ratio so future multiplier changes are caught
+      const ratio = level19Delta / level20Delta;
+      expect(ratio).toBeGreaterThan(30);   // must be a significant reset
+      expect(ratio).toBeLessThan(100);     // but not absurdly large
+      expect(level20Delta).toBe(3500);     // exact value for current multiplier
     });
   });
 });
