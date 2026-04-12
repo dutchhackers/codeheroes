@@ -770,20 +770,33 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.isConnectingGitHub.set(true);
     this.connectGitHubError.set(null);
 
+    const userId = this.#userId;
+
     try {
-      // Use signInWithPopup to get GitHub identity, then immediately
-      // re-authenticate with Google. We only need the GitHub user ID,
-      // not a persistent Firebase Auth link.
+      // Get GitHub identity via OAuth popup. We extract the GitHub access token
+      // from the credential result and use it to call the GitHub API directly.
+      // This avoids Firebase Auth session switching issues.
       const provider = new GithubAuthProvider();
       const result = await signInWithPopup(this.#auth, provider);
+      const credential = GithubAuthProvider.credentialFromResult(result);
+      const githubAccessToken = credential?.accessToken;
 
-      const githubProfile = result.user.providerData.find((p) => p.providerId === 'github.com');
-      const githubUid = githubProfile?.uid;
-      const githubUsername = githubProfile?.displayName || githubProfile?.email || undefined;
-
-      if (!githubUid) {
-        throw new Error('Could not retrieve GitHub profile');
+      if (!githubAccessToken) {
+        throw new Error('Could not retrieve GitHub access token');
       }
+
+      // Use the GitHub API to get the authenticated user's profile
+      const ghResponse = await fetch('https://api.github.com/user', {
+        headers: { Authorization: `Bearer ${githubAccessToken}`, Accept: 'application/vnd.github+json' },
+      });
+
+      if (!ghResponse.ok) {
+        throw new Error(`GitHub API error: ${ghResponse.status}`);
+      }
+
+      const ghUser = await ghResponse.json();
+      const githubUid = String(ghUser.id);
+      const githubUsername = ghUser.login;
 
       // Re-authenticate with Google to restore the original session
       await signInWithPopup(this.#auth, new GoogleAuthProvider());
@@ -791,7 +804,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
       // Create connected account via API
       const token = await this.#auth.currentUser!.getIdToken();
 
-      const response = await fetch(`${environment.apiUrl}/users/${this.#userId}/connected-accounts`, {
+      const response = await fetch(`${environment.apiUrl}/users/${userId}/connected-accounts`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -806,7 +819,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
       }
 
       // Refresh connected accounts list
-      this.#loadConnectedAccounts(this.#userId);
+      this.#loadConnectedAccounts(userId);
       this.isConnectingGitHub.set(false);
     } catch (error: any) {
       this.isConnectingGitHub.set(false);
