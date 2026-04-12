@@ -119,6 +119,100 @@ router.get('/:userId/connected-accounts', async (req, res) => {
   }
 });
 
+/**
+ * POST /users/:userId/connect-github
+ * Exchange a GitHub OAuth code for user info and create a connected account.
+ */
+router.post('/:userId/connect-github', async (req, res) => {
+  const { userId } = req.params;
+  const { code, redirectUri } = req.body;
+
+  if (!code || !redirectUri) {
+    res.status(400).json({ error: 'Missing code or redirectUri' });
+    return;
+  }
+
+  // Verify the requesting user matches the target userId
+  if (req.user?.customUserId !== userId) {
+    res.status(403).json({ error: 'Access denied' });
+    return;
+  }
+
+  logger.debug('POST /users/:userId/connect-github', { userId });
+
+  try {
+    const clientId = process.env.GITHUB_OAUTH_CLIENT_ID;
+    const clientSecret = process.env.GITHUB_OAUTH_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+      logger.error('GITHUB_OAUTH_CLIENT_ID or GITHUB_OAUTH_CLIENT_SECRET not configured');
+      res.status(500).json({ error: 'GitHub OAuth not configured' });
+      return;
+    }
+
+    // Exchange code for access token
+    const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_id: clientId, client_secret: clientSecret, code, redirect_uri: redirectUri }),
+    });
+
+    const tokenData = await tokenResponse.json();
+    if (tokenData.error || !tokenData.access_token) {
+      logger.error('GitHub OAuth token exchange failed', { error: tokenData.error });
+      res.status(400).json({ error: tokenData.error_description || 'GitHub authorization failed' });
+      return;
+    }
+
+    // Get GitHub user profile
+    const userResponse = await fetch('https://api.github.com/user', {
+      headers: { Authorization: `Bearer ${tokenData.access_token}`, Accept: 'application/vnd.github+json' },
+    });
+
+    if (!userResponse.ok) {
+      res.status(502).json({ error: 'Failed to fetch GitHub user profile' });
+      return;
+    }
+
+    const ghUser = await userResponse.json();
+    const externalUserId = String(ghUser.id);
+    const externalUserName = ghUser.login;
+
+    // Create connected account
+    const db = getFirestore();
+    const docId = `github_${externalUserId}`;
+    const now = getCurrentTimeAsISO();
+
+    const accountRef = db
+      .collection(Collections.Users)
+      .doc(userId)
+      .collection(Collections.ConnectedAccounts)
+      .doc(docId);
+
+    try {
+      await accountRef.create({
+        provider: 'github',
+        externalUserId,
+        externalUserName,
+        createdAt: now,
+        updatedAt: now,
+      });
+    } catch (createError: any) {
+      if (createError?.code === 6 || createError?.code === 'already-exists') {
+        res.json({ message: 'GitHub account already connected', externalUserName });
+        return;
+      }
+      throw createError;
+    }
+
+    logger.info('GitHub account connected', { userId, githubId: externalUserId, githubLogin: externalUserName });
+    res.status(201).json({ message: 'GitHub account connected', externalUserName });
+  } catch (error) {
+    logger.error('Error connecting GitHub account:', error);
+    res.status(500).json({ error: 'Failed to connect GitHub account' });
+  }
+});
+
 router.post('/:userId/connected-accounts', validate(addConnectedAccountSchema), async (req, res) => {
   const { userId } = req.params;
   const { provider, externalUserId, externalUserName } = req.body;

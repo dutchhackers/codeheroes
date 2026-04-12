@@ -17,7 +17,7 @@ export const api = onRequest(
   {
     memory: '2GiB',
     timeoutSeconds: 120,
-    secrets: ['GITHUB_APP_ID', 'GITHUB_APP_PRIVATE_KEY'],
+    secrets: ['GITHUB_APP_ID', 'GITHUB_APP_PRIVATE_KEY', 'GITHUB_OAUTH_CLIENT_ID', 'GITHUB_OAUTH_CLIENT_SECRET'],
   },
   defaultApi,
 );
