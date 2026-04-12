@@ -5,7 +5,7 @@ export interface GitHubInstallation {
   accountLogin: string;
   accountId: number;
   accountType: 'User' | 'Organization';
-  repositorySelection: 'all' | 'selected';
+  repositorySelection?: 'all' | 'selected';
   repositories: InstallationRepository[];
   permissions: Record<string, string>;
   events: string[];
