@@ -24,7 +24,7 @@ import {
  * Formula: XP = LEVEL_20_XP + (ALGORITHMIC_XP_MULTIPLIER * levelsAbove20²)
  *
  * Rebalanced (2026-04): Increased from 2500 to 3500 to slow progression at higher levels.
- * With Level 20 at 1,400,000 XP, Level 80 now requires ~14,100,000 XP.
+ * With Level 20 at 1,400,000 XP, Level 80 now requires 14,000,000 XP.
  *
  * Examples:
  * - Level 21: 1,400,000 + 3,500 × 1   = 1,403,500 XP

@@ -31,9 +31,9 @@ export interface LevelDefinition {
  * Hand-tuned for progression with smooth transition to algorithmic levels
  *
  * Target progression times (active developer ~10K XP/day):
- * - Levels 1-9 (COMMON): 1-3 months
- * - Levels 10-14 (UNCOMMON): 3-5 months
- * - Levels 15-20 (RARE): 5-18 months
+ * - Levels 1-9 (COMMON): 1-3 weeks
+ * - Levels 10-14 (UNCOMMON): 1-2 months
+ * - Levels 15-20 (RARE): 3-7 months
  */
 export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   {

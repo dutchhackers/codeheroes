@@ -12,11 +12,11 @@
  * - Quality > Quantity: bonuses reward depth, not volume
  * - Merge > Create: completing work is slightly more valuable than starting it
  *
- * Target progression (active developer ~6.5K XP/day):
- * - Level 10: ~1 month
- * - Level 15: ~3 months
- * - Level 20: ~7 months
- * - Level 80: ~3 years (power user at ~15K/day)
+ * Target progression (active developer ~10K XP/day, power user ~19K/day):
+ * - Level 10: ~1 month (active dev)
+ * - Level 15: ~3 months (active dev)
+ * - Level 20: ~6 months (active dev)
+ * - Level 80: ~3 years (power user)
  */
 export const XP_VALUES = {
   CODE_PUSH: {
