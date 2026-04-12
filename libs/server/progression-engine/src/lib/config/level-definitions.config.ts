@@ -10,10 +10,10 @@ import { LevelRequirementItem } from '@codeheroes/types';
  * For levels > MAX_STATIC_LEVEL, XP is calculated in level-thresholds.ts using
  * a quadratic formula anchored at level 20's XP:
  *   XP(level) = LEVEL_20_XP + multiplier * (level - MAX_STATIC_LEVEL)²
- * The multiplier (2500) results in Level 80 requiring approximately 10,400,000 XP.
+ * The multiplier (3500) results in Level 80 requiring approximately 14,000,000 XP.
  *
- * Rebalanced (2024): Increased thresholds ~1.5-2x for levels 10+ to slow progression.
- * Target: Level 80 achievable in ~3 years of typical active development.
+ * Rebalanced (2026-04): XP values reduced ~40%, curve multiplier increased to 3500.
+ * Target: Level 80 achievable in ~3 years for a power user.
  */
 export interface LevelDefinition {
   level: number;
@@ -30,10 +30,10 @@ export interface LevelDefinition {
  * Static level definitions for levels 1-20 (onboarding phase)
  * Hand-tuned for progression with smooth transition to algorithmic levels
  *
- * Target progression times (active developer):
- * - Levels 1-9 (COMMON): 1-2 weeks
- * - Levels 10-14 (UNCOMMON): 1-2 months
- * - Levels 15-20 (RARE): 3-6 months
+ * Target progression times (active developer ~10K XP/day):
+ * - Levels 1-9 (COMMON): 1-3 months
+ * - Levels 10-14 (UNCOMMON): 3-5 months
+ * - Levels 15-20 (RARE): 5-18 months
  */
 export const LEVEL_DEFINITIONS: LevelDefinition[] = [
   {
