@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { Auth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup } from '@angular/fire/auth';
 import { Firestore, collection, collectionData } from '@angular/fire/firestore';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DEFAULT_DAILY_GOAL, ConnectedAccountDto, Collections } from '@codeheroes/types';
 import { UserSettingsService } from '../../core/services/user-settings.service';
 import { UserStatsService } from '../../core/services/user-stats.service';
@@ -589,7 +588,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
   readonly #location = inject(Location);
   readonly #auth = inject(Auth);
   readonly #firestore = inject(Firestore);
-  readonly #http = inject(HttpClient);
   readonly #injector = inject(Injector);
   readonly #settingsService = inject(UserSettingsService);
   readonly #userStatsService = inject(UserStatsService);
@@ -653,6 +651,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   #loadConnectedAccounts(userId: string) {
+    this.#connectedAccountsSub?.unsubscribe();
     const accountsRef = collection(this.#firestore, `users/${userId}/${Collections.ConnectedAccounts}`);
     this.#connectedAccountsSub = runInInjectionContext(this.#injector, () =>
       collectionData(accountsRef, { idField: 'id' }),
