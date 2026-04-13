@@ -55,6 +55,7 @@ import { environment } from '../../../environments/environment';
             <p class="step-description">
               Your coding activity is now being tracked.
               Push some code to earn your first XP!
+              Redirecting to dashboard...
             </p>
             <button type="button" class="action-button" (click)="goToDashboard()">
               Go to Dashboard
@@ -330,6 +331,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
 
   #subs: Subscription[] = [];
   #userId: string | null = null;
+  #redirectTimeout: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit() {
     // Load onboarding state
@@ -339,7 +341,10 @@ export class OnboardingComponent implements OnInit, OnDestroy {
         this.githubConnected.set(v);
         this.isLoading.set(false);
       }),
-      this.#onboardingService.hasInstallations$.subscribe((v) => this.appInstalled.set(v)),
+      this.#onboardingService.hasInstallations$.subscribe((v) => {
+        this.appInstalled.set(v);
+        this.#checkAutoRedirect();
+      }),
     );
 
     // Handle GitHub OAuth callback
@@ -351,6 +356,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.#subs.forEach((s) => s.unsubscribe());
+    if (this.#redirectTimeout) clearTimeout(this.#redirectTimeout);
   }
 
   connectGitHub() {
@@ -370,6 +376,12 @@ export class OnboardingComponent implements OnInit, OnDestroy {
 
   goBack() {
     this.#location.back();
+  }
+
+  #checkAutoRedirect() {
+    if (this.allComplete() && !this.#redirectTimeout) {
+      this.#redirectTimeout = setTimeout(() => this.#router.navigate(['/hq']), 3000);
+    }
   }
 
   #handleOAuthCallback() {
@@ -416,6 +428,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
 
         this.githubConnected.set(true);
         this.isProcessing.set(false);
+        this.#checkAutoRedirect();
       } catch (err: any) {
         this.error.set(`Failed to connect GitHub: ${err?.message || 'Unknown error'}`);
         this.isProcessing.set(false);
@@ -430,17 +443,29 @@ export class OnboardingComponent implements OnInit, OnDestroy {
 
     if (!installationId || !setupAction) return;
 
+    const numericId = Number(installationId);
+    if (isNaN(numericId) || numericId <= 0) {
+      this.error.set('Invalid installation ID.');
+      return;
+    }
+
     window.history.replaceState({}, '', window.location.pathname);
     this.isProcessing.set(true);
 
-    this.#installationsService.setupInstallation(Number(installationId), setupAction).subscribe({
+    this.#installationsService.setupInstallation(numericId, setupAction).subscribe({
       next: () => {
         this.appInstalled.set(true);
         this.isProcessing.set(false);
       },
-      error: () => {
-        this.appInstalled.set(true); // Might already exist, treat as success
+      error: (err) => {
         this.isProcessing.set(false);
+        // 409 = already linked, treat as success
+        if (err?.status === 409) {
+          this.appInstalled.set(true);
+        } else {
+          this.error.set('Failed to set up installation. Please try again.');
+          console.error('Installation setup error:', err);
+        }
       },
     });
   }
