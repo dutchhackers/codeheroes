@@ -365,9 +365,13 @@ export class OnboardingComponent implements OnInit, OnDestroy {
 
   skip() {
     if (this.#userId) {
-      this.#onboardingService.dismissOnboarding(this.#userId).subscribe();
+      this.#onboardingService.dismissOnboarding(this.#userId).subscribe({
+        next: () => this.#router.navigate(['/hq']),
+        error: () => this.#router.navigate(['/hq']),
+      });
+    } else {
+      this.#router.navigate(['/hq']);
     }
-    this.#router.navigate(['/hq']);
   }
 
   goToDashboard() {

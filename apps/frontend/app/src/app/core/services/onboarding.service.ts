@@ -1,7 +1,7 @@
 import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import { Auth, user } from '@angular/fire/auth';
 import { Firestore, collection, collectionData } from '@angular/fire/firestore';
-import { Observable, combineLatest, from, map, of, switchMap, catchError, shareReplay } from 'rxjs';
+import { Observable, combineLatest, map, of, switchMap, catchError, shareReplay } from 'rxjs';
 import { Collections, ConnectedAccountDto } from '@codeheroes/types';
 import { InstallationsService } from './installations.service';
 import { UserSettingsService } from './user-settings.service';
@@ -83,7 +83,6 @@ export class OnboardingService {
 
     const state = crypto.randomUUID();
     localStorage.setItem('githubOAuthState', state);
-    localStorage.setItem('githubOAuthReturn', returnPath);
 
     const redirectUri = `${window.location.origin}${returnPath}`;
     window.location.href =
