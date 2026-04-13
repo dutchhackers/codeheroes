@@ -771,6 +771,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
     // Direct GitHub OAuth flow — no Firebase Auth involvement.
     // Redirect to GitHub, which redirects back to /settings with a code param.
     // We exchange the code for user info server-side or client-side.
+    this.connectGitHubError.set(null);
+
     const clientId = environment.githubOAuthClientId;
     if (!clientId) {
       this.connectGitHubError.set('GitHub OAuth not configured.');
@@ -822,7 +824,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
       const response = await fetch(`${environment.apiUrl}/users/${userId}/connect-github`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, redirectUri: `${window.location.origin}/settings` }),
+        body: JSON.stringify({ code }),
       });
 
       if (!response.ok) {

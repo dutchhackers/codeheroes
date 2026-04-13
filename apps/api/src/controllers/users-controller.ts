@@ -125,10 +125,10 @@ router.get('/:userId/connected-accounts', async (req, res) => {
  */
 router.post('/:userId/connect-github', async (req, res) => {
   const { userId } = req.params;
-  const { code, redirectUri } = req.body;
+  const { code } = req.body;
 
-  if (!code || !redirectUri) {
-    res.status(400).json({ error: 'Missing code or redirectUri' });
+  if (!code) {
+    res.status(400).json({ error: 'Missing code' });
     return;
   }
 
@@ -154,8 +154,14 @@ router.post('/:userId/connect-github', async (req, res) => {
     const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
       method: 'POST',
       headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ client_id: clientId, client_secret: clientSecret, code, redirect_uri: redirectUri }),
+      body: JSON.stringify({ client_id: clientId, client_secret: clientSecret, code }),
     });
+
+    if (!tokenResponse.ok) {
+      logger.error('GitHub OAuth token exchange HTTP error', { status: tokenResponse.status });
+      res.status(502).json({ error: 'GitHub authorization failed' });
+      return;
+    }
 
     const tokenData = await tokenResponse.json();
     if (tokenData.error || !tokenData.access_token) {
@@ -178,8 +184,15 @@ router.post('/:userId/connect-github', async (req, res) => {
     const externalUserId = String(ghUser.id);
     const externalUserName = ghUser.login;
 
-    // Create connected account
+    // Verify user exists
     const db = getFirestore();
+    const userDoc = await db.collection(Collections.Users).doc(userId).get();
+    if (!userDoc.exists) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Create connected account
     const docId = `github_${externalUserId}`;
     const now = getCurrentTimeAsISO();
 
