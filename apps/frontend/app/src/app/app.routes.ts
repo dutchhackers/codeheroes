@@ -35,6 +35,12 @@ export const appRoutes: Routes = [
     loadComponent: loadWithReload(() => import('./pages/hq/hq.component').then((m) => m.HqComponent)),
   },
   {
+    path: 'onboarding',
+    loadComponent: loadWithReload(() =>
+      import('./pages/onboarding/onboarding.component').then((m) => m.OnboardingComponent),
+    ),
+  },
+  {
     path: 'leaderboard/heroes',
     loadComponent: loadWithReload(() =>
       import('./pages/leaderboard/full-leaderboard.component').then((m) => m.FullLeaderboardComponent),

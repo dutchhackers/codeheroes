@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription, switchMap } from 'rxjs';
+import { Subscription, switchMap, take } from 'rxjs';
+import { OnboardingService } from '../../core/services/onboarding.service';
 import { UserSettingsService } from '../../core/services/user-settings.service';
 import { NotificationDataService } from '../../core/services/notification-data.service';
 import {
@@ -119,6 +120,7 @@ export class HqComponent implements OnInit, OnDestroy {
   readonly #hqDataService = inject(HqDataService);
   readonly #userSettingsService = inject(UserSettingsService);
   readonly #notificationService = inject(NotificationDataService);
+  readonly #onboardingService = inject(OnboardingService);
   readonly #router = inject(Router);
 
   #dailyProgressSub: Subscription | null = null;
@@ -136,6 +138,14 @@ export class HqComponent implements OnInit, OnDestroy {
   highlights = signal<Highlight[]>([]);
 
   ngOnInit() {
+    // Check if onboarding should be shown (one-time check)
+    this.#onboardingService.shouldShowOnboarding$.pipe(take(1)).subscribe((shouldShow) => {
+      if (shouldShow) {
+        this.#router.navigate(['/onboarding']);
+        return;
+      }
+    });
+
     this.#notificationSub = this.#notificationService.unreadCount$.subscribe((count) =>
       this.unreadCount.set(count),
     );
