@@ -14,5 +14,6 @@ export const environment: Environment = {
   },
   appVersion: 'dev',
   githubAppSlug: 'code-heroes-test',
+  githubOAuthClientId: 'Ov23lizRLHjVRvqSoCLV',
   vapidKey: '',
 };

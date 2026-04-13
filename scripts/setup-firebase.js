@@ -64,6 +64,7 @@ const appProdConfig = appProdTemplate
   .replace('${FIREBASE_PROD_APP_ID}', process.env.FIREBASE_PROD_APP_ID || process.env.FIREBASE_APP_ID)
   .replace('${FIREBASE_PROD_MEASUREMENT_ID}', process.env.FIREBASE_PROD_MEASUREMENT_ID || process.env.FIREBASE_MEASUREMENT_ID || '')
   .replace('${FIREBASE_PROD_VAPID_KEY}', process.env.FIREBASE_PROD_VAPID_KEY || process.env.FIREBASE_VAPID_KEY || '')
+  .replace('${GITHUB_OAUTH_CLIENT_ID}', process.env.GITHUB_OAUTH_CLIENT_ID || '')
   .replace('${APP_VERSION}', appVersion);
 fs.writeFileSync('apps/frontend/app/src/environments/environment.prod.ts', appProdConfig);
 

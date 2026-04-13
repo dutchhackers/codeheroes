@@ -14,6 +14,7 @@ export const environment: Environment = {
     measurementId: '${FIREBASE_PROD_MEASUREMENT_ID}',
   },
   appVersion: '${APP_VERSION}',
-  githubAppSlug: 'code-heroes',
+  githubAppSlug: 'code-heroes-app',
+  githubOAuthClientId: '${GITHUB_OAUTH_CLIENT_ID}',
   vapidKey: '${FIREBASE_PROD_VAPID_KEY}',
 };
