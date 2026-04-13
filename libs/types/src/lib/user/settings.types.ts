@@ -4,6 +4,7 @@ export interface UserSettings {
   dailyGoal: number;
   notificationsEnabled: boolean;
   fcmTokens?: string[];
+  onboardingDismissed?: boolean;
   updatedAt: string;
 }
 
@@ -11,6 +12,7 @@ export interface UpdateUserSettingsDto {
   dailyGoal?: number;
   notificationsEnabled?: boolean;
   fcmTokens?: string[];
+  onboardingDismissed?: boolean;
 }
 
 export const DEFAULT_DAILY_GOAL = 8000;
