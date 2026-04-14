@@ -87,11 +87,7 @@ import { UsersService } from '../../core/services/users.service';
               </thead>
               <tbody>
                 @for (inst of filteredInstallations(); track inst.id) {
-                  <tr class="clickable-row" role="button" tabindex="0"
-                      (click)="toggleExpanded(inst.id)"
-                      (keydown.enter)="toggleExpanded(inst.id)"
-                      (keydown.space)="toggleExpanded(inst.id); $event.preventDefault()"
-                      [attr.aria-expanded]="expandedId() === inst.id">
+                  <tr>
                     <td>
                       <div class="account-cell">
                         <div class="account-avatar">{{ inst.accountLogin.charAt(0).toUpperCase() }}</div>
@@ -103,11 +99,25 @@ import { UsersService } from '../../core/services/users.service';
                       @if (inst.repositorySelection === 'all') {
                         <span class="repo-all-badge">All repositories</span>
                       } @else {
-                        <span>{{ inst.repositoryCount }}</span>
-                        @if (inst.repositories.length > 0) {
-                          <span class="repo-preview">
-                            — {{ repoPreview(inst) }}
-                          </span>
+                        <button class="repo-toggle" role="button" tabindex="0"
+                            (click)="toggleExpanded(inst.id)"
+                            (keydown.enter)="toggleExpanded(inst.id)"
+                            (keydown.space)="toggleExpanded(inst.id); $event.preventDefault()"
+                            [attr.aria-expanded]="expandedId() === inst.id">
+                          <span class="repo-toggle-icon" [class.repo-toggle-icon--open]="expandedId() === inst.id">&#9656;</span>
+                          {{ inst.repositoryCount }} repo{{ inst.repositoryCount !== 1 ? 's' : '' }}
+                        </button>
+                        @if (expandedId() === inst.id && inst.repositories.length > 0) {
+                          <div class="repo-list">
+                            @for (repo of inst.repositories; track repo.id) {
+                              <div class="repo-item">
+                                <span class="repo-name">{{ repo.name }}</span>
+                                <span class="visibility-badge" [class.visibility-private]="repo.private">
+                                  {{ repo.private ? 'private' : 'public' }}
+                                </span>
+                              </div>
+                            }
+                          </div>
                         }
                       }
                     </td>
@@ -116,7 +126,7 @@ import { UsersService } from '../../core/services/users.service';
                     </td>
                     <td>
                       @if (inst.linkedUserId) {
-                        <a class="user-link" [routerLink]="['/users', inst.linkedUserId]" (click)="$event.stopPropagation()">
+                        <a class="user-link" [routerLink]="['/users', inst.linkedUserId]">
                           {{ userNameMap()[inst.linkedUserId] || inst.linkedUserId }}
                         </a>
                       } @else {
@@ -131,22 +141,6 @@ import { UsersService } from '../../core/services/users.service';
                       }
                     </td>
                   </tr>
-                  @if (expandedId() === inst.id && inst.repositorySelection !== 'all' && inst.repositories.length > 0) {
-                    <tr class="expanded-row">
-                      <td colspan="5">
-                        <div class="repo-list">
-                          @for (repo of inst.repositories; track repo.id) {
-                            <div class="repo-item">
-                              <span class="repo-name">{{ repo.fullName }}</span>
-                              <span class="visibility-badge" [class.visibility-private]="repo.private">
-                                {{ repo.private ? 'private' : 'public' }}
-                              </span>
-                            </div>
-                          }
-                        </div>
-                      </td>
-                    </tr>
-                  }
                 }
               </tbody>
             </table>
@@ -263,12 +257,31 @@ import { UsersService } from '../../core/services/users.service';
         border-bottom: none;
       }
 
-      .clickable-row {
+      .repo-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 0;
+        border: none;
+        background: none;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--theme-color-text-brand-default);
         cursor: pointer;
       }
 
-      .clickable-row:hover td {
-        background: var(--theme-color-bg-neutral-secondary);
+      .repo-toggle:hover {
+        text-decoration: underline;
+      }
+
+      .repo-toggle-icon {
+        display: inline-block;
+        font-size: 10px;
+        transition: transform 0.15s ease;
+      }
+
+      .repo-toggle-icon--open {
+        transform: rotate(90deg);
       }
 
       .account-cell {
@@ -354,16 +367,12 @@ import { UsersService } from '../../core/services/users.service';
         font-style: italic;
       }
 
-      .expanded-row td {
-        padding: 0 16px 16px;
-        background: var(--theme-color-bg-neutral-secondary);
-      }
-
       .repo-list {
         display: flex;
         flex-direction: column;
-        gap: 6px;
-        padding: 12px 0 0 38px;
+        gap: 4px;
+        margin-top: 8px;
+        padding-left: 14px;
       }
 
       .repo-item {
