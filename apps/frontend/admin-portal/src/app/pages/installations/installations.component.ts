@@ -17,7 +17,7 @@ import { UsersService } from '../../core/services/users.service';
       <p class="page-subtitle">
         @if (!isLoading() && !error()) {
           {{ filteredInstallations().length }} installation{{ filteredInstallations().length !== 1 ? 's' : '' }}
-          · {{ totalRepoCount() }} linked repositories
+          · {{ filteredRepoCount() }} linked repositories
         } @else {
           GitHub App installations overview
         }
@@ -87,7 +87,11 @@ import { UsersService } from '../../core/services/users.service';
               </thead>
               <tbody>
                 @for (inst of filteredInstallations(); track inst.id) {
-                  <tr class="clickable-row" (click)="toggleExpanded(inst.id)">
+                  <tr class="clickable-row" role="button" tabindex="0"
+                      (click)="toggleExpanded(inst.id)"
+                      (keydown.enter)="toggleExpanded(inst.id)"
+                      (keydown.space)="toggleExpanded(inst.id); $event.preventDefault()"
+                      [attr.aria-expanded]="expandedId() === inst.id">
                     <td>
                       <div class="account-cell">
                         <div class="account-avatar">{{ inst.accountLogin.charAt(0).toUpperCase() }}</div>
@@ -516,6 +520,10 @@ export class InstallationsComponent implements OnInit {
 
   readonly totalRepoCount = computed(() =>
     this.installations().reduce((sum, i) => sum + i.repositoryCount, 0),
+  );
+
+  readonly filteredRepoCount = computed(() =>
+    this.filteredInstallations().reduce((sum, i) => sum + i.repositoryCount, 0),
   );
 
   ngOnInit(): void {

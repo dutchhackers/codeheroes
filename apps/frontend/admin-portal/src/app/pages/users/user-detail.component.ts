@@ -254,6 +254,13 @@ import { InstallationsService } from '../../core/services/installations.service'
             <div class="loading-state">
               <p>Loading installations...</p>
             </div>
+          } @else if (installationsError()) {
+            <div class="error-state">
+              <p>{{ installationsError() }}</p>
+              <sui-button variant="outline" color="neutral" size="sm" (click)="loadInstallations()">
+                Try again
+              </sui-button>
+            </div>
           } @else if (userInstallations().length === 0) {
             <div class="empty-state">
               <p>No GitHub installations linked.</p>
@@ -687,6 +694,7 @@ export class UserDetailComponent implements OnInit {
   readonly accounts = signal<ConnectedAccountDto[]>([]);
   readonly userInstallations = signal<InstallationSummaryDto[]>([]);
   readonly installationsLoading = signal(true);
+  readonly installationsError = signal<string | null>(null);
   readonly isLoading = signal(true);
   readonly accountsLoading = signal(true);
   readonly error = signal<string | null>(null);
@@ -723,12 +731,14 @@ export class UserDetailComponent implements OnInit {
 
   loadInstallations(): void {
     this.installationsLoading.set(true);
+    this.installationsError.set(null);
     this.#installationsService.getAllInstallations().subscribe({
       next: (all) => {
         this.userInstallations.set(all.filter((i) => i.linkedUserId === this.#userId));
         this.installationsLoading.set(false);
       },
       error: () => {
+        this.installationsError.set('Failed to load installations.');
         this.installationsLoading.set(false);
       },
     });
