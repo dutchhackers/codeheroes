@@ -54,8 +54,9 @@ import { UsersService } from '../../core/services/users.service';
             [value]="searchTerm()"
             (input)="onSearch($event)"
           />
+          @if (hasMultipleStatuses()) {
           <div class="filter-pills">
-            @for (f of statusFilters; track f.value) {
+            @for (f of statusFilters(); track f.value) {
               <button
                 class="filter-pill"
                 [class.filter-pill--active]="statusFilter() === f.value"
@@ -65,6 +66,7 @@ import { UsersService } from '../../core/services/users.service';
               </button>
             }
           </div>
+          }
         </div>
 
         @if (filteredInstallations().length === 0) {
@@ -478,12 +480,19 @@ export class InstallationsComponent implements OnInit {
   readonly statusFilter = signal<string | null>(null);
   readonly expandedId = signal<string | null>(null);
 
-  readonly statusFilters = [
-    { label: 'All', value: null },
-    { label: 'Active', value: 'active' },
-    { label: 'Suspended', value: 'suspended' },
-    { label: 'Deleted', value: 'deleted' },
-  ];
+  readonly hasMultipleStatuses = computed(() => {
+    const statuses = new Set(this.installations().map((i) => i.status));
+    return statuses.size > 1;
+  });
+
+  readonly statusFilters = computed(() => {
+    const statuses = new Set(this.installations().map((i) => i.status));
+    const filters: { label: string; value: string | null }[] = [{ label: 'All', value: null }];
+    if (statuses.has('active')) filters.push({ label: 'Active', value: 'active' });
+    if (statuses.has('suspended')) filters.push({ label: 'Suspended', value: 'suspended' });
+    if (statuses.has('deleted')) filters.push({ label: 'Deleted', value: 'deleted' });
+    return filters;
+  });
 
   readonly filteredInstallations = computed(() => {
     let list = this.installations();
