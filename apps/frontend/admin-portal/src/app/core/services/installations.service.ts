@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, from, shareReplay, switchMap } from 'rxjs';
+import { Observable, from, shareReplay, switchMap, tap, catchError, throwError } from 'rxjs';
 import { InstallationSummaryDto } from '@codeheroes/types';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
@@ -16,7 +16,13 @@ export class InstallationsService {
     if (!this.#cache$) {
       this.#cache$ = this.#withAuth((headers) =>
         this.#http.get<InstallationSummaryDto[]>(`${environment.apiUrl}/installations/admin/all`, { headers }),
-      ).pipe(shareReplay({ bufferSize: 1, refCount: true }));
+      ).pipe(
+        catchError((err) => {
+          this.#cache$ = null;
+          return throwError(() => err);
+        }),
+        shareReplay({ bufferSize: 1, refCount: true }),
+      );
     }
     return this.#cache$;
   }
