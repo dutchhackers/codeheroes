@@ -3,8 +3,9 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
-import { ConnectedAccountDto, ConnectedAccountProvider, CONNECTED_ACCOUNT_PROVIDERS, UserDto, UserRole } from '@codeheroes/types';
+import { ConnectedAccountDto, ConnectedAccountProvider, CONNECTED_ACCOUNT_PROVIDERS, InstallationSummaryDto, UserDto, UserRole } from '@codeheroes/types';
 import { UsersService } from '../../core/services/users.service';
+import { InstallationsService } from '../../core/services/installations.service';
 
 @Component({
   selector: 'admin-user-detail',
@@ -236,6 +237,56 @@ import { UsersService } from '../../core/services/users.service';
                           Remove
                         </sui-button>
                       </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
+        <div class="section">
+          <div class="section-header">
+            <h2 class="section-title">GitHub Installations</h2>
+          </div>
+
+          @if (installationsLoading()) {
+            <div class="loading-state">
+              <p>Loading installations...</p>
+            </div>
+          } @else if (userInstallations().length === 0) {
+            <div class="empty-state">
+              <p>No GitHub installations linked.</p>
+            </div>
+          } @else {
+            <div class="table-container">
+              <table class="accounts-table">
+                <thead>
+                  <tr>
+                    <th>Account</th>
+                    <th>Repositories</th>
+                    <th>Status</th>
+                    <th>Linked At</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (inst of userInstallations(); track inst.id) {
+                    <tr>
+                      <td>
+                        <span class="account-login">{{ inst.accountLogin }}</span>
+                        <span class="type-badge">{{ inst.accountType }}</span>
+                      </td>
+                      <td>
+                        @if (inst.repositorySelection === 'all') {
+                          <span class="repo-all">All repositories</span>
+                        } @else {
+                          {{ inst.repositoryCount }} repo{{ inst.repositoryCount !== 1 ? 's' : '' }}
+                        }
+                      </td>
+                      <td>
+                        <span class="installation-status-badge installation-status-{{ inst.status }}">{{ inst.status }}</span>
+                      </td>
+                      <td>{{ inst.linkedAt | date: 'mediumDate' }}</td>
                     </tr>
                   }
                 </tbody>
@@ -579,6 +630,50 @@ import { UsersService } from '../../core/services/users.service';
         font-size: 13px;
         color: var(--theme-color-text-neutral-tertiary);
       }
+
+      .account-login {
+        font-weight: 500;
+        margin-right: 8px;
+      }
+
+      .type-badge {
+        display: inline-block;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 500;
+        background: var(--theme-color-bg-neutral-secondary);
+        color: var(--theme-color-text-neutral-secondary);
+      }
+
+      .repo-all {
+        font-style: italic;
+        color: var(--theme-color-text-neutral-tertiary);
+      }
+
+      .installation-status-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: capitalize;
+      }
+
+      .installation-status-active {
+        background: var(--theme-color-feedback-bg-success-secondary, var(--theme-color-bg-brand-secondary));
+        color: var(--theme-color-feedback-text-success-default, var(--theme-color-text-brand-default));
+      }
+
+      .installation-status-suspended {
+        background: var(--theme-color-feedback-bg-warning-secondary, #fef3c7);
+        color: var(--theme-color-feedback-text-warning-default, #92400e);
+      }
+
+      .installation-status-deleted {
+        background: var(--theme-color-feedback-bg-error-secondary);
+        color: var(--theme-color-feedback-text-error-default);
+      }
     `,
   ],
 })
@@ -586,9 +681,12 @@ export class UserDetailComponent implements OnInit {
   readonly #route = inject(ActivatedRoute);
   readonly #router = inject(Router);
   readonly #usersService = inject(UsersService);
+  readonly #installationsService = inject(InstallationsService);
 
   readonly user = signal<UserDto | null>(null);
   readonly accounts = signal<ConnectedAccountDto[]>([]);
+  readonly userInstallations = signal<InstallationSummaryDto[]>([]);
+  readonly installationsLoading = signal(true);
   readonly isLoading = signal(true);
   readonly accountsLoading = signal(true);
   readonly error = signal<string | null>(null);
@@ -620,6 +718,20 @@ export class UserDetailComponent implements OnInit {
     this.#userId = this.#route.snapshot.params['id'];
     this.loadUser();
     this.loadAccounts();
+    this.loadInstallations();
+  }
+
+  loadInstallations(): void {
+    this.installationsLoading.set(true);
+    this.#installationsService.getAllInstallations().subscribe({
+      next: (all) => {
+        this.userInstallations.set(all.filter((i) => i.linkedUserId === this.#userId));
+        this.installationsLoading.set(false);
+      },
+      error: () => {
+        this.installationsLoading.set(false);
+      },
+    });
   }
 
   hasChanges(): boolean {

@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ProjectsService } from '../../core/services/projects.service';
 import { DashboardService, LeaderboardEntry } from '../../core/services/dashboard.service';
+import { InstallationsService } from '../../core/services/installations.service';
 import { UnmatchedEventsService } from '../../core/services/unmatched-events.service';
 
 @Component({
@@ -17,7 +18,7 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
       @if (isLoading()) {
         <!-- Skeleton: stat cards -->
         <div class="stats-grid">
-          @for (_ of [1, 2, 3, 4, 5]; track $index) {
+          @for (_ of [1, 2, 3, 4, 5, 6]; track $index) {
             <div class="stat-card">
               <div class="skeleton skeleton-label"></div>
               <div class="skeleton skeleton-value"></div>
@@ -65,6 +66,10 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
             <span class="stat-label">Total Actions (all projects)</span>
             <span class="stat-value">{{ formatNumber(totalActions()) }}</span>
           </div>
+          <a class="stat-card stat-card--link" routerLink="/installations">
+            <span class="stat-label">Linked Repos</span>
+            <span class="stat-value">{{ linkedRepoCount() }}</span>
+          </a>
           <a class="stat-card stat-card--link" routerLink="/unmatched">
             <span class="stat-label">Unmatched Events</span>
             <span class="stat-value">{{ unmatchedCount() }}</span>
@@ -341,12 +346,14 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
 export class HomeComponent implements OnInit {
   readonly #projectsService = inject(ProjectsService);
   readonly #dashboardService = inject(DashboardService);
+  readonly #installationsService = inject(InstallationsService);
   readonly #unmatchedEventsService = inject(UnmatchedEventsService);
 
   readonly projectCount = signal(0);
   readonly userCountLabel = signal('0');
   readonly totalXp = signal(0);
   readonly totalActions = signal(0);
+  readonly linkedRepoCount = signal(0);
   readonly unmatchedCount = signal(0);
   readonly leaderboard = signal<LeaderboardEntry[]>([]);
   readonly leaderboardTop = computed(() => this.leaderboard().slice(0, 5));
@@ -357,14 +364,16 @@ export class HomeComponent implements OnInit {
     forkJoin({
       projects: this.#projectsService.getProjects(),
       leaderboard: this.#dashboardService.getWeeklyLeaderboard(),
+      installations: this.#installationsService.getAllInstallations(),
       unmatched: this.#unmatchedEventsService.getSummary(),
     }).subscribe({
-      next: ({ projects, leaderboard, unmatched }) => {
+      next: ({ projects, leaderboard, installations, unmatched }) => {
         this.projectCount.set(projects.length);
         this.totalXp.set(projects.reduce((sum, p) => sum + p.totalXp, 0));
         this.totalActions.set(projects.reduce((sum, p) => sum + p.totalActions, 0));
         this.userCountLabel.set(String(leaderboard.length));
         this.leaderboard.set(leaderboard);
+        this.linkedRepoCount.set(installations.reduce((sum, i) => sum + i.repositoryCount, 0));
         this.unmatchedCount.set(unmatched.unknownUserCount + unmatched.unlinkedRepoCount);
         this.isLoading.set(false);
       },
