@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, from, shareReplay, switchMap, tap, catchError, throwError } from 'rxjs';
+import { Observable, from, shareReplay, switchMap, catchError, throwError } from 'rxjs';
 import { InstallationSummaryDto } from '@codeheroes/types';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';

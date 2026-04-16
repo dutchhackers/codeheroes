@@ -99,10 +99,8 @@ import { UsersService } from '../../core/services/users.service';
                       @if (inst.repositorySelection === 'all') {
                         <span class="repo-all-badge">All repositories</span>
                       } @else {
-                        <button class="repo-toggle" role="button" tabindex="0"
+                        <button class="repo-toggle"
                             (click)="toggleExpanded(inst.id)"
-                            (keydown.enter)="toggleExpanded(inst.id)"
-                            (keydown.space)="toggleExpanded(inst.id); $event.preventDefault()"
                             [attr.aria-expanded]="expandedId() === inst.id">
                           <span class="repo-toggle-icon" [class.repo-toggle-icon--open]="expandedId() === inst.id">&#9656;</span>
                           {{ inst.repositoryCount }} repo{{ inst.repositoryCount !== 1 ? 's' : '' }}
@@ -347,11 +345,6 @@ import { UsersService } from '../../core/services/users.service';
         color: var(--theme-color-text-neutral-tertiary);
       }
 
-      .repo-preview {
-        font-size: 13px;
-        color: var(--theme-color-text-neutral-tertiary);
-      }
-
       .user-link {
         color: var(--theme-color-text-brand-default);
         text-decoration: none;
@@ -527,10 +520,6 @@ export class InstallationsComponent implements OnInit {
     return list;
   });
 
-  readonly totalRepoCount = computed(() =>
-    this.installations().reduce((sum, i) => sum + i.repositoryCount, 0),
-  );
-
   readonly filteredRepoCount = computed(() =>
     this.filteredInstallations().reduce((sum, i) => sum + i.repositoryCount, 0),
   );
@@ -572,11 +561,4 @@ export class InstallationsComponent implements OnInit {
     this.expandedId.update((current) => (current === id ? null : id));
   }
 
-  repoPreview(inst: InstallationSummaryDto): string {
-    const repos = inst.repositories;
-    if (repos.length <= 3) {
-      return repos.map((r) => r.name).join(', ');
-    }
-    return repos.slice(0, 2).map((r) => r.name).join(', ') + ` +${repos.length - 2} more`;
-  }
 }
