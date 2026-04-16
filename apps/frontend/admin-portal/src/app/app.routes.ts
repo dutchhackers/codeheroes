@@ -35,6 +35,11 @@ export const appRoutes: Routes = [
           import('./pages/users/user-detail.component').then((m) => m.UserDetailComponent),
       },
       {
+        path: 'installations',
+        loadComponent: () =>
+          import('./pages/installations/installations.component').then((m) => m.InstallationsComponent),
+      },
+      {
         path: 'unmatched',
         loadComponent: () =>
           import('./pages/unmatched/unmatched.component').then((m) => m.UnmatchedComponent),
