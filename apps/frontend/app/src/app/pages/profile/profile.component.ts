@@ -1,16 +1,17 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth, signOut } from '@angular/fire/auth';
 import { Subscription } from 'rxjs';
-import { UserDto, UserStats } from '@codeheroes/types';
+import { SystemOptionsDto, UserDto, UserStats } from '@codeheroes/types';
 import { UserStatsService } from '../../core/services/user-stats.service';
 import { UserCacheService } from '../../core/services/user-cache.service';
+import { SystemOptionsService } from '../../core/services/system-options.service';
 import { UserBadge } from '../../core/models/user-badge.model';
 import { ProfileAvatarComponent } from './components/profile-avatar.component';
 import { XpProgressComponent } from './components/xp-progress.component';
 import { StatsGridComponent } from './components/stats-grid.component';
 import { BadgesGridComponent } from './components/badges-grid.component';
-import { ProfileEditModalComponent } from './components/profile-edit-modal.component';
+import { ProfileEditModalComponent, ProfileEditPayload } from './components/profile-edit-modal.component';
 import { BadgesModalComponent } from './components/badges-modal.component';
 
 @Component({
@@ -112,6 +113,22 @@ import { BadgesModalComponent } from './components/badges-modal.component';
             >
               Level {{ stats()?.level ?? 1 }}
             </p>
+            @if (studioLabel() || disciplineLabel()) {
+              <div class="dimension-chips">
+                @if (studioLabel()) {
+                  <span class="dimension-chip" aria-label="Studio {{ studioLabel() }}">
+                    <span class="dimension-chip-key">Studio</span>
+                    <span class="dimension-chip-value">{{ studioLabel() }}</span>
+                  </span>
+                }
+                @if (disciplineLabel()) {
+                  <span class="dimension-chip" aria-label="Discipline {{ disciplineLabel() }}">
+                    <span class="dimension-chip-key">Craft</span>
+                    <span class="dimension-chip-value">{{ disciplineLabel() }}</span>
+                  </span>
+                }
+              </div>
+            }
             @if (user()?.createdAt) {
               <p class="text-xs text-slate-500 mt-1">Hero Since {{ formatMemberSince(user()?.createdAt) }}</p>
             }
@@ -146,10 +163,11 @@ import { BadgesModalComponent } from './components/badges-modal.component';
     @if (showEditModal()) {
       <app-profile-edit-modal
         [currentDisplayName]="user()?.displayName ?? ''"
+        [currentDimensions]="user()?.dimensions ?? null"
         [isSaving]="isSavingProfile()"
         [saveError]="profileSaveError()"
         (dismiss)="closeEditModal()"
-        (save)="saveDisplayName($event)"
+        (save)="saveProfile($event)"
       />
     }
   `,
@@ -189,6 +207,38 @@ import { BadgesModalComponent } from './components/badges-modal.component';
         border-color: var(--neon-cyan);
         box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
       }
+
+      .dimension-chips {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+      }
+
+      .dimension-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.25rem 0.625rem;
+        border-radius: 999px;
+        background: rgba(139, 92, 246, 0.1);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        font-size: 0.75rem;
+      }
+
+      .dimension-chip-key {
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.625rem;
+      }
+
+      .dimension-chip-value {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+      }
     `,
   ],
 })
@@ -197,9 +247,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
   readonly #router = inject(Router);
   readonly #userStatsService = inject(UserStatsService);
   readonly #userCacheService = inject(UserCacheService);
+  readonly #systemOptions = inject(SystemOptionsService);
 
   #profileSubscription: Subscription | null = null;
   #badgesSubscription: Subscription | null = null;
+  #optionsSubscription: Subscription | null = null;
 
   user = signal<UserDto | null>(null);
   stats = signal<UserStats | null>(null);
@@ -210,14 +262,32 @@ export class ProfileComponent implements OnInit, OnDestroy {
   selectedBadgeId = signal<string | null>(null);
   isSavingProfile = signal(false);
   profileSaveError = signal<string | null>(null);
+  options = signal<SystemOptionsDto>({ studios: [], disciplines: [] });
+
+  studioLabel = computed(() => {
+    const studioId = this.user()?.dimensions?.studio;
+    if (!studioId) return null;
+    return this.options().studios.find((s) => s.id === studioId)?.label ?? studioId;
+  });
+
+  disciplineLabel = computed(() => {
+    const disciplineId = this.user()?.dimensions?.discipline;
+    if (!disciplineId) return null;
+    return this.options().disciplines.find((d) => d.id === disciplineId)?.label ?? disciplineId;
+  });
 
   ngOnInit() {
     this.#loadProfile();
+    this.#optionsSubscription = this.#systemOptions.getOptions().subscribe({
+      next: (options) => this.options.set(options),
+      error: () => this.options.set({ studios: [], disciplines: [] }),
+    });
   }
 
   ngOnDestroy() {
     this.#profileSubscription?.unsubscribe();
     this.#badgesSubscription?.unsubscribe();
+    this.#optionsSubscription?.unsubscribe();
   }
 
   #loadProfile() {
@@ -276,26 +346,30 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.profileSaveError.set(null);
   }
 
-  async saveDisplayName(newName: string) {
+  async saveProfile(payload: ProfileEditPayload) {
     const currentUser = this.user();
     if (!currentUser?.id) return;
 
     this.isSavingProfile.set(true);
     this.profileSaveError.set(null);
     try {
-      await this.#userStatsService.updateDisplayName(currentUser.id, newName);
+      await this.#userStatsService.updateProfile(currentUser.id, {
+        displayName: payload.displayName,
+        dimensions: payload.dimensions,
+      });
       // Update the user cache so activity items show the new name
       this.#userCacheService.updateUserInCache(currentUser.id, {
-        displayName: newName,
+        displayName: payload.displayName,
       });
-      // Update the user signal for immediate UI feedback in profile header
+      // Update the user signal for immediate UI feedback
       this.user.set({
         ...currentUser,
-        displayName: newName,
+        displayName: payload.displayName,
+        dimensions: payload.dimensions,
       });
       this.closeEditModal();
     } catch (error) {
-      console.error('Failed to update display name:', error);
+      console.error('Failed to update profile:', error);
       this.profileSaveError.set('Failed to save. Please try again.');
     } finally {
       this.isSavingProfile.set(false);

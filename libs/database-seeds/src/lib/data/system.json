@@ -2,7 +2,21 @@
   "system": [
     {
       "settings": {
-        "allowedDomains": []
+        "allowedDomains": [],
+        "studios": [
+          { "id": "zwolle", "label": "Zwolle", "country": "NL", "active": true },
+          { "id": "amsterdam", "label": "Amsterdam", "country": "NL", "active": true },
+          { "id": "copenhagen", "label": "Copenhagen", "country": "DK", "active": true },
+          { "id": "malmo", "label": "Malmö", "country": "SE", "active": true },
+          { "id": "stockholm", "label": "Stockholm", "country": "SE", "active": true },
+          { "id": "warsaw", "label": "Warsaw", "country": "PL", "active": true }
+        ],
+        "disciplines": [
+          { "id": "frontend", "label": "Frontend", "active": true },
+          { "id": "backend", "label": "Backend", "active": true },
+          { "id": "design", "label": "Design", "active": true },
+          { "id": "other", "label": "Other", "active": true }
+        ]
       },
       "counters": {
         "nextUserId": 20000000

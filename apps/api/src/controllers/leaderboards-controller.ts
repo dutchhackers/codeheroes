@@ -58,6 +58,8 @@ interface LeaderboardEntry {
   currentLevelXp: number;
   xpToNextLevel: number;
   userType: string;
+  studio?: string | null;
+  discipline?: string | null;
 }
 
 interface LeaderboardOptions {
@@ -119,6 +121,8 @@ async function getXpLeaderboard(
       currentLevelXp: userStats?.currentLevelXp || 0,
       xpToNextLevel: userStats?.xpToNextLevel || 0,
       userType: userData.userType || 'user',
+      studio: userData.dimensions?.studio ?? null,
+      discipline: userData.dimensions?.discipline ?? null,
     };
   });
 
@@ -222,20 +226,43 @@ router.get('/projects/day/:dayId?', async (req, res) => {
   }
 });
 
+function applyDimensionFilters(
+  entries: LeaderboardEntry[],
+  userType?: string,
+  studio?: string,
+  discipline?: string,
+): LeaderboardEntry[] {
+  let filtered = entries;
+  if (userType) {
+    filtered = filtered.filter((entry) => entry.userType === userType);
+  }
+  if (studio) {
+    filtered = filtered.filter((entry) => entry.studio === studio);
+  }
+  if (discipline) {
+    filtered = filtered.filter((entry) => entry.discipline === discipline);
+  }
+  return filtered;
+}
+
 // Weekly leaderboard endpoint
 router.get('/week/:weekId?', async (req, res) => {
   const weekId = req.params.weekId;
   const includeZeroXp = req.query.includeZeroXp === 'true';
   const userType = req.query.userType as string | undefined;
+  const studio = req.query.studio as string | undefined;
+  const discipline = req.query.discipline as string | undefined;
 
-  logger.debug(`GET /leaderboards/week${weekId ? `/${weekId}` : ''}`, { includeZeroXp, userType });
+  logger.debug(`GET /leaderboards/week${weekId ? `/${weekId}` : ''}`, {
+    includeZeroXp,
+    userType,
+    studio,
+    discipline,
+  });
 
   try {
-    let leaderboard = await getXpLeaderboard('weekly', weekId, { includeZeroXp });
-    if (userType) {
-      leaderboard = leaderboard.filter((entry) => entry.userType === userType);
-    }
-    res.json(leaderboard);
+    const leaderboard = await getXpLeaderboard('weekly', weekId, { includeZeroXp });
+    res.json(applyDimensionFilters(leaderboard, userType, studio, discipline));
   } catch (error) {
     logger.error('Error getting weekly leaderboard:', error);
     res.status(500).json({ error: 'Failed to retrieve weekly leaderboard' });
@@ -247,15 +274,19 @@ router.get('/day/:dayId?', async (req, res) => {
   const dayId = req.params.dayId;
   const includeZeroXp = req.query.includeZeroXp === 'true';
   const userType = req.query.userType as string | undefined;
+  const studio = req.query.studio as string | undefined;
+  const discipline = req.query.discipline as string | undefined;
 
-  logger.debug(`GET /leaderboards/day${dayId ? `/${dayId}` : ''}`, { includeZeroXp, userType });
+  logger.debug(`GET /leaderboards/day${dayId ? `/${dayId}` : ''}`, {
+    includeZeroXp,
+    userType,
+    studio,
+    discipline,
+  });
 
   try {
-    let leaderboard = await getXpLeaderboard('daily', dayId, { includeZeroXp });
-    if (userType) {
-      leaderboard = leaderboard.filter((entry) => entry.userType === userType);
-    }
-    res.json(leaderboard);
+    const leaderboard = await getXpLeaderboard('daily', dayId, { includeZeroXp });
+    res.json(applyDimensionFilters(leaderboard, userType, studio, discipline));
   } catch (error) {
     logger.error('Error getting daily leaderboard:', error);
     res.status(500).json({ error: 'Failed to retrieve daily leaderboard' });

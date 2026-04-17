@@ -1,4 +1,4 @@
-import { UserRole } from '@codeheroes/types';
+import { UserDimensions, UserRole } from '@codeheroes/types';
 
 export interface CreateUserInput {
   uid?: string;
@@ -18,4 +18,5 @@ export interface UpdateUserInput {
   active?: boolean;
   userType?: 'user' | 'bot' | 'system';
   role?: UserRole;
+  dimensions?: UserDimensions;
 }

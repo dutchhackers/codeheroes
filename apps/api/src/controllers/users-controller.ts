@@ -16,12 +16,20 @@ const createUserSchema = z.object({
   email: z.string().email(),
 });
 
+const dimensionsSchema = z
+  .object({
+    studio: z.string().min(1).max(64).nullable().optional(),
+    discipline: z.string().min(1).max(64).nullable().optional(),
+  })
+  .strict();
+
 const updateUserSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   displayName: z.string().min(1).max(100).optional(),
   active: z.boolean().optional(),
   userType: z.enum(['user', 'bot', 'system']).optional(),
   photoUrl: z.string().url().max(500).nullable().optional(),
+  dimensions: dimensionsSchema.optional(),
 });
 
 const addConnectedAccountSchema = z.object({
