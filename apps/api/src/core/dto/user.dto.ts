@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { UserRole, UserType } from '@codeheroes/types';
+import { UserDimensions, UserRole, UserType } from '@codeheroes/types';
 
 export class UserDto {
   @Expose()
@@ -34,6 +34,9 @@ export class UserDto {
 
   @Expose()
   role?: UserRole;
+
+  @Expose()
+  dimensions?: UserDimensions;
 
   @Expose()
   createdAt?: string;

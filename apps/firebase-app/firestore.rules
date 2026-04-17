@@ -25,12 +25,36 @@ service cloud.firestore {
       // User can only update their own profile
       allow update: if isOwner(userId)
         // Only allow specific fields to be modified
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'displayNameLower', 'updatedAt'])
-        // Validate displayName. Note: size() uses the untrimmed value; trimming and final
-        // length validation are enforced in the backend service.
-        && request.resource.data.displayName is string
-        && request.resource.data.displayName.size() >= 2
-        && request.resource.data.displayName.size() <= 50;
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'displayNameLower', 'dimensions', 'updatedAt'])
+        // Validate displayName if present. Note: size() uses the untrimmed value; trimming and
+        // final length validation are enforced in the backend service.
+        && (
+          !('displayName' in request.resource.data.diff(resource.data).affectedKeys())
+          || (
+            request.resource.data.displayName is string
+            && request.resource.data.displayName.size() >= 2
+            && request.resource.data.displayName.size() <= 50
+          )
+        )
+        // Validate dimensions shape if present — only studio and discipline keys, each
+        // must be either a short non-empty string or null.
+        && (
+          !('dimensions' in request.resource.data.diff(resource.data).affectedKeys())
+          || (
+            request.resource.data.dimensions is map
+            && request.resource.data.dimensions.keys().hasOnly(['studio', 'discipline'])
+            && (
+              !('studio' in request.resource.data.dimensions)
+              || request.resource.data.dimensions.studio == null
+              || (request.resource.data.dimensions.studio is string && request.resource.data.dimensions.studio.size() >= 1 && request.resource.data.dimensions.studio.size() <= 64)
+            )
+            && (
+              !('discipline' in request.resource.data.dimensions)
+              || request.resource.data.dimensions.discipline == null
+              || (request.resource.data.dimensions.discipline is string && request.resource.data.dimensions.discipline.size() >= 1 && request.resource.data.dimensions.discipline.size() <= 64)
+            )
+          )
+        );
 
       // Only server can create/delete users
       allow create, delete: if false;

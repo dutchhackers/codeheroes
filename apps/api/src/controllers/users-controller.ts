@@ -16,12 +16,20 @@ const createUserSchema = z.object({
   email: z.string().email(),
 });
 
+const dimensionsSchema = z
+  .object({
+    studio: z.string().min(1).max(64).nullable().optional(),
+    discipline: z.string().min(1).max(64).nullable().optional(),
+  })
+  .strict();
+
 const updateUserSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   displayName: z.string().min(1).max(100).optional(),
   active: z.boolean().optional(),
   userType: z.enum(['user', 'bot', 'system']).optional(),
   photoUrl: z.string().url().max(500).nullable().optional(),
+  dimensions: dimensionsSchema.optional(),
 });
 
 const addConnectedAccountSchema = z.object({
@@ -75,8 +83,28 @@ router.post('/', validate(createUserSchema), async (req, res) => {
   res.json(await userService.createUser(req.body));
 });
 
+// Admin-only fields — users may only modify their own displayName/dimensions/photoUrl.
+const SELF_EDITABLE_FIELDS = new Set(['displayName', 'dimensions', 'photoUrl']);
+
 router.patch('/:id', validate(updateUserSchema), async (req, res) => {
   logger.debug('PATCH /users/:id', { id: req.params.id, body: req.body });
+
+  const isAdmin = req.user?.role === 'admin';
+  const isSelf = req.user?.customUserId === req.params.id;
+
+  if (!isAdmin && !isSelf) {
+    res.status(403).json({ error: 'Forbidden: admin role or self-edit required' });
+    return;
+  }
+
+  if (!isAdmin) {
+    const requestedKeys = Object.keys(req.body);
+    const hasDisallowedKey = requestedKeys.some((key) => !SELF_EDITABLE_FIELDS.has(key));
+    if (hasDisallowedKey) {
+      res.status(403).json({ error: 'Forbidden: admin role required to modify these fields' });
+      return;
+    }
+  }
 
   const userService = new UserService();
   const updated = await userService.updateUser(req.params.id, req.body);

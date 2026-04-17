@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, from, switchMap } from 'rxjs';
-import { ConnectedAccountDto, ConnectedAccountProvider, UserDto, UserRole, PaginatedResponse } from '@codeheroes/types';
+import { ConnectedAccountDto, ConnectedAccountProvider, UserDimensions, UserDto, UserRole, PaginatedResponse } from '@codeheroes/types';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
 
@@ -73,7 +73,17 @@ export class UsersService {
     );
   }
 
-  updateUser(id: string, data: { name?: string; displayName?: string; active?: boolean; userType?: string; photoUrl?: string | null }): Observable<UserDto> {
+  updateUser(
+    id: string,
+    data: {
+      name?: string;
+      displayName?: string;
+      active?: boolean;
+      userType?: string;
+      photoUrl?: string | null;
+      dimensions?: UserDimensions;
+    },
+  ): Observable<UserDto> {
     return this.#withAuth((headers) =>
       this.#http.patch<UserDto>(`${environment.apiUrl}/users/${id}`, data, { headers }),
     );

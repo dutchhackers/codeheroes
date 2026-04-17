@@ -1,8 +1,11 @@
+import { DisciplineOption, StudioOption } from '@codeheroes/types';
 import { Firestore, Timestamp } from 'firebase-admin/firestore';
 import { Seeder } from '../types/seeder.interface';
 
 interface SystemSettings {
   allowedDomains: string[];
+  studios?: StudioOption[];
+  disciplines?: DisciplineOption[];
 }
 
 interface SystemCounters {
@@ -32,7 +35,11 @@ export class SystemSeeder implements Seeder<SystemData> {
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       });
-      console.log('Seeding system/settings with allowedDomains:', systemData.settings.allowedDomains);
+      console.log(
+        'Seeding system/settings with allowedDomains:',
+        systemData.settings.allowedDomains,
+        `(studios: ${systemData.settings.studios?.length ?? 0}, disciplines: ${systemData.settings.disciplines?.length ?? 0})`,
+      );
     }
 
     if (systemData.counters) {

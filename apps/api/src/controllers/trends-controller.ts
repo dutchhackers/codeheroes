@@ -9,8 +9,10 @@ const router = express.Router();
 router.get('/weekly', async (req, res) => {
   const parsed = parseInt(req.query.weeks as string, 10);
   const weeks = Math.min(Math.max(isNaN(parsed) ? 10 : parsed, 1), 52);
+  const studio = req.query.studio as string | undefined;
+  const discipline = req.query.discipline as string | undefined;
 
-  logger.debug(`GET /trends/weekly?weeks=${weeks}`);
+  logger.debug(`GET /trends/weekly?weeks=${weeks}`, { studio, discipline });
 
   try {
     const db = getFirestore();
@@ -71,6 +73,8 @@ router.get('/weekly', async (req, res) => {
             weeklyData,
           } as TrendsEntityData,
           userType: userData.userType || 'user',
+          studio: userData.dimensions?.studio ?? null,
+          discipline: userData.dimensions?.discipline ?? null,
           hasAnyXp,
         };
       }),
@@ -135,13 +139,19 @@ router.get('/weekly', async (req, res) => {
       return totalB - totalA;
     };
 
+    const matchesDimensions = (u: { studio: string | null; discipline: string | null }) => {
+      if (studio && u.studio !== studio) return false;
+      if (discipline && u.discipline !== discipline) return false;
+      return true;
+    };
+
     const users = userStatsDoc
-      .filter((u) => u.hasAnyXp && u.userType === 'user')
+      .filter((u) => u.hasAnyXp && u.userType === 'user' && matchesDimensions(u))
       .map((u) => u.entity)
       .sort(sortByTotalWeeklyXp);
 
     const bots = userStatsDoc
-      .filter((u) => u.hasAnyXp && u.userType === 'bot')
+      .filter((u) => u.hasAnyXp && u.userType === 'bot' && matchesDimensions(u))
       .map((u) => u.entity)
       .sort(sortByTotalWeeklyXp);
 

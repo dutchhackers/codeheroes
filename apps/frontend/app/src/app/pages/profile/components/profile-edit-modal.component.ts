@@ -1,4 +1,24 @@
-import { Component, input, output, signal, computed, ElementRef, viewChild, AfterViewInit } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  computed,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { DisciplineOption, StudioOption, UserDimensions } from '@codeheroes/types';
+import { Subscription } from 'rxjs';
+import { SystemOptionsService } from '../../../core/services/system-options.service';
+
+export interface ProfileEditPayload {
+  displayName: string;
+  dimensions: UserDimensions;
+}
 
 @Component({
   selector: 'app-profile-edit-modal',
@@ -37,7 +57,7 @@ import { Component, input, output, signal, computed, ElementRef, viewChild, Afte
             type="text"
             id="displayName"
             class="input-field"
-            [class.input-error]="hasError() || saveError()"
+            [class.input-error]="hasNameError() || saveError()"
             [value]="inputValue()"
             (input)="onInputChange($event)"
             (keydown.enter)="onSave()"
@@ -45,21 +65,55 @@ import { Component, input, output, signal, computed, ElementRef, viewChild, Afte
             maxlength="50"
             autocomplete="off"
             aria-describedby="displayName-hint"
-            [attr.aria-invalid]="hasError() || saveError() ? 'true' : 'false'"
+            [attr.aria-invalid]="hasNameError() || saveError() ? 'true' : 'false'"
           />
           <div
             id="displayName-hint"
             class="input-hint"
-            [class.error-text]="hasError() || saveError()"
+            [class.error-text]="hasNameError() || saveError()"
             aria-live="polite"
           >
             @if (saveError()) {
               {{ saveError() }}
-            } @else if (hasError()) {
+            } @else if (hasNameError()) {
               {{ errorMessage() }}
             } @else {
               2-50 characters
             }
+          </div>
+
+          <div class="field-group">
+            <label class="input-label" for="studio">Primary studio</label>
+            <select
+              id="studio"
+              class="input-field"
+              [value]="studioValue() ?? ''"
+              (change)="onStudioChange($event)"
+              [disabled]="isSaving() || optionsLoading()"
+            >
+              <option value="">—</option>
+              @for (studio of studios(); track studio.id) {
+                <option [value]="studio.id">{{ studio.label }}</option>
+              }
+            </select>
+            <div class="input-hint">Choose your primary studio. You can change this later.</div>
+          </div>
+
+          <div class="field-group">
+            <label class="input-label" for="discipline">Primary discipline</label>
+            <select
+              id="discipline"
+              class="input-field"
+              [value]="disciplineValue() ?? ''"
+              (change)="onDisciplineChange($event)"
+              [disabled]="isSaving() || optionsLoading()"
+            >
+              <option value="">—</option>
+              @for (discipline of disciplines(); track discipline.id) {
+                <option [value]="discipline.id">{{ discipline.label }}</option>
+              }
+            </select>
+            <div class="input-hint">Pick what best describes your main craft.</div>
           </div>
         </div>
 
@@ -142,6 +196,10 @@ import { Component, input, output, signal, computed, ElementRef, viewChild, Afte
         padding: 1.25rem;
       }
 
+      .field-group {
+        margin-top: 1rem;
+      }
+
       .input-label {
         display: block;
         font-size: 0.75rem;
@@ -161,6 +219,20 @@ import { Component, input, output, signal, computed, ElementRef, viewChild, Afte
         font-size: 1rem;
         font-family: inherit;
         transition: all 0.2s;
+      }
+
+      select.input-field {
+        appearance: none;
+        background-image: linear-gradient(45deg, transparent 50%, rgba(255, 255, 255, 0.5) 50%),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.5) 50%, transparent 50%);
+        background-position:
+          calc(100% - 18px) 1.05rem,
+          calc(100% - 13px) 1.05rem;
+        background-size:
+          5px 5px,
+          5px 5px;
+        background-repeat: no-repeat;
+        padding-right: 2.25rem;
       }
 
       .input-field:focus {
@@ -252,20 +324,31 @@ import { Component, input, output, signal, computed, ElementRef, viewChild, Afte
     `,
   ],
 })
-export class ProfileEditModalComponent implements AfterViewInit {
+export class ProfileEditModalComponent implements AfterViewInit, OnDestroy, OnInit {
+  readonly #systemOptions = inject(SystemOptionsService);
+
   currentDisplayName = input.required<string>();
+  currentDimensions = input<UserDimensions | null>(null);
   isSaving = input<boolean>(false);
   saveError = input<string | null>(null);
 
   dismiss = output<void>();
-  save = output<string>();
+  save = output<ProfileEditPayload>();
 
   displayNameInput = viewChild<ElementRef<HTMLInputElement>>('displayNameInput');
 
   inputValue = signal('');
+  studioValue = signal<string | null>(null);
+  disciplineValue = signal<string | null>(null);
   touched = signal(false);
 
-  hasError = computed(() => {
+  studios = signal<StudioOption[]>([]);
+  disciplines = signal<DisciplineOption[]>([]);
+  optionsLoading = signal(true);
+
+  #optionsSub: Subscription | null = null;
+
+  hasNameError = computed(() => {
     if (!this.touched()) return false;
     const value = this.inputValue().trim();
     return value.length < 2 || value.length > 50;
@@ -281,12 +364,37 @@ export class ProfileEditModalComponent implements AfterViewInit {
 
   canSave = computed(() => {
     const value = this.inputValue().trim();
-    return value.length >= 2 && value.length <= 50 && value !== this.currentDisplayName();
+    if (value.length < 2 || value.length > 50) return false;
+
+    const currentDims = this.currentDimensions();
+    const currentStudio = currentDims?.studio ?? null;
+    const currentDiscipline = currentDims?.discipline ?? null;
+
+    const nameChanged = value !== this.currentDisplayName();
+    const studioChanged = (this.studioValue() ?? null) !== currentStudio;
+    const disciplineChanged = (this.disciplineValue() ?? null) !== currentDiscipline;
+
+    return nameChanged || studioChanged || disciplineChanged;
   });
+
+  ngOnInit() {
+    this.#optionsSub = this.#systemOptions.getOptions().subscribe({
+      next: (options) => {
+        this.studios.set((options.studios ?? []).filter((s) => s.active));
+        this.disciplines.set((options.disciplines ?? []).filter((d) => d.active));
+        this.optionsLoading.set(false);
+      },
+      error: () => {
+        this.optionsLoading.set(false);
+      },
+    });
+  }
 
   ngAfterViewInit() {
     this.inputValue.set(this.currentDisplayName());
-    // Focus the input after a brief delay to ensure the modal is rendered
+    const dims = this.currentDimensions();
+    this.studioValue.set(dims?.studio ?? null);
+    this.disciplineValue.set(dims?.discipline ?? null);
     setTimeout(() => {
       this.displayNameInput()?.nativeElement.focus();
       this.displayNameInput()?.nativeElement.select();
@@ -297,6 +405,16 @@ export class ProfileEditModalComponent implements AfterViewInit {
     const input = event.target as HTMLInputElement;
     this.inputValue.set(input.value);
     this.touched.set(true);
+  }
+
+  onStudioChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.studioValue.set(select.value === '' ? null : select.value);
+  }
+
+  onDisciplineChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.disciplineValue.set(select.value === '' ? null : select.value);
   }
 
   onBackdropClick(event: MouseEvent) {
@@ -312,6 +430,10 @@ export class ProfileEditModalComponent implements AfterViewInit {
     // is done by more specific event bindings.
   }
 
+  ngOnDestroy() {
+    this.#optionsSub?.unsubscribe();
+  }
+
   onCancel() {
     if (!this.isSaving()) {
       this.dismiss.emit();
@@ -320,7 +442,13 @@ export class ProfileEditModalComponent implements AfterViewInit {
 
   onSave() {
     if (this.canSave() && !this.isSaving()) {
-      this.save.emit(this.inputValue().trim());
+      this.save.emit({
+        displayName: this.inputValue().trim(),
+        dimensions: {
+          studio: this.studioValue(),
+          discipline: this.disciplineValue(),
+        },
+      });
     }
   }
 }

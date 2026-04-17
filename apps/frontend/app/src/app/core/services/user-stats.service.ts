@@ -14,7 +14,7 @@ import {
 } from '@angular/fire/firestore';
 import { Auth, user } from '@angular/fire/auth';
 import { Observable, of, switchMap, map, catchError, from, forkJoin } from 'rxjs';
-import { Activity, UserDto, UserStats } from '@codeheroes/types';
+import { Activity, UserDimensions, UserDto, UserStats } from '@codeheroes/types';
 import { UserBadge } from '../models/user-badge.model';
 
 export interface CurrentUserProfile {
@@ -203,6 +203,36 @@ export class UserStatsService {
       displayNameLower: trimmed.toLowerCase(),
       updatedAt: new Date().toISOString(),
     });
+  }
+
+  /**
+   * Update the current user's editable profile fields (display name + dimensions).
+   * Accepts partial updates — only fields passed in are persisted.
+   */
+  async updateProfile(
+    userId: string,
+    updates: { displayName?: string; dimensions?: UserDimensions },
+  ): Promise<void> {
+    const payload: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+
+    if (updates.displayName !== undefined) {
+      const trimmed = updates.displayName.trim();
+      if (!trimmed || trimmed.length < 2 || trimmed.length > 50) {
+        throw new Error('Display name must be 2-50 characters');
+      }
+      payload['displayName'] = trimmed;
+      payload['displayNameLower'] = trimmed.toLowerCase();
+    }
+
+    if (updates.dimensions !== undefined) {
+      payload['dimensions'] = {
+        studio: updates.dimensions.studio ?? null,
+        discipline: updates.dimensions.discipline ?? null,
+      };
+    }
+
+    const userDocRef = doc(this.#firestore, `users/${userId}`);
+    await updateDoc(userDocRef, payload);
   }
 
   /**

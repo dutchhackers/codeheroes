@@ -3,9 +3,19 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
-import { ConnectedAccountDto, ConnectedAccountProvider, CONNECTED_ACCOUNT_PROVIDERS, InstallationSummaryDto, UserDto, UserRole } from '@codeheroes/types';
+import {
+  ConnectedAccountDto,
+  ConnectedAccountProvider,
+  CONNECTED_ACCOUNT_PROVIDERS,
+  DisciplineOption,
+  InstallationSummaryDto,
+  StudioOption,
+  UserDto,
+  UserRole,
+} from '@codeheroes/types';
 import { UsersService } from '../../core/services/users.service';
 import { InstallationsService } from '../../core/services/installations.service';
+import { SystemOptionsService } from '../../core/services/system-options.service';
 
 @Component({
   selector: 'admin-user-detail',
@@ -96,6 +106,28 @@ import { InstallationsService } from '../../core/services/installations.service'
                   <option value="user">user</option>
                   <option value="bot">bot</option>
                   <option value="system">system</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-label">Studio</div>
+              <div class="settings-value">
+                <select class="form-input settings-select" [(ngModel)]="formStudio">
+                  <option value="">—</option>
+                  @for (studio of studios(); track studio.id) {
+                    <option [value]="studio.id">{{ studio.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-label">Discipline</div>
+              <div class="settings-value">
+                <select class="form-input settings-select" [(ngModel)]="formDiscipline">
+                  <option value="">—</option>
+                  @for (discipline of disciplines(); track discipline.id) {
+                    <option [value]="discipline.id">{{ discipline.label }}</option>
+                  }
                 </select>
               </div>
             </div>
@@ -689,6 +721,7 @@ export class UserDetailComponent implements OnInit {
   readonly #router = inject(Router);
   readonly #usersService = inject(UsersService);
   readonly #installationsService = inject(InstallationsService);
+  readonly #systemOptions = inject(SystemOptionsService);
 
   readonly user = signal<UserDto | null>(null);
   readonly accounts = signal<ConnectedAccountDto[]>([]);
@@ -705,6 +738,8 @@ export class UserDetailComponent implements OnInit {
   readonly saveError = signal<string | null>(null);
   readonly isRoleSaving = signal(false);
   readonly roleError = signal<string | null>(null);
+  readonly studios = signal<StudioOption[]>([]);
+  readonly disciplines = signal<DisciplineOption[]>([]);
 
   readonly providers = CONNECTED_ACCOUNT_PROVIDERS.filter((p) => p !== 'system');
 
@@ -719,6 +754,8 @@ export class UserDetailComponent implements OnInit {
   formPhotoUrl = '';
   formUserType = 'user';
   formActive = true;
+  formStudio = '';
+  formDiscipline = '';
 
   #userId = '';
 
@@ -727,6 +764,16 @@ export class UserDetailComponent implements OnInit {
     this.loadUser();
     this.loadAccounts();
     this.loadInstallations();
+    this.#systemOptions.getOptions().subscribe({
+      next: (options) => {
+        this.studios.set((options.studios ?? []).filter((s) => s.active));
+        this.disciplines.set((options.disciplines ?? []).filter((d) => d.active));
+      },
+      error: () => {
+        this.studios.set([]);
+        this.disciplines.set([]);
+      },
+    });
   }
 
   loadInstallations(): void {
@@ -750,12 +797,16 @@ export class UserDetailComponent implements OnInit {
     const trimmedName = this.formName.trim();
     const trimmedDisplayName = this.formDisplayName.trim();
     if (!trimmedName || !trimmedDisplayName) return false;
+    const currentStudio = u.dimensions?.studio ?? '';
+    const currentDiscipline = u.dimensions?.discipline ?? '';
     return (
       trimmedName !== (u.name || '') ||
       trimmedDisplayName !== (u.displayName || '') ||
       this.formPhotoUrl.trim() !== (u.photoUrl || '') ||
       this.formUserType !== (u.userType || 'user') ||
-      this.formActive !== u.active
+      this.formActive !== u.active ||
+      this.formStudio !== currentStudio ||
+      this.formDiscipline !== currentDiscipline
     );
   }
 
@@ -819,6 +870,15 @@ export class UserDetailComponent implements OnInit {
     }
     if (this.formActive !== u.active) {
       updates['active'] = this.formActive;
+    }
+
+    const currentStudio = u.dimensions?.studio ?? '';
+    const currentDiscipline = u.dimensions?.discipline ?? '';
+    if (this.formStudio !== currentStudio || this.formDiscipline !== currentDiscipline) {
+      updates['dimensions'] = {
+        studio: this.formStudio === '' ? null : this.formStudio,
+        discipline: this.formDiscipline === '' ? null : this.formDiscipline,
+      };
     }
 
     this.#usersService.updateUser(this.#userId, updates).subscribe({
@@ -909,5 +969,7 @@ export class UserDetailComponent implements OnInit {
     this.formPhotoUrl = user.photoUrl || '';
     this.formUserType = user.userType || 'user';
     this.formActive = user.active;
+    this.formStudio = user.dimensions?.studio ?? '';
+    this.formDiscipline = user.dimensions?.discipline ?? '';
   }
 }

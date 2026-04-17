@@ -3,6 +3,11 @@ import { BaseDocument } from '../core/base.types';
 export type UserType = 'user' | 'bot' | 'system';
 export type UserRole = 'admin' | 'user';
 
+export interface UserDimensions {
+  studio?: string | null;
+  discipline?: string | null;
+}
+
 export interface UserDto extends BaseDocument {
   name: string;
   displayName: string;
@@ -15,6 +20,7 @@ export interface UserDto extends BaseDocument {
   uid?: string; // Firebase Auth UID
   userType: UserType;
   role?: UserRole;
+  dimensions?: UserDimensions;
 }
 
 export interface CreateUserDto {
@@ -34,6 +40,7 @@ export interface UpdateUserDto {
   active?: boolean;
   userType?: UserType;
   role?: UserRole;
+  dimensions?: UserDimensions;
 }
 
 export interface UserProfileDto extends UserDto {
