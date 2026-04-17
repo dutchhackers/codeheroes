@@ -2,8 +2,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Auth, user } from '@angular/fire/auth';
 import { SystemOptionsDto } from '@codeheroes/types';
-import { Observable, ReplaySubject, defer, from, of, switchMap, tap } from 'rxjs';
+import { Observable, catchError, from, of, shareReplay, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+
+const EMPTY_OPTIONS: SystemOptionsDto = { studios: [], disciplines: [] };
 
 @Injectable({ providedIn: 'root' })
 export class SystemOptionsService {
@@ -11,32 +13,22 @@ export class SystemOptionsService {
   readonly #auth = inject(Auth);
   readonly #authUser$ = user(this.#auth);
 
-  #cache$: ReplaySubject<SystemOptionsDto> | null = null;
+  #cache$: Observable<SystemOptionsDto> | null = null;
 
   getOptions(): Observable<SystemOptionsDto> {
-    if (this.#cache$) {
-      return this.#cache$.asObservable();
+    if (!this.#cache$) {
+      this.#cache$ = this.#fetch().pipe(
+        catchError(() => of(EMPTY_OPTIONS)),
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
     }
-    const subject = new ReplaySubject<SystemOptionsDto>(1);
-    this.#cache$ = subject;
-
-    return defer(() => this.#fetch()).pipe(
-      tap({
-        next: (value) => subject.next(value),
-        error: () => {
-          this.#cache$ = null;
-          subject.next({ studios: [], disciplines: [] });
-          subject.complete();
-        },
-      }),
-      switchMap(() => subject.asObservable()),
-    );
+    return this.#cache$;
   }
 
   #fetch(): Observable<SystemOptionsDto> {
     return this.#authUser$.pipe(
       switchMap((authUser) => {
-        if (!authUser) return of({ studios: [], disciplines: [] });
+        if (!authUser) return of(EMPTY_OPTIONS);
         return from(authUser.getIdToken()).pipe(
           switchMap((token) => {
             const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);

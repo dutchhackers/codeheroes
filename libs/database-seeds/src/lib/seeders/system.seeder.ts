@@ -1,18 +1,6 @@
+import { DisciplineOption, StudioOption } from '@codeheroes/types';
 import { Firestore, Timestamp } from 'firebase-admin/firestore';
 import { Seeder } from '../types/seeder.interface';
-
-interface StudioOption {
-  id: string;
-  label: string;
-  country?: string;
-  active: boolean;
-}
-
-interface DisciplineOption {
-  id: string;
-  label: string;
-  active: boolean;
-}
 
 interface SystemSettings {
   allowedDomains: string[];

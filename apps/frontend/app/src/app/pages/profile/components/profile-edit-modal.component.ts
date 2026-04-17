@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  OnDestroy,
   OnInit,
   computed,
   inject,
@@ -323,7 +324,7 @@ export interface ProfileEditPayload {
     `,
   ],
 })
-export class ProfileEditModalComponent implements AfterViewInit, OnInit {
+export class ProfileEditModalComponent implements AfterViewInit, OnDestroy, OnInit {
   readonly #systemOptions = inject(SystemOptionsService);
 
   currentDisplayName = input.required<string>();
@@ -429,9 +430,12 @@ export class ProfileEditModalComponent implements AfterViewInit, OnInit {
     // is done by more specific event bindings.
   }
 
+  ngOnDestroy() {
+    this.#optionsSub?.unsubscribe();
+  }
+
   onCancel() {
     if (!this.isSaving()) {
-      this.#optionsSub?.unsubscribe();
       this.dismiss.emit();
     }
   }

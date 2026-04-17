@@ -1,17 +1,5 @@
+import { DisciplineOption, StudioOption } from '@codeheroes/types';
 import { BaseFirestoreService } from './base.service';
-
-export interface StudioOption {
-  id: string;
-  label: string;
-  country?: string;
-  active: boolean;
-}
-
-export interface DisciplineOption {
-  id: string;
-  label: string;
-  active: boolean;
-}
 
 interface SystemSettings {
   allowedDomains?: string[];
