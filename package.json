@@ -80,7 +80,7 @@
     "commander": "^14.0.3",
     "dotenv": "^17.4.0",
     "esbuild": "^0.28.0",
-    "eslint": "^10.2.0",
+    "eslint": "^10.2.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "firebase-functions-test": "^3.4.1",
