@@ -3,5 +3,7 @@
 /dist
 /coverage
 /.nx/cache
+/.nx/polygraph
+/.nx/self-healing
 /.nx/workspace-data
 .angular
