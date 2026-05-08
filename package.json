@@ -37,7 +37,7 @@
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "express-rate-limit": "^8.5.0",
     "firebase": "^12.12.1",
-    "firebase-admin": "^13.8.0",
+    "firebase-admin": "^13.9.0",
     "firebase-functions": "^7.2.5",
     "helmet": "^8.1.0",
     "ngx-echarts": "^21.0.0",
