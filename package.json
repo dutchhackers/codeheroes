@@ -98,7 +98,7 @@
     "tslib": "^2.3.0",
     "typescript": "5.9.3",
     "typescript-eslint": "^8.59.2",
-    "verdaccio": "6.5.2"
+    "verdaccio": "6.6.0"
   },
   "nx": {
     "includedScripts": []
