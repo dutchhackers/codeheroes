@@ -12,67 +12,16 @@ updates:
     ignore:
       - dependency-name: '@move4mobile*'
     groups:
-      angular:
-        applies-to: version-updates
-        patterns:
-          - '@angular*'
-          - '@schematics/angular'
-          - 'zone.js'
-      nx:
-        applies-to: version-updates
-        patterns:
-          - '@nx/*'
-          - 'nx*'
-      firebase:
-        applies-to: version-updates
-        patterns:
-          - 'firebase'
-          - 'firebase-*'
-          - '@angular/fire'
-          - '@firebase/*'
-      firebase-admin:
-        applies-to: version-updates
-        patterns:
-          - 'firebase-admin'
-          - 'firebase-functions'
-          - 'firebase-functions-test'
-          - '@simondotm/nx-firebase'
-      eslint:
-        applies-to: version-updates
-        patterns:
-          - 'eslint*'
-          - '@eslint/*'
-          - 'eslint-config-*'
-      typescript-eslint:
-        applies-to: version-updates
-        patterns:
-          - '@typescript-eslint/*'
-          - 'typescript-eslint'
-      typescript:
-        applies-to: version-updates
-        patterns:
-          - 'typescript'
-          - 'tslib'
-      swc:
-        applies-to: version-updates
-        patterns:
-          - '@swc*'
-      jest:
-        applies-to: version-updates
-        patterns:
-          - 'jest'
-          - 'jest-*'
-          - '@jest/*'
-          - 'ts-jest'
-      tailwindcss:
-        applies-to: version-updates
-        patterns:
-          - 'tailwindcss'
-          - '@tailwindcss/*'
-      types:
-        applies-to: version-updates
-        patterns:
-          - '@types/*'
+      production-minor-patch:
+        dependency-type: 'production'
+        update-types:
+          - 'minor'
+          - 'patch'
+      development-minor-patch:
+        dependency-type: 'development'
+        update-types:
+          - 'minor'
+          - 'patch'
 
   - package-ecosystem: 'github-actions'
     directory: '/'
@@ -84,3 +33,8 @@ updates:
     labels:
       - 'dependencies'
       - 'github-actions'
+    groups:
+      actions-minor-patch:
+        update-types:
+          - 'minor'
+          - 'patch'
