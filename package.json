@@ -31,7 +31,7 @@
     "angular-svg-icon": "^19.1.1",
     "axios": "^1.16.1",
     "class-transformer": "^0.5.1",
-    "date-fns": "^4.3.0",
+    "date-fns": "^4.4.0",
     "echarts": "^6.1.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-simple-import-sort": "^13.0.0",
