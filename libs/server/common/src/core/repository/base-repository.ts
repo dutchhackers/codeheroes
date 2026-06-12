@@ -114,8 +114,8 @@ export abstract class BaseRepository<T extends { id: string }>
       }
 
       return {
-        id: doc.id,
         ...this.fromFirestore(doc.data() || {}),
+        id: doc.id,
       } as T;
     } catch (error) {
       logger.error(`Error finding document by ID in ${this.collectionPath}`, { id, error });
@@ -134,8 +134,8 @@ export abstract class BaseRepository<T extends { id: string }>
       return snapshot.docs.map(
         (doc) =>
           ({
-            id: doc.id,
             ...this.fromFirestore(doc.data()),
+            id: doc.id,
           }) as T,
       );
     } catch (error) {
@@ -162,8 +162,8 @@ export abstract class BaseRepository<T extends { id: string }>
       await docRef.set(newData);
 
       return {
-        id: docRef.id,
         ...this.fromFirestore(newData),
+        id: docRef.id,
         createdAt: now,
         updatedAt: now,
       } as T;
@@ -220,8 +220,8 @@ export abstract class BaseRepository<T extends { id: string }>
       return snapshot.docs.map(
         (doc) =>
           ({
-            id: doc.id,
             ...this.fromFirestore(doc.data()),
+            id: doc.id,
           }) as T,
       );
     } catch (error) {
@@ -259,8 +259,8 @@ export abstract class BaseRepository<T extends { id: string }>
       const items = snapshot.docs.slice(0, limit).map(
         (doc) =>
           ({
-            id: doc.id,
             ...this.fromFirestore(doc.data()),
+            id: doc.id,
           }) as T,
       );
 
@@ -329,8 +329,8 @@ export abstract class BaseRepository<T extends { id: string }>
         batch.set(docRef, newData);
 
         newItems.push({
-          id: docRef.id,
           ...this.fromFirestore(newData),
+          id: docRef.id,
           createdAt: now,
           updatedAt: now,
         } as T);
