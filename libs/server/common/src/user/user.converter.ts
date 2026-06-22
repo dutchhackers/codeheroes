@@ -1,12 +1,12 @@
-import * as admin from 'firebase-admin';
+import { DocumentData, FirestoreDataConverter, QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { User } from './user.model';
 
 // --- Firestore Data Converter ---
-export const userConverter: admin.firestore.FirestoreDataConverter<User> = {
-  toFirestore: (user: User): admin.firestore.DocumentData => {
+export const userConverter: FirestoreDataConverter<User> = {
+  toFirestore: (user: User): DocumentData => {
     return user;
   },
-  fromFirestore: (snapshot: admin.firestore.QueryDocumentSnapshot): User => {
+  fromFirestore: (snapshot: QueryDocumentSnapshot): User => {
     const data = snapshot.data();
     if (!data) {
       throw new Error('Document data is undefined');

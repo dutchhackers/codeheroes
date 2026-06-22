@@ -1,11 +1,11 @@
-import * as admin from 'firebase-admin';
+import { DocumentData, FirestoreDataConverter, QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { Event } from './event.model';
 
-export const eventConverter: admin.firestore.FirestoreDataConverter<Event> = {
-  toFirestore: (user: Event): admin.firestore.DocumentData => {
+export const eventConverter: FirestoreDataConverter<Event> = {
+  toFirestore: (user: Event): DocumentData => {
     return user;
   },
-  fromFirestore: (snapshot: admin.firestore.QueryDocumentSnapshot): Event => {
+  fromFirestore: (snapshot: QueryDocumentSnapshot): Event => {
     const data = snapshot.data();
     if (!data) {
       throw new Error('Document data is undefined');
