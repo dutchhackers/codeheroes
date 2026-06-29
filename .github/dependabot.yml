@@ -11,6 +11,17 @@ updates:
       - 'dependencies'
     ignore:
       - dependency-name: '@move4mobile*'
+      # Angular majors are coupled to Nx — @nx/angular@23 peers cap the
+      # Angular toolchain < 22.0.0. Hold major bumps until Nx supports them
+      # (run via nx migrate, not standalone). Minor/patch still flow.
+      - dependency-name: '@angular*'
+        update-types:
+          - 'version-update:semver-major'
+      # firebase-admin v14 is blocked by firebase-functions@7 peer
+      # (^11||^12||^13). Hold the major until firebase-functions relaxes it.
+      - dependency-name: 'firebase-admin'
+        update-types:
+          - 'version-update:semver-major'
     groups:
       production-minor-patch:
         dependency-type: 'production'
