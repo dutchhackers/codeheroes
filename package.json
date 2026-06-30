@@ -21,7 +21,7 @@
     "@angular/fire": "^21.0.0-rc.0",
     "@angular/forms": "21.2.15",
     "@angular/platform-browser": "21.2.15",
-    "@angular/platform-browser-dynamic": "21.2.15",
+    "@angular/platform-browser-dynamic": "22.0.4",
     "@angular/pwa": "21.2.13",
     "@angular/router": "21.2.15",
     "@angular/service-worker": "21.2.15",
