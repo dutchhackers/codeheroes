@@ -1,7 +1,8 @@
+import type { Firestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 
 export class SetAdminRoleMigration {
-  async run(db: FirebaseFirestore.Firestore, email: string): Promise<void> {
+  async run(db: Firestore, email: string): Promise<void> {
     console.log(`Setting admin role for user with email: ${email}`);
 
     const usersRef = db.collection('users');

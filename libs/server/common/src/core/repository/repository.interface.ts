@@ -1,4 +1,4 @@
-import { WhereFilterOp, OrderByDirection } from 'firebase-admin/firestore';
+import { WhereFilterOp, OrderByDirection, type Transaction } from 'firebase-admin/firestore';
 
 /** Base repository interface for standard CRUD operations */
 export interface IRepository<T extends { id: string }> {
@@ -32,7 +32,7 @@ export interface IAdvancedRepository<T extends { id: string }> extends IReposito
 }
 
 /** Transaction function type */
-export type TransactionFunction<R> = (transaction: FirebaseFirestore.Transaction) => Promise<R>;
+export type TransactionFunction<R> = (transaction: Transaction) => Promise<R>;
 
 /** Repository with transaction support */
 export interface ITransactionalRepository {

@@ -1,5 +1,6 @@
+import type { Firestore } from 'firebase-admin/firestore';
 export class LowercaseNamesMigration {
-  async run(db: FirebaseFirestore.Firestore): Promise<void> {
+  async run(db: Firestore): Promise<void> {
     console.log('Starting displayNameLower backfill migration...');
 
     const usersRef = db.collection('users');

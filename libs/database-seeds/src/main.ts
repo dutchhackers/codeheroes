@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { UserSeeder } from './lib/seeders/user.seeder';
 import { ConnectedAccountSeeder } from './lib/seeders/connected-account.seeder';
 import { SystemSeeder } from './lib/seeders/system.seeder';
@@ -43,7 +43,7 @@ Examples:
 `);
 }
 
-async function runSeed(db: FirebaseFirestore.Firestore) {
+async function runSeed(db: Firestore) {
   const userSeeder = new UserSeeder();
   const connectedAccountSeeder = new ConnectedAccountSeeder();
   const systemSeeder = new SystemSeeder();
@@ -68,32 +68,32 @@ async function runSeed(db: FirebaseFirestore.Firestore) {
   console.log('✅ Seeding completed');
 }
 
-async function runResetProgression(db: FirebaseFirestore.Firestore) {
+async function runResetProgression(db: Firestore) {
   const resetter = new ProgressionResetter();
   await resetter.reset(db);
 }
 
-async function runDiscoverSchema(db: FirebaseFirestore.Firestore) {
+async function runDiscoverSchema(db: Firestore) {
   const discovery = new SchemaDiscovery(db);
   await discovery.discover();
 }
 
-async function runBackfillLowercaseNames(db: FirebaseFirestore.Firestore) {
+async function runBackfillLowercaseNames(db: Firestore) {
   const migration = new LowercaseNamesMigration();
   await migration.run(db);
 }
 
-async function runBackfillName(db: FirebaseFirestore.Firestore) {
+async function runBackfillName(db: Firestore) {
   const migration = new BackfillNameMigration();
   await migration.run(db);
 }
 
-async function runBackfillNameLower(db: FirebaseFirestore.Firestore) {
+async function runBackfillNameLower(db: Firestore) {
   const migration = new BackfillNameLowerMigration();
   await migration.run(db);
 }
 
-async function runClearLastLogin(db: FirebaseFirestore.Firestore) {
+async function runClearLastLogin(db: Firestore) {
   const migration = new ClearLastLoginMigration();
   await migration.run(db);
 }

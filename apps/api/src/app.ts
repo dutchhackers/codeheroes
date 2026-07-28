@@ -2,7 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import admin from 'firebase-admin';
+import { initializeApp } from 'firebase-admin/app';
 
 import { AdminController } from './controllers/admin-controller';
 import { CharactersController } from './controllers/characters-controller';
@@ -21,7 +21,7 @@ import { UsersController } from './controllers/users-controller';
 
 const app = express();
 
-admin.initializeApp();
+initializeApp();
 
 // Security headers
 app.use(helmet());

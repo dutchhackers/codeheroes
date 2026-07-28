@@ -1,6 +1,6 @@
 import { BaseRepository, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { Activity, Collections, TimeBasedActivityStats, isGameActionActivity } from '@codeheroes/types';
-import { Firestore } from 'firebase-admin/firestore';
+import { Firestore, type DocumentData, type Query } from 'firebase-admin/firestore';
 import { getTimePeriodIds } from '../../utils/time-periods.utils';
 
 /**
@@ -153,7 +153,7 @@ export class ActivityRepository extends BaseRepository<Activity> {
       const collectionRef = this.db.collection(Collections.Users).doc(userId).collection(Collections.Activities);
 
       // Create a query from the CollectionReference
-      let query = collectionRef as FirebaseFirestore.Query<FirebaseFirestore.DocumentData>;
+      let query = collectionRef as Query<DocumentData>;
 
       // Apply the condition if needed
       if (activityType) {

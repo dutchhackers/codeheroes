@@ -1,7 +1,7 @@
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 
 export class ClearLastLoginMigration {
-  async run(db: FirebaseFirestore.Firestore): Promise<void> {
+  async run(db: Firestore): Promise<void> {
     console.log('Starting clear-last-login migration...');
 
     const usersRef = db.collection('users');
