@@ -1,5 +1,6 @@
+import type { Firestore } from 'firebase-admin/firestore';
 export class BackfillNameMigration {
-  async run(db: FirebaseFirestore.Firestore): Promise<void> {
+  async run(db: Firestore): Promise<void> {
     console.log('Starting name backfill migration...');
 
     const usersRef = db.collection('users');

@@ -1,7 +1,8 @@
+import type { Firestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 
 export class BackfillCustomClaimsMigration {
-  async run(db: FirebaseFirestore.Firestore): Promise<void> {
+  async run(db: Firestore): Promise<void> {
     console.log('Starting customUserId claim backfill...');
 
     const usersRef = db.collection('users');

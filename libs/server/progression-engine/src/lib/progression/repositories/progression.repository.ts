@@ -1,6 +1,6 @@
 import { BaseRepository, getCurrentTimeAsISO, logger } from '@codeheroes/common';
 import { ActivityCounters, Collections } from '@codeheroes/types';
-import { FieldValue, Firestore } from 'firebase-admin/firestore';
+import { FieldValue, Firestore, type DocumentReference } from 'firebase-admin/firestore';
 import { getXpProgress } from '../../config/level-thresholds';
 import { getTimePeriodIds } from '../../utils/time-periods.utils';
 import { ProgressionState, ProgressionUpdate, ProgressionUpdateResult } from '../core/progression-state.model';
@@ -256,10 +256,10 @@ export class ProgressionRepository extends BaseRepository<ProgressionState> {
   private async executeStateUpdateTransaction(
     plan: TransactionPlan,
     refs: {
-      statsRef: FirebaseFirestore.DocumentReference;
-      dailyStatsRef: FirebaseFirestore.DocumentReference;
-      weeklyStatsRef: FirebaseFirestore.DocumentReference;
-      userRef: FirebaseFirestore.DocumentReference;
+      statsRef: DocumentReference;
+      dailyStatsRef: DocumentReference;
+      weeklyStatsRef: DocumentReference;
+      userRef: DocumentReference;
     },
   ): Promise<ProgressionUpdateResult> {
     // If initialization is needed, handle specially

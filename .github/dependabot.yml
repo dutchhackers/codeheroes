@@ -17,11 +17,6 @@ updates:
       - dependency-name: '@angular*'
         update-types:
           - 'version-update:semver-major'
-      # firebase-admin v14 is blocked by firebase-functions@7 peer
-      # (^11||^12||^13). Hold the major until firebase-functions relaxes it.
-      - dependency-name: 'firebase-admin'
-        update-types:
-          - 'version-update:semver-major'
     groups:
       production-minor-patch:
         dependency-type: 'production'

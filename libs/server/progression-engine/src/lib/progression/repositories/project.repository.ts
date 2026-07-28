@@ -8,7 +8,7 @@ import {
   ActivityCounters,
   GameActionType,
 } from '@codeheroes/types';
-import { FieldValue, Firestore } from 'firebase-admin/firestore';
+import { FieldValue, Firestore, type DocumentReference, type DocumentSnapshot, type WriteBatch } from 'firebase-admin/firestore';
 import { getTimePeriodIds } from '../../utils/time-periods.utils';
 
 export interface UpdateProjectStatsParams {
@@ -256,9 +256,9 @@ export class ProjectRepository extends BaseRepository<Project> {
   }
 
   private batchTimeBasedStats(
-    batch: FirebaseFirestore.WriteBatch,
-    doc: FirebaseFirestore.DocumentSnapshot,
-    ref: FirebaseFirestore.DocumentReference,
+    batch: WriteBatch,
+    doc: DocumentSnapshot,
+    ref: DocumentReference,
     timeframeId: string,
     params: {
       xpGained: number;
