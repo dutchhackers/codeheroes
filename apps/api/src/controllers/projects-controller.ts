@@ -4,6 +4,7 @@ import { CONNECTED_ACCOUNT_PROVIDERS, ProjectDetailDto, ProjectSummaryDto } from
 import * as express from 'express';
 import { z } from 'zod';
 import { getTimePeriodIds } from '@codeheroes/progression-engine';
+import { adminMiddleware } from '../middleware/admin.middleware';
 import { validate } from '../middleware/validate.middleware';
 
 const router = express.Router();
@@ -136,7 +137,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /projects — create project
-router.post('/', validate(createProjectSchema), async (req, res) => {
+router.post('/', adminMiddleware, validate(createProjectSchema), async (req, res) => {
   logger.debug('POST /projects', req.body);
 
   try {
@@ -171,7 +172,7 @@ router.post('/', validate(createProjectSchema), async (req, res) => {
 });
 
 // PUT /projects/:id — update project
-router.put('/:id', validate(updateProjectSchema), async (req, res) => {
+router.put('/:id', adminMiddleware, validate(updateProjectSchema), async (req, res) => {
   logger.debug('PUT /projects/:id', { id: req.params.id, body: req.body });
 
   try {
@@ -208,7 +209,7 @@ router.put('/:id', validate(updateProjectSchema), async (req, res) => {
 });
 
 // DELETE /projects/:id — delete project
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', adminMiddleware, async (req, res) => {
   logger.debug('DELETE /projects/:id', req.params);
 
   try {

@@ -2,9 +2,13 @@ import { DatabaseInstance, logger, UnmatchedEventRepository } from '@codeheroes/
 import { UnmatchedEventCategory, UnmatchedEventResolutionAction, UnmatchedEventStatus } from '@codeheroes/types';
 import * as express from 'express';
 import { z } from 'zod';
+import { adminMiddleware } from '../middleware/admin.middleware';
 import { validate } from '../middleware/validate.middleware';
 
 const router = express.Router();
+
+// All unmatched-event routes are admin-only
+router.use(adminMiddleware);
 
 const CATEGORIES: readonly [UnmatchedEventCategory, ...UnmatchedEventCategory[]] = ['unknown_user', 'unlinked_repo'];
 const STATUSES: readonly [UnmatchedEventStatus, ...UnmatchedEventStatus[]] = ['pending', 'resolved', 'dismissed'];

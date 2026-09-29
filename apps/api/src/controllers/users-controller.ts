@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { ConnectedAccountDto } from '../core/dto/connected-account.dto';
 import { UserDto } from '../core/dto/user.dto';
 import { transformArrayTo, transformTo } from '../core/utils/transformer.utils';
+import { adminMiddleware } from '../middleware/admin.middleware';
 import { validate } from '../middleware/validate.middleware';
 
 const router = express.Router();
@@ -76,7 +77,7 @@ router.get('/', async (req, res) => {
   res.json(transformedUsers);
 });
 
-router.post('/', validate(createUserSchema), async (req, res) => {
+router.post('/', adminMiddleware, validate(createUserSchema), async (req, res) => {
   logger.debug('POST /users', req.body);
 
   const userService = new UserService();
@@ -254,7 +255,7 @@ router.post('/:userId/connect-github', async (req, res) => {
   }
 });
 
-router.post('/:userId/connected-accounts', validate(addConnectedAccountSchema), async (req, res) => {
+router.post('/:userId/connected-accounts', adminMiddleware, validate(addConnectedAccountSchema), async (req, res) => {
   const { userId } = req.params;
   const { provider, externalUserId, externalUserName } = req.body;
   logger.debug('POST /users/:userId/connected-accounts', { userId, provider, externalUserId });
@@ -303,7 +304,7 @@ router.post('/:userId/connected-accounts', validate(addConnectedAccountSchema), 
   }
 });
 
-router.delete('/:userId/connected-accounts/:accountId', async (req, res) => {
+router.delete('/:userId/connected-accounts/:accountId', adminMiddleware, async (req, res) => {
   const { userId, accountId } = req.params;
   logger.debug('DELETE /users/:userId/connected-accounts/:accountId', { userId, accountId });
 
