@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy, computed } from '@angular/core';
+import { Component, DestroyRef, inject, signal, OnInit, OnDestroy, computed } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {
   LeaderboardService,
@@ -6,6 +6,8 @@ import {
   ProjectLeaderboardEntry,
 } from '../../core/services/leaderboard.service';
 import { LeaderboardSectionComponent } from './leaderboard-section.component';
+import { registerWebMcpTools } from '../../core/webmcp/model-context';
+import { createShowLeaderboardTool } from '../../core/webmcp/code-heroes-tools';
 
 type LeaderboardPeriod = 'week' | 'day';
 
@@ -128,6 +130,7 @@ type LeaderboardPeriod = 'week' | 'day';
 })
 export class LeaderboardComponent implements OnInit, OnDestroy {
   readonly #leaderboardService = inject(LeaderboardService);
+  readonly #destroyRef = inject(DestroyRef);
 
   activePeriod = signal<LeaderboardPeriod>('week');
   heroesLoading = signal(true);
@@ -145,6 +148,22 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.#loadAll();
+    registerWebMcpTools(
+      [
+        createShowLeaderboardTool({
+          board: 'Heroes',
+          activePeriod: () => this.activePeriod(),
+          switchPeriod: (period) => this.switchPeriod(period),
+          isLoading: () => this.heroesLoading(),
+          rows: () =>
+            this.heroEntries().map((e) => ({ id: e.userId, name: e.displayName, xpGained: e.xpGained, level: e.level })),
+          currentUserId: () => this.currentUserId(),
+          // The overview only loads the top 5 heroes.
+          partial: true,
+        }),
+      ],
+      this.#destroyRef,
+    );
   }
 
   ngOnDestroy() {

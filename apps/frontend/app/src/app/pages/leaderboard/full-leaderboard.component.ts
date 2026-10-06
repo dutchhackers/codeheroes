@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, DestroyRef, ElementRef, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -8,6 +8,9 @@ import {
   ProjectLeaderboardEntry,
 } from '../../core/services/leaderboard.service';
 import * as LeaderboardUtils from '../hq/utils/leaderboard.utils';
+import { AnyWebMcpTool, registerWebMcpTools } from '../../core/webmcp/model-context';
+import { createCompareWithTool, createShowLeaderboardTool } from '../../core/webmcp/code-heroes-tools';
+import { RankedRow } from '../../core/webmcp/webmcp-format';
 
 type LeaderboardPeriod = 'week' | 'day';
 type LeaderboardType = 'heroes' | 'bots' | 'projects';
@@ -67,6 +70,8 @@ type LeaderboardType = 'heroes' | 'bots' | 'projects';
               <div
                 class="leaderboard-entry"
                 [class.is-current-user]="entry.userId === currentUserId()"
+                [class.is-highlighted]="entry.userId === highlightedId()"
+                [attr.data-entry-id]="entry.userId"
               >
                 <span class="rank" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">
                   @if (i === 0) { 🥇 }
@@ -195,6 +200,11 @@ type LeaderboardType = 'heroes' | 'bots' | 'projects';
         border-color: rgba(255, 255, 255, 0.1);
       }
 
+      .leaderboard-entry.is-highlighted {
+        border-color: var(--neon-cyan);
+        box-shadow: 0 0 14px rgba(6, 182, 212, 0.35);
+      }
+
       .leaderboard-entry.is-current-user {
         background: rgba(0, 245, 255, 0.1);
         border-color: rgba(0, 245, 255, 0.3);
@@ -303,6 +313,8 @@ export class FullLeaderboardComponent implements OnInit, OnDestroy {
   readonly #leaderboardService = inject(LeaderboardService);
   readonly #route = inject(ActivatedRoute);
   readonly #location = inject(Location);
+  readonly #destroyRef = inject(DestroyRef);
+  readonly #host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   leaderboardType: LeaderboardType = 'heroes';
   activePeriod = signal<LeaderboardPeriod>('week');
@@ -312,6 +324,8 @@ export class FullLeaderboardComponent implements OnInit, OnDestroy {
   currentUserId = signal<string | null>(null);
 
   pageTitle = signal('Leaderboard');
+  /** Row highlighted by the compare_with WebMCP tool. */
+  highlightedId = signal<string | null>(null);
 
   #dataSub: Subscription | null = null;
 
@@ -330,6 +344,7 @@ export class FullLeaderboardComponent implements OnInit, OnDestroy {
     this.pageTitle.set(titles[this.leaderboardType]);
 
     this.#loadData();
+    this.#registerWebMcpTools();
   }
 
   ngOnDestroy() {
@@ -345,6 +360,51 @@ export class FullLeaderboardComponent implements OnInit, OnDestroy {
 
   goBack() {
     this.#location.back();
+  }
+
+  #rows(): RankedRow[] {
+    if (this.leaderboardType === 'projects') {
+      return this.projectEntries().map((e) => ({ id: e.projectId, name: e.name, xpGained: e.xpGained }));
+    }
+    return this.userEntries().map((e) => ({
+      id: e.userId,
+      name: e.displayName,
+      xpGained: e.xpGained,
+      level: e.level,
+      totalXp: e.totalXp,
+    }));
+  }
+
+  #registerWebMcpTools() {
+    const tools: AnyWebMcpTool[] = [
+      createShowLeaderboardTool({
+        board: this.pageTitle(),
+        activePeriod: () => this.activePeriod(),
+        switchPeriod: (period) => this.switchPeriod(period),
+        isLoading: () => this.isLoading(),
+        rows: () => this.#rows(),
+        currentUserId: () => this.currentUserId(),
+      }),
+    ];
+    if (this.leaderboardType === 'heroes') {
+      tools.push(
+        createCompareWithTool({
+          activePeriod: () => this.activePeriod(),
+          isLoading: () => this.isLoading(),
+          rows: () => this.#rows(),
+          currentUserId: () => this.currentUserId(),
+          highlight: (id) => {
+            this.highlightedId.set(id);
+            setTimeout(() =>
+              this.#host.nativeElement
+                .querySelector(`[data-entry-id="${CSS.escape(id)}"]`)
+                ?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
+            );
+          },
+        }),
+      );
+    }
+    registerWebMcpTools(tools, this.#destroyRef);
   }
 
   #loadData() {
