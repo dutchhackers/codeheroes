@@ -148,6 +148,37 @@ describe('code-heroes-tools', () => {
     expect((await tool.execute({ period: 'year' })).isError).toBe(true);
   });
 
+  it('show_leaderboard errors when the period changes while loading', async () => {
+    let loading = true;
+    const tool = createShowLeaderboardTool({
+      board: 'Heroes',
+      activePeriod: () => 'week', // user flipped back to week meanwhile
+      switchPeriod: () => setTimeout(() => (loading = false), 10),
+      isLoading: () => loading,
+      rows: () => rows,
+      currentUserId: () => null,
+    });
+    const result = await tool.execute({ period: 'day' });
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('period changed');
+  });
+
+  it('explain_xp errors when HQ never finishes loading', async () => {
+    jest.useFakeTimers();
+    const reveal = jest.fn();
+    const tool = createExplainXpTool({
+      isLoading: () => true,
+      snapshot: () => ({ daily: null, weekly: null, weeklyRank: null }),
+      reveal,
+    });
+    const pending = tool.execute({ period: 'week' });
+    await jest.advanceTimersByTimeAsync(9000);
+    const result = await pending;
+    jest.useRealTimers();
+    expect(result.isError).toBe(true);
+    expect(reveal).not.toHaveBeenCalled();
+  });
+
   it('explain_xp reveals the matching card', async () => {
     const reveal = jest.fn();
     const tool = createExplainXpTool({

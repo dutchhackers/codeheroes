@@ -57,6 +57,10 @@ export function safeName(name: string | undefined | null, max = 40): string {
   return `"${capped}"`;
 }
 
+export function plural(count: number, singular: string, pluralForm = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : pluralForm}`;
+}
+
 export function formatLeaderboardSummary(
   board: string,
   period: WebMcpPeriod,
@@ -107,10 +111,13 @@ export function formatXpBreakdown(period: WebMcpPeriod, snapshot: XpSnapshot, co
     if (compare && daily.goal > 0) {
       const pct = Math.round((daily.xpEarned / daily.goal) * 100);
       const gap = daily.goal - daily.xpEarned;
+      const goal = `Daily goal ${formatNumber(daily.goal)} XP`;
       parts.push(
         gap > 0
-          ? `Daily goal ${formatNumber(daily.goal)} XP: ${pct}% done, ${formatNumber(gap)} XP to go.`
-          : `Daily goal ${formatNumber(daily.goal)} XP reached (${pct}%), ${formatNumber(-gap)} XP over.`,
+          ? `${goal}: ${pct}% done, ${formatNumber(gap)} XP to go.`
+          : gap === 0
+            ? `${goal} reached exactly.`
+            : `${goal} reached (${pct}%), ${formatNumber(-gap)} XP over.`,
       );
     }
     return clampText(parts.join(' '));
@@ -120,8 +127,8 @@ export function formatXpBreakdown(period: WebMcpPeriod, snapshot: XpSnapshot, co
   if (!weekly) return 'This week’s XP has not loaded yet.';
   const parts = [
     `This week you earned ${formatNumber(weekly.xpGained)} XP.`,
-    `Breakdown by activity: ${weekly.prsCreated} PRs opened, ${weekly.prsMerged} merged, ` +
-      `${weekly.reviewsSubmitted} reviews, ${weekly.codePushes} pushes.`,
+    `Breakdown by activity: ${plural(weekly.prsCreated, 'PR')} opened, ${weekly.prsMerged} merged, ` +
+      `${plural(weekly.reviewsSubmitted, 'review')}, ${plural(weekly.codePushes, 'push', 'pushes')}.`,
   ];
   if (compare) {
     parts.push(

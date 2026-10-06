@@ -77,6 +77,19 @@ describe('webmcp-format', () => {
       expect(formatXpBreakdown('day', done, true)).toContain('reached (113%), 1,000 XP over.');
     });
 
+    it('handles hitting the goal exactly', () => {
+      const exact = { ...snapshot, daily: { ...snapshot.daily, xpEarned: 8000 } };
+      expect(formatXpBreakdown('day', exact, true)).toContain('Daily goal 8,000 XP reached exactly.');
+    });
+
+    it('uses singular nouns for counts of one', () => {
+      const one = {
+        ...snapshot,
+        weekly: { xpGained: 10, prsCreated: 1, prsMerged: 1, reviewsSubmitted: 1, codePushes: 1 },
+      };
+      expect(formatXpBreakdown('week', one)).toContain('1 PR opened, 1 merged, 1 review, 1 push.');
+    });
+
     it('summarises the week with the activity breakdown and rank', () => {
       const text = formatXpBreakdown('week', snapshot, true);
       expect(text).toContain('This week you earned 12,000 XP.');

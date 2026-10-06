@@ -57,6 +57,10 @@ export function createShowLeaderboardTool(deps: ShowLeaderboardDeps): WebMcpTool
       if (period !== deps.activePeriod()) deps.switchPeriod(period);
       const loaded = await waitUntil(() => !deps.isLoading());
       if (!loaded) return textResult('The leaderboard is still loading. Try again in a moment.', true);
+      // The period can change while we wait (user click or a concurrent call): never mislabel rows.
+      if (deps.activePeriod() !== period) {
+        return textResult('The visible period changed while loading. Call show_leaderboard again.', true);
+      }
 
       return textResult(
         formatLeaderboardSummary(deps.board, period, deps.rows(), deps.currentUserId(), { partial: deps.partial }),
@@ -96,7 +100,8 @@ export function createExplainXpTool(deps: ExplainXpDeps): WebMcpTool<{ period?: 
       const period = parsePeriod(input?.period);
       if (!period) return textResult("Invalid period. Use 'day' or 'week'.", true);
 
-      await waitUntil(() => !deps.isLoading());
+      const loaded = await waitUntil(() => !deps.isLoading());
+      if (!loaded) return textResult('HQ is still loading. Try again in a moment.', true);
       deps.reveal(period);
       return textResult(formatXpBreakdown(period, deps.snapshot(), input?.compare === true));
     },
