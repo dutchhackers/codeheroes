@@ -83,6 +83,20 @@ These change through humans only. The factory refuses a patch that touches any o
 - `.npmrc`, `.gitattributes`, `.gitmodules`, in any directory
 - `firebase.json`, `*.rules` (Firestore and Storage security rules)
 - `scripts/setup-firebase.js`
+- What decides how tests run: `nx.json`, `.nxignore`, `jest.config.*`, `jest.preset.*`,
+  `tsconfig.spec.json`, `test-setup.*`
+
+The test contract is checked too (`.factory/guard.sh`), so a green check still means the
+tests ran:
+
+- the `scripts` in the root `package.json` stay as they are (dependencies may change);
+- in `project.json` you may change build options, but not `name`, `tags`,
+  `implicitDependencies`, the `test` and `lint` targets or the build executor, and you may
+  not delete one;
+- no test file is deleted, no `.skip`, `.only`, `xit`, `fit` or similar is added, and the
+  number of test cases does not go down.
+
+`run_verify` runs the same guard, so you see a refusal while you can still fix it.
 
 ## Definition of done
 
