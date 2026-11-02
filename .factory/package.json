@@ -1,0 +1,22 @@
+{
+  "name": "codeheroes-factory",
+  "private": true,
+  "description": "Builder for the agent-build workflow. Kept out of the root package so it never touches the app's dependency graph.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build-issue": "tsx build.ts",
+    "typecheck": "tsc --noEmit --strict"
+  },
+  "dependencies": {
+    "@github/copilot-sdk": "1.0.28",
+    "tsx": "4.23.15",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "6.0.3"
+  }
+}

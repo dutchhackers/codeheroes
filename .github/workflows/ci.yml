@@ -32,12 +32,21 @@ jobs:
           path: '**/node_modules'
           key: ubuntu-latest-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
+      # The token is only present while nothing from the PR can run: lifecycle scripts
+      # (which a PR can change through package.json or the lockfile) run in the next
+      # step, without it.
       - name: Install node modules
         if: steps.node-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
         env:
           CI: true
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+
+      - name: Run install scripts
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm rebuild
+        env:
+          CI: true
 
       - name: Setup Firebase
         run: npm run setup

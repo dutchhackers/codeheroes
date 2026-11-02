@@ -1,0 +1,49 @@
+name: Build task (agent)
+description: A build-ready task that the agent-build factory can implement on its own
+title: '<type>(<scope>): <what>'
+labels: ['needs:refine']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A maintainer refines this issue, then replaces `needs:refine` with `agent:build` to start a build.
+        The issue body is all the agent gets: write down what matters, leave the rest to `AGENTS.md`.
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: Which problem does this solve, and for whom?
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: Behaviour as seen from the outside. Do not prescribe the implementation unless it matters.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: One checkbox per testable criterion. The build is judged against these and only these.
+      value: |
+        - [ ] 
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: plan
+    attributes:
+      label: Plan (what we care about)
+      description: Files or projects involved, tests that must exist, API shape, edge cases. Whatever is not here, the agent decides. Use checkboxes only under Acceptance criteria.
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      options:
+        - 'S: one PR, a few files'
+        - 'M: one PR, several files or projects'
+        - 'L: split into sub-issues first (not for agent:build)'
+    validations:
+      required: true

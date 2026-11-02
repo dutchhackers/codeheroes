@@ -1,0 +1,313 @@
+# agent-build: the label `agent:build` on a build-ready issue → a coding agent → a draft PR.
+#
+# Four jobs, so no job holds untrusted input, secrets and write access at the same time
+# (Agents Rule of Two), and code from the agent's patch never runs on a runner that ever
+# holds a write token:
+#   assemble   gate, no agent, no repo code      → task.json
+#   implement  the agent, no write token         → agent.patch + result.json
+#   verify     runs the patched code, no secrets → pass/fail, runner thrown away
+#   publish    applies the patch, never runs it  → branch agent/issue-<n> + draft PR
+# plus `report`, which comments on the issue when a run ends without a PR.
+#
+# Patched code (the agent's shell, the verify run) only ever executes inside a Docker
+# container that gets no GitHub token and no npm token. This workflow runs on `issues`,
+# so its jobs share the default branch's Actions cache scope; code running directly on
+# the runner could reach the runner's cache token and seed a poisoned node_modules cache
+# that the deploy workflows would later restore. Do not add actions/cache or setup-node
+# caching to implement or verify.
+#
+# Factory input and output live in $RUNNER_TEMP/factory, outside the checkout.
+name: agent-build
+
+on:
+  issues:
+    types: [labeled]
+
+permissions: {}
+
+concurrency:
+  group: agent-build-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '24'
+  # Image for everything that runs patched code. Debian glibc x64, matches the SDK's linux-x64 runtime.
+  SANDBOX_IMAGE: node:24-bookworm
+  # Mirrors ci.yml. --base only (no --head): Nx then includes uncommitted and untracked files.
+  VERIFY_COMMAND: npm run setup && npx nx affected -t test build --base=origin/main
+  # Humans only. One pattern, valid as a JS RegExp (build.ts) and as grep -E (guards below).
+  PROTECTED_PATHS: '^(\.github/|\.factory/|AGENTS\.md$|\.gitattributes$|\.gitmodules$|firebase\.json$|scripts/setup-firebase\.js$)|(^|/)\.npmrc$|\.rules$'
+
+jobs:
+  assemble:
+    if: github.event.label.name == 'agent:build' && vars.FACTORY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write # only to refuse visibly: a comment and removal of the label
+    steps:
+      - name: Labeller and issue author need write access
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LABELLER: ${{ github.event.sender.login }}
+          AUTHOR: ${{ github.event.issue.user.login }}
+        run: |
+          for who in "$LABELLER" "$AUTHOR"; do
+            p=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$who/permission" --jq .permission 2>/dev/null || echo none)
+            if [[ "$p" != "admin" && "$p" != "write" ]]; then
+              echo "::error::$who has '$p' access; agent-build needs a labeller and an issue author with write access"
+              exit 1
+            fi
+          done
+
+      - name: Build task.json from the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/factory"
+          gh issue view "$N" -R "$GITHUB_REPOSITORY" --json number,title,body \
+            | jq '{issue: .number, title, body: (.body // ""),
+                   acceptance: [(.body // "") | split("\n")[] | capture("^\\s*- \\[ \\] (?<a>.*\\S)\\s*$")? | .a]}' \
+            > "$RUNNER_TEMP/factory/task.json"
+          n=$(jq '.acceptance | length' "$RUNNER_TEMP/factory/task.json")
+          if [[ "$n" -eq 0 ]]; then
+            echo "::error::the issue has no open acceptance criteria (- [ ] ...)"
+            exit 1
+          fi
+          if jq -e '.body | test("(^|\n)L: split into sub-issues")' "$RUNNER_TEMP/factory/task.json" > /dev/null; then
+            echo "::error::size L: split the issue into sub-issues first"
+            exit 1
+          fi
+          echo "Task with $n acceptance criteria"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: task
+          path: ${{ runner.temp }}/factory/task.json
+
+      - name: Refuse visibly
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh issue comment "$N" -R "$GITHUB_REPOSITORY" --body "agent-build refused this run: see [the workflow log]($RUN_URL)."
+          gh issue edit "$N" -R "$GITHUB_REPOSITORY" --remove-label "agent:build"
+
+  implement:
+    needs: assemble
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # nx affected needs origin/main
+          persist-credentials: false # no git credentials in the checkout
+
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: task
+          path: ${{ runner.temp }}/factory
+
+      # The only step with the npm token: lockfile from main, no lifecycle scripts.
+      - name: Install app dependencies (no scripts)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+
+      - name: Install builder dependencies
+        working-directory: .factory
+        run: npm ci --no-audit --no-fund
+
+      - name: Agent (sandboxed)
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }} # fine-grained PAT: "Copilot Requests"
+          MODEL: ${{ vars.AGENT_MODEL }}
+        run: |
+          docker run --rm \
+            --user "$(id -u):$(id -g)" --security-opt no-new-privileges \
+            -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" -w "$GITHUB_WORKSPACE" \
+            -v "$RUNNER_TEMP/factory:/factory" \
+            -e HOME=/tmp -e CI=true -e NX_DAEMON=false -e NX_NO_CLOUD=true \
+            -e OUT_DIR=/factory -e COPILOT_GITHUB_TOKEN -e MODEL -e VERIFY_COMMAND -e PROTECTED_PATHS \
+            "$SANDBOX_IMAGE" \
+            sh -c 'npm rebuild && node .factory/node_modules/tsx/dist/cli.mjs .factory/build.ts'
+          # exits non-zero unless the agent reported done AND the builder's own verify passed
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: build-output
+          path: |
+            ${{ runner.temp }}/factory/agent.patch
+            ${{ runner.temp }}/factory/result.json
+          if-no-files-found: ignore
+
+  verify:
+    needs: implement
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: build-output
+          path: ${{ runner.temp }}/factory
+
+      - name: Apply the patch and guard protected paths
+        run: |
+          git apply --index "$RUNNER_TEMP/factory/agent.patch"
+          # --no-renames: a move reports its deleted source too. -z: no quoting of odd names.
+          if git diff --cached --name-only --no-renames -z | grep -zE "$PROTECTED_PATHS" | tr '\0' '\n' | grep .; then
+            echo "::error::the patch touches protected paths"; exit 1
+          fi
+          if git diff --cached --summary | grep -E 'mode 120000'; then
+            echo "::error::the patch adds a symlink"; exit 1
+          fi
+          git diff --cached --stat
+
+      # The patched lockfile may be installed with the token, but nothing from it may run here.
+      - name: Install patched dependencies (no scripts)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+
+      - name: Verify (sandboxed)
+        run: |
+          docker run --rm \
+            --user "$(id -u):$(id -g)" --security-opt no-new-privileges \
+            -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" -w "$GITHUB_WORKSPACE" \
+            -e HOME=/tmp -e CI=true -e NX_DAEMON=false -e NX_NO_CLOUD=true -e VERIFY_COMMAND \
+            "$SANDBOX_IMAGE" \
+            sh -c 'npm rebuild && eval "$VERIFY_COMMAND"'
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # all writes go through the App token, minted after the commit
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: build-output
+          path: ${{ runner.temp }}/factory
+
+      - name: Apply and commit (no install, no scripts, no hooks)
+        run: |
+          R="$RUNNER_TEMP/factory/result.json"
+          [[ "$(jq -r .status "$R")" == "done" && "$(jq -r .verified "$R")" == "true" ]] || { echo "::error::result is not done+verified"; exit 1; }
+          git apply --index "$RUNNER_TEMP/factory/agent.patch"
+          if git diff --cached --name-only --no-renames -z | grep -zE "$PROTECTED_PATHS" | tr '\0' '\n' | grep .; then
+            echo "::error::the patch touches protected paths"; exit 1
+          fi
+          if git diff --cached --summary | grep -E 'mode 120000'; then
+            echo "::error::the patch adds a symlink"; exit 1
+          fi
+          git diff --cached --quiet && { echo "::error::the patch is empty"; exit 1; }
+          git -c core.hooksPath=/dev/null \
+              -c user.name="codeheroes-agent[bot]" -c user.email="codeheroes-agent[bot]@users.noreply.github.com" \
+              commit --no-verify -q -m "$(jq -r .prTitle "$R")" -m "Closes #${{ github.event.issue.number }}"
+
+      - name: Write the PR body
+        env:
+          N: ${{ github.event.issue.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          jq -r --arg n "$N" --arg run "$RUN_URL" '
+            "Closes #\($n)\n\n" +
+            "## Summary\n\n\(.summary)\n\n" +
+            "## Acceptance criteria\n\n" +
+            ([.acceptance[] | "- [\(if .met then "x" else " " end)] \(.item)\n  - Evidence: \(.evidence)"] | join("\n")) +
+            "\n\n## Factory\n\n" +
+            "Built by the agent-build workflow ([run](\($run))). Verified on a separate runner before this PR was opened.\n\n" +
+            "| Model | Rounds | Tool calls | Input tokens | Output tokens | Cost |\n|---|---|---|---|---|---|\n" +
+            "| \(.telemetry.model) | \(.telemetry.rounds) | \(.telemetry.toolCalls) | \(.telemetry.inputTokens) | \(.telemetry.outputTokens) | \(.telemetry.cost) |\n" +
+            (if (.questions | length) > 0 then "\n## Open questions\n\n" + ([.questions[] | "- \(.)"] | join("\n")) + "\n" else "" end)
+          ' "$RUNNER_TEMP/factory/result.json" > "$RUNNER_TEMP/factory/pr-body.md"
+
+      # A GitHub App token, not GITHUB_TOKEN: a PR opened with GITHUB_TOKEN triggers no workflows,
+      # so CI and the Copilot review would never run on it.
+      - uses: actions/create-github-app-token@v3
+        id: app
+        with:
+          app-id: ${{ vars.AGENT_APP_ID }}
+          private-key: ${{ secrets.AGENT_APP_PRIVATE_KEY }}
+
+      - name: Push agent/issue-<n> and open or update the draft PR
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          N: ${{ github.event.issue.number }}
+        run: |
+          B="agent/issue-$N"
+          R="$RUNNER_TEMP/factory/result.json"
+          git -c core.hooksPath=/dev/null push --no-verify -f \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$B"
+          if pr=$(gh pr view "$B" -R "$GITHUB_REPOSITORY" --json number,state --jq 'select(.state == "OPEN") | .number') && [[ -n "$pr" ]]; then
+            gh pr edit "$pr" -R "$GITHUB_REPOSITORY" --title "$(jq -r .prTitle "$R")" --body-file "$RUNNER_TEMP/factory/pr-body.md"
+          else
+            gh pr create -R "$GITHUB_REPOSITORY" --draft --base main --head "$B" \
+              --title "$(jq -r .prTitle "$R")" --body-file "$RUNNER_TEMP/factory/pr-body.md" --label agent-built
+          fi
+          gh issue edit "$N" -R "$GITHUB_REPOSITORY" --remove-label "agent:build"
+
+  report:
+    needs: [assemble, implement, verify, publish]
+    if: >-
+      always() && needs.assemble.result == 'success' &&
+      (needs.implement.result == 'failure' || needs.verify.result == 'failure' || needs.publish.result == 'failure')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: build-output
+          path: ${{ runner.temp }}/factory
+
+      - name: Comment, hand over to a human
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          FAILED_JOB: ${{ needs.implement.result == 'failure' && 'implement' || needs.verify.result == 'failure' && 'verify' || 'publish' }}
+        run: |
+          R="$RUNNER_TEMP/factory/result.json"
+          {
+            echo "agent-build finished without a PR (failed job: \`$FAILED_JOB\`, [run]($RUN_URL))."
+            if [[ -f "$R" ]]; then
+              jq -r '
+                (if (.reasons | length) > 0 then "\n**Why:**\n" + ([.reasons[] | "- \(.)"] | join("\n")) else "" end),
+                (if (.questions | length) > 0 then "\n**Questions from the agent:**\n" + ([.questions[] | "- \(.)"] | join("\n")) else "" end),
+                (if (.summary | length) > 0 then "\n**Agent summary:**\n\n\(.summary)" else "" end)
+              ' "$R"
+            fi
+            echo
+            echo "Refine the issue and put \`agent:build\` on it again to retry."
+          } | head -c 60000 > "$RUNNER_TEMP/comment.md"
+          gh issue comment "$N" -R "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/comment.md"
+          gh issue edit "$N" -R "$GITHUB_REPOSITORY" --remove-label "agent:build" --add-label "needs:human"
