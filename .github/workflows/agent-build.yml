@@ -35,8 +35,9 @@ env:
   SANDBOX_IMAGE: node:24-bookworm
   # Mirrors ci.yml. --base only (no --head): Nx then includes uncommitted and untracked files.
   VERIFY_COMMAND: npm run setup && npx nx affected -t test build --base=origin/main
-  # Humans only. One pattern, valid as a JS RegExp (build.ts) and as grep -E (guards below).
-  PROTECTED_PATHS: '^(\.github/|\.factory/|AGENTS\.md$|firebase\.json$|scripts/setup-firebase\.js$)|(^|/)(\.npmrc|\.gitattributes|\.gitmodules)$|\.rules$'
+  # Humans only. One pattern, valid as a JS RegExp (build.ts) and as grep -E (.factory/guard.sh).
+  # Includes what decides how tests run; project.json is checked field by field in guard.sh.
+  PROTECTED_PATHS: '^(\.github/|\.factory/|AGENTS\.md$|firebase\.json$|scripts/setup-firebase\.js$|nx\.json$|\.nxignore$)|(^|/)(\.npmrc|\.gitattributes|\.gitmodules|jest\.(config|preset)\.[cm]?[jt]s|tsconfig\.spec\.json|test-setup\.[jt]s)$|\.rules$'
 
 jobs:
   assemble:
@@ -102,6 +103,7 @@ jobs:
     timeout-minutes: 75
     permissions:
       contents: read
+      copilot-requests: write # the job's own short-lived token makes the Copilot requests
     steps:
       - uses: actions/checkout@v7
         with:
@@ -129,7 +131,10 @@ jobs:
 
       - name: Agent (sandboxed)
         env:
-          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }} # fine-grained PAT: "Copilot Requests"
+          # Default: this job's own GITHUB_TOKEN (copilot-requests: write), short-lived and scoped to the run.
+          # Needs the org policy "Allow use of Copilot CLI billed to the organization". If that policy
+          # can't be enabled, set COPILOT_GITHUB_TOKEN to a fine-grained PAT with "Copilot Requests".
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN || github.token }}
           MODEL: ${{ vars.AGENT_MODEL }}
         run: |
           docker run --rm \
@@ -172,18 +177,12 @@ jobs:
           name: build-output
           path: ${{ runner.temp }}/factory
 
-      - name: Apply the patch and guard protected paths
+      - name: Apply the patch and guard it
         run: |
+          # The guard is copied out of the checkout first: the patch cannot change its own judge.
+          cp .factory/guard.sh "$RUNNER_TEMP/guard.sh"
           git apply --index "$RUNNER_TEMP/factory/agent.patch"
-          # --no-renames: a move reports its deleted source too. -z: no quoting of odd names.
-          if git diff --cached --name-only --no-renames -z | grep -zE "$PROTECTED_PATHS" | tr '\0' '\n' | grep .; then
-            echo "::error::the patch touches protected paths"; exit 1
-          fi
-          # Raw format ':<old mode> <new mode> ...': catches new symlinks and files turned into one.
-          if git diff --cached --raw --no-renames | awk '$2 == "120000" { print; found = 1 } END { exit !found }'; then
-            echo "::error::the patch creates a symlink"; exit 1
-          fi
-          git diff --cached --stat
+          bash "$RUNNER_TEMP/guard.sh"
 
       # The patched lockfile may be installed with the token, but nothing from it may run here.
       - name: Install patched dependencies (no scripts)
@@ -220,14 +219,10 @@ jobs:
         run: |
           R="$RUNNER_TEMP/factory/result.json"
           [[ "$(jq -r .status "$R")" == "done" && "$(jq -r .verified "$R")" == "true" ]] || { echo "::error::result is not done+verified"; exit 1; }
+          # The guard is copied out of the checkout first: the patch cannot change its own judge.
+          cp .factory/guard.sh "$RUNNER_TEMP/guard.sh"
           git apply --index "$RUNNER_TEMP/factory/agent.patch"
-          if git diff --cached --name-only --no-renames -z | grep -zE "$PROTECTED_PATHS" | tr '\0' '\n' | grep .; then
-            echo "::error::the patch touches protected paths"; exit 1
-          fi
-          # Raw format ':<old mode> <new mode> ...': catches new symlinks and files turned into one.
-          if git diff --cached --raw --no-renames | awk '$2 == "120000" { print; found = 1 } END { exit !found }'; then
-            echo "::error::the patch creates a symlink"; exit 1
-          fi
+          bash "$RUNNER_TEMP/guard.sh"
           git diff --cached --quiet && { echo "::error::the patch is empty"; exit 1; }
           git -c core.hooksPath=/dev/null \
               -c user.name="codeheroes-agent[bot]" -c user.email="codeheroes-agent[bot]@users.noreply.github.com" \

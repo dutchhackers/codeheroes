@@ -12,7 +12,7 @@
 import { CopilotClient, defineTool } from '@github/copilot-sdk';
 import type { PermissionRequest, PermissionRequestResult } from '@github/copilot-sdk';
 import { execFileSync, execSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
 
@@ -138,6 +138,9 @@ const telemetry = {
 };
 const startedAt = Date.now();
 const startSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+// Same guard as the verify and publish jobs, copied outside the repository before the agent starts.
+const guard = path.join(outDir, 'guard.sh');
+copyFileSync(path.join(repoRoot, '.factory', 'guard.sh'), guard);
 
 const client = new CopilotClient({ gitHubToken: required('COPILOT_GITHUB_TOKEN'), useLoggedInUser: false });
 await client.start();
@@ -262,7 +265,12 @@ process.exit(publishable ? 0 : 1); // non-zero: no PR; result.json is still uplo
 
 function runVerify(): { ok: boolean; log: string } {
   try {
-    const out = execSync(cfg.verify, { encoding: 'utf8', stdio: 'pipe', timeout: cfg.verifyTimeoutMs });
+    // Stage everything so the guard sees the change as a patch (the final patch is staged the same way).
+    const out = execSync(`git add -A && bash "${guard}" && (${cfg.verify})`, {
+      encoding: 'utf8',
+      stdio: 'pipe',
+      timeout: cfg.verifyTimeoutMs,
+    });
     return { ok: true, log: out.slice(-4000) };
   } catch (e) {
     const err = e as { stdout?: string; stderr?: string; message?: string };
