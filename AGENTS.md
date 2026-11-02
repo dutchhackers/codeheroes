@@ -80,7 +80,7 @@ These change through humans only. The factory refuses a patch that touches any o
 - `.github/` (workflows, issue templates, CODEOWNERS)
 - `.factory/` (the factory itself)
 - `AGENTS.md` (this file)
-- `.npmrc`, `.gitattributes`, `.gitmodules`
+- `.npmrc`, `.gitattributes`, `.gitmodules`, in any directory
 - `firebase.json`, `*.rules` (Firestore and Storage security rules)
 - `scripts/setup-firebase.js`
 

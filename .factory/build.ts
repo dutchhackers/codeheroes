@@ -54,7 +54,9 @@ const AgentResult = z.object({
   status: z.enum(['done', 'blocked']),
   summary: z.string().max(4000),
   prTitle: z.string().describe('Conventional commit title, e.g. "fix(api): reject duplicate installation links"'),
-  acceptance: z.array(z.object({ item: z.string(), met: z.boolean(), evidence: z.string() })),
+  acceptance: z
+    .array(z.object({ item: z.string(), met: z.boolean(), evidence: z.string() }))
+    .describe('One entry per acceptance criterion of the task, item copied verbatim'),
   questions: z.array(z.string()).describe('Open questions for a human; required when status is "blocked"'),
 });
 type AgentResult = z.infer<typeof AgentResult>;
@@ -71,6 +73,10 @@ const relativeToRepo = (p: string): string | undefined => {
   return rel.startsWith('..') || path.isAbsolute(rel) ? undefined : rel.split(path.sep).join('/');
 };
 const isProtected = (rel: string): boolean => cfg.protectedPaths.test(rel);
+const isScratch = (p: string): boolean => {
+  const abs = path.resolve(repoRoot, p);
+  return abs === '/dev/null' || abs === '/tmp' || abs.startsWith('/tmp/');
+};
 
 const deny = (feedback: string): PermissionRequestResult => {
   policyDenials.push(feedback);
@@ -98,6 +104,9 @@ function decide(request: PermissionRequest): PermissionRequestResult {
       if (FORBIDDEN_GIT.test(request.fullCommandText)) {
         return deny('git may only be used to inspect (status, diff, log, show); leave changes uncommitted');
       }
+      // Outside the repository only scratch space is allowed (HOME is /tmp in the sandbox).
+      const outside = request.possiblePaths.find((p) => relativeToRepo(p) === undefined && !isScratch(p));
+      if (outside) return deny(`the command touches ${outside}, outside the repository`);
       const writes = request.hasWriteFileRedirection || request.commands.some((c) => !c.readOnly);
       const touched = request.possiblePaths.map(relativeToRepo).filter((p): p is string => p !== undefined);
       const hit = touched.find(isProtected);
@@ -181,7 +190,8 @@ ${task.body}
 ## Acceptance criteria (the build is judged against these)
 ${task.acceptance.map((a) => `- [ ] ${a}`).join('\n')}
 
-Build it. Use run_verify until it passes. Then answer with the result JSON.`;
+Build it. Use run_verify until it passes. Then answer with the result JSON, with one acceptance entry per
+criterion above, its text copied verbatim.`;
 
 let result: AgentResult | undefined;
 let verify = { ok: false, log: '' };
@@ -213,7 +223,12 @@ try {
 execSync(`git add -A && git diff --cached --binary ${startSha} > "${path.join(outDir, 'agent.patch')}"`);
 
 const titleOk = result !== undefined && CONVENTIONAL_TITLE.test(result.prTitle);
-const allMet = result !== undefined && result.acceptance.length > 0 && result.acceptance.every((a) => a.met);
+// Judge against the task's criteria, not against whatever list the agent returned.
+const normalize = (s: string): string => s.replace(/\s+/g, ' ').trim().toLowerCase();
+const unmet = task.acceptance.filter(
+  (criterion) => !result?.acceptance.some((a) => a.met && normalize(a.item) === normalize(criterion)),
+);
+const allMet = result !== undefined && unmet.length === 0;
 const publishable = !error && verify.ok && result?.status === 'done' && titleOk && allMet;
 telemetry.durationMs = Date.now() - startedAt;
 
@@ -222,7 +237,7 @@ const reasons = [
   result?.status === 'blocked' && 'the agent reported status "blocked"',
   result?.status === 'done' && !verify.ok && `verification still failed after ${telemetry.rounds} round(s)`,
   result && !titleOk && `prTitle is not a conventional commit title: ${result.prTitle}`,
-  result && !allMet && 'not every acceptance criterion is reported as met',
+  result && !allMet && `acceptance criteria not reported as met: ${unmet.join('; ')}`,
 ].filter((r): r is string => typeof r === 'string');
 
 writeFileSync(
