@@ -37,7 +37,7 @@ env:
   VERIFY_COMMAND: npm run setup && npx nx affected -t test build --base=origin/main
   # Humans only. One pattern, valid as a JS RegExp (build.ts) and as grep -E (.factory/guard.sh).
   # Includes what decides how tests run; project.json is checked field by field in guard.sh.
-  PROTECTED_PATHS: '^(\.github/|\.factory/|AGENTS\.md$|firebase\.json$|scripts/setup-firebase\.js$|nx\.json$|\.nxignore$)|(^|/)(\.npmrc|\.gitattributes|\.gitmodules|jest\.(config|preset)\.[cm]?[jt]s|tsconfig\.spec\.json|test-setup\.[jt]s)$|\.rules$'
+  PROTECTED_PATHS: '^(\.git/|\.github/|\.factory/|AGENTS\.md$|firebase\.json$|scripts/setup-firebase\.js$|nx\.json$|\.nxignore$)|(^|/)(\.npmrc|\.gitattributes|\.gitmodules|jest\.(config|preset)\.[cm]?[jt]s|tsconfig\.spec\.json|test-setup\.[jt]s)$|\.rules$'
 
 jobs:
   assemble:
@@ -136,24 +136,47 @@ jobs:
           # can't be enabled, set COPILOT_GITHUB_TOKEN to a fine-grained PAT with "Copilot Requests".
           COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN || github.token }}
           MODEL: ${{ vars.AGENT_MODEL }}
+          MAX_COST: ${{ vars.AGENT_MAX_COST }} # optional spend cap per run, in the SDK's cost unit
         run: |
           docker run --rm \
             --user "$(id -u):$(id -g)" --security-opt no-new-privileges \
             -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" -w "$GITHUB_WORKSPACE" \
             -v "$RUNNER_TEMP/factory:/factory" \
             -e HOME=/tmp -e CI=true -e NX_DAEMON=false -e NX_NO_CLOUD=true \
-            -e OUT_DIR=/factory -e COPILOT_GITHUB_TOKEN -e MODEL -e VERIFY_COMMAND -e PROTECTED_PATHS \
+            -e OUT_DIR=/factory -e COPILOT_GITHUB_TOKEN -e MODEL -e MAX_COST -e VERIFY_COMMAND -e PROTECTED_PATHS \
             "$SANDBOX_IMAGE" \
             sh -c 'npm rebuild && node .factory/node_modules/tsx/dist/cli.mjs .factory/build.ts'
           # exits non-zero unless the agent reported done AND the builder's own verify passed
 
-      - uses: actions/upload-artifact@v7
+      # Everything the sandbox wrote is untrusted. Copy only regular files out of it (a symlink
+      # to /proc/self/environ would make the uploader leak the runner's environment), then wipe
+      # the workspace: the sandbox could have planted .git config (fsmonitor, hooks) that a later
+      # git call on this runner, such as the checkout post-job cleanup, would execute.
+      - name: Collect outputs, wipe the workspace
+        id: collect
         if: always()
+        run: |
+          # Wipe first, so it also happens when an output is refused below.
+          find "$GITHUB_WORKSPACE" -mindepth 1 -delete
+          mkdir -p "$RUNNER_TEMP/upload"
+          for f in agent.patch result.json; do
+            src="$RUNNER_TEMP/factory/$f"
+            if [[ -L "$src" ]] || { [[ -e "$src" ]] && [[ ! -f "$src" ]]; }; then
+              echo "::error::$f is not a regular file"; exit 1
+            fi
+            if [[ -f "$src" ]]; then
+              (( $(stat -c %s "$src") <= 50 * 1024 * 1024 )) || { echo "::error::$f is larger than 50 MiB"; exit 1; }
+              cp -- "$src" "$RUNNER_TEMP/upload/$f"
+            fi
+          done
+
+      - uses: actions/upload-artifact@v7
+        if: always() && steps.collect.outcome == 'success'
         with:
           name: build-output
           path: |
-            ${{ runner.temp }}/factory/agent.patch
-            ${{ runner.temp }}/factory/result.json
+            ${{ runner.temp }}/upload/agent.patch
+            ${{ runner.temp }}/upload/result.json
           if-no-files-found: ignore
 
   verify:
@@ -179,6 +202,10 @@ jobs:
 
       - name: Apply the patch and guard it
         run: |
+          # Provenance: the patch must be the one recorded, built on the commit this job checked out.
+          R="$RUNNER_TEMP/factory/result.json"
+          [[ "$(git rev-parse HEAD)" == "$(jq -r .provenance.baseSha "$R")" ]] || { echo "::error::patch was built on another base"; exit 1; }
+          [[ "$(sha256sum "$RUNNER_TEMP/factory/agent.patch" | cut -d' ' -f1)" == "$(jq -r .provenance.patchSha256 "$R")" ]] || { echo "::error::patch hash does not match result.json"; exit 1; }
           # The guard is copied out of the checkout first: the patch cannot change its own judge.
           cp .factory/guard.sh "$RUNNER_TEMP/guard.sh"
           git apply --index "$RUNNER_TEMP/factory/agent.patch"
@@ -198,6 +225,11 @@ jobs:
             -e HOME=/tmp -e CI=true -e NX_DAEMON=false -e NX_NO_CLOUD=true -e VERIFY_COMMAND \
             "$SANDBOX_IMAGE" \
             sh -c 'npm rebuild && eval "$VERIFY_COMMAND"'
+
+      # Same reason as in implement: nothing the sandbox left behind may run on this runner.
+      - name: Wipe the workspace
+        if: always()
+        run: find "$GITHUB_WORKSPACE" -mindepth 1 -delete
 
   publish:
     needs: verify
@@ -219,6 +251,9 @@ jobs:
         run: |
           R="$RUNNER_TEMP/factory/result.json"
           [[ "$(jq -r .status "$R")" == "done" && "$(jq -r .verified "$R")" == "true" ]] || { echo "::error::result is not done+verified"; exit 1; }
+          # Provenance: the patch must be the one recorded, built on the commit this job checked out.
+          [[ "$(git rev-parse HEAD)" == "$(jq -r .provenance.baseSha "$R")" ]] || { echo "::error::patch was built on another base"; exit 1; }
+          [[ "$(sha256sum "$RUNNER_TEMP/factory/agent.patch" | cut -d' ' -f1)" == "$(jq -r .provenance.patchSha256 "$R")" ]] || { echo "::error::patch hash does not match result.json"; exit 1; }
           # The guard is copied out of the checkout first: the patch cannot change its own judge.
           cp .factory/guard.sh "$RUNNER_TEMP/guard.sh"
           git apply --index "$RUNNER_TEMP/factory/agent.patch"
@@ -241,7 +276,8 @@ jobs:
             "\n\n## Factory\n\n" +
             "Built by the agent-build workflow ([run](\($run))). Verified on a separate runner before this PR was opened.\n\n" +
             "| Model | Rounds | Tool calls | Input tokens | Output tokens | Cost |\n|---|---|---|---|---|---|\n" +
-            "| \(.telemetry.model) | \(.telemetry.rounds) | \(.telemetry.toolCalls) | \(.telemetry.inputTokens) | \(.telemetry.outputTokens) | \(.telemetry.cost) |\n" +
+            "| \(.telemetry.model) | \(.telemetry.rounds) | \(.telemetry.toolCalls) | \(.telemetry.inputTokens) | \(.telemetry.outputTokens) | \(.telemetry.cost) |\n\n" +
+            "Base `\(.provenance.baseSha)` · task sha256 `\(.provenance.taskSha256[0:12])` · patch sha256 `\(.provenance.patchSha256[0:12])`\n" +
             (if (.questions | length) > 0 then "\n## Open questions\n\n" + ([.questions[] | "- \(.)"] | join("\n")) + "\n" else "" end)
           ' "$RUNNER_TEMP/factory/result.json" > "$RUNNER_TEMP/factory/pr-body.md"
 
@@ -260,6 +296,15 @@ jobs:
         run: |
           B="agent/issue-$N"
           R="$RUNNER_TEMP/factory/result.json"
+          # A rerun may only replace a branch that holds factory commits alone: never overwrite a human fix.
+          if gh api "repos/$GITHUB_REPOSITORY/branches/$B" --silent 2>/dev/null; then
+            others=$(gh api "repos/$GITHUB_REPOSITORY/compare/main...$B" \
+              --jq '[.commits[].commit.author.email | select(. != "codeheroes-agent[bot]@users.noreply.github.com")] | unique | join(", ")')
+            if [[ -n "$others" ]]; then
+              echo "::error::$B has commits by $others; not overwriting it"
+              exit 1
+            fi
+          fi
           git -c core.hooksPath=/dev/null push --no-verify -f \
             "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$B"
           if pr=$(gh pr view "$B" -R "$GITHUB_REPOSITORY" --json number,state --jq 'select(.state == "OPEN") | .number') && [[ -n "$pr" ]]; then
