@@ -137,13 +137,16 @@ jobs:
           COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN || github.token }}
           MODEL: ${{ vars.AGENT_MODEL }}
           MAX_COST: ${{ vars.AGENT_MAX_COST }} # optional spend cap per run, in the SDK's cost unit
+          # One clock for the whole agent run (model rounds + every verify). Must stay below this job's
+          # timeout-minutes (75) minus the installs before and the collect/upload after this step.
+          RUN_DEADLINE_MINUTES: '55'
         run: |
           docker run --rm \
             --user "$(id -u):$(id -g)" --security-opt no-new-privileges \
             -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" -w "$GITHUB_WORKSPACE" \
             -v "$RUNNER_TEMP/factory:/factory" \
             -e HOME=/tmp -e CI=true -e NX_DAEMON=false -e NX_NO_CLOUD=true \
-            -e OUT_DIR=/factory -e COPILOT_GITHUB_TOKEN -e MODEL -e MAX_COST -e VERIFY_COMMAND -e PROTECTED_PATHS \
+            -e OUT_DIR=/factory -e COPILOT_GITHUB_TOKEN -e MODEL -e MAX_COST -e RUN_DEADLINE_MINUTES -e VERIFY_COMMAND -e PROTECTED_PATHS \
             "$SANDBOX_IMAGE" \
             sh -c 'npm rebuild && node .factory/node_modules/tsx/dist/cli.mjs .factory/build.ts'
           # exits non-zero unless the agent reported done AND the builder's own verify passed
@@ -272,17 +275,27 @@ jobs:
           N: ${{ github.event.issue.number }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
+          # Line 1 is the ONE provenance marker the later review gate requires (exactly one, at
+          # the top). Model text (summary, criteria, evidence, questions) cannot add another:
+          # every "<!--" in it is neutralised. Malformed provenance stops the publish.
           jq -r --arg n "$N" --arg run "$RUN_URL" '
+            def safe: gsub("<!--"; "< !--");
+            .provenance as $p
+            | if ($p.issue | tostring) != $n
+                 or ($p.taskSha256 | test("^[0-9a-f]{64}$") | not)
+                 or ($p.baseSha | test("^[0-9a-f]{40}$") | not)
+              then error("provenance does not match this issue or is malformed") else . end
+            | "<!-- agent-task issue=\($p.issue) task-sha256=\($p.taskSha256) base=\($p.baseSha) -->\n" +
             "Closes #\($n)\n\n" +
-            "## Summary\n\n\(.summary)\n\n" +
+            "## Summary\n\n\(.summary | safe)\n\n" +
             "## Acceptance criteria\n\n" +
-            ([.acceptance[] | "- [\(if .met then "x" else " " end)] \(.item)\n  - Evidence: \(.evidence)"] | join("\n")) +
+            ([.acceptance[] | "- [\(if .met then "x" else " " end)] \(.item | safe)\n  - Evidence: \(.evidence | safe)"] | join("\n")) +
             "\n\n## Factory\n\n" +
             "Built by the agent-build workflow ([run](\($run))). Verified on a separate runner before this PR was opened.\n\n" +
             "| Model | Rounds | Tool calls | Input tokens | Output tokens | Cost |\n|---|---|---|---|---|---|\n" +
             "| \(.telemetry.model) | \(.telemetry.rounds) | \(.telemetry.toolCalls) | \(.telemetry.inputTokens) | \(.telemetry.outputTokens) | \(.telemetry.cost) |\n\n" +
-            "Base `\(.provenance.baseSha)` · task sha256 `\(.provenance.taskSha256[0:12])` · patch sha256 `\(.provenance.patchSha256[0:12])`\n" +
-            (if (.questions | length) > 0 then "\n## Open questions\n\n" + ([.questions[] | "- \(.)"] | join("\n")) + "\n" else "" end)
+            "Base `\($p.baseSha)` · task sha256 `\($p.taskSha256[0:12])` · patch sha256 `\($p.patchSha256[0:12])`\n" +
+            (if (.questions | length) > 0 then "\n## Open questions\n\n" + ([.questions[] | "- \(safe)"] | join("\n")) + "\n" else "" end)
           ' "$RUNNER_TEMP/factory/result.json" > "$RUNNER_TEMP/factory/pr-body.md"
 
       # A GitHub App token, not GITHUB_TOKEN: a PR opened with GITHUB_TOKEN triggers no workflows,

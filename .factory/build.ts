@@ -49,6 +49,13 @@ const cfg = {
   // Spend cap in the SDK's cost unit (sum of assistant.usage `cost`); 0 or unset means no cap.
   maxCost: Number(process.env.MAX_COST ?? 0),
   verifyTimeoutMs: 15 * 60_000,
+  // One clock for the whole run: every model round and every verify (also run_verify inside a
+  // round) is capped by the time left, so the job timeout never kills the run before
+  // result.json is written. Keep it below the implement job's timeout-minutes minus the
+  // install steps before this one and the collect/upload steps after it.
+  runDeadlineMs: Number(process.env.RUN_DEADLINE_MINUTES ?? 55) * 60_000,
+  // Reserved at the end of the run for the patch, result.json and process exit.
+  finishReserveMs: 90_000,
 };
 
 // ---------- 2. Output contract ----------
@@ -142,6 +149,10 @@ const telemetry = {
   durationMs: 0,
 };
 const startedAt = Date.now();
+const deadline = startedAt + cfg.runDeadlineMs;
+/** Milliseconds left before the reserve for writing the outputs. */
+const timeLeft = (): number => deadline - cfg.finishReserveMs - Date.now();
+class DeadlineReached extends Error {}
 const startSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 // Same guard as the verify and publish jobs, copied outside the repository before the agent starts.
 const guard = path.join(outDir, 'guard.sh');
@@ -216,14 +227,19 @@ try {
       round === 1
         ? prompt
         : `The factory's own verification failed after your last change. Fix it, then answer with the result JSON again.\n\n${verify.log}`;
-    result = await session.sendAndWait(message, AgentResult, cfg.roundTimeoutMs);
+    // A round needs room for the model AND the verify after it; stop before starting one that cannot finish.
+    const left = timeLeft();
+    if (left < 2 * 60_000) throw new DeadlineReached(`run deadline of ${cfg.runDeadlineMs / 60_000} min reached before round ${round}`);
+    result = await session.sendAndWait(message, AgentResult, Math.min(cfg.roundTimeoutMs, left));
     if (result.status === 'blocked') break;
     verify = runVerify(); // trust nothing the agent says
     if (verify.ok) break;
   }
 } catch (e) {
   error = e instanceof Error ? e.message : String(e);
-  if (telemetry.toolCalls > cfg.maxToolCalls) error = `tool-call budget of ${cfg.maxToolCalls} spent (${error})`;
+  if (e instanceof DeadlineReached) error = e.message;
+  else if (timeLeft() <= 0) error = `run deadline of ${cfg.runDeadlineMs / 60_000} min reached (${error})`;
+  else if (telemetry.toolCalls > cfg.maxToolCalls) error = `tool-call budget of ${cfg.maxToolCalls} spent (${error})`;
   else if (cfg.maxCost > 0 && telemetry.cost > cfg.maxCost) error = `cost budget of ${cfg.maxCost} spent (${error})`;
 } finally {
   await session?.disconnect().catch(() => undefined);
@@ -282,12 +298,14 @@ console.log(JSON.stringify({ publishable, reasons, telemetry }, null, 2));
 process.exit(publishable ? 0 : 1); // non-zero: no PR; result.json is still uploaded for the report job
 
 function runVerify(): { ok: boolean; log: string } {
+  const left = timeLeft();
+  if (left < 30_000) return { ok: false, log: 'not verified: the run deadline leaves no time for verify' };
   try {
     // Stage everything so the guard sees the change as a patch (the final patch is staged the same way).
     const out = execSync(`git add -A && bash "${guard}" && (${cfg.verify})`, {
       encoding: 'utf8',
       stdio: 'pipe',
-      timeout: cfg.verifyTimeoutMs,
+      timeout: Math.min(cfg.verifyTimeoutMs, left),
     });
     return { ok: true, log: out.slice(-4000) };
   } catch (e) {
