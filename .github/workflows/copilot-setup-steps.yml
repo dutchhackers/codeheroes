@@ -1,0 +1,44 @@
+# Environment for Copilot's own cloud agent (when an issue is assigned to Copilot directly),
+# so it runs on GitHub Actions with the same setup as CI. Only steps, permissions, runs-on,
+# services, snapshot and timeout-minutes are honoured in this job, and the job name must
+# stay exactly `copilot-setup-steps`.
+#
+# Inside a Copilot session, secrets come from the repository's Agents secrets, not from the
+# Actions secrets: NODE_AUTH_TOKEN must exist there too.
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24
+
+      # Same split as ci.yml: the token is only present while no lifecycle script runs.
+      - name: Install node modules
+        run: npm ci --ignore-scripts
+        env:
+          CI: true
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+
+      - name: Run install scripts
+        run: npm rebuild
+
+      - name: Setup Firebase
+        run: npm run setup

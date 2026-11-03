@@ -1,0 +1,38 @@
+# Self-test of the agent factory: the patch guard against adversarial fixtures, and a strict
+# type check of the builder against its pinned SDK. Runs on pull requests that touch the factory.
+name: factory-check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .factory/**
+      - .github/workflows/agent-build.yml
+      - .github/workflows/factory-check.yml
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24
+
+      - name: Guard fixtures
+        run: bash .factory/guard.test.sh
+
+      - name: Install builder dependencies
+        working-directory: .factory
+        run: npm ci --no-audit --no-fund
+
+      - name: Type check (strict)
+        working-directory: .factory
+        run: npx tsc --noEmit --strict

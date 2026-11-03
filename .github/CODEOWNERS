@@ -1,0 +1,4 @@
+# Factory and agent rules change through humans only (see AGENTS.md, "Protected paths").
+/.github/  @mschilling
+/.factory/  @mschilling
+/AGENTS.md  @mschilling

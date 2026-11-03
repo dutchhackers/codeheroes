@@ -1,3 +1,6 @@
 # Nx-Firebase
 !.secret.local
 !.runtimeconfig.json
+
+# Agent factory builder: its own package, not part of the Nx workspace
+.factory

@@ -1,0 +1,6 @@
+# actionlint 1.7.12 does not know the copilot-requests permission yet (rhysd/actionlint#686).
+# GitHub documents it for Copilot SDK auth in Actions; drop this once actionlint supports it.
+paths:
+  .github/workflows/agent-build.yml:
+    ignore:
+      - 'unknown permission scope "copilot-requests"'

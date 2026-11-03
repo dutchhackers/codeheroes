@@ -103,6 +103,18 @@ Labels for specific technologies or integrations.
 | `firebase` | ![#FFA000](https://via.placeholder.com/15/FFA000/FFA000.png) `#FFA000` | Firebase-related |
 | `github-integration` | ![#24292e](https://via.placeholder.com/15/24292e/24292e.png) `#24292e` | GitHub webhook/API |
 
+## Agent Factory Labels
+
+Labels that drive the `agent-build` workflow (`.github/workflows/agent-build.yml`, rules in `AGENTS.md`).
+
+| Label | Description |
+|-------|-------------|
+| `needs:refine` | Build task written with the "Build task (agent)" form, not yet build-ready |
+| `agent:build` | Starts a build. Only takes effect when both the labeller and the issue author have write access |
+| `agent-built` | On a pull request: opened by the factory |
+| `agent:fix` | Reserved: sends review findings back to the builder (not active yet) |
+| `needs:human` | The factory stopped without a PR; see the comment on the issue |
+
 ## Label Usage Guidelines
 
 ### When Creating Issues
