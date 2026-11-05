@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, DestroyRef, ElementRef, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, switchMap, take } from 'rxjs';
 import { OnboardingService } from '../../core/services/onboarding.service';
@@ -14,6 +14,9 @@ import { DailyProgressComponent } from './components/daily-progress.component';
 import { WeeklyStatsComponent } from './components/weekly-stats.component';
 import { RankCardComponent } from './components/rank-card.component';
 import { HighlightsComponent } from './components/highlights.component';
+import { registerWebMcpTools } from '../../core/webmcp/model-context';
+import { createExplainXpTool } from '../../core/webmcp/code-heroes-tools';
+import { WebMcpPeriod } from '../../core/webmcp/webmcp-format';
 
 @Component({
   selector: 'app-hq',
@@ -51,10 +54,18 @@ import { HighlightsComponent } from './components/highlights.component';
       } @else {
         <div class="max-w-2xl mx-auto py-2 md:py-6">
           <!-- Daily Progress -->
-          <app-daily-progress [progress]="dailyProgress()" />
+          <app-daily-progress
+            data-webmcp-card="day"
+            [class.webmcp-focus]="focusedCard() === 'day'"
+            [progress]="dailyProgress()"
+          />
 
           <!-- Weekly Stats -->
-          <app-weekly-stats [stats]="weeklyStats()" />
+          <app-weekly-stats
+            data-webmcp-card="week"
+            [class.webmcp-focus]="focusedCard() === 'week'"
+            [stats]="weeklyStats()"
+          />
 
           <!-- Your Rank -->
           <app-rank-card
@@ -72,6 +83,14 @@ import { HighlightsComponent } from './components/highlights.component';
   `,
   styles: [
     `
+      .webmcp-focus {
+        display: block;
+        border-radius: 12px;
+        outline: 2px solid var(--neon-cyan);
+        outline-offset: 4px;
+        transition: outline-color 0.3s;
+      }
+
       :host {
         display: block;
       }
@@ -122,6 +141,9 @@ export class HqComponent implements OnInit, OnDestroy {
   readonly #notificationService = inject(NotificationDataService);
   readonly #onboardingService = inject(OnboardingService);
   readonly #router = inject(Router);
+  readonly #destroyRef = inject(DestroyRef);
+  readonly #host = inject<ElementRef<HTMLElement>>(ElementRef);
+  #focusTimer: ReturnType<typeof setTimeout> | null = null;
 
   #dailyProgressSub: Subscription | null = null;
   #weeklyStatsSub: Subscription | null = null;
@@ -136,6 +158,8 @@ export class HqComponent implements OnInit, OnDestroy {
   leaderboardLoading = signal(true);
   currentUserRank = signal<number | null>(null);
   highlights = signal<Highlight[]>([]);
+  /** HQ card highlighted by the explain_xp WebMCP tool. */
+  focusedCard = signal<WebMcpPeriod | null>(null);
 
   ngOnInit() {
     // Check if onboarding should be shown (one-time check)
@@ -150,9 +174,11 @@ export class HqComponent implements OnInit, OnDestroy {
       this.unreadCount.set(count),
     );
     this.#loadData();
+    this.#registerWebMcpTools();
   }
 
   ngOnDestroy() {
+    if (this.#focusTimer) clearTimeout(this.#focusTimer);
     this.#dailyProgressSub?.unsubscribe();
     this.#weeklyStatsSub?.unsubscribe();
     this.#leaderboardSub?.unsubscribe();
@@ -162,6 +188,34 @@ export class HqComponent implements OnInit, OnDestroy {
 
   openNotifications(): void {
     this.#router.navigate(['/notifications']);
+  }
+
+  #registerWebMcpTools() {
+    registerWebMcpTools(
+      [
+        createExplainXpTool({
+          isLoading: () => this.isLoading(),
+          snapshot: () => ({
+            daily: this.dailyProgress(),
+            weekly: this.weeklyStats(),
+            weeklyRank: this.currentUserRank(),
+          }),
+          reveal: (period) => this.#focusCard(period),
+        }),
+      ],
+      this.#destroyRef,
+    );
+  }
+
+  #focusCard(period: WebMcpPeriod) {
+    this.focusedCard.set(period);
+    setTimeout(() =>
+      this.#host.nativeElement
+        .querySelector(`[data-webmcp-card="${period}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
+    );
+    if (this.#focusTimer) clearTimeout(this.#focusTimer);
+    this.#focusTimer = setTimeout(() => this.focusedCard.set(null), 4000);
   }
 
   #loadData() {
