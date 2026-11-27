@@ -24,8 +24,8 @@ import { ProjectSummaryDto } from '@codeheroes/types';
   styles: [
     `
       .card {
-        background: var(--theme-color-bg-surface-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 8px;
         padding: 20px;
         transition: box-shadow 0.15s ease;
@@ -35,7 +35,7 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       }
 
       .card:hover {
-        box-shadow: var(--theme-effect-styles-drop-shadow-200);
+        box-shadow: var(--effect-styles-drop-shadow-200);
       }
 
       .card-top {
@@ -49,7 +49,7 @@ import { ProjectSummaryDto } from '@codeheroes/types';
         width: 40px;
         height: 40px;
         border-radius: 8px;
-        background: var(--theme-color-bg-brand-default);
+        background: var(--color-bg-brand-default);
         color: #fff;
         display: flex;
         align-items: center;
@@ -62,13 +62,13 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       .card-title {
         font-size: 16px;
         font-weight: 600;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 4px;
       }
 
       .card-subtitle {
         font-size: 13px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         margin-bottom: 20px;
         flex: 1;
       }
@@ -79,7 +79,7 @@ import { ProjectSummaryDto } from '@codeheroes/types';
         gap: 4px;
         font-size: 14px;
         font-weight: 500;
-        color: var(--theme-color-text-brand-default);
+        color: var(--color-text-brand-default);
         text-decoration: none;
         cursor: pointer;
       }

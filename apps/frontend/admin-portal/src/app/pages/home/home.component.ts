@@ -120,13 +120,13 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
       .page-title {
         font-size: 24px;
         font-weight: 700;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 4px;
       }
 
       .page-subtitle {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         margin-bottom: 32px;
       }
 
@@ -137,8 +137,8 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
       }
 
       .stat-card {
-        background: var(--theme-color-bg-surface-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 8px;
         padding: 20px;
         display: flex;
@@ -153,19 +153,19 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
       }
 
       .stat-card--link:hover {
-        box-shadow: var(--theme-effect-styles-drop-shadow-200);
+        box-shadow: var(--effect-styles-drop-shadow-200);
       }
 
       .stat-label {
         font-size: 13px;
         font-weight: 500;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
 
       .stat-value {
         font-size: 28px;
         font-weight: 700;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
       }
 
       .section-header {
@@ -179,13 +179,13 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
       .section-title {
         font-size: 18px;
         font-weight: 600;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
       }
 
       .view-all-link {
         font-size: 14px;
         font-weight: 500;
-        color: var(--theme-color-text-brand-default);
+        color: var(--color-text-brand-default);
         text-decoration: none;
       }
 
@@ -194,8 +194,8 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
       }
 
       .table-container {
-        background: var(--theme-color-bg-surface-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 8px;
         overflow: hidden;
       }
@@ -210,18 +210,18 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
         padding: 12px 16px;
         font-size: 12px;
         font-weight: 600;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        border-bottom: 1px solid var(--theme-color-border-default-default);
-        background: var(--theme-color-bg-neutral-secondary);
+        border-bottom: 1px solid var(--color-border-default-default);
+        background: var(--color-bg-neutral-secondary);
       }
 
       .leaderboard-table td {
         padding: 12px 16px;
         font-size: 14px;
-        color: var(--theme-color-text-default);
-        border-bottom: 1px solid var(--theme-color-border-default-default);
+        color: var(--color-text-default);
+        border-bottom: 1px solid var(--color-border-default-default);
       }
 
       .leaderboard-table tr:last-child td {
@@ -229,12 +229,12 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
       }
 
       .leaderboard-table tr:hover td {
-        background: var(--theme-color-bg-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
       }
 
       .rank-cell {
         font-weight: 600;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         width: 48px;
       }
 
@@ -248,8 +248,8 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
         width: 28px;
         height: 28px;
         border-radius: 50%;
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-brand-default);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-brand-default);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -263,16 +263,16 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
       }
 
       .xp-cell {
-        color: var(--theme-color-text-brand-default);
+        color: var(--color-text-brand-default);
         font-weight: 600;
       }
 
       .error-state {
-        background: var(--theme-color-feedback-bg-error-secondary);
-        border: 1px solid var(--theme-color-feedback-border-error-default);
+        background: var(--color-feedback-bg-error-secondary);
+        border: 1px solid var(--color-feedback-border-error-default);
         border-radius: 8px;
         padding: 16px;
-        color: var(--theme-color-feedback-text-error-default);
+        color: var(--color-feedback-text-error-default);
         font-size: 14px;
         margin-top: 24px;
       }
@@ -285,7 +285,7 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
       }
 
       .skeleton {
-        background: var(--theme-color-bg-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
         border-radius: 4px;
         animation: shimmer 1.5s ease-in-out infinite;
       }

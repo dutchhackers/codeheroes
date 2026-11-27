@@ -113,8 +113,8 @@ export function computeTopMovers(
         gap: 16px;
       }
       .mover-card {
-        background: var(--theme-color-bg-surface-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 8px;
         padding: 20px;
         display: flex;
@@ -124,29 +124,29 @@ export function computeTopMovers(
       .mover-label {
         font-size: 13px;
         font-weight: 500;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
       .mover-stat {
         font-size: 28px;
         font-weight: 700;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
       }
       .mover-name {
         font-size: 14px;
         font-weight: 500;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
       .mover-names {
         font-size: 14px;
         font-weight: 500;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
       .mover-overflow {
-        color: var(--theme-color-text-brand-default);
+        color: var(--color-text-brand-default);
       }
       .mover-empty {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
     `,
   ],

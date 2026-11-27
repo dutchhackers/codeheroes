@@ -1,6 +1,6 @@
 import { Component, input, output, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SuiButtonComponent } from '@move4mobile/stride-ui';
+import { SuiButtonComponent } from '@stride-ui/components';
 import { ProjectSummaryDto } from '@codeheroes/types';
 
 @Component({
@@ -60,19 +60,19 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       }
 
       .modal {
-        background: var(--theme-color-bg-surface-default);
+        background: var(--color-bg-surface-default);
         border-radius: 12px;
         padding: 24px;
         width: 100%;
         max-width: 440px;
-        box-shadow: var(--theme-effect-styles-drop-shadow-200);
+        box-shadow: var(--effect-styles-drop-shadow-200);
       }
 
       .modal-icon {
         width: 40px;
         height: 40px;
         border-radius: 8px;
-        background: var(--theme-color-bg-brand-default);
+        background: var(--color-bg-brand-default);
         color: #fff;
         display: flex;
         align-items: center;
@@ -85,13 +85,13 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       .modal-title {
         font-size: 18px;
         font-weight: 600;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 4px;
       }
 
       .modal-subtitle {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         margin-bottom: 20px;
       }
 
@@ -99,7 +99,7 @@ import { ProjectSummaryDto } from '@codeheroes/types';
         display: block;
         font-size: 13px;
         font-weight: 500;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 6px;
       }
 
@@ -107,18 +107,18 @@ import { ProjectSummaryDto } from '@codeheroes/types';
         width: 100%;
         padding: 10px 12px;
         font-size: 14px;
-        font-family: var(--theme-font-family-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        font-family: var(--font-family-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 6px;
-        background: var(--theme-color-bg-surface-default);
-        color: var(--theme-color-text-default);
+        background: var(--color-bg-surface-default);
+        color: var(--color-text-default);
         outline: none;
         transition: border-color 0.15s ease;
         box-sizing: border-box;
       }
 
       .field-input:focus {
-        border-color: var(--theme-color-border-brand-default);
+        border-color: var(--color-border-brand-default);
       }
 
       .modal-actions {

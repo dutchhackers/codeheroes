@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
-import { SuiButtonComponent } from '@move4mobile/stride-ui';
+import { SuiButtonComponent } from '@stride-ui/components';
 import { TrendsEntityData, TrendsProjectData, TrendsResponse } from '@codeheroes/types';
 import { TrendsService } from '../../core/services/trends.service';
 import { TopMoversComponent, TopMoversData, computeTopMovers } from './top-movers.component';
@@ -80,12 +80,12 @@ type TabType = 'heroes' | 'bots' | 'projects';
       .page-title {
         font-size: 24px;
         font-weight: 700;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 4px;
       }
       .page-subtitle {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
       .filters {
         display: flex;
@@ -103,10 +103,10 @@ type TabType = 'heroes' | 'bots' | 'projects';
       }
       .filter-pill {
         padding: 6px 14px;
-        border: 1px solid var(--theme-color-border-default-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 20px;
-        background: var(--theme-color-bg-surface-default);
-        color: var(--theme-color-text-neutral-tertiary);
+        background: var(--color-bg-surface-default);
+        color: var(--color-text-neutral-tertiary);
         font-size: 13px;
         font-weight: 500;
         cursor: pointer;
@@ -114,29 +114,29 @@ type TabType = 'heroes' | 'bots' | 'projects';
         transition: all 0.15s ease;
       }
       .filter-pill:hover {
-        border-color: var(--theme-color-border-brand-default);
-        color: var(--theme-color-text-default);
+        border-color: var(--color-border-brand-default);
+        color: var(--color-text-default);
       }
       .filter-pill--active {
-        background: var(--theme-color-bg-brand-default);
-        border-color: var(--theme-color-bg-brand-default);
+        background: var(--color-bg-brand-default);
+        border-color: var(--color-bg-brand-default);
         color: #fff;
       }
       .loading-state, .empty-state {
         text-align: center;
         padding: 48px 0;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         font-size: 14px;
       }
       .error-state {
-        background: var(--theme-color-feedback-bg-error-secondary);
-        border: 1px solid var(--theme-color-feedback-border-error-default);
+        background: var(--color-feedback-bg-error-secondary);
+        border: 1px solid var(--color-feedback-border-error-default);
         border-radius: 8px;
         padding: 16px;
         display: flex;
         align-items: center;
         gap: 12px;
-        color: var(--theme-color-feedback-text-error-default);
+        color: var(--color-feedback-text-error-default);
         font-size: 14px;
       }
       .charts-grid {

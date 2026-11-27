@@ -19,15 +19,15 @@ import { EChartsOption, getChartColor, getDefaultEChartsOptions, getSubtleTextCo
   styles: [
     `
       .chart-container {
-        background: var(--theme-color-bg-surface-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 8px;
         padding: 20px;
       }
       .chart-title {
         font-size: 16px;
         font-weight: 600;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 16px;
       }
       .chart-wrapper { height: 320px; }

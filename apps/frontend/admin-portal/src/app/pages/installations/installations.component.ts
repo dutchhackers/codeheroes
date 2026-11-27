@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { SuiButtonComponent } from '@move4mobile/stride-ui';
+import { SuiButtonComponent } from '@stride-ui/components';
 import { InstallationSummaryDto } from '@codeheroes/types';
 import { forkJoin } from 'rxjs';
 import { InstallationsService } from '../../core/services/installations.service';
@@ -153,13 +153,13 @@ import { UsersService } from '../../core/services/users.service';
       .page-title {
         font-size: 24px;
         font-weight: 700;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 4px;
       }
 
       .page-subtitle {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         margin-bottom: 24px;
       }
 
@@ -176,20 +176,20 @@ import { UsersService } from '../../core/services/users.service';
         min-width: 200px;
         max-width: 320px;
         padding: 8px 12px;
-        border: 1px solid var(--theme-color-border-default-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 6px;
         font-size: 14px;
-        color: var(--theme-color-text-default);
-        background: var(--theme-color-bg-surface-default);
+        color: var(--color-text-default);
+        background: var(--color-bg-surface-default);
       }
 
       .search-input:focus {
         outline: none;
-        border-color: var(--theme-color-border-brand-default);
+        border-color: var(--color-border-brand-default);
       }
 
       .search-input::placeholder {
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
 
       .filter-pills {
@@ -199,11 +199,11 @@ import { UsersService } from '../../core/services/users.service';
 
       .filter-pill {
         padding: 4px 12px;
-        border: 1px solid var(--theme-color-border-default-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 16px;
         font-size: 13px;
         font-weight: 500;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         background: transparent;
         cursor: pointer;
         transition: all 0.15s ease;
@@ -211,19 +211,19 @@ import { UsersService } from '../../core/services/users.service';
       }
 
       .filter-pill:hover {
-        color: var(--theme-color-text-default);
-        background: var(--theme-color-bg-neutral-secondary);
+        color: var(--color-text-default);
+        background: var(--color-bg-neutral-secondary);
       }
 
       .filter-pill--active {
-        background: var(--theme-color-bg-brand-secondary);
-        color: var(--theme-color-text-brand-default);
-        border-color: var(--theme-color-border-brand-default);
+        background: var(--color-bg-brand-secondary);
+        color: var(--color-text-brand-default);
+        border-color: var(--color-border-brand-default);
       }
 
       .table-container {
-        background: var(--theme-color-bg-surface-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 8px;
         overflow: hidden;
       }
@@ -238,18 +238,18 @@ import { UsersService } from '../../core/services/users.service';
         padding: 12px 16px;
         font-size: 12px;
         font-weight: 600;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        border-bottom: 1px solid var(--theme-color-border-default-default);
-        background: var(--theme-color-bg-neutral-secondary);
+        border-bottom: 1px solid var(--color-border-default-default);
+        background: var(--color-bg-neutral-secondary);
       }
 
       .installations-table td {
         padding: 12px 16px;
         font-size: 14px;
-        color: var(--theme-color-text-default);
-        border-bottom: 1px solid var(--theme-color-border-default-default);
+        color: var(--color-text-default);
+        border-bottom: 1px solid var(--color-border-default-default);
       }
 
       .installations-table tr:last-child td {
@@ -265,7 +265,7 @@ import { UsersService } from '../../core/services/users.service';
         background: none;
         font-family: inherit;
         font-size: 14px;
-        color: var(--theme-color-text-brand-default);
+        color: var(--color-text-brand-default);
         cursor: pointer;
       }
 
@@ -293,8 +293,8 @@ import { UsersService } from '../../core/services/users.service';
         width: 28px;
         height: 28px;
         border-radius: 50%;
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-brand-default);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-brand-default);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -313,8 +313,8 @@ import { UsersService } from '../../core/services/users.service';
         border-radius: 4px;
         font-size: 11px;
         font-weight: 500;
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-neutral-secondary);
       }
 
       .status-badge {
@@ -327,27 +327,27 @@ import { UsersService } from '../../core/services/users.service';
       }
 
       .status-active {
-        background: var(--theme-color-feedback-bg-success-secondary, var(--theme-color-bg-brand-secondary));
-        color: var(--theme-color-feedback-text-success-default, var(--theme-color-text-brand-default));
+        background: var(--color-feedback-bg-success-secondary, var(--color-bg-brand-secondary));
+        color: var(--color-feedback-text-success-default, var(--color-text-brand-default));
       }
 
       .status-suspended {
-        background: var(--theme-color-feedback-bg-warning-secondary, #fef3c7);
-        color: var(--theme-color-feedback-text-warning-default, #92400e);
+        background: var(--color-feedback-bg-warning-secondary, #fef3c7);
+        color: var(--color-feedback-text-warning-default, #92400e);
       }
 
       .status-deleted {
-        background: var(--theme-color-feedback-bg-error-secondary);
-        color: var(--theme-color-feedback-text-error-default);
+        background: var(--color-feedback-bg-error-secondary);
+        color: var(--color-feedback-text-error-default);
       }
 
       .repo-all-badge {
         font-style: italic;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
 
       .user-link {
-        color: var(--theme-color-text-brand-default);
+        color: var(--color-text-brand-default);
         text-decoration: none;
         font-weight: 500;
       }
@@ -357,7 +357,7 @@ import { UsersService } from '../../core/services/users.service';
       }
 
       .unlinked {
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         font-style: italic;
       }
 
@@ -379,7 +379,7 @@ import { UsersService } from '../../core/services/users.service';
       .repo-name {
         font-family: monospace;
         font-size: 13px;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
       }
 
       .visibility-badge {
@@ -388,32 +388,32 @@ import { UsersService } from '../../core/services/users.service';
         border-radius: 4px;
         font-size: 11px;
         font-weight: 500;
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-neutral-secondary);
       }
 
       .visibility-private {
-        background: var(--theme-color-feedback-bg-warning-secondary, #fef3c7);
-        color: var(--theme-color-feedback-text-warning-default, #92400e);
+        background: var(--color-feedback-bg-warning-secondary, #fef3c7);
+        color: var(--color-feedback-text-warning-default, #92400e);
       }
 
       .loading-state,
       .empty-state {
         text-align: center;
         padding: 48px 0;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         font-size: 14px;
       }
 
       .error-state {
-        background: var(--theme-color-feedback-bg-error-secondary);
-        border: 1px solid var(--theme-color-feedback-border-error-default);
+        background: var(--color-feedback-bg-error-secondary);
+        border: 1px solid var(--color-feedback-border-error-default);
         border-radius: 8px;
         padding: 16px;
         display: flex;
         align-items: center;
         gap: 12px;
-        color: var(--theme-color-feedback-text-error-default);
+        color: var(--color-feedback-text-error-default);
         font-size: 14px;
       }
 
@@ -425,7 +425,7 @@ import { UsersService } from '../../core/services/users.service';
       }
 
       .skeleton {
-        background: var(--theme-color-bg-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
         border-radius: 4px;
         animation: shimmer 1.5s ease-in-out infinite;
       }

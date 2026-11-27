@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SuiButtonComponent } from '@move4mobile/stride-ui';
+import { SuiButtonComponent } from '@stride-ui/components';
 import { UnmatchedEvent } from '@codeheroes/types';
 import { UsersService } from '../../../core/services/users.service';
 import { UnmatchedEventsService } from '../../../core/services/unmatched-events.service';
@@ -63,22 +63,22 @@ import { switchMap } from 'rxjs';
         z-index: 1000;
       }
       .modal-card {
-        background: var(--theme-color-bg-surface-default);
+        background: var(--color-bg-surface-default);
         border-radius: 12px;
         padding: 24px;
         width: 480px;
         max-width: 90vw;
-        box-shadow: var(--theme-effect-styles-drop-shadow-200);
+        box-shadow: var(--effect-styles-drop-shadow-200);
       }
       .modal-title {
         font-size: 18px;
         font-weight: 600;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 4px;
       }
       .modal-subtitle {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         margin-bottom: 20px;
       }
       .form-group {
@@ -88,28 +88,28 @@ import { switchMap } from 'rxjs';
         display: block;
         font-size: 13px;
         font-weight: 500;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 6px;
       }
       .form-input {
         width: 100%;
         padding: 8px 12px;
-        border: 1px solid var(--theme-color-border-default-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 6px;
         font-size: 14px;
-        color: var(--theme-color-text-default);
-        background: var(--theme-color-bg-surface-default);
+        color: var(--color-text-default);
+        background: var(--color-bg-surface-default);
         font-family: inherit;
         box-sizing: border-box;
       }
       .form-input:focus {
         outline: none;
-        border-color: var(--theme-color-border-brand-default);
+        border-color: var(--color-border-brand-default);
       }
       .form-error {
-        background: var(--theme-color-feedback-bg-error-secondary);
-        border: 1px solid var(--theme-color-feedback-border-error-default);
-        color: var(--theme-color-feedback-text-error-default);
+        background: var(--color-feedback-bg-error-secondary);
+        border: 1px solid var(--color-feedback-border-error-default);
+        color: var(--color-feedback-text-error-default);
         border-radius: 6px;
         padding: 8px 12px;
         font-size: 13px;

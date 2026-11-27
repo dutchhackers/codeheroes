@@ -74,13 +74,13 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       .page-title {
         font-size: 24px;
         font-weight: 700;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 4px;
       }
 
       .page-subtitle {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
 
       .search-container {
@@ -89,50 +89,50 @@ import { ProjectSummaryDto } from '@codeheroes/types';
 
       .search-input {
         padding: 8px 12px;
-        border: 1px solid var(--theme-color-border-default-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 6px;
         font-size: 14px;
-        color: var(--theme-color-text-default);
-        background: var(--theme-color-bg-surface-default);
+        color: var(--color-text-default);
+        background: var(--color-bg-surface-default);
         min-width: 240px;
         font-family: inherit;
       }
 
       .search-input:focus {
         outline: none;
-        border-color: var(--theme-color-border-brand-default);
+        border-color: var(--color-border-brand-default);
       }
 
       .search-input::placeholder {
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
 
       .loading-state,
       .empty-state {
         text-align: center;
         padding: 48px 0;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         font-size: 14px;
       }
 
       .error-state {
-        background: var(--theme-color-feedback-bg-error-secondary);
-        border: 1px solid var(--theme-color-feedback-border-error-default);
+        background: var(--color-feedback-bg-error-secondary);
+        border: 1px solid var(--color-feedback-border-error-default);
         border-radius: 8px;
         padding: 16px;
         display: flex;
         align-items: center;
         gap: 12px;
-        color: var(--theme-color-feedback-text-error-default);
+        color: var(--color-feedback-text-error-default);
         font-size: 14px;
       }
 
       .retry-button {
         padding: 6px 12px;
-        border: 1px solid var(--theme-color-border-default-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 6px;
-        background: var(--theme-color-bg-surface-default);
-        color: var(--theme-color-text-default);
+        background: var(--color-bg-surface-default);
+        color: var(--color-text-default);
         font-size: 13px;
         cursor: pointer;
         font-family: inherit;

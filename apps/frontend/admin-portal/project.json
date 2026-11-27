@@ -24,11 +24,19 @@
           },
           {
             "glob": "**/*",
-            "input": "node_modules/@move4mobile/theme-framna/assets/fonts",
-            "output": "/assets/fonts"
+            "input": "node_modules/@stride-ui/components/assets",
+            "output": "/assets"
+          },
+          {
+            "glob": "**/*",
+            "input": "node_modules/@stride-ui/theme-framna/assets",
+            "output": "/assets"
           }
         ],
-        "styles": ["apps/frontend/admin-portal/src/styles.scss"],
+        "styles": [
+          "apps/frontend/admin-portal/src/styles.scss",
+          "node_modules/@stride-ui/theme-framna/components/css/tokens.css"
+        ],
         "scripts": []
       },
       "configurations": {

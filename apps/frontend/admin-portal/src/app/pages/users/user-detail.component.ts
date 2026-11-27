@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@ang
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SuiButtonComponent } from '@move4mobile/stride-ui';
+import { SuiButtonComponent } from '@stride-ui/components';
 import {
   ConnectedAccountDto,
   ConnectedAccountProvider,
@@ -346,7 +346,7 @@ import { SystemOptionsService } from '../../core/services/system-options.service
         border: none;
         background: none;
         font-size: 14px;
-        color: var(--theme-color-text-brand-default);
+        color: var(--color-text-brand-default);
         cursor: pointer;
         font-family: inherit;
       }
@@ -359,19 +359,19 @@ import { SystemOptionsService } from '../../core/services/system-options.service
       .empty-state {
         text-align: center;
         padding: 48px 0;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         font-size: 14px;
       }
 
       .error-state {
-        background: var(--theme-color-feedback-bg-error-secondary);
-        border: 1px solid var(--theme-color-feedback-border-error-default);
+        background: var(--color-feedback-bg-error-secondary);
+        border: 1px solid var(--color-feedback-border-error-default);
         border-radius: 8px;
         padding: 16px;
         display: flex;
         align-items: center;
         gap: 12px;
-        color: var(--theme-color-feedback-text-error-default);
+        color: var(--color-feedback-text-error-default);
         font-size: 14px;
       }
 
@@ -386,8 +386,8 @@ import { SystemOptionsService } from '../../core/services/system-options.service
         width: 56px;
         height: 56px;
         border-radius: 50%;
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-brand-default);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-brand-default);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -407,25 +407,25 @@ import { SystemOptionsService } from '../../core/services/system-options.service
       .user-info .user-name {
         font-size: 24px;
         font-weight: 700;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 2px;
       }
 
       .user-info .user-display-name {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-secondary);
+        color: var(--color-text-neutral-secondary);
         margin-bottom: 2px;
       }
 
       .user-info .user-email {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         margin-bottom: 4px;
       }
 
       .user-meta {
         font-size: 13px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
 
       .user-type-badge {
@@ -434,13 +434,13 @@ import { SystemOptionsService } from '../../core/services/system-options.service
         border-radius: 4px;
         font-size: 12px;
         font-weight: 500;
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-neutral-secondary);
         text-transform: capitalize;
       }
 
       .user-type-bot {
-        background: var(--theme-color-bg-brand-default);
+        background: var(--color-bg-brand-default);
         color: #fff;
       }
 
@@ -458,12 +458,12 @@ import { SystemOptionsService } from '../../core/services/system-options.service
       .section-title {
         font-size: 18px;
         font-weight: 600;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
       }
 
       .table-container {
-        background: var(--theme-color-bg-surface-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 8px;
         overflow: hidden;
       }
@@ -478,18 +478,18 @@ import { SystemOptionsService } from '../../core/services/system-options.service
         padding: 12px 16px;
         font-size: 12px;
         font-weight: 600;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        border-bottom: 1px solid var(--theme-color-border-default-default);
-        background: var(--theme-color-bg-neutral-secondary);
+        border-bottom: 1px solid var(--color-border-default-default);
+        background: var(--color-bg-neutral-secondary);
       }
 
       .accounts-table td {
         padding: 12px 16px;
         font-size: 14px;
-        color: var(--theme-color-text-default);
-        border-bottom: 1px solid var(--theme-color-border-default-default);
+        color: var(--color-text-default);
+        border-bottom: 1px solid var(--color-border-default-default);
       }
 
       .accounts-table tr:last-child td {
@@ -502,8 +502,8 @@ import { SystemOptionsService } from '../../core/services/system-options.service
         border-radius: 4px;
         font-size: 12px;
         font-weight: 500;
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-neutral-secondary);
       }
 
       .monospace {
@@ -512,8 +512,8 @@ import { SystemOptionsService } from '../../core/services/system-options.service
       }
 
       .add-form {
-        background: var(--theme-color-bg-surface-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 8px;
         padding: 16px;
         margin-bottom: 16px;
@@ -533,7 +533,7 @@ import { SystemOptionsService } from '../../core/services/system-options.service
         display: block;
         font-size: 12px;
         font-weight: 600;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         margin-bottom: 4px;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -542,17 +542,17 @@ import { SystemOptionsService } from '../../core/services/system-options.service
       .form-input {
         width: 100%;
         padding: 8px 12px;
-        border: 1px solid var(--theme-color-border-default-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 6px;
         font-size: 14px;
-        color: var(--theme-color-text-default);
-        background: var(--theme-color-bg-surface-default);
+        color: var(--color-text-default);
+        background: var(--color-bg-surface-default);
         box-sizing: border-box;
       }
 
       .form-input:focus {
         outline: none;
-        border-color: var(--theme-color-border-brand-default);
+        border-color: var(--color-border-brand-default);
       }
 
       .form-actions {
@@ -562,12 +562,12 @@ import { SystemOptionsService } from '../../core/services/system-options.service
 
       .form-error {
         font-size: 13px;
-        color: var(--theme-color-feedback-text-error-default);
+        color: var(--color-feedback-text-error-default);
       }
 
       .settings-card {
-        background: var(--theme-color-bg-surface-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 8px;
         overflow: hidden;
       }
@@ -576,7 +576,7 @@ import { SystemOptionsService } from '../../core/services/system-options.service
         display: flex;
         align-items: center;
         padding: 12px 16px;
-        border-bottom: 1px solid var(--theme-color-border-default-default);
+        border-bottom: 1px solid var(--color-border-default-default);
       }
 
       .settings-row:last-child {
@@ -593,7 +593,7 @@ import { SystemOptionsService } from '../../core/services/system-options.service
         flex-shrink: 0;
         font-size: 13px;
         font-weight: 600;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         text-transform: uppercase;
         letter-spacing: 0.05em;
       }
@@ -601,7 +601,7 @@ import { SystemOptionsService } from '../../core/services/system-options.service
       .settings-value {
         flex: 1;
         font-size: 14px;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
       }
 
       .settings-input {
@@ -628,7 +628,7 @@ import { SystemOptionsService } from '../../core/services/system-options.service
         width: 16px;
         height: 16px;
         cursor: pointer;
-        accent-color: var(--theme-color-bg-brand-default);
+        accent-color: var(--color-bg-brand-default);
       }
 
       .status-label {
@@ -637,11 +637,11 @@ import { SystemOptionsService } from '../../core/services/system-options.service
       }
 
       .status-active {
-        color: var(--theme-color-text-brand-default);
+        color: var(--color-text-brand-default);
       }
 
       .status-inactive {
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
 
       .role-badge {
@@ -650,13 +650,13 @@ import { SystemOptionsService } from '../../core/services/system-options.service
         border-radius: 4px;
         font-size: 12px;
         font-weight: 600;
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-neutral-secondary);
         text-transform: capitalize;
       }
 
       .role-admin {
-        background: var(--theme-color-bg-brand-default);
+        background: var(--color-bg-brand-default);
         color: #fff;
       }
 
@@ -668,7 +668,7 @@ import { SystemOptionsService } from '../../core/services/system-options.service
 
       .saving-label {
         font-size: 13px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
 
       .account-login {
@@ -682,13 +682,13 @@ import { SystemOptionsService } from '../../core/services/system-options.service
         border-radius: 4px;
         font-size: 11px;
         font-weight: 500;
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-neutral-secondary);
       }
 
       .repo-all {
         font-style: italic;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
 
       .installation-status-badge {
@@ -701,18 +701,18 @@ import { SystemOptionsService } from '../../core/services/system-options.service
       }
 
       .installation-status-active {
-        background: var(--theme-color-feedback-bg-success-secondary, var(--theme-color-bg-brand-secondary));
-        color: var(--theme-color-feedback-text-success-default, var(--theme-color-text-brand-default));
+        background: var(--color-feedback-bg-success-secondary, var(--color-bg-brand-secondary));
+        color: var(--color-feedback-text-success-default, var(--color-text-brand-default));
       }
 
       .installation-status-suspended {
-        background: var(--theme-color-feedback-bg-warning-secondary, #fef3c7);
-        color: var(--theme-color-feedback-text-warning-default, #92400e);
+        background: var(--color-feedback-bg-warning-secondary, #fef3c7);
+        color: var(--color-feedback-text-warning-default, #92400e);
       }
 
       .installation-status-deleted {
-        background: var(--theme-color-feedback-bg-error-secondary);
-        color: var(--theme-color-feedback-text-error-default);
+        background: var(--color-feedback-bg-error-secondary);
+        color: var(--color-feedback-text-error-default);
       }
     `,
   ],

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SuiButtonComponent } from '@move4mobile/stride-ui';
+import { SuiButtonComponent } from '@stride-ui/components';
 import { UnmatchedEvent, UserDto } from '@codeheroes/types';
 import { UsersService } from '../../../core/services/users.service';
 import { UnmatchedEventsService } from '../../../core/services/unmatched-events.service';
@@ -89,22 +89,22 @@ import { switchMap } from 'rxjs';
         z-index: 1000;
       }
       .modal-card {
-        background: var(--theme-color-bg-surface-default);
+        background: var(--color-bg-surface-default);
         border-radius: 12px;
         padding: 24px;
         width: 480px;
         max-width: 90vw;
-        box-shadow: var(--theme-effect-styles-drop-shadow-200);
+        box-shadow: var(--effect-styles-drop-shadow-200);
       }
       .modal-title {
         font-size: 18px;
         font-weight: 600;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 4px;
       }
       .modal-subtitle {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         margin-bottom: 20px;
       }
       .form-group {
@@ -114,35 +114,35 @@ import { switchMap } from 'rxjs';
         display: block;
         font-size: 13px;
         font-weight: 500;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 6px;
       }
       .form-input {
         width: 100%;
         padding: 8px 12px;
-        border: 1px solid var(--theme-color-border-default-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 6px;
         font-size: 14px;
-        color: var(--theme-color-text-default);
-        background: var(--theme-color-bg-surface-default);
+        color: var(--color-text-default);
+        background: var(--color-bg-surface-default);
         font-family: inherit;
         box-sizing: border-box;
       }
       .form-input:focus {
         outline: none;
-        border-color: var(--theme-color-border-brand-default);
+        border-color: var(--color-border-brand-default);
       }
       .user-list {
         max-height: 240px;
         overflow-y: auto;
-        border: 1px solid var(--theme-color-border-default-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 6px;
         margin-bottom: 16px;
       }
       .list-status {
         padding: 16px;
         text-align: center;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         font-size: 13px;
       }
       .user-option {
@@ -151,24 +151,24 @@ import { switchMap } from 'rxjs';
         gap: 10px;
         padding: 10px 12px;
         cursor: pointer;
-        border-bottom: 1px solid var(--theme-color-border-default-default);
+        border-bottom: 1px solid var(--color-border-default-default);
         transition: background 0.1s;
       }
       .user-option:last-child {
         border-bottom: none;
       }
       .user-option:hover {
-        background: var(--theme-color-bg-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
       }
       .user-option--selected {
-        background: var(--theme-color-bg-brand-secondary);
+        background: var(--color-bg-brand-secondary);
       }
       .user-option-avatar {
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-brand-default);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-brand-default);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -179,16 +179,16 @@ import { switchMap } from 'rxjs';
       .user-option-name {
         font-size: 14px;
         font-weight: 500;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
       }
       .user-option-email {
         font-size: 12px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
       .form-error {
-        background: var(--theme-color-feedback-bg-error-secondary);
-        border: 1px solid var(--theme-color-feedback-border-error-default);
-        color: var(--theme-color-feedback-text-error-default);
+        background: var(--color-feedback-bg-error-secondary);
+        border: 1px solid var(--color-feedback-border-error-default);
+        color: var(--color-feedback-text-error-default);
         border-radius: 6px;
         padding: 8px 12px;
         font-size: 13px;

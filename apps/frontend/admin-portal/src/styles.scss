@@ -1,15 +1,14 @@
 @use 'tailwindcss';
-@use '@move4mobile/theme-framna/theme';
-@use '@move4mobile/stride-ui/sass/reset';
-
-@include theme.init();
+@use '@stride-ui/components/sass/prebuilt';
+@use '@stride-ui/components/sass/reset';
+@use '@angular/cdk/overlay-prebuilt.css';
 
 html,
 body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: var(--theme-font-family-default), system-ui, sans-serif;
-  background: var(--theme-color-bg-surface-default);
-  color: var(--theme-color-text-default);
+  font-family: var(--font-family-default), system-ui, sans-serif;
+  background: var(--color-bg-surface-default);
+  color: var(--color-text-default);
 }

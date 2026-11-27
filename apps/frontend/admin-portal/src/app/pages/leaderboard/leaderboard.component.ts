@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
-import { SuiButtonComponent } from '@move4mobile/stride-ui';
+import { SuiButtonComponent } from '@stride-ui/components';
 import { DashboardService, LeaderboardEntry } from '../../core/services/dashboard.service';
 
 @Component({
@@ -90,38 +90,38 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
       .page-title {
         font-size: 24px;
         font-weight: 700;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 4px;
       }
 
       .page-subtitle {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
 
       .loading-state,
       .empty-state {
         text-align: center;
         padding: 48px 0;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         font-size: 14px;
       }
 
       .error-state {
-        background: var(--theme-color-feedback-bg-error-secondary);
-        border: 1px solid var(--theme-color-feedback-border-error-default);
+        background: var(--color-feedback-bg-error-secondary);
+        border: 1px solid var(--color-feedback-border-error-default);
         border-radius: 8px;
         padding: 16px;
         display: flex;
         align-items: center;
         gap: 12px;
-        color: var(--theme-color-feedback-text-error-default);
+        color: var(--color-feedback-text-error-default);
         font-size: 14px;
       }
 
       .table-container {
-        background: var(--theme-color-bg-surface-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 8px;
         overflow: hidden;
       }
@@ -136,18 +136,18 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
         padding: 12px 16px;
         font-size: 12px;
         font-weight: 600;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        border-bottom: 1px solid var(--theme-color-border-default-default);
-        background: var(--theme-color-bg-neutral-secondary);
+        border-bottom: 1px solid var(--color-border-default-default);
+        background: var(--color-bg-neutral-secondary);
       }
 
       .leaderboard-table td {
         padding: 12px 16px;
         font-size: 14px;
-        color: var(--theme-color-text-default);
-        border-bottom: 1px solid var(--theme-color-border-default-default);
+        color: var(--color-text-default);
+        border-bottom: 1px solid var(--color-border-default-default);
       }
 
       .leaderboard-table tr:last-child td {
@@ -155,12 +155,12 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
       }
 
       .leaderboard-table tr:hover td {
-        background: var(--theme-color-bg-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
       }
 
       .rank-cell {
         font-weight: 600;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         width: 48px;
       }
 
@@ -174,8 +174,8 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-brand-default);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-brand-default);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -189,7 +189,7 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
       }
 
       .xp-cell {
-        color: var(--theme-color-text-brand-default);
+        color: var(--color-text-brand-default);
         font-weight: 600;
       }
 
@@ -208,10 +208,10 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
 
       .filter-pill {
         padding: 6px 14px;
-        border: 1px solid var(--theme-color-border-default-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 20px;
-        background: var(--theme-color-bg-surface-default);
-        color: var(--theme-color-text-neutral-tertiary);
+        background: var(--color-bg-surface-default);
+        color: var(--color-text-neutral-tertiary);
         font-size: 13px;
         font-weight: 500;
         cursor: pointer;
@@ -220,13 +220,13 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
       }
 
       .filter-pill:hover {
-        border-color: var(--theme-color-border-brand-default);
-        color: var(--theme-color-text-default);
+        border-color: var(--color-border-brand-default);
+        color: var(--color-text-default);
       }
 
       .filter-pill--active {
-        background: var(--theme-color-bg-brand-default);
-        border-color: var(--theme-color-bg-brand-default);
+        background: var(--color-bg-brand-default);
+        border-color: var(--color-bg-brand-default);
         color: #fff;
       }
 
@@ -235,13 +235,13 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
         align-items: center;
         gap: 8px;
         font-size: 13px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         cursor: pointer;
         user-select: none;
       }
 
       .toggle-label input[type="checkbox"] {
-        accent-color: var(--theme-color-bg-brand-default);
+        accent-color: var(--color-bg-brand-default);
         cursor: pointer;
       }
     `,
