@@ -12,7 +12,7 @@ Functions, Firestore, Hosting).
 
 ## Layout
 
-Nx 23 monorepo, TypeScript, Node 24 (`.nvmrc`). Import libraries through their path aliases
+Nx 24 monorepo, TypeScript 6, Node 24 (`.nvmrc`). Import libraries through their path aliases
 (`@codeheroes/<lib>`, see `tsconfig.base.json`), never through relative paths across projects.
 
 **Apps** (`apps/`)
@@ -25,8 +25,8 @@ Nx 23 monorepo, TypeScript, Node 24 (`.nvmrc`). Import libraries through their p
 | `github-receiver`, `azure-receiver`, `bitbucket-receiver`    | Webhook receivers, one per provider                                   |
 | `github-simulator`, `azure-simulator`, `bitbucket-simulator` | CLIs that send test webhooks locally                                  |
 | `firebase-app`                                               | Firebase project wrapper: rules, emulators, deploy targets            |
-| `app` (`apps/frontend/app`)                                  | The player PWA, Angular 21                                            |
-| `admin-portal` (`apps/frontend/admin-portal`)                | The admin UI, Angular 21                                              |
+| `app` (`apps/frontend/app`)                                  | The player PWA, Angular 22                                            |
+| `admin-portal` (`apps/frontend/admin-portal`)                | The admin UI, Angular 22                                              |
 
 **Libraries** (`libs/`)
 

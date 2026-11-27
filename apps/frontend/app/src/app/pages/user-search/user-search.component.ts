@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnDestroy, AfterViewInit, ElementRef, viewChild } from '@angular/core';
+import { Component, inject, signal, OnDestroy, AfterViewInit, ElementRef, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription, forkJoin, of } from 'rxjs';
@@ -214,6 +214,7 @@ type SearchTab = 'heroes' | 'projects';
       </div>
     </main>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host {

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { UnmatchedEvent, ProjectSummaryDto } from '@codeheroes/types';
 import { ProjectsService } from '../../../core/services/projects.service';
@@ -63,6 +63,7 @@ import { switchMap } from 'rxjs';
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .modal-overlay {

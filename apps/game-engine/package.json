@@ -13,5 +13,8 @@
   },
   "dependencies": {},
   "devDependencies": {},
-  "private": true
+  "private": true,
+  "nx": {
+    "includedScripts": []
+  }
 }

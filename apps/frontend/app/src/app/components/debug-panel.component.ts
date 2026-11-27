@@ -1,4 +1,4 @@
-import { Component, input, output, computed } from '@angular/core';
+import { Component, input, output, computed, ChangeDetectionStrategy } from '@angular/core';
 
 import { Activity, isGameActionActivity } from '@codeheroes/types';
 
@@ -6,6 +6,7 @@ import { Activity, isGameActionActivity } from '@codeheroes/types';
   selector: 'app-debug-panel',
   standalone: true,
   imports: [],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
       class="fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700 transition-transform duration-300"

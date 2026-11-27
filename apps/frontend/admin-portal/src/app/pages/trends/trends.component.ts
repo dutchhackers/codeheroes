@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { TrendsEntityData, TrendsProjectData, TrendsResponse } from '@codeheroes/types';
 import { TrendsService } from '../../core/services/trends.service';
@@ -68,6 +68,7 @@ type TabType = 'heroes' | 'bots' | 'projects';
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .page-header {

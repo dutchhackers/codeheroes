@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-level-up-celebration',
@@ -16,6 +16,7 @@ import { Component, input, output } from '@angular/core';
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .overlay {

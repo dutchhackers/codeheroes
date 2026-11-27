@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { DashboardService, LeaderboardEntry } from '../../core/services/dashboard.service';
 
@@ -77,6 +77,7 @@ import { DashboardService, LeaderboardEntry } from '../../core/services/dashboar
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .page-header {

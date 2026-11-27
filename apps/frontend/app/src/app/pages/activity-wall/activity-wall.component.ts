@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, HostListener, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, HostListener, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { QueryDocumentSnapshot, DocumentData } from '@angular/fire/firestore';
 import { Activity } from '@codeheroes/types';
@@ -121,6 +121,7 @@ import { DebugPanelComponent } from '../../components/debug-panel.component';
       (togglePanel)="toggleDebugPanel()"
     />
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host {

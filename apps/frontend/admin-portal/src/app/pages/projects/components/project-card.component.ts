@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { ProjectSummaryDto } from '@codeheroes/types';
 
 @Component({
@@ -20,6 +20,7 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       </button>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .card {

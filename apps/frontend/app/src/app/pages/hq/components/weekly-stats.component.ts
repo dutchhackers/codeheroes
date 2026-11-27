@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { WeeklyStats } from '../../../core/services/hq-data.service';
 
 interface StatItem {
@@ -27,6 +27,7 @@ interface StatItem {
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .weekly-stats-section {

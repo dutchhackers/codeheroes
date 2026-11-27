@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { UserInfo } from '../../../core/services/user-cache.service';
 
 @Component({
@@ -32,6 +32,7 @@ import { UserInfo } from '../../../core/services/user-cache.service';
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .members-section {

@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import { TrendsEntityData, TrendsProjectData } from '@codeheroes/types';
 import { EChartsOption, getChartColor, getDefaultEChartsOptions } from './chart-theme.utils';
@@ -15,6 +15,7 @@ import { EChartsOption, getChartColor, getDefaultEChartsOptions } from './chart-
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .chart-container {

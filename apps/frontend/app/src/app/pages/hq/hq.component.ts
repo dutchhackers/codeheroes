@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, switchMap, take } from 'rxjs';
 import { OnboardingService } from '../../core/services/onboarding.service';
@@ -70,6 +70,7 @@ import { HighlightsComponent } from './components/highlights.component';
     </main>
 
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host {

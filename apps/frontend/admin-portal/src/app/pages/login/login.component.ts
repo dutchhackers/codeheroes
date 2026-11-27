@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, effect } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, effect, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { AuthService } from '../../core/services/auth.service';
@@ -52,6 +52,7 @@ import { environment } from '../../../environments/environment';
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .login-page {

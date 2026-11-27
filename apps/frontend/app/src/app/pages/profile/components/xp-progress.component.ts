@@ -1,4 +1,4 @@
-import { Component, input, computed } from '@angular/core';
+import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
 import { UserStats } from '@codeheroes/types';
 
 @Component({
@@ -30,6 +30,7 @@ import { UserStats } from '@codeheroes/types';
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .xp-progress-card {

@@ -1,4 +1,4 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { Activity } from '@codeheroes/types';
 import { ActivityItemComponent } from '../../../components/activity-item.component';
 import { UserInfo, UserCacheService } from '../../../core/services/user-cache.service';
@@ -24,6 +24,7 @@ import { UserInfo, UserCacheService } from '../../../core/services/user-cache.se
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .activity-section {

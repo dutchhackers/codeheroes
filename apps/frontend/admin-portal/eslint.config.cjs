@@ -8,6 +8,9 @@ module.exports = [
   {
     files: ['**/*.ts'],
     rules: {
+      // Angular 22 defaults to OnPush; the v22 migration marked every existing
+      // component Eager to keep its behaviour. Moving them to OnPush is separate work.
+      '@angular-eslint/prefer-on-push-component-change-detection': 'off',
       '@angular-eslint/directive-selector': [
         'error',
         {

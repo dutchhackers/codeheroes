@@ -18,7 +18,14 @@
     "@nx/esbuild:esbuild": {
       "cache": true,
       "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "inputs": [
+        "production",
+        "^production",
+        {
+          "dependentTasksOutputFiles": "**/*",
+          "transitive": true
+        }
+      ]
     },
     "@nx/js:tsc": {
       "cache": true,
@@ -49,6 +56,14 @@
         "targetName": "test"
       },
       "exclude": ["apps/codeheroes-e2e/**/*"]
+    },
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "cwd": "workspaceRoot",
+        "targetName": "lint"
+      },
+      "include": ["apps/frontend/admin-portal/**/*", "apps/frontend/app/**/*"]
     }
   ],
   "release": {
@@ -77,12 +92,6 @@
     },
     "@schematics/angular:service": {
       "type": "service"
-    },
-    "@nx/angular:scam": {
-      "type": "component"
-    },
-    "@nx/angular:scam-directive": {
-      "type": "directive"
     },
     "@nx/angular:guard": {
       "typeSeparator": "."
@@ -120,5 +129,8 @@
       "style": "scss",
       "unitTestRunner": "jest"
     }
+  },
+  "affected": {
+    "legacy": true
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { ProjectDetailDto, ProjectSummaryDto } from '@codeheroes/types';
@@ -92,6 +92,7 @@ import { EditProjectModalComponent } from './components/edit-project-modal.compo
       />
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .back-link {

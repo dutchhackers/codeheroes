@@ -1,12 +1,12 @@
 # Admin Portal
 
-Admin dashboard for Code Heroes, built with Angular 21 and Stride UI.
+Admin dashboard for Code Heroes, built with Angular 22 and Stride UI.
 
 ## Architecture
 
 ### Angular Setup
 
-- **Angular 21** standalone-component application (no NgModules)
+- **Angular 22** standalone-component application (no NgModules)
 - Bootstrapping via `bootstrapApplication()` with `ApplicationConfig`
 - Zone change detection with `eventCoalescing: true`
 - All page components are **lazy-loaded** via `loadComponent()`

@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-project-stats-card',
@@ -9,6 +9,7 @@ import { Component, input } from '@angular/core';
       <span class="stat-label">{{ label() }}</span>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .stat-card {

@@ -1,4 +1,4 @@
-import { Component, input, output, OnInit } from '@angular/core';
+import { Component, input, output, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { ProjectSummaryDto } from '@codeheroes/types';
@@ -46,6 +46,7 @@ import { ProjectSummaryDto } from '@codeheroes/types';
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .overlay {

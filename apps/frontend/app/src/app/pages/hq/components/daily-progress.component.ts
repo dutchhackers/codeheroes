@@ -1,4 +1,4 @@
-import { Component, input, computed, signal, effect } from '@angular/core';
+import { Component, input, computed, signal, effect, ChangeDetectionStrategy } from '@angular/core';
 import { DailyProgress } from '../../../core/services/hq-data.service';
 
 @Component({
@@ -51,6 +51,7 @@ import { DailyProgress } from '../../../core/services/hq-data.service';
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .daily-progress-card {

@@ -10,6 +10,7 @@ import {
   output,
   signal,
   viewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { DisciplineOption, StudioOption, UserDimensions } from '@codeheroes/types';
 import { Subscription } from 'rxjs';
@@ -131,6 +132,7 @@ export interface ProfileEditPayload {
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .modal-backdrop {
