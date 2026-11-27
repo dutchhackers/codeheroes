@@ -36,12 +36,13 @@ Admin dashboard for Code Heroes, built with Angular 22 and Stride UI.
 
 REST calls to an Express API (Cloud Function):
 
-| Environment | API URL |
-|---|---|
-| Local | `http://localhost:5001/codeheroes-test/europe-west1/api` |
-| Test/Prod | `https://europe-west1-codeheroes-test.cloudfunctions.net/api` |
+| Environment | API URL                                                       |
+| ----------- | ------------------------------------------------------------- |
+| Local       | `http://localhost:5001/codeheroes-test/europe-west1/api`      |
+| Test/Prod   | `https://europe-west1-codeheroes-test.cloudfunctions.net/api` |
 
 Pattern used in every service:
+
 1. Fetch Firebase ID token via `AuthService.getIdToken()`
 2. Convert Promise to Observable via `from()` + `switchMap()`
 3. Execute HTTP request with `Authorization: Bearer {token}` header
@@ -76,40 +77,47 @@ src/app/
 ### Dependencies
 
 ```
-@move4mobile/stride-ui     ^1.17.0
-@move4mobile/theme-framna  ^0.3.12
-quill                      ^2.0.3   (peer dep of stride-ui)
+@stride-ui/components     ^2.14.0
+@stride-ui/theme-framna   ^0.7.0
+quill                     ^2.0.3   (optional peer, only for sui-rich-text-input)
 ```
+
+Both packages come from GitHub Packages (`@stride-ui` scope, see `.npmrc`). The components need
+Angular 22. `node_modules/@stride-ui/components/skill.md` documents every component and its inputs.
 
 ### Setup Steps
 
-**1. Configure font assets** in `project.json`:
+**1. Add the theme tokens and the assets** in `project.json`:
 
 ```json
-{
-  "glob": "**/*",
-  "input": "node_modules/@move4mobile/theme-framna/assets/fonts",
-  "output": "/assets/fonts"
-}
+"assets": [
+  { "glob": "**/*", "input": "node_modules/@stride-ui/components/assets", "output": "/assets" },
+  { "glob": "**/*", "input": "node_modules/@stride-ui/theme-framna/assets", "output": "/assets" }
+],
+"styles": [
+  "apps/frontend/admin-portal/src/styles.scss",
+  "node_modules/@stride-ui/theme-framna/components/css/tokens.css"
+]
 ```
 
-**2. Initialize theme** in `styles.scss`:
+`tokens.css` defines the design tokens as CSS variables on `:root` and declares the Framna fonts,
+which it loads from `/assets/fonts`. The icons of `sui-icon` are fetched from `/assets/icons`.
+
+**2. Load the component styles** in `styles.scss`:
 
 ```scss
 @use 'tailwindcss';
-@use '@move4mobile/theme-framna/theme';
-@use '@move4mobile/stride-ui/sass/reset';
-
-@include theme.init();
+@use '@stride-ui/components/sass/prebuilt';
+@use '@stride-ui/components/sass/reset';
+@use '@angular/cdk/overlay-prebuilt.css';
 ```
 
 **3. Import components** (standalone):
 
 ```typescript
-import { SuiButtonComponent } from '@move4mobile/stride-ui';
+import { SuiButtonComponent } from '@stride-ui/components';
 
 @Component({
-  standalone: true,
   imports: [SuiButtonComponent],
   template: `<sui-button variant="outline" color="neutral" size="sm">Click</sui-button>`
 })
@@ -117,21 +125,19 @@ import { SuiButtonComponent } from '@move4mobile/stride-ui';
 
 ### Lessons Learned
 
-1. **`theme.init()` must be called at top level** — The mixin generates CSS on `body {}`. Calling it inside `:root {}` or any other selector produces nested output and doesn't work.
+1. **Token names have no prefix** (they were `--theme-*` up to theme 0.3):
+   - Background: `--color-bg-surface-default`, `--color-bg-neutral-secondary`, `--color-bg-brand-default`
+   - Text: `--color-text-default`, `--color-text-neutral-secondary`, `--color-text-neutral-tertiary`
+   - Border: `--color-border-default-default` (double "default")
+   - Feedback: `--color-feedback-bg-error-secondary`, `--color-feedback-border-error-default`
+   - Font: `--font-family-default`
+   - Shadow: `--effect-styles-drop-shadow-200`
 
-2. **CSS variable naming** differs from what you might expect:
-   - Background: `--theme-color-bg-surface-default`, `bg-neutral-secondary`, `bg-brand-default`
-   - Text: `--theme-color-text-default`, `text-neutral-secondary`, `text-neutral-tertiary`
-   - Border: `--theme-color-border-default-default` (double "default")
-   - Feedback: `--theme-color-feedback-bg-error-secondary`, `feedback-border-error-default`
-   - Font: `--theme-font-family-default`
-   - Shadow: `--theme-effect-styles-drop-shadow-200`
+2. **Dark mode is an attribute** — the tokens switch on `data-color-mode="dark"`. `ThemeService` sets it on `<html>` and keeps the `dark-mode` class on `<body>` for the portal's own styles; `index.html` does the same before Angular starts, so there is no flash.
 
-3. **Font copy is required** — Without the assets config in `project.json`, the UI falls back to system fonts.
+3. **The asset copy is required** — without it the UI falls back to system fonts and `sui-icon` shows nothing.
 
-4. **Quill as peer dependency** — Despite being marked "optional", npm produces warnings without it. Always install it.
-
-5. **Standalone imports, not modules** — Use `SuiButtonComponent` (not `SuiButtonModule`) for Angular 21+ standalone components.
+4. **`provideHttpClient()` is required** — `sui-icon` loads its SVGs over HTTP.
 
 ## Development
 

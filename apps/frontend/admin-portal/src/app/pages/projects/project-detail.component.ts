@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SuiButtonComponent } from '@move4mobile/stride-ui';
+import { SuiButtonComponent } from '@stride-ui/components';
 import { ProjectDetailDto, ProjectSummaryDto } from '@codeheroes/types';
 import { ProjectsService } from '../../core/services/projects.service';
 import { EditProjectModalComponent } from './components/edit-project-modal.component';
@@ -102,7 +102,7 @@ import { EditProjectModalComponent } from './components/edit-project-modal.compo
         border: none;
         background: none;
         font-size: 14px;
-        color: var(--theme-color-text-brand-default);
+        color: var(--color-text-brand-default);
         cursor: pointer;
         font-family: inherit;
       }
@@ -115,19 +115,19 @@ import { EditProjectModalComponent } from './components/edit-project-modal.compo
       .empty-state {
         text-align: center;
         padding: 48px 0;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         font-size: 14px;
       }
 
       .error-state {
-        background: var(--theme-color-feedback-bg-error-secondary);
-        border: 1px solid var(--theme-color-feedback-border-error-default);
+        background: var(--color-feedback-bg-error-secondary);
+        border: 1px solid var(--color-feedback-border-error-default);
         border-radius: 8px;
         padding: 16px;
         display: flex;
         align-items: center;
         gap: 12px;
-        color: var(--theme-color-feedback-text-error-default);
+        color: var(--color-feedback-text-error-default);
         font-size: 14px;
       }
 
@@ -142,7 +142,7 @@ import { EditProjectModalComponent } from './components/edit-project-modal.compo
         width: 56px;
         height: 56px;
         border-radius: 12px;
-        background: var(--theme-color-bg-brand-default);
+        background: var(--color-bg-brand-default);
         color: #fff;
         display: flex;
         align-items: center;
@@ -159,19 +159,19 @@ import { EditProjectModalComponent } from './components/edit-project-modal.compo
       .project-name {
         font-size: 24px;
         font-weight: 700;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 2px;
       }
 
       .project-slug {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         margin-bottom: 4px;
       }
 
       .project-description {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-secondary);
+        color: var(--color-text-neutral-secondary);
       }
 
       .stats-grid {
@@ -182,8 +182,8 @@ import { EditProjectModalComponent } from './components/edit-project-modal.compo
       }
 
       .stat-card {
-        background: var(--theme-color-bg-surface-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 8px;
         padding: 20px;
         display: flex;
@@ -194,13 +194,13 @@ import { EditProjectModalComponent } from './components/edit-project-modal.compo
       .stat-label {
         font-size: 13px;
         font-weight: 500;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
 
       .stat-value {
         font-size: 28px;
         font-weight: 700;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
       }
 
       .section {
@@ -210,13 +210,13 @@ import { EditProjectModalComponent } from './components/edit-project-modal.compo
       .section-title {
         font-size: 18px;
         font-weight: 600;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 16px;
       }
 
       .table-container {
-        background: var(--theme-color-bg-surface-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 8px;
         overflow: hidden;
       }
@@ -231,18 +231,18 @@ import { EditProjectModalComponent } from './components/edit-project-modal.compo
         padding: 12px 16px;
         font-size: 12px;
         font-weight: 600;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        border-bottom: 1px solid var(--theme-color-border-default-default);
-        background: var(--theme-color-bg-neutral-secondary);
+        border-bottom: 1px solid var(--color-border-default-default);
+        background: var(--color-bg-neutral-secondary);
       }
 
       .repos-table td {
         padding: 12px 16px;
         font-size: 14px;
-        color: var(--theme-color-text-default);
-        border-bottom: 1px solid var(--theme-color-border-default-default);
+        color: var(--color-text-default);
+        border-bottom: 1px solid var(--color-border-default-default);
       }
 
       .repos-table tr:last-child td {
@@ -255,8 +255,8 @@ import { EditProjectModalComponent } from './components/edit-project-modal.compo
         border-radius: 4px;
         font-size: 12px;
         font-weight: 500;
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-neutral-secondary);
         text-transform: capitalize;
       }
 

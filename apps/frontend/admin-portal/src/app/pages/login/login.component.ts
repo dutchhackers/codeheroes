@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, effect, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
-import { SuiButtonComponent } from '@move4mobile/stride-ui';
+import { SuiButtonComponent } from '@stride-ui/components';
 import { AuthService } from '../../core/services/auth.service';
 import { environment } from '../../../environments/environment';
 
@@ -61,17 +61,17 @@ import { environment } from '../../../environments/environment';
         align-items: center;
         justify-content: center;
         padding: 16px;
-        background: var(--theme-color-bg-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
       }
 
       .login-card {
-        background: var(--theme-color-bg-surface-default);
-        border: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 12px;
         padding: 40px 32px;
         width: 100%;
         max-width: 380px;
-        box-shadow: var(--theme-effect-styles-drop-shadow-200);
+        box-shadow: var(--effect-styles-drop-shadow-200);
       }
 
       .login-header {
@@ -83,7 +83,7 @@ import { environment } from '../../../environments/environment';
         width: 48px;
         height: 48px;
         border-radius: 12px;
-        background: var(--theme-color-bg-brand-default);
+        background: var(--color-bg-brand-default);
         color: white;
         display: inline-flex;
         align-items: center;
@@ -96,22 +96,22 @@ import { environment } from '../../../environments/environment';
       .login-title {
         font-size: 22px;
         font-weight: 700;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 4px;
       }
 
       .login-subtitle {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
 
       .login-error {
         margin-bottom: 16px;
         padding: 12px;
         border-radius: 8px;
-        background: var(--theme-color-feedback-bg-error-secondary);
-        border: 1px solid var(--theme-color-feedback-border-error-default);
-        color: var(--theme-color-feedback-text-error-default);
+        background: var(--color-feedback-bg-error-secondary);
+        border: 1px solid var(--color-feedback-border-error-default);
+        color: var(--color-feedback-text-error-default);
         font-size: 14px;
       }
 

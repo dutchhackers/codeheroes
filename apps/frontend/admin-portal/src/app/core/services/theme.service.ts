@@ -11,6 +11,12 @@ export class ThemeService {
       const dark = this.isDark();
       if (typeof document !== 'undefined') {
         document.body.classList.toggle('dark-mode', dark);
+        // The Stride theme tokens switch on this attribute.
+        if (dark) {
+          document.documentElement.setAttribute('data-color-mode', 'dark');
+        } else {
+          document.documentElement.removeAttribute('data-color-mode');
+        }
       }
     });
   }

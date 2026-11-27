@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { SuiButtonComponent } from '@move4mobile/stride-ui';
+import { SuiButtonComponent } from '@stride-ui/components';
 import { AuthService } from '../core/services/auth.service';
 import { ThemeService } from '../core/services/theme.service';
 import { UnmatchedEventsService } from '../core/services/unmatched-events.service';
@@ -155,8 +155,8 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
       .sidebar {
         width: 256px;
         min-width: 256px;
-        background: var(--theme-color-bg-surface-default);
-        border-right: 1px solid var(--theme-color-border-default-default);
+        background: var(--color-bg-surface-default);
+        border-right: 1px solid var(--color-border-default-default);
         display: flex;
         flex-direction: column;
         height: 100vh;
@@ -169,7 +169,7 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
         align-items: center;
         gap: 12px;
         padding: 20px 16px;
-        border-bottom: 1px solid var(--theme-color-border-default-default);
+        border-bottom: 1px solid var(--color-border-default-default);
       }
 
       .sidebar-logo {
@@ -179,7 +179,7 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
         width: 36px;
         height: 36px;
         border-radius: 8px;
-        background: var(--theme-color-bg-brand-default);
+        background: var(--color-bg-brand-default);
         color: white;
         font-weight: 700;
         font-size: 14px;
@@ -188,7 +188,7 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
       .sidebar-title {
         font-weight: 600;
         font-size: 16px;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
       }
 
       .sidebar-nav {
@@ -205,7 +205,7 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
         gap: 10px;
         padding: 8px 12px;
         border-radius: 6px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         text-decoration: none;
         font-size: 14px;
         font-weight: 500;
@@ -213,13 +213,13 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
       }
 
       .nav-item:hover {
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-default);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-default);
       }
 
       .nav-item--active {
-        background: var(--theme-color-bg-brand-secondary);
-        color: var(--theme-color-text-brand-default);
+        background: var(--color-bg-brand-secondary);
+        color: var(--color-text-brand-default);
       }
 
       .nav-icon {
@@ -236,7 +236,7 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
         height: 18px;
         padding: 0 5px;
         border-radius: 9px;
-        background: var(--theme-color-bg-brand-default);
+        background: var(--color-bg-brand-default);
         color: white;
         font-size: 11px;
         font-weight: 600;
@@ -245,7 +245,7 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
 
       .sidebar-footer {
         padding: 12px 16px;
-        border-top: 1px solid var(--theme-color-border-default-default);
+        border-top: 1px solid var(--color-border-default-default);
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -261,8 +261,8 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background: var(--theme-color-bg-neutral-secondary);
-        color: var(--theme-color-text-brand-default);
+        background: var(--color-bg-neutral-secondary);
+        color: var(--color-text-brand-default);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -273,7 +273,7 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
 
       .user-email {
         font-size: 13px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -294,24 +294,24 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
         border: none;
         border-radius: 8px;
         background: transparent;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         cursor: pointer;
         transition: color 0.15s ease;
       }
 
       .theme-toggle:hover {
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
       }
 
       .main-content {
         flex: 1;
         overflow-y: auto;
-        background: var(--theme-color-bg-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
         padding: 32px 48px;
       }
 
       :host-context(body.dark-mode) .main-content {
-        background: var(--theme-color-bg-surface-sunken);
+        background: var(--color-bg-surface-sunken);
       }
 
       .content-wrapper {

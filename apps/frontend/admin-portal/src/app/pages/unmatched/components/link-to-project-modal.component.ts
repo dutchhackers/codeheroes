@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject, signal, ChangeDetectionStrategy } from '@angular/core';
-import { SuiButtonComponent } from '@move4mobile/stride-ui';
+import { SuiButtonComponent } from '@stride-ui/components';
 import { UnmatchedEvent, ProjectSummaryDto } from '@codeheroes/types';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { UnmatchedEventsService } from '../../../core/services/unmatched-events.service';
@@ -76,65 +76,65 @@ import { switchMap } from 'rxjs';
         z-index: 1000;
       }
       .modal-card {
-        background: var(--theme-color-bg-surface-default);
+        background: var(--color-bg-surface-default);
         border-radius: 12px;
         padding: 24px;
         width: 480px;
         max-width: 90vw;
-        box-shadow: var(--theme-effect-styles-drop-shadow-200);
+        box-shadow: var(--effect-styles-drop-shadow-200);
       }
       .modal-title {
         font-size: 18px;
         font-weight: 600;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
         margin-bottom: 4px;
       }
       .modal-subtitle {
         font-size: 14px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         margin-bottom: 20px;
       }
       .project-list {
         max-height: 300px;
         overflow-y: auto;
-        border: 1px solid var(--theme-color-border-default-default);
+        border: 1px solid var(--color-border-default-default);
         border-radius: 6px;
         margin-bottom: 16px;
       }
       .list-status {
         padding: 16px;
         text-align: center;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
         font-size: 13px;
       }
       .project-option {
         padding: 10px 12px;
         cursor: pointer;
-        border-bottom: 1px solid var(--theme-color-border-default-default);
+        border-bottom: 1px solid var(--color-border-default-default);
         transition: background 0.1s;
       }
       .project-option:last-child {
         border-bottom: none;
       }
       .project-option:hover {
-        background: var(--theme-color-bg-neutral-secondary);
+        background: var(--color-bg-neutral-secondary);
       }
       .project-option--selected {
-        background: var(--theme-color-bg-brand-secondary);
+        background: var(--color-bg-brand-secondary);
       }
       .project-option-name {
         font-size: 14px;
         font-weight: 500;
-        color: var(--theme-color-text-default);
+        color: var(--color-text-default);
       }
       .project-option-slug {
         font-size: 12px;
-        color: var(--theme-color-text-neutral-tertiary);
+        color: var(--color-text-neutral-tertiary);
       }
       .form-error {
-        background: var(--theme-color-feedback-bg-error-secondary);
-        border: 1px solid var(--theme-color-feedback-border-error-default);
-        color: var(--theme-color-feedback-text-error-default);
+        background: var(--color-feedback-bg-error-secondary);
+        border: 1px solid var(--color-feedback-border-error-default);
+        color: var(--color-feedback-text-error-default);
         border-radius: 6px;
         padding: 8px 12px;
         font-size: 13px;

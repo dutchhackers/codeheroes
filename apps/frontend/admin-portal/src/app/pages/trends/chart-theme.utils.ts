@@ -1,16 +1,16 @@
 import type { EChartsOption } from 'echarts';
 
 const DATAVIZ_VARS = [
-  '--theme-color-dataviz-categorical-1', // amber/secondary
-  '--theme-color-dataviz-categorical-2', // blue-base
-  '--theme-color-dataviz-categorical-3', // brand green
-  '--theme-color-dataviz-categorical-4', // sand
-  '--theme-color-dataviz-categorical-5', // info blue
-  '--theme-color-dataviz-categorical-6', // error orange
-  '--theme-color-dataviz-diverging-1',   // teal-blue
-  '--theme-color-dataviz-diverging-9',   // warm amber
-  '--theme-color-dataviz-diverging-3',   // light blue
-  '--theme-color-dataviz-diverging-8',   // peach
+  '--color-dataviz-categorical-1', // amber/secondary
+  '--color-dataviz-categorical-2', // blue-base
+  '--color-dataviz-categorical-3', // brand green
+  '--color-dataviz-categorical-4', // sand
+  '--color-dataviz-categorical-5', // info blue
+  '--color-dataviz-categorical-6', // error orange
+  '--color-dataviz-diverging-1',   // teal-blue
+  '--color-dataviz-diverging-9',   // warm amber
+  '--color-dataviz-diverging-3',   // light blue
+  '--color-dataviz-diverging-8',   // peach
 ];
 
 const DATAVIZ_FALLBACKS = [
@@ -28,19 +28,19 @@ function getCssVar(name: string): string {
 }
 
 export function getTextColor(): string {
-  return getCssVar('--theme-color-text-default') || '#1f2937';
+  return getCssVar('--color-text-default') || '#1f2937';
 }
 
 export function getSubtleTextColor(): string {
-  return getCssVar('--theme-color-text-neutral-tertiary') || '#9ca3af';
+  return getCssVar('--color-text-neutral-tertiary') || '#9ca3af';
 }
 
 export function getGridColor(): string {
-  return getCssVar('--theme-color-border-default-default') || '#e5e7eb';
+  return getCssVar('--color-border-default-default') || '#e5e7eb';
 }
 
 export function getSurfaceColor(): string {
-  return getCssVar('--theme-color-bg-surface-default') || '#ffffff';
+  return getCssVar('--color-bg-surface-default') || '#ffffff';
 }
 
 export function getDefaultEChartsOptions(): EChartsOption {
