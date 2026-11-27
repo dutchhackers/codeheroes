@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, computed, inject, signal, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Auth, signOut } from '@angular/fire/auth';
 import { Subscription } from 'rxjs';
@@ -130,7 +130,7 @@ import { BadgesModalComponent } from './components/badges-modal.component';
               </div>
             }
             @if (user()?.createdAt) {
-              <p class="text-xs text-slate-500 mt-1">Hero Since {{ formatMemberSince(user()?.createdAt) }}</p>
+              <p class="text-xs text-slate-500 mt-1">Hero Since {{ formatMemberSince($safeNavigationMigration(user()?.createdAt)) }}</p>
             }
           </div>
 
@@ -171,6 +171,7 @@ import { BadgesModalComponent } from './components/badges-modal.component';
       />
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host {

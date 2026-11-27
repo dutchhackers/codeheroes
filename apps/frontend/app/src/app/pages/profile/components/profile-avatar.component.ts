@@ -1,4 +1,4 @@
-import { Component, input, computed } from '@angular/core';
+import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-profile-avatar',
@@ -19,6 +19,7 @@ import { Component, input, computed } from '@angular/core';
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .avatar-container {

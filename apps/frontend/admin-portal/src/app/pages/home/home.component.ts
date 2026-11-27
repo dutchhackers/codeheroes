@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ProjectsService } from '../../core/services/projects.service';
@@ -114,6 +114,7 @@ import { UnmatchedEventsService } from '../../core/services/unmatched-events.ser
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .page-title {

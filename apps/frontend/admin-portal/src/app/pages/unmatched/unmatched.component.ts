@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { UnmatchedEvent } from '@codeheroes/types';
@@ -195,6 +195,7 @@ type TabType = 'unknown_user' | 'unlinked_repo';
       />
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .page-header {

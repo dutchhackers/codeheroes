@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
 import { environment } from '../../environments/environment';
 
@@ -9,6 +9,7 @@ export const showEnvironmentIndicator = environment.name !== 'production';
   selector: 'app-environment-banner',
   standalone: true,
   imports: [UpperCasePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (showBanner) {
       <div

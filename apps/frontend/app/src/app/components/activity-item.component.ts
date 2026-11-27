@@ -1,4 +1,4 @@
-import { Component, inject, input, output, computed } from '@angular/core';
+import { Component, inject, input, output, computed, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
@@ -111,6 +111,7 @@ import { buildActivityDescription } from '../core/utils/activity-description.uti
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .activity-card {

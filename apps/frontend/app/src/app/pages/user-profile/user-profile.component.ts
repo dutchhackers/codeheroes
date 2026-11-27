@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -77,7 +77,7 @@ import { BadgesModalComponent } from '../profile/components/badges-modal.compone
               Level {{ stats()?.level ?? 1 }}
             </p>
             @if (user()?.createdAt) {
-              <p class="text-xs text-slate-500 mt-1">Hero Since {{ formatMemberSince(user()?.createdAt) }}</p>
+              <p class="text-xs text-slate-500 mt-1">Hero Since {{ formatMemberSince($safeNavigationMigration(user()?.createdAt)) }}</p>
             }
           </div>
 
@@ -98,6 +98,7 @@ import { BadgesModalComponent } from '../profile/components/badges-modal.compone
       <app-badges-modal [badges]="badges()" (dismiss)="showBadgesModal.set(false)" />
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host {

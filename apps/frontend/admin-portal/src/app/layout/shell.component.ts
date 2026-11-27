@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SuiButtonComponent } from '@move4mobile/stride-ui';
 import { AuthService } from '../core/services/auth.service';
@@ -139,6 +139,7 @@ import { UnmatchedEventsService } from '../core/services/unmatched-events.servic
       </main>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host {

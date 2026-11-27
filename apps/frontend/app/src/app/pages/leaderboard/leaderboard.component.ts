@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, computed, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {
   LeaderboardService,
@@ -84,6 +84,7 @@ type LeaderboardPeriod = 'week' | 'day';
       </div>
     </main>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host {

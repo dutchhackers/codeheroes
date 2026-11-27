@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ShellComponent } from './layout/shell.component';
 
 @Component({
@@ -6,6 +6,7 @@ import { ShellComponent } from './layout/shell.component';
   standalone: true,
   imports: [ShellComponent],
   template: `<app-shell />`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host {

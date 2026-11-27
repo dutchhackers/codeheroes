@@ -18,16 +18,12 @@
       }
     },
     "lint": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "nx run-many --targets=lint --projects=tag:firebase:dep:firebase-app --parallel=100"
-      }
+      "executor": "nx:noop",
+      "dependsOn": ["^lint"]
     },
     "test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "nx run-many --targets=test --projects=tag:firebase:dep:firebase-app --parallel=100"
-      }
+      "executor": "nx:noop",
+      "dependsOn": ["^test"]
     },
     "firebase": {
       "executor": "nx:run-commands",

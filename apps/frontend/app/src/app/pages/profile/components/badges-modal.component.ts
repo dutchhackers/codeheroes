@@ -1,4 +1,4 @@
-import { Component, HostListener, input, output, signal, computed, OnInit } from '@angular/core';
+import { Component, HostListener, input, output, signal, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { BadgeRarity } from '@codeheroes/types';
 import { UserBadge, getBadgeRarity, getBadgeEmoji, getBadgeRarityColor } from '../../../core/models/user-badge.model';
@@ -92,6 +92,7 @@ interface BadgeDisplay {
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .modal-backdrop {

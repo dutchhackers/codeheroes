@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, computed, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { Auth } from '@angular/fire/auth';
@@ -110,6 +110,7 @@ import { environment } from '../../../environments/environment';
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host { display: block; }

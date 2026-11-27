@@ -1,4 +1,4 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { LeaderboardEntry, ProjectLeaderboardEntry } from '../../core/services/leaderboard.service';
 import * as LeaderboardUtils from '../hq/utils/leaderboard.utils';
@@ -97,6 +97,7 @@ import * as LeaderboardUtils from '../hq/utils/leaderboard.utils';
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .leaderboard-section {

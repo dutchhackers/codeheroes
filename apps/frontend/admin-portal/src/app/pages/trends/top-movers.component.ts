@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { TrendsEntityData, TrendsProjectData } from '@codeheroes/types';
 
 export interface TopMoversData {
@@ -104,6 +104,7 @@ export function computeTopMovers(
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .movers-grid {

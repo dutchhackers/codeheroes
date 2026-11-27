@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { ConnectedAccountDto, ConnectedAccountProvider } from '@codeheroes/types';
 
 @Component({
@@ -29,6 +29,7 @@ import { ConnectedAccountDto, ConnectedAccountProvider } from '@codeheroes/types
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .accounts-section {

@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { Highlight } from '../../../core/services/hq-data.service';
 
 @Component({
@@ -38,6 +38,7 @@ import { Highlight } from '../../../core/services/hq-data.service';
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .highlights-section {

@@ -2,6 +2,8 @@
   "compileOnSave": false,
   "compilerOptions": {
     "rootDir": ".",
+    "ignoreDeprecations": "6.0",
+    "strict": false,
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "node",

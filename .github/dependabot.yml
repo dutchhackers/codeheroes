@@ -11,12 +11,17 @@ updates:
       - 'dependencies'
     ignore:
       - dependency-name: '@move4mobile*'
-      # Angular majors are coupled to Nx — @nx/angular@23 peers cap the
-      # Angular toolchain < 22.0.0. Hold major bumps until Nx supports them
+      # Angular majors are coupled to Nx: @nx/angular@24 peers cap the
+      # Angular toolchain < 23.0.0. Hold major bumps until Nx supports them
       # (run via nx migrate, not standalone). Minor/patch still flow.
       - dependency-name: '@angular*'
         update-types:
           - 'version-update:semver-major'
+      # Angular 22 peers TypeScript >=6.0 <6.1, so TypeScript moves with Angular.
+      - dependency-name: 'typescript'
+        update-types:
+          - 'version-update:semver-major'
+          - 'version-update:semver-minor'
     groups:
       production-minor-patch:
         dependency-type: 'production'

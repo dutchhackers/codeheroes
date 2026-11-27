@@ -1,4 +1,4 @@
-import { Component, input, output, signal, computed, inject } from '@angular/core';
+import { Component, input, output, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Activity } from '@codeheroes/types';
 import { ActivityStack } from '../../core/models/activity-stack.model';
@@ -83,6 +83,7 @@ const STACK_ICONS = {
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host {

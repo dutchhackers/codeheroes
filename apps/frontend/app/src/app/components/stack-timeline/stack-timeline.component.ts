@@ -1,4 +1,4 @@
-import { Component, input, computed, inject } from '@angular/core';
+import { Component, input, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Activity, GameActionActivity, isGameActionActivity } from '@codeheroes/types';
@@ -30,6 +30,7 @@ interface TimelineEvent {
       text-underline-offset: 2px;
     }
   `],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="relative pl-6">
       <!-- Vertical connecting line -->
